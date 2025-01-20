@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 
 dotenv.config();
-const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "http://127.0.0.1:8000/";
+const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend.onrender.com/";
 export const AuthApi = createApi({
   reducerPath: "AuthApi",
   baseQuery: fetchBaseQuery({ baseUrl }),

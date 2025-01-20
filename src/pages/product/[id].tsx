@@ -57,7 +57,7 @@ const AddToCartButton = styled(Button)({
 
 function ProductDetailView() {
   const router = useRouter();
-  const { id } = router.query;
+  const id  = router.query.id;
   const { data: product, error, isLoading } = useGetProductQuery(id);
   console.log(product)
 
