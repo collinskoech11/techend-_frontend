@@ -78,7 +78,7 @@ function ProductDetailView() {
       <Navbar textColor={'#000'} bgColor={'#fff'}/>
       <Breadcrumbs aria-label="breadcrumb" sx={{ padding: "20px" }}>
         <Link underline="hover" color="inherit" href="/">
-          KINGSMAN
+          TechEnd
         </Link>
         <Link underline="hover" color="inherit" href="/shop">
           Shop

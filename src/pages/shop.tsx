@@ -45,7 +45,7 @@ function Shop() {
       <BreadCrumbContainer >
         <Breadcrumbs aria-label="breadcrumb">
           <Link underline="hover" color="inherit" href="/">
-            KINGSMAN
+            TechEnd
           </Link>
           <Link underline="hover" color="inherit" href="/shop">
             Shop

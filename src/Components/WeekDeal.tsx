@@ -57,7 +57,7 @@ function WeekDeal() {
               WEEK DEAL
               </RevealMainTypo>
               <MiniTypo>
-              Welcome to KINGSMAN BOUTIQUE, where elegance meets excellence. Discover our exquisite collection of finely tailored suits designed to make you look and feel your best.
+              Welcome to TechEnd, where elegance meets excellence. Discover our exquisite collection of finely tailored suits designed to make you look and feel your best.
               </MiniTypo>
               <br/>
               <LoginButton sx={{fontSize:"22px", borderRadius:"0px"}}>
