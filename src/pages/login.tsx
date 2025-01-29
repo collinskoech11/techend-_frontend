@@ -56,7 +56,8 @@ function Login() {
     <>
       <Toaster />
       <Navbar textColor={'#000'} bgColor={'#fff'}/>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+            
+            <Box sx={{ display: "flex", alignItems: "center", pt:8 }}>
         <Box
           sx={{
             width: "100%",

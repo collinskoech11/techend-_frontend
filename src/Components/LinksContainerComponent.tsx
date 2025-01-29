@@ -115,22 +115,25 @@ function LinksContainerComponent({ textColor, bgColor }) {
           <NavLink href="/shop">
             <LinkText>Merchendise</LinkText>
           </NavLink>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <NavLink href="https://www.youtube.com/@TechendForgranted">
-            <StandardImage src="/assets/youtube.svg" alt="youtube logo" />
+            <StandardImage src="/assets/youtube.svg" alt="YouTube logo" />
           </NavLink>
           <NavLink href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k">
-            <StandardImage src="/assets/instagram.svg" alt="youtube logo" />
+            <StandardImage src="/assets/instagram.svg" alt="Instagram logo" />
           </NavLink>
           <NavLink href="#">
             <StandardImage
               src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png"
-              alt="youtube logo"
+              alt="TikTok logo"
             />
           </NavLink>
+        </div>
           <Box sx={{ width: "80%", margin: "auto" }}>
             {username ? (
               <>
-                <Box
+              <Box sx={{display:"flex"}}>
+                {/* <Box
                   sx={{
                     width: "100%",
                     margin: "auto",
@@ -143,24 +146,24 @@ function LinksContainerComponent({ textColor, bgColor }) {
                   <Typography sx={{ color: "#fff", fontWeight: "700" }}>
                     Welcome : {username}
                   </Typography>
-                </Box>
-
+                </Box> */}
                 <Box
                   sx={{
                     width: "100%",
                     margin: "auto",
-                    border: " 1px solid #BE1E2D",
+                    background: "#BE1E2D",
                     textAlign: "center",
                     p: 1,
-                    mt: 2,
+                    // mt: 2,
                     borderRadius: "5px",
                   }}
                   onClick={() => LogoutFx()}
                 >
-                  <Typography sx={{ color: "#BE1E2D", fontWeight: "700" }}>
+                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
                     Log out
                   </Typography>
                 </Box>
+              </Box>
               </>
             ) : (
               <LoginButton onClick={() => navigate("/login")}>Join</LoginButton>
