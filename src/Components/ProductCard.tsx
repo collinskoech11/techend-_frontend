@@ -96,7 +96,7 @@ function ProductCard({ product, isLoading }) {
   return (
     <>
       <Toaster />
-      <ProductItem item md={3} xs={6}>
+      <ProductItem item md={3} xs={12}>
         <ProductItemStyled
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

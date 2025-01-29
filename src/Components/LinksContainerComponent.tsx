@@ -18,8 +18,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import Cookies from "js-cookie";
 import Image from "next/image";
 
-function LinksContainerComponent({textColor, bgColor}) {
-  console.log(textColor, bgColor, "+_+_+_+_+)_")
+function LinksContainerComponent({ textColor, bgColor }) {
+  console.log(textColor, bgColor, "+_+_+_+_+)_");
   const router = useRouter();
   const navigate = (link: string) => {
     router.push(link);
@@ -70,16 +70,16 @@ function LinksContainerComponent({textColor, bgColor}) {
     Cookies.remove("refresh");
     router.push("/login");
   };
-  const StandardImage = styled('img')({
+  const StandardImage = styled("img")({
     padding: 0,
-    height:"25px"
+    height: "25px",
   });
   const LinkText = styled(Box)({
     height: "100%",
     display: "flex",
     alignItems: "center",
-    fontWeight:"bolder",
-    color:textColor
+    fontWeight: "bolder",
+    color: textColor,
   });
   useEffect(() => {
     // Get the user from cookies
@@ -90,7 +90,7 @@ function LinksContainerComponent({textColor, bgColor}) {
 
   return (
     <>
-      <LinksContainer >
+      <LinksContainer>
         <IconButton
           sx={{
             display: {
@@ -116,23 +116,56 @@ function LinksContainerComponent({textColor, bgColor}) {
             <LinkText>Merchendise</LinkText>
           </NavLink>
           <NavLink href="https://www.youtube.com/@TechendForgranted">
-            <StandardImage
-              src="/assets/youtube.svg"
-              alt="youtube logo"
-            />
+            <StandardImage src="/assets/youtube.svg" alt="youtube logo" />
           </NavLink>
           <NavLink href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k">
-            <StandardImage
-              src="/assets/instagram.svg"
-              alt="youtube logo"
-            />
+            <StandardImage src="/assets/instagram.svg" alt="youtube logo" />
           </NavLink>
           <NavLink href="#">
-          <StandardImage
+            <StandardImage
               src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png"
               alt="youtube logo"
             />
           </NavLink>
+          <Box sx={{ width: "80%", margin: "auto" }}>
+            {username ? (
+              <>
+                <Box
+                  sx={{
+                    width: "100%",
+                    margin: "auto",
+                    background: "#BE1E2D",
+                    textAlign: "center",
+                    p: 1,
+                    borderRadius: "5px",
+                  }}
+                >
+                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
+                    Welcome : {username}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    width: "100%",
+                    margin: "auto",
+                    border: " 1px solid #BE1E2D",
+                    textAlign: "center",
+                    p: 1,
+                    mt: 2,
+                    borderRadius: "5px",
+                  }}
+                  onClick={() => LogoutFx()}
+                >
+                  <Typography sx={{ color: "#BE1E2D", fontWeight: "700" }}>
+                    Log out
+                  </Typography>
+                </Box>
+              </>
+            ) : (
+              <LoginButton onClick={() => navigate("/login")}>Join</LoginButton>
+            )}
+          </Box>
           {/* <NavButton
             id="basic-button"
             aria-controls={open ? "basic-menu" : undefined}
@@ -188,7 +221,21 @@ function LinksContainerComponent({textColor, bgColor}) {
           <NavLink href="/shop">shop</NavLink>
           <br />
           <br />
-          <NavButton
+          <Box sx={{ display:"flex", maxWidth:"150px", "*":{marginRight:"10px"}}}>
+            <NavLink href="https://www.youtube.com/@TechendForgranted">
+              <StandardImage src="/assets/youtube.svg" alt="youtube logo" />
+            </NavLink>
+            <NavLink href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k">
+              <StandardImage src="/assets/instagram.svg" alt="youtube logo" />
+            </NavLink>
+            <NavLink href="#">
+              <StandardImage
+                src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png"
+                alt="youtube logo"
+              />
+            </NavLink>
+          </Box>
+          {/* <NavButton
             id="basic-button"
             aria-controls={open ? "basic-menu" : undefined}
             aria-haspopup="true"
@@ -208,10 +255,10 @@ function LinksContainerComponent({textColor, bgColor}) {
             men's essentials
           </NavButton>
           <br />
-          <NavLink href="#">our laundry</NavLink>
+          <NavLink href="#">our laundry</NavLink> */}
           <br />
           <br />
-          <Box sx={{ width: "80%", margin: "auto" }}>
+          <Box sx={{ width: "95%", margin: "auto" }}>
             {username ? (
               <>
                 <Box
@@ -247,9 +294,7 @@ function LinksContainerComponent({textColor, bgColor}) {
                 </Box>
               </>
             ) : (
-              <LoginButton onClick={() => navigate("/login")}>
-                Login/Register
-              </LoginButton>
+              <LoginButton onClick={() => navigate("/login")}>Join</LoginButton>
             )}
           </Box>
           <br />
