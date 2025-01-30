@@ -20,7 +20,7 @@ function Footer() {
             <Box>
               <ProductPrice>Call Us</ProductPrice>
               <ProductPrice>+254 728 000 107</ProductPrice>
-              <ReviewText>Find a location near you. See</ReviewText>
+              <ReviewText>Find a location near you</ReviewText>
             </Box>
           </Grid>
           <Grid item md={2} xs={12}>
