@@ -91,12 +91,36 @@ function LinksContainerComponent({ textColor, bgColor }) {
   return (
     <>
       <LinksContainer>
+        <Box sx={{ marginLeft:"15px", display: { xs: "flex", sm: "none" } }}>
+            {username ? (
+              <>
+              <Box sx={{display:"flex"}}>
+                <Box
+                  sx={{
+                    margin: "auto",
+                    background: "#BE1E2D",
+                    textAlign: "center",
+                    p: 1,
+                    // mt: 2,
+                    borderRadius: "5px",
+                  }}
+                  onClick={() => LogoutFx()}
+                >
+                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
+                    Log out
+                  </Typography>
+                </Box>
+              </Box>
+              </>
+            ) : (
+              <LoginButton onClick={() => navigate("/login")}>Join Us</LoginButton>
+            )}
+        </Box>
         <IconButton
           sx={{
             display: {
               xs: "block",
               sm: "none",
-              width: "100%",
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "end",
@@ -106,7 +130,7 @@ function LinksContainerComponent({ textColor, bgColor }) {
           aria-label="menu"
           onClick={toggleDrawer(true)}
         >
-          <MenuIcon />
+          <MenuIcon sx={{color:"#fff"}} />
         </IconButton>
         <LinksSubContainer sx={{ display: { xs: "none", sm: "flex" } }}>
           <NavLink href="/">

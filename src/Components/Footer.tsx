@@ -1,7 +1,6 @@
 import { ProductPrice, ReviewText } from "@/StyledComponents/Typos";
 import { Box, Button, Grid, IconButton, TextField } from "@mui/material";
 import React from "react";
-import SendIcon from '@mui/icons-material/Send';
 
 function Footer() {
   return (

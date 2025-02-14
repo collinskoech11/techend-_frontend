@@ -5,6 +5,8 @@ export const LoginButton = styled(Button)({
   background: "#BE1E2D",
   textTransform: "capitalize",
   // fontSize: "10px",
+  fontWeight:"bolder",
+  borderRadius:"15px",
   "&:hover": {
     background: "#0C0C4C", 
   },

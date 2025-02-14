@@ -36,6 +36,7 @@ export const LinksContainer  = styled(Box)({
     height:"100px",
     alignItems:"center",
     position:"fixed",
+    justifyContent:"space-between",
     background:"rgb(2, 110, 129, 0.3)"
 })
 
