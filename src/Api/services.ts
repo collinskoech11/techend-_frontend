@@ -32,7 +32,7 @@ export const AuthApi = createApi({
     }),
     getProducts: builder.query({
       query: data => ({
-        url: `products/all/?category=${data.category}`,
+        url: `products/all/?company=${data.company}&category=${data.category}`,
         method: "GET"
       }),
     }),
