@@ -55,9 +55,16 @@ function Login() {
   return (
     <>
       <Toaster />
-      <Navbar textColor={'#000'} bgColor={'#fff'}/>
-            
-            <Box sx={{ display: "flex", alignItems: "center", pt:8 }}>
+      <Navbar textColor={'#000'} bgColor={'#fff'} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "calc(100dvh - 64px)", 
+          pt: 8,
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -65,7 +72,6 @@ function Login() {
             height: "auto",
             margin: "auto",
             padding: "20px",
-            marginTop: "50px",
             background: "#fff",
             borderRadius: "5px",
             boxShadow: "0 0 10px rgb(0,0,0,0.1)",

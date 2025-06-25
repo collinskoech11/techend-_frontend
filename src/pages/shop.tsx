@@ -25,7 +25,7 @@ function Shop() {
     data: products_data,
     error: products_error,
     isLoading: products_loading,
-  } = useGetProductsQuery({ category: category });
+  } = useGetProductsQuery({ company: "techend", category: category });
   console.log(products_loading, "+_+_+")
 
   useEffect(() => {
