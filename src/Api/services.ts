@@ -44,7 +44,7 @@ export const AuthApi = createApi({
     }),
     addToCart: builder.mutation({
       query: data => ({
-        url: `cart/cart/add/${data.product}/`,
+        url: `cart/cart/add/${data.product}/techend`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -70,11 +70,11 @@ export const AuthApi = createApi({
       }),
     }),
     getCart: builder.query({
-      query: data => ({
-        url: `cart/cart`,
+      query: ({ token, company_name }) => ({
+        url: `cart/cart/${company_name}`,
         method: "GET",
         headers: {
-          Authorization: `Bearer ${data.token}`,
+          Authorization: `Bearer ${token}`,
         },
       }),
     }),

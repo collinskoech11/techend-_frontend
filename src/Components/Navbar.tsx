@@ -20,7 +20,7 @@ import { useGetCartQuery } from "@/Api/services";
 
 function Navbar({textColor, bgColor}) {
   const router = useRouter();
-  const { data: cart_data, error: cart_error, isLoading: cart_loading, refetch: cart_refetch } = useGetCartQuery({token: Cookies.get("access")});
+  const { data: cart_data, error: cart_error, isLoading: cart_loading, refetch: cart_refetch } = useGetCartQuery({token: Cookies.get("access"), company_name: "techend"});
   const navigate = (link:string) => {
     router.push(link);
   };
@@ -54,7 +54,7 @@ function Navbar({textColor, bgColor}) {
           <LocalMallIcon onClick={() => navigate("/cart")} />
         </ButtonsContainer>
       </MainNav> */}
-      <LinksContainerComponent textColor={textColor} bgColor={bgColor}/>
+      <LinksContainerComponent/>
     </>
   );
 }
