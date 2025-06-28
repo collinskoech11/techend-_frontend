@@ -26,7 +26,6 @@ function Shop() {
     error: products_error,
     isLoading: products_loading,
   } = useGetProductsQuery({ company: "techend", category: category });
-  console.log(products_loading, "+_+_+")
 
   useEffect(() => {
     if (router.isReady) {

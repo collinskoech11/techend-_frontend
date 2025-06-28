@@ -18,6 +18,7 @@ import { Person2Outlined } from "@mui/icons-material";
 import { ShoppingBasket } from "@mui/icons-material";
 import Image from "next/image";
 import Cookies from "js-cookie";
+import AuthDialog from "./AuthDialog";
 
 function LinksContainerComponent() {
   const router = useRouter();
@@ -119,7 +120,7 @@ function LinksContainerComponent() {
             </Box>
           ) : (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Button  sx={{  background:"#BE1E2D", border:"1px solid #fff", color:"#fff" }} onClick={() => router.push("/login")}>Join</Button>
+               <AuthDialog />
             </Box>
           )}
         </Box>
@@ -160,7 +161,7 @@ function LinksContainerComponent() {
             </Button>
           ) : (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Button fullWidth sx={{ mt: 2, background:"#BE1E2D" }} onClick={() => router.push("/login")}>Join</Button>
+              <AuthDialog />
             </Box>
           )}
         </Box>
