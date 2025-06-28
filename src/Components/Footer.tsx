@@ -1,11 +1,11 @@
 import { ProductPrice, ReviewText } from "@/StyledComponents/Typos";
-import { Box, Button, Grid, IconButton, TextField } from "@mui/material";
+import { Box, Button, Grid, TextField } from "@mui/material";
 import React from "react";
 
 function Footer() {
   return (
     <>
-      <Box sx={{ width: "100vw", background: "#F7F7F7", pt: 6, pb:6 }}>
+      <Box sx={{ width: "100vw", background: "#be1f2f", pt: 6, pb: 6, mt:"100px" }}>
         <Grid
           container
           sx={{
@@ -15,45 +15,65 @@ function Footer() {
             margin: "auto",
           }}
         >
-          <Grid item md={3} xs={12}>
+          <Grid item md={3} xs={12} sx={{ mb: { xs: 3, md: 0 } }}>
             <Box>
-              <ProductPrice>Call Us</ProductPrice>
-              <ProductPrice>+254 728 000 107</ProductPrice>
-              <ReviewText>Find a location near you</ReviewText>
+              <ProductPrice sx={{ color: "#fff" }}>Talk to Us</ProductPrice>
+              <ProductPrice sx={{ color: "#fff" }}>+254 728 000 107</ProductPrice>
+              <ReviewText sx={{ color: "#fff" }}>
+                Join our open eCommerce community
+              </ReviewText>
             </Box>
           </Grid>
-          <Grid item md={2} xs={12}>
-            <ProductPrice>Company</ProductPrice>
-            <ReviewText>New Products</ReviewText>
-            <ReviewText>Best Sellers</ReviewText>
+          <Grid item md={2} xs={12} sx={{ mb: { xs: 3, md: 0 } }}>
+            <ProductPrice sx={{ color: "#fff" }}>Explore</ProductPrice>
+            <ReviewText sx={{ color: "#fff" }}>Open Products</ReviewText>
+            <ReviewText sx={{ color: "#fff" }}>Popular Items</ReviewText>
+            <ReviewText sx={{ color: "#fff" }}>Marketplace</ReviewText>
           </Grid>
-          <Grid item md={2} xs={12}>
-            <ProductPrice>Information</ProductPrice>
-            <ReviewText>Start a Return</ReviewText>
-            <ReviewText>Contact Us</ReviewText>
-            <ReviewText>Shipping FAQ&apos;s</ReviewText>
-            <ReviewText>Terms &amp; Conditions</ReviewText>
+          <Grid item md={2} xs={12} sx={{ mb: { xs: 3, md: 0 } }}>
+            <ProductPrice sx={{ color: "#fff" }}>About</ProductPrice>
+            <ReviewText sx={{ color: "#fff" }}>Our Mission</ReviewText>
+            <ReviewText sx={{ color: "#fff" }}>Contact Us</ReviewText>
+            <ReviewText sx={{ color: "#fff" }}>Community Guidelines</ReviewText>
+            <ReviewText sx={{ color: "#fff" }}>Terms & Conditions</ReviewText>
           </Grid>
           <Grid item md={5} xs={12}>
-            <ProductPrice sx={{ fontSize: "34px", mt: "-13px" }}>
-              Good emails.
+            <ProductPrice sx={{ fontSize: "34px", mt: "-13px", color: "#fff" }}>
+              Stay Connected
             </ProductPrice>
-            <ReviewText>
-              Enter your email below to be the first to know about new
-              collections and product launches.
+            <ReviewText sx={{ color: "#fff" }}>
+              Enter your email to get updates on new features, products, and
+              community events.
             </ReviewText>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <TextField
-              placeholder="Type something..."
-              sx={{padding:"0"}}
+              placeholder="Enter your email..."
+              sx={{
+                background: "#fff",
+                borderRadius: "4px",
+                "& input": { padding: "10px" },
+              }}
               InputProps={{
                 endAdornment: (
-                  <Button sx={{color:"#fff", background:"#000", fontSize:"16px", textTransform:"capitalize", padding:"15px 35px"}}>
+                  <Button
+                    sx={{
+                      color: "#fff",
+                      background: "#000",
+                      fontSize: "16px",
+                      textTransform: "capitalize",
+                      padding: "15px 35px",
+                      borderRadius: "0 4px 4px 0",
+                      "&:hover": {
+                        background: "#333",
+                      },
+                    }}
+                  >
                     Subscribe
                   </Button>
                 ),
               }}
+              fullWidth
             />
           </Grid>
         </Grid>

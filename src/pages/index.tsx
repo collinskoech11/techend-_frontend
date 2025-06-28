@@ -55,7 +55,7 @@ export default function Home() {
       <Head>
         <title>Techend</title>
       </Head>
-      <Navbar textColor={'#000'} bgColor={'rgb(2, 110, 129, 0.3)'}/>
+      {/* <Navbar textColor={'#000'} bgColor={'rgb(2, 110, 129, 0.3)'}/> */}
       {/* <RevealBanner />
       <ProductNav text="Our Bestseller" link="#" />
       <ProductsContainer container sx={{ margin: "auto", mt: 5 }}>
@@ -89,7 +89,7 @@ export default function Home() {
           backgroundRepeat: "no-repeat",
         }}
       ></Box>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

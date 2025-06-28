@@ -55,7 +55,7 @@ function Login() {
   return (
     <>
       <Toaster />
-      <Navbar textColor={'#000'} bgColor={'#fff'} />
+      {/* <Navbar textColor={'#000'} bgColor={'#fff'} /> */}
       <Box
         sx={{
           display: "flex",

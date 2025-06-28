@@ -1,4 +1,5 @@
 import Navbar from "@/Components/Navbar";
+import Footer from "@/Components/Footer";
 import { BreadCrumbContainer } from "@/StyledComponents/BreadCrumb";
 import {
   Breadcrumbs,
@@ -58,21 +59,21 @@ function Checkout() {
   return (
     <>
       <Toaster />
-      <Navbar textColor="#000" bgColor="#fff" />
+      {/* <Navbar textColor="#000" bgColor="#fff" /> */}
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <BreadCrumbContainer sx={{ background: "#fff", border: "none", mb: 4 }}>
           <Breadcrumbs>
             <Link underline="hover" color="inherit" href="/">TechEnd</Link>
             <Link underline="hover" color="inherit" href="/shop">Shop</Link>
             <Link underline="hover" color="inherit" href="/cart">Cart</Link>
-            <Typography color="text.primary">Checkout</Typography>
+            <Typography color="#be1f2f">Checkout</Typography>
           </Breadcrumbs>
         </BreadCrumbContainer>
 
         <Grid container spacing={4}>
           {/* Billing Form */}
           <Grid item xs={12} md={7}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>Billing Address</Typography>
+            <Typography variant="h5" fontWeight="bold" gutterBottom style={{color:"#be1f2f"}}>Billing Address</Typography>
             <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
@@ -166,7 +167,7 @@ function Checkout() {
 
           {/* Order Summary */}
           <Grid item xs={12} md={5}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>Order Summary</Typography>
+            <Typography variant="h5" fontWeight="bold" gutterBottom style={{color:"#be1f2f"}}>Order Summary</Typography>
             <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body1">Subtotal: <b>${cart_data?.total || 0}</b></Typography>
@@ -202,6 +203,7 @@ function Checkout() {
           </Grid>
         </Grid>
       </Box>
+            {/* <Footer /> */}
     </>
   );
 }
