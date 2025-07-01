@@ -107,6 +107,35 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    getCompany: builder.query({
+     query: (token) => ({
+       url: `companies/my/status/`,
+       method: "GET",
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     }),
+    }),
+    createCompany: builder.mutation({
+      query: (data) => ({
+        url: `companies/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+        body: data.body,
+      }),
+    }),
+    updateCompany: builder.mutation({
+      query: (data) => ({
+        url: `companies/${data}`,
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+        body: data.body,
+      }),
+    }),
   }),
 });
 export const {
@@ -120,5 +149,8 @@ export const {
   useRemoveProductFromCartMutation,
   useGetCartQuery,
   useCheckoutCartMutation,
-  useGetCheckoutHistoryQuery
+  useGetCheckoutHistoryQuery,
+  useGetCompanyQuery,
+  useCreateCompanyMutation,
+  useUpdateCompanyMutation,
 }: any = AuthApi;
