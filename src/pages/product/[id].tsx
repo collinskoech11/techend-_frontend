@@ -13,6 +13,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Autoplay, Pagination, Thumbs } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
+import Cookies from "js-cookie";
 
 // Styled components
 const ProductContainer = styled(Box)({
@@ -64,6 +65,8 @@ const AddToCartButton = styled(Button)({
 function ProductDetailView() {
   const router = useRouter();
   const id = router.query.id;
+      const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  
   const { data: product, error, isLoading } = useGetProductQuery(id);
 const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   return (
@@ -73,7 +76,7 @@ const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
         <Link underline="hover" color="inherit" href="/">
           TechEnd
         </Link>
-        <Link underline="hover" color="inherit" href="/shop">
+        <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>
           Shop
         </Link>
         <Typography color="text.primary">

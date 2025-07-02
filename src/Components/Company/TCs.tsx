@@ -1,53 +1,32 @@
 import { YourChildProps } from "@/Types";
-import {
-    Box,
-    Button,
-    Typography,
-} from "@mui/material";
-import { useState } from "react";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
+import { useUpdateCompanyMutation } from "@/Api/services";
+import toast from "react-hot-toast";
 
-const BasicInfo = ({ nextStep, prevStep, steps, activeStep }: YourChildProps) => {
-    const [companyData, setCompanyData] = useState<any>({
-        name: "",
-        description: "",
-        logo: null,
-        website: "",
-        contact_email: "",
-        contact_phone: "",
-        id_number: "",
-        id_front: null,
-        id_back: null,
-        business_registration_number: "",
-        business_permit: null,
-        tax_pin_number: "",
-        tax_certificate: null,
-        utility_bill: null,
-        lease_agreement: null,
-        postal_address: "",
-        physical_address: "",
-        country: "",
-        city: "",
-        state: "",
-        postal_code: "",
-        primary_color: "#be1f2f",
-        secondary_color: "#000000",
-        accent_color: "#cccccc",
-        acceptTerms: false,
-    });
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCompanyData({ ...companyData, [e.target.name]: e.target.value });
-    };
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-        if (e.target.files) {
-            setCompanyData({ ...companyData, [field]: e.target.files[0] });
+const TCs = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
+
+    const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
+
+    const handleSubmit = async () => {
+        const formData = new FormData();
+        Object.entries(companyData).forEach(([key, value]) => {
+            if (value instanceof File || typeof value === "string" || typeof value === "boolean") {
+                formData.append(key, value as any);
+            }
+        });
+        formData.append("company_onboarding_step", (activeStep+1).toString());
+
+        try {
+            await updateCompany({ token, body: formData }).unwrap();
+            toast.success("Onboarding submitted successfully");
+            refetchCompany();
+            triggerRerender;
+            nextStep();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to submit onboarding");
         }
     };
-
-    const handleColorChange = (field: string, color: any) => {
-        setCompanyData({ ...companyData, [field]: color.hex });
-    };
-
-
 
     return (
         <>
@@ -94,32 +73,22 @@ const BasicInfo = ({ nextStep, prevStep, steps, activeStep }: YourChildProps) =>
                     I accept the Terms & Conditions
                 </label>
             </Box>
+
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-                            <Button variant="outlined" onClick={prevStep}>
-                                Back
-                            </Button>
-                {activeStep === steps.length - 1 ? (
-                    <>
-                        <Button
-                            variant="contained"
-                            sx={{ background: "#be1f2f" }}
-                            disabled={!companyData.acceptTerms}
-                            onClick={() => alert("Submit onboarding")}
-                        >
-                            Submit
-                        </Button>
-                    </>
-                ) : (
-                    <>
-                        {/* {activeStep > 1 && (
-                        )} */}
-                        <Button variant="contained" sx={{ background: "#be1f2f" }} onClick={nextStep}>
-                            Next
-                        </Button>
-                    </>
-                )}
+                <Button variant="outlined" onClick={prevStep}>
+                    Back
+                </Button>
+                <Button
+                    variant="contained"
+                    sx={{ background: "#be1f2f" }}
+                    disabled={!companyData.acceptTerms || isLoading}
+                    onClick={handleSubmit}
+                >
+                    {isLoading ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Submit"}
+                </Button>
             </Box>
         </>
-    )
-}
-export default BasicInfo
+    );
+};
+
+export default TCs;

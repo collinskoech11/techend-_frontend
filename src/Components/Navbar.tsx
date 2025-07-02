@@ -21,7 +21,7 @@ import { useGetCartQuery } from "@/Api/services";
 const Navbar = forwardRef((props:any, ref:any) => {
     const cartRef = useRef<any>(null);
   const router = useRouter();
-  const { data: cart_data, error: cart_error, isLoading: cart_loading, refetch: cart_refetch } = useGetCartQuery({token: Cookies.get("access"), company_name: "techend"});
+  const { data: cart_data, error: cart_error, isLoading: cart_loading, refetch: cart_refetch } = useGetCartQuery({token: Cookies.get("access"), company_name: Cookies.get('shopname')});
   const navigate = (link:string) => {
     router.push(link);
   };

@@ -40,7 +40,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 function Cart() {
   const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } =
-    useGetCartQuery({ token: Cookies.get("access"), company_name: "techend" });
+    useGetCartQuery({ token: Cookies.get("access"), company_name: Cookies.get('shopname') });
   const router = useRouter();
 
   const [updateItemQty, { isLoading: isLoadingUpdate }] =

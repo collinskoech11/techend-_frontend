@@ -42,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isLoading, triggerCa
     const username = Cookies.get("username");
 
     if (access && refresh && username) {
-      const response = await addToCart({ product: product.product?.id || product.id, token: access });
+      const response = await addToCart({ product: product.product?.id || product.id, token: access, shopname: Cookies.get("shopname")});
       if (response.error) {
         const error_message = response.error.data?.error || "An error occurred";
         toast.error(<Typography>{error_message}</Typography>);

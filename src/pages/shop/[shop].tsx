@@ -18,16 +18,30 @@ import { useRouter } from "next/router";
 import { useGetProductsQuery } from "@/Api/services";
 import { Box, Grid } from "@mui/material";
 import Footer from "@/Components/Footer";
+import Cookies from "js-cookie";
 
 const Shop = forwardRef((props:any, ref:any) => {
   const router = useRouter();
     const cartRef = useRef<any>(null);
+    const [shopname, setShopName] =  useState(Cookies.get("shopname") || "techend");
   const [category, setCategory] = useState<any>("");
+
+  useEffect(() => {
+    // Check if URL matches /shop/[shopname]
+    const pathParts = router.asPath.split("/");
+
+    if (pathParts[1] === "shop" && pathParts[2]) {
+      const urlShopName = pathParts[2];
+      setShopName(urlShopName);
+      Cookies.set("shopname", urlShopName, { expires: 7 });
+    }
+  }, [router.asPath]);
+  
   const {
     data: products_data,
     error: products_error,
     isLoading: products_loading,
-  } = useGetProductsQuery({ company: "techend", category: category });
+  } = useGetProductsQuery({ company: shopname, category: category });
   const triggerCartRefetch = () => {
     if (cartRef.current) {
       cartRef.current.triggerCartRefetch();
@@ -57,17 +71,17 @@ const Shop = forwardRef((props:any, ref:any) => {
           <Link underline="hover" color="inherit" href="/">
             TechEnd
           </Link>
-          <Link underline="hover" color="inherit" href="/shop">
+          <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>
             Shop
           </Link>
         </Breadcrumbs>
       </BreadCrumbContainer>
       <MainProductsContainer sx={{ mt: 4 }}>
-        <FiltersContainer sx={{ display: { xs: "none", md: "flex" } }}>
+        {/* <FiltersContainer sx={{ display: { xs: "none", md: "flex" } }}>
           <GreenButton>FILTER BY</GreenButton>
           <GreenButton>SORT BY</GreenButton>
         </FiltersContainer>
-        <Filters />
+        <Filters /> */}
         {products_loading}
         <ProductsContainer container>
           {products_loading ? (

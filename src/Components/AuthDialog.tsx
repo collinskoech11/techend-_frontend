@@ -74,6 +74,7 @@ function AuthDialog({ onTrigger }) {
         Cookies.set("access", access, { expires: 7 });
         Cookies.set("refresh", refresh, { expires: 7 });
         Cookies.set("username", user.username, { expires: 7 });
+        Cookies.set("user", JSON.stringify(user), { expires: 7 })
         setLoggedInUser(user.username);
         toast.success(<Typography>Log in success</Typography>);
         setOpen(false);

@@ -1,60 +1,43 @@
 import { YourChildProps } from "@/Types";
 import { PhotoCamera } from "@mui/icons-material";
-import {
-    Box,
-    Button,
-    Grid,
-    Typography,
-} from "@mui/material";
-import { useState } from "react";
+import { Box, Button, Grid, Typography, CircularProgress } from "@mui/material";
 import { SketchPicker } from "react-color";
+import { useUpdateCompanyMutation } from "@/Api/services";
+import toast from "react-hot-toast";
 
-const BasicInfo = ({ nextStep, prevStep, steps, activeStep }: YourChildProps) => {
-    const [companyData, setCompanyData] = useState<any>({
-        name: "",
-        description: "",
-        logo: null,
-        website: "",
-        contact_email: "",
-        contact_phone: "",
-        id_number: "",
-        id_front: null,
-        id_back: null,
-        business_registration_number: "",
-        business_permit: null,
-        tax_pin_number: "",
-        tax_certificate: null,
-        utility_bill: null,
-        lease_agreement: null,
-        postal_address: "",
-        physical_address: "",
-        country: "",
-        city: "",
-        state: "",
-        postal_code: "",
-        primary_color: "#be1f2f",
-        secondary_color: "#000000",
-        accent_color: "#cccccc",
-        acceptTerms: false,
-    });
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCompanyData({ ...companyData, [e.target.name]: e.target.value });
-    };
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-        if (e.target.files) {
-            setCompanyData({ ...companyData, [field]: e.target.files[0] });
-        }
-    };
+const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
+
+    const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
 
     const handleColorChange = (field: string, color: any) => {
         setCompanyData({ ...companyData, [field]: color.hex });
     };
 
-
+    const handleSubmit = async () => {
+        const formData = new FormData();
+        Object.entries(companyData).forEach(([key, value]) => {
+            if (typeof value === "string" || typeof value === "boolean") {
+                formData.append(key, value as any);
+            }
+        });
+        console.log(activeStep, "&*&*^*")
+        formData.append("company_onboarding_step", (activeStep+1).toString());
+        console.log((activeStep+1).toString(), "&*^&^&")
+        try {
+            await updateCompany({ token, body: formData }).unwrap();
+            refetchCompany();
+            triggerRerender;
+            toast.success("Colors saved successfully");
+            nextStep();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to save colors");
+        }
+    };
 
     return (
         <>
-            <Grid container>
+            <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Primary Color</Typography>
                     <SketchPicker color={companyData.primary_color} onChange={(color) => handleColorChange("primary_color", color)} />
@@ -68,32 +51,24 @@ const BasicInfo = ({ nextStep, prevStep, steps, activeStep }: YourChildProps) =>
                     <SketchPicker color={companyData.accent_color} onChange={(color) => handleColorChange("accent_color", color)} />
                 </Grid>
             </Grid>
+
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-                {activeStep === steps.length - 1 ? (
-                    <>
-                        <Button
-                            variant="contained"
-                            sx={{ background: "#be1f2f" }}
-                            disabled={!companyData.acceptTerms}
-                            onClick={() => alert("Submit onboarding")}
-                        >
-                            Submit
-                        </Button>
-                    </>
-                ) : (
-                    <>
-                        {activeStep > 1 && (
-                            <Button variant="outlined" onClick={prevStep}>
-                                Back
-                            </Button>
-                        )}
-                        <Button variant="contained" sx={{ background: "#be1f2f" }} onClick={nextStep}>
-                            Next
-                        </Button>
-                    </>
+                {activeStep > 1 && (
+                    <Button variant="outlined" onClick={prevStep}>
+                        Back
+                    </Button>
                 )}
+                <Button
+                    variant="contained"
+                    sx={{ background: "#be1f2f" }}
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                >
+                    {isLoading ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Save & Next"}
+                </Button>
             </Box>
         </>
-    )
-}
-export default BasicInfo
+    );
+};
+
+export default Branding;

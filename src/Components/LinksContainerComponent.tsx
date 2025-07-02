@@ -29,6 +29,7 @@ import Cookies from "js-cookie";
 import AuthDialog from "./AuthDialog";
 
 
+
 const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const router = useRouter();
   const theme = useTheme();
@@ -38,6 +39,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const [anchorElsec, setAnchorElsec] = useState(null);
   const [username, setUsername] = useState(null);
   const [user, setUser] = useState(Cookies.get("username"))
+  // const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const cartRef = useRef<any>(null);
   const open = Boolean(anchorEl);
   const opensec = Boolean(anchorElsec);
@@ -101,15 +103,15 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   return (
     <AppBar position="static" sx={{ background: "#BE1E2D", color: "#fff" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" sx={{ cursor: "pointer" }} onClick={() => router.push("/")}>
-          Techend
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${Cookies.get("shopname")}`)}>
+          {Cookies.get("shopname")}
         </Typography>
 
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
           {router.pathname === "/" && (
             <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
           )}
-          <Button color="inherit" onClick={() => router.push("/shop")}>Shop</Button>
+          <Button color="inherit" onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>Shop</Button>
           {router.pathname === "/" && (
             <>
               <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
@@ -238,7 +240,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
           {router.pathname === "/" && (
             <Button color="inherit" fullWidth onClick={() => router.push("/")}>Home</Button>
           )}
-          <Button color="inherit" fullWidth onClick={() => router.push("/shop")}>shop</Button>
+          <Button color="inherit" fullWidth onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>shop</Button>
           <Button color="inherit" fullWidth ><CartMenu ref={cartRef} /> CART</Button>
           <Button color="inherit" fullWidth >
             <Tooltip title="Order History">

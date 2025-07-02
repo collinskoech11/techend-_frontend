@@ -13,7 +13,7 @@ const CartMenu = forwardRef((props: any, ref) => {
 
   const { data: cart_data, isLoading, refetch: cart_refetch } = useGetCartQuery({
     token: Cookies.get("access"),
-    company_name: "techend",
+    company_name: Cookies.get("shopname"),
   });
 
   const CartItems = cart_data?.items || [];

@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
+import Cookies from "js-cookie";
+
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -43,13 +45,18 @@ export const AuthApi = createApi({
       }),
     }),
     addToCart: builder.mutation({
-      query: data => ({
-        url: `cart/cart/add/${data.product}/techend`,
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${data.token}`,
-        },
-      }),
+      query: (data) => {
+        const shopname = Cookies.get("shopname") || "techend";
+        const token = Cookies.get("access");
+
+        return {
+          url: `cart/cart/add/${data.product}/${shopname}`,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+      },
     }),
     addProductQtyToCart: builder.mutation({
       query: data => ({
@@ -118,7 +125,7 @@ export const AuthApi = createApi({
     }),
     createCompany: builder.mutation({
       query: (data) => ({
-        url: `companies/`,
+        url: `companies/my/create/`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -128,7 +135,7 @@ export const AuthApi = createApi({
     }),
     updateCompany: builder.mutation({
       query: (data) => ({
-        url: `companies/${data}`,
+        url: `companies/my/onboard/`,
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${data.token}`,

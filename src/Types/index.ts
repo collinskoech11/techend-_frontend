@@ -27,10 +27,14 @@ export interface CompanyData {
 }
 
 export interface YourChildProps {
+    token: string | undefined;
     nextStep: () => void;
     prevStep: () => void;
     steps: string[];
     activeStep: number;
     companyData: CompanyData;
     setCompanyData: React.Dispatch<React.SetStateAction<CompanyData>>;
+    companyExists?: boolean | undefined;
+    refetchCompany: () => void;
+    triggerRerender: () => void;
 };
