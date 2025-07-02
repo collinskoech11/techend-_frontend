@@ -24,6 +24,7 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+    const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,7 +42,7 @@ function Register() {
         Cookies.set("refresh", refresh, { expires: 7 });
         Cookies.set("user", user, { expires: 7 });
         toast.success("Successful registration");
-        router.push("/shop");
+        router.push(`/shop/${shopname}`);
       } else if (response.error) {
         const emailError = response.error?.data?.email?.[0];
         const usernameError = response.error?.data?.username?.[0];
