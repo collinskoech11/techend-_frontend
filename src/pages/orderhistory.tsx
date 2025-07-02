@@ -1,7 +1,9 @@
 import Navbar from "@/Components/Navbar";
 import React, { useState } from "react";
 import Cookies from "js-cookie";
+import { ProductImage } from "@/StyledComponents/Products";
 import { useGetCheckoutHistoryQuery } from "@/Api/services";
+import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from '@mui/lab';
 import {
   Box,
   Button,
@@ -21,7 +23,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { format } from "date-fns";
-
+// https://res.cloudinary.com/dqokryv6u
 function OrderHistory() {
   const {
     data: checkout_data,
@@ -41,10 +43,12 @@ function OrderHistory() {
     payment_status: string;
     cart?: {
       created_at?: string;
+      status?:any;
       items: {
         product: {
           title: string;
           price: number;
+          main_image: string;
         };
         quantity: number;
       }[];
@@ -63,8 +67,9 @@ function OrderHistory() {
 
   const HistoryItem = ({ item }) => {
     const cartItems = item.cart?.items || [];
+    console.log(cartItems, "*&*^")
     const totalProducts = cartItems.reduce(
-      (acc, curr) => acc + curr.quantity,
+      (acc:any, curr:any) => acc + curr.quantity,
       0
     );
 
@@ -148,9 +153,9 @@ function OrderHistory() {
 
   return (
     <>
-      <Navbar textColor={"#000"} bgColor={"#fff"} />
+      {/* <Navbar textColor={"#000"} bgColor={"#fff"} /> */}
       <Box sx={{ maxWidth: "800px", width: "95%", margin: "auto", mt: 4 }}>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold", color:"#BE1E2D" }}>
           My Order History
         </Typography>
 
@@ -168,54 +173,115 @@ function OrderHistory() {
       </Box>
 
       {/* Dialog for View Details */}
-      <Dialog
-        open={Boolean(selectedCheckout)}
-        onClose={() => setSelectedCheckout(null)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Order #{selectedCheckout?.id} Details</DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Shipping Address:
-          </Typography>
-          <Typography sx={{ mb: 2 }}>
-            {selectedCheckout?.address}, {selectedCheckout?.city},{" "}
-            {selectedCheckout?.state}, {selectedCheckout?.postal_code},{" "}
-            {selectedCheckout?.country}
-          </Typography>
+<Dialog
+  open={Boolean(selectedCheckout)}
+  onClose={() => setSelectedCheckout(null)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle sx={{ fontWeight: "bold" }}>Order #{selectedCheckout?.id} Details</DialogTitle>
+  
+  <DialogContent dividers>
 
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Products:
-          </Typography>
-          <Table size="small">
-            <TableBody>
-              {selectedCheckout?.cart?.items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.product.title}</TableCell>
-                  <TableCell>Qty: {item.quantity}</TableCell>
-                  <TableCell>Price: Ksh {item.product.price}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+    {/* Payment Status Timeline */}
+    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+      Payment Status:
+    </Typography>
+    <Timeline position="left" sx={{ p: 0, mb: 2}}>
+      <TimelineItem sx={{ textAlign: "left" }}>
+        <TimelineSeparator sx={{ textAlign: "left"}}>
+          <TimelineDot color={selectedCheckout?.payment_status === "Paid" ? "success" : "error"} />
+          <TimelineConnector />
+        </TimelineSeparator>
+        <TimelineContent>
+          {selectedCheckout?.payment_status === "Paid" ? "Payment Completed" : "Payment Pending"}
+        </TimelineContent>
+      </TimelineItem>
+    </Timeline>
 
-          <Divider sx={{ my: 2 }} />
+    {/* Delivery Status Timeline */}
+    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+      Delivery Status:
+    </Typography>
+    <Timeline position="left" sx={{ p: 0, mb: 2 }}>
+      <TimelineItem>
+        <TimelineSeparator>
+          <TimelineDot color="primary" />
+          <TimelineConnector />
+        </TimelineSeparator>
+        <TimelineContent>Order Placed</TimelineContent>
+      </TimelineItem>
 
-          <Typography>
-            <strong>Total:</strong> Ksh {selectedCheckout?.total_amount}
-          </Typography>
-          <Typography>
-            <strong>Payment Method:</strong> {selectedCheckout?.payment_method}
-          </Typography>
-          <Typography>
-            <strong>Payment Status:</strong> {selectedCheckout?.payment_status}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSelectedCheckout(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      <TimelineItem>
+        <TimelineSeparator>
+          <TimelineDot color={selectedCheckout?.cart?.status >= 1 ? "primary" : "grey"} />
+          <TimelineConnector />
+        </TimelineSeparator>
+        <TimelineContent>In Progress</TimelineContent>
+      </TimelineItem>
+
+      <TimelineItem>
+        <TimelineSeparator>
+          <TimelineDot color={selectedCheckout?.cart?.status === 2 ? "success" : "grey"} />
+        </TimelineSeparator>
+        <TimelineContent>Delivered</TimelineContent>
+      </TimelineItem>
+    </Timeline>
+
+    {/* Shipping Address */}
+    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+      Shipping Address:
+    </Typography>
+    <Typography sx={{ mb: 2 }}>
+      {selectedCheckout?.address}, {selectedCheckout?.city},{" "}
+      {selectedCheckout?.state}, {selectedCheckout?.postal_code},{" "}
+      {selectedCheckout?.country}
+    </Typography>
+
+    {/* Products Table */}
+    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
+      Products:
+    </Typography>
+    <Table size="small">
+      <TableBody>
+        {selectedCheckout?.cart?.items.map((item, index) => (
+          <TableRow key={index}>
+            <TableCell>{item.product.title}</TableCell>
+            <TableCell>
+              <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", overflow: "hidden" }}>
+                <ProductImage src={`https://res.cloudinary.com/dqokryv6u/${item.product.main_image}`} />
+              </Box>
+            </TableCell>
+            <TableCell>Qty: {item.quantity}</TableCell>
+            <TableCell>Ksh {item.product.price}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+
+    <Divider sx={{ my: 2 }} />
+
+    {/* Payment Summary */}
+    <Typography sx={{ mb: 1 }}>
+      <strong>Total:</strong> Ksh {selectedCheckout?.total_amount}
+    </Typography>
+    <Typography sx={{ mb: 1 }}>
+      <strong>Payment Method:</strong> {selectedCheckout?.payment_method}
+    </Typography>
+    <Typography>
+      <strong>Payment Status:</strong>{" "}
+      <span style={{ color: selectedCheckout?.payment_status === "Paid" ? "green" : "#BE1E2D", fontWeight: "bold" }}>
+        {selectedCheckout?.payment_status}
+      </span>
+    </Typography>
+
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setSelectedCheckout(null)} variant="outlined">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
     </>
   );
 }

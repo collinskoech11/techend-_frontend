@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
 import { useRouter } from "next/router";
 import {
   AppBar,
@@ -11,15 +11,26 @@ import {
   Box,
   Typography,
   useTheme,
+  Divider, ListItemIcon,
+  Tooltip,
+  Badge
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { Person2Outlined } from "@mui/icons-material";
-import { ShoppingBasket } from "@mui/icons-material";
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SettingsIcon from "@mui/icons-material/Settings";
+import CartMenu from "./CartMin";
 import Image from "next/image";
 import Cookies from "js-cookie";
+import AuthDialog from "./AuthDialog";
 
-function LinksContainerComponent() {
+
+
+const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const router = useRouter();
   const theme = useTheme();
 
@@ -27,12 +38,29 @@ function LinksContainerComponent() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElsec, setAnchorElsec] = useState(null);
   const [username, setUsername] = useState(null);
-
+  const [user, setUser] = useState(Cookies.get("username"))
+  // const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const cartRef = useRef<any>(null);
   const open = Boolean(anchorEl);
   const opensec = Boolean(anchorElsec);
 
-  const user = Cookies.get("username");
+  // const user = Cookies.get("username");
 
+  const refetchUser = () => {
+    console.log("called from child")
+    setUser(Cookies.get("username"));
+  }
+  const triggerCartRefetch = () => {
+    if (cartRef.current) {
+      cartRef.current.cart_refetch();
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    triggerCartRefetch() {
+      triggerCartRefetch();
+    },
+  }));
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
@@ -50,8 +78,10 @@ function LinksContainerComponent() {
     setAnchorElsec(event.currentTarget);
   };
 
-  const handleClosesec = (link) => {
-    router.push(link);
+  const handleClosesec = (link: any) => {
+    if (link !== "") {
+      router.push(link);
+    }
     setAnchorElsec(null);
   };
 
@@ -73,32 +103,46 @@ function LinksContainerComponent() {
   return (
     <AppBar position="static" sx={{ background: "#BE1E2D", color: "#fff" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" sx={{ cursor: "pointer" }} onClick={() => router.push("/")}>
-          Techend
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${Cookies.get("shopname")}`)}>
+          {Cookies.get("shopname")}
         </Typography>
 
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
-          <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
-          <Button color="inherit" onClick={() => router.push("/shop")}>Merchandise</Button>
-          <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
-            <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
-          </IconButton>
-          <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
-            <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
-          </IconButton>
-          <IconButton color="inherit" href="#" target="_blank">
-            <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
-          </IconButton>
-          {username ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton
-                color="inherit"
-                onClick={handleCartClick}
-                aria-controls={opensec ? "user-menu-sec" : undefined}
-                aria-haspopup="true"
-              >
-                <ShoppingBasket />
+          {router.pathname === "/" && (
+            <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
+          )}
+          <Button color="inherit" onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>Shop</Button>
+          {router.pathname === "/" && (
+            <>
+              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
+                <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
               </IconButton>
+              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
+                <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="#" target="_blank">
+                <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
+              </IconButton>
+            </>
+          )}
+          {user ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CartMenu ref={cartRef} />
+              <Tooltip title="Order History">
+                <IconButton sx={{ mr: 1 }}>
+                  <Badge badgeContent={1} color="warning">
+                    <HistoryOutlinedIcon sx={{ color: "#fff" }} onClick={() => router.push("/orderhistory")} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Notifications">
+                <IconButton sx={{ mr: 1 }}>
+                  <Badge badgeContent={1} color="warning">
+                    <NotificationsOutlinedIcon sx={{ color: "#fff" }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
               <IconButton
                 color="inherit"
                 onClick={handleClick}
@@ -111,15 +155,67 @@ function LinksContainerComponent() {
                 anchorEl={anchorEl}
                 open={open}
                 onClose={() => setAnchorEl(null)}
+                PaperProps={{
+                  elevation: 4,
+                  sx: {
+                    mt: 1,
+                    minWidth: 180,
+                    borderRadius: 2,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                    "& .MuiMenuItem-root": {
+                      px: 2,
+                      py: 1.5,
+                      fontSize: "0.95rem",
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    },
+                  },
+                }}
               >
-                <MenuItem onClick={() => handleClose("/profile")}>Profile</MenuItem>
-                <MenuItem onClick={() => handleClose("/settings")}>Settings</MenuItem>
+                <MenuItem onClick={() => handleClose("/profile")}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  Profile
+                </MenuItem>
+
+                <MenuItem onClick={() => handleClose("/settings")}>
+                  <ListItemIcon>
+                    <SettingsIcon fontSize="small" />
+                  </ListItemIcon>
+                  Settings
+                </MenuItem>
+
+                <Divider />
+
+                <MenuItem
+                  onClick={() => {
+                    // You can replace this with your logout logic
+                    Cookies.remove("access");
+                    Cookies.remove("refresh");
+                    Cookies.remove("username");
+                    handleClose("/");
+                  }}
+                  sx={{
+                    color: "#BE1E2D",
+                    fontWeight: "600",
+                    "&:hover": {
+                      backgroundColor: "#ffebeb",
+                    },
+                  }}
+                >
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" sx={{ color: "#BE1E2D" }} />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
               </Menu>
-              <Button variant="outlined" color="inherit" onClick={LogoutFx}>Log out</Button>
+              {/* <Button variant="outlined" color="inherit" onClick={LogoutFx}>Log out</Button> */}
             </Box>
           ) : (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Button  sx={{  background:"#BE1E2D", border:"1px solid #fff", color:"#fff" }} onClick={() => router.push("/login")}>Join</Button>
+              <AuthDialog onTrigger={refetchUser} />
             </Box>
           )}
         </Box>
@@ -141,32 +237,125 @@ function LinksContainerComponent() {
               <CloseIcon />
             </IconButton>
           </Box>
-          <Button color="inherit" fullWidth onClick={() => router.push("/")}>Home</Button>
-          <Button color="inherit" fullWidth onClick={() => router.push("/shop")}>Merchandise</Button>
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
-            <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
-              <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
+          {router.pathname === "/" && (
+            <Button color="inherit" fullWidth onClick={() => router.push("/")}>Home</Button>
+          )}
+          <Button color="inherit" fullWidth onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>shop</Button>
+          <Button color="inherit" fullWidth ><CartMenu ref={cartRef} /> CART</Button>
+          <Button color="inherit" fullWidth >
+            <Tooltip title="Order History">
+              <IconButton sx={{ mr: 1 }}>
+                <HistoryOutlinedIcon sx={{ color: "#fff" }} onClick={() => router.push("/orderhistory")} />
+                &nbsp;<Typography color={'#fff'}>ORDER HISTORY</Typography>
+              </IconButton>
+            </Tooltip>
+          </Button>
+          <Button color="inherit" fullWidth >
+            <Tooltip title="Notifications">
+              <IconButton sx={{ mr: 1 }}>
+                <NotificationsOutlinedIcon sx={{ color: "#fff" }} />
+                &nbsp;<Typography color={'#fff'}>NOTIFICATIONS</Typography>
+
+              </IconButton>
+            </Tooltip>
+          </Button>
+          <Button color="inherit" fullWidth >
+            <IconButton
+              color="inherit"
+              onClick={handleClick}
+              aria-controls={open ? "user-menu" : undefined}
+              aria-haspopup="true"
+            >
+              <Person2Outlined />
+              &nbsp;<Typography color={'#fff'}>PROFILE</Typography>
             </IconButton>
-            <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
-              <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
-            </IconButton>
-            <IconButton color="inherit" href="#" target="_blank">
-              <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
-            </IconButton>
-          </Box>
-          {username ? (
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={() => setAnchorEl(null)}
+            PaperProps={{
+              elevation: 4,
+              sx: {
+                mt: 1,
+                minWidth: 180,
+                borderRadius: 2,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                "& .MuiMenuItem-root": {
+                  px: 2,
+                  py: 1.5,
+                  fontSize: "0.95rem",
+                  "&:hover": {
+                    backgroundColor: "#f5f5f5",
+                  },
+                },
+              },
+            }}
+          >
+            <MenuItem onClick={() => handleClose("/profile")}>
+              <ListItemIcon>
+                <AccountCircleIcon fontSize="small" />
+              </ListItemIcon>
+              Profile
+            </MenuItem>
+
+            <MenuItem onClick={() => handleClose("/settings")}>
+              <ListItemIcon>
+                <SettingsIcon fontSize="small" />
+              </ListItemIcon>
+              Settings
+            </MenuItem>
+
+            <Divider />
+
+            <MenuItem
+              onClick={() => {
+                // You can replace this with your logout logic
+                Cookies.remove("access");
+                Cookies.remove("refresh");
+                Cookies.remove("username");
+                handleClose("/");
+              }}
+              sx={{
+                color: "#BE1E2D",
+                fontWeight: "600",
+                "&:hover": {
+                  backgroundColor: "#ffebeb",
+                },
+              }}
+            >
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" sx={{ color: "#BE1E2D" }} />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
+          {router.pathname === "/" && (
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
+              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
+                <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
+                <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="#" target="_blank">
+                <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
+              </IconButton>
+            </Box>
+          )}
+          {/* {username ? (
             <Button variant="outlined" color="inherit" fullWidth sx={{ mt: 2 }} onClick={LogoutFx}>
               Log out
             </Button>
           ) : (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Button fullWidth sx={{ mt: 2, background:"#BE1E2D" }} onClick={() => router.push("/login")}>Join</Button>
+              <AuthDialog onTrigger={refetchUser} />
             </Box>
-          )}
+          )} */}
         </Box>
       </Drawer>
     </AppBar>
   );
-}
+})
 
 export default LinksContainerComponent;

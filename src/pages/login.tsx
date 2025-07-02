@@ -22,6 +22,7 @@ function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+    const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,7 +40,7 @@ function Login() {
         Cookies.set("refresh", refresh, { expires: 7 });
         Cookies.set("username", user.username, { expires: 7 });
         toast.success(<><Typography>Log in success</Typography></>);
-        router.push("/shop");
+        router.push(`/shop/${shopname}`);
       } else if (response.error) {
         toast.error(<><Typography>{response.error.data.non_field_errors[0]}</Typography></>);
       }
@@ -55,7 +56,7 @@ function Login() {
   return (
     <>
       <Toaster />
-      <Navbar textColor={'#000'} bgColor={'#fff'} />
+      {/* <Navbar textColor={'#000'} bgColor={'#fff'} /> */}
       <Box
         sx={{
           display: "flex",

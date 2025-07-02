@@ -1,6 +1,7 @@
 "use client";
 import Navbar from "@/Components/Navbar";
 import { CouponButton } from "@/StyledComponents/Buttons";
+import Footer from "@/Components/Footer";
 import {
   CartBanner,
   CartSummary,
@@ -39,7 +40,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 function Cart() {
   const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } =
-    useGetCartQuery({ token: Cookies.get("access"), company_name: "techend" });
+    useGetCartQuery({ token: Cookies.get("access"), company_name: Cookies.get('shopname') });
   const router = useRouter();
 
   const [updateItemQty, { isLoading: isLoadingUpdate }] =
@@ -94,13 +95,13 @@ function Cart() {
   return (
     <>
       <Toaster />
-      <Navbar textColor="#000" bgColor="#fff" />
+      {/* <Navbar textColor="#000" bgColor="#fff" /> */}
       <CartBanner>
         <Box>
-          <Typography variant="h3">Shopping Cart</Typography>
+          <Typography variant="h3" color={'#be1f2f'}>Shopping Cart</Typography>
           <br />
           <Typography>
-            <span style={{ color: "#E6C0A4" }}>Home</span> - Shopping cart
+            <span style={{ color: "#be1f2f" }}>Home</span> - Shopping cart
           </Typography>
         </Box>
       </CartBanner>
@@ -230,12 +231,12 @@ function Cart() {
           </Grid>
           <Grid item xs={12} md={4}>
             <CartSummary>
-              <CouponContainer>
+              {/* <CouponContainer>
                 <CouponInput />
                 <CouponButton>Apply Coupon</CouponButton>
-              </CouponContainer>
+              </CouponContainer> */}
               <CartSummarySub>
-                <CartSummaryTitle>Cart Summary</CartSummaryTitle>
+                <CartSummaryTitle style={{color:'#be1f2f'}}>Cart Summary</CartSummaryTitle>
                 <CartSummaryContent>
                   <span>Subtotal</span>
                   <span>${subTotal.toFixed(2)}</span>
@@ -268,6 +269,7 @@ function Cart() {
           </Grid>
         </Grid>
       </CartSummaryContainer>
+            {/* <Footer /> */}
     </>
   );
 }
