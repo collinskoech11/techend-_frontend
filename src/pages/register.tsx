@@ -37,9 +37,9 @@ function Register() {
       const response = await register({ body: formData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7 });
-        Cookies.set("refresh", refresh, { expires: 7 });
-        Cookies.set("user", user, { expires: 7 });
+        Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("user", user, { expires: 7, secure: true, sameSite: "Strict" });
         toast.success("Successful registration");
         router.push(`/shop/${shopname}`);
       } else if (response.error) {

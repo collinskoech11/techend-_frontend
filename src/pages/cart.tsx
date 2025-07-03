@@ -177,7 +177,7 @@ function Cart() {
                           <TableCell
                             sx={{ display: { xs: "none", md: "table-cell" } }}
                           >
-                            ${item.product.price}
+                            Kes {item.product.price}
                           </TableCell>
                           <TableCell>
                             <Box
@@ -210,7 +210,7 @@ function Cart() {
                               </Button>
                             </Box>
                           </TableCell>
-                          <TableCell>${prod_total.toFixed(2)}</TableCell>
+                          <TableCell>Kes {prod_total.toFixed(2)}</TableCell>
                           <TableCell>
                             {isLoadingDelete ? (
                               <CircularProgress size={20} />
@@ -239,16 +239,16 @@ function Cart() {
                 <CartSummaryTitle style={{color:'#be1f2f'}}>Cart Summary</CartSummaryTitle>
                 <CartSummaryContent>
                   <span>Subtotal</span>
-                  <span>${subTotal.toFixed(2)}</span>
+                  <span>Kes {subTotal.toFixed(2)}</span>
                 </CartSummaryContent>
                 <CartSummaryContent>
                   <span>Shipping</span>
-                  <span>$150.00</span>
+                  <span>Kes 150.00</span>
                 </CartSummaryContent>
                 <CartSummaryContent>
                   <span style={{ fontWeight: "bold" }}>Total</span>
                   <span style={{ fontWeight: "bold" }}>
-                    ${(subTotal + 150).toFixed(2)}
+                    Kes {(subTotal + 150).toFixed(2)}
                   </span>
                 </CartSummaryContent>
                 <CartSummaryTitle
