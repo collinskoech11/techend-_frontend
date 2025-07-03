@@ -96,12 +96,14 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
     router.push("/cart");
   };
 
+  const accent = "#be1f2f";
+
   useEffect(() => {
     if (user) setUsername(user);
   }, [user]);
 
   return (
-    <AppBar position="static" sx={{ background: "#BE1E2D", color: "#fff" }}>
+    <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${accent} 0%, #2b0507 100%)`, color: "#fff" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${Cookies.get("shopname")}`)}>
           {Cookies.get("shopname")}

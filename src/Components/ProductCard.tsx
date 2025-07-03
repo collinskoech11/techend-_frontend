@@ -100,7 +100,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, isLoading, triggerCa
           </IconsContainer>
         )}
         <br />
-        <ProductPrice>$ {product?.product?.price || product?.price}</ProductPrice>
+        <ProductPrice>Ksh {product?.product?.price || product?.price}</ProductPrice>
         <ProductTitle>{product?.product?.title || product?.title}</ProductTitle>
         <RatingContainer sx={{ maxWidth: "100px" }}>
           {renderStars(product?.product?.rating || product?.rating)}
