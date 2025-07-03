@@ -33,7 +33,7 @@ const Shop = forwardRef((props:any, ref:any) => {
     if (pathParts[1] === "shop" && pathParts[2]) {
       const urlShopName = pathParts[2];
       setShopName(urlShopName);
-      Cookies.set("shopname", urlShopName, { expires: 7 });
+      Cookies.set("shopname", urlShopName, { expires: 7, secure: true, sameSite: "Strict" });
     }
   }, [router.asPath]);
   

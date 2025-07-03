@@ -146,7 +146,7 @@ const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
               ) : (
                 <>
                   <ProductTitle>{product.title}</ProductTitle>
-                  <ProductPrice>${product.price}</ProductPrice>
+                  <ProductPrice>Kes {product.price}</ProductPrice>
                   <Typography>Color: {product.color}</Typography>
                   <Typography>Size: {product.size}</Typography>
                   <Typography>Rating: {product.rating} / 5</Typography>
