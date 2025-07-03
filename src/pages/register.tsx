@@ -1,4 +1,3 @@
-import Navbar from "@/Components/Navbar";
 import { Box, CircularProgress, Typography, IconButton, InputAdornment, TextField } from "@mui/material";
 import React, { useState } from "react";
 import { useUserRegistrationMutation } from "@/Api/services";
@@ -67,7 +66,6 @@ function Register() {
   return (
     <>
       <Toaster />
-      <Navbar textColor={'#000'} bgColor={'#fff'} />
       <Box 
         sx={{
           display: "flex", 
