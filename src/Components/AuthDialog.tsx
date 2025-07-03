@@ -71,10 +71,10 @@ function AuthDialog({ onTrigger }) {
       const response = await login({ body: loginData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7 });
-        Cookies.set("refresh", refresh, { expires: 7 });
-        Cookies.set("username", user.username, { expires: 7 });
-        Cookies.set("user", JSON.stringify(user), { expires: 7 })
+        Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: true, sameSite: "Strict" })
         setLoggedInUser(user.username);
         toast.success(<Typography>Log in success</Typography>);
         setOpen(false);
@@ -98,9 +98,9 @@ function AuthDialog({ onTrigger }) {
       const response = await register({ body: registerData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7 });
-        Cookies.set("refresh", refresh, { expires: 7 });
-        Cookies.set("username", user.username, { expires: 7 });
+        Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
         toast.success("Successful registration");
         setOpen(false);
         setTabIndex(0);

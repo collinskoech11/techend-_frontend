@@ -172,10 +172,10 @@ function Checkout() {
             <Typography variant="h5" fontWeight="bold" gutterBottom style={{color:"#be1f2f"}}>Order Summary</Typography>
             <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body1">Subtotal: <b>${cart_data?.total || 0}</b></Typography>
-                <Typography variant="body1">Shipping: <b>$150</b></Typography>
+                <Typography variant="body1">Subtotal: <b>Kes {cart_data?.total || 0}</b></Typography>
+                <Typography variant="body1">Shipping: <b>Kes 150</b></Typography>
                 <Typography variant="h6" sx={{ mt: 1, color: "#BE1E2D" }}>
-                  Total: ${cart_data?.total ? cart_data.total + 150 : 150}
+                  Total: kes {cart_data?.total ? cart_data.total + 150 : 150}
                 </Typography>
               </Box>
 
