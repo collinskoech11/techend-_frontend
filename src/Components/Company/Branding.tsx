@@ -10,7 +10,7 @@ const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompa
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
 
     const handleColorChange = (field: string, color: any) => {
-        setCompanyData({ ...companyData, [field]: color.hex });
+        setCompanyData({ ...companyData, [field]: color?.hex });
     };
 
     const handleSubmit = async () => {
@@ -21,8 +21,8 @@ const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompa
             }
         });
         console.log(activeStep, "&*&*^*")
-        formData.append("company_onboarding_step", (activeStep+1).toString());
-        console.log((activeStep+1).toString(), "&*^&^&")
+        formData.append("company_onboarding_step", (activeStep + 1).toString());
+        console.log((activeStep + 1).toString(), "&*^&^&")
         try {
             await updateCompany({ token, body: formData }).unwrap();
             refetchCompany();
@@ -40,15 +40,14 @@ const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompa
             <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Primary Color</Typography>
-                    <SketchPicker color={companyData.primary_color} onChange={(color) => handleColorChange("primary_color", color)} />
-                </Grid>
+                    <SketchPicker color={companyData.primary_color || "#000000"} onChange={(color) => handleColorChange("primary_color", color)} />                </Grid>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Secondary Color</Typography>
-                    <SketchPicker color={companyData.secondary_color} onChange={(color) => handleColorChange("secondary_color", color)} />
+                    <SketchPicker color={companyData.secondary_color || "#000000"} onChange={(color) => handleColorChange("secondary_color", color)} />
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Accent Color</Typography>
-                    <SketchPicker color={companyData.accent_color} onChange={(color) => handleColorChange("accent_color", color)} />
+                    <SketchPicker color={companyData.accent_color || "#000000"} onChange={(color) => handleColorChange("accent_color", color)} />
                 </Grid>
             </Grid>
 

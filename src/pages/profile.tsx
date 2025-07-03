@@ -8,13 +8,60 @@ import {
   Button,
   Grid,
   Chip,
+  Divider,
+  Card
 } from "@mui/material";
+import { styled, keyframes } from "@mui/material/styles"; // Import keyframes
 import { useState } from "react";
 import Cookies from "js-cookie";
+import Payment from "@/Components/Company/Payment";
+import CheckIcon from "@mui/icons-material/Check"
+
+
 
 const accent = "#be1f2f";
 
 function ProfilePage() {
+  const primaryColor = "#be1f2f"; // Your existing accent color
+const secondaryColor = "#3f51b5"; // A complementary blue
+const lightGray = "#f8f8f8";
+const darkText = "#333";
+const lightText = "#666";
+
+  const PricingCard:any = styled(Card)({
+        textAlign: "center",
+        padding: "40px 30px",
+        borderRadius: "20px",
+        boxShadow: "0 8px 25px rgba(0,0,0,0.07)",
+        border: `1px solid ${lightGray}`,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        transition: "transform 0.4s ease, box-shadow 0.4s ease",
+        "&:hover": {
+          transform: "translateY(-8px) scale(1.01)",
+          boxShadow: "0 12px 35px rgba(0,0,0,0.12)",
+        },
+      });
+
+      const AccentButton = styled(Button)({
+        backgroundColor: primaryColor,
+        color: "#fff",
+        textTransform: "capitalize",
+        padding: "16px 40px",
+        borderRadius: "30px", // More rounded for a softer feel
+        fontWeight: 600,
+        fontSize: "1.15rem",
+        boxShadow: "0 8px 20px rgba(0,0,0,0.3)", // Stronger shadow
+        transition: "all 0.4s ease",
+        "&:hover": {
+          backgroundColor: "#a01624",
+          transform: "translateY(-3px) scale(1.02)", // Enhanced hover effect
+          boxShadow: "0 12px 25px rgba(0,0,0,0.4)",
+        },
+      });
+      
   const router = useRouter();
   const [userDetails, setUserDetails] = useState<any>(
     JSON.parse(Cookies.get("user")) || {}
@@ -45,14 +92,16 @@ function ProfilePage() {
 
     const formattedValue = isDate
       ? new Date(value).toLocaleString(undefined, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-          second: "numeric",
-        })
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+      })
       : value;
+
+      
 
     return (
       <Grid container spacing={2} sx={{ mb: 2 }} key={key}>
@@ -99,8 +148,10 @@ function ProfilePage() {
         <Tab label="Personal Info" />
         <Tab label="Company Info" />
         <Tab label="Groups & Permissions" />
+        <Tab label="Payments" />
       </Tabs>
 
+      {/* Personal Info */}
       {tab === 0 && (
         <>
           {renderField("Username", userDetails.username, userDetails, "username", setUserDetails)}
@@ -115,6 +166,7 @@ function ProfilePage() {
         </>
       )}
 
+      {/* Company Info */}
       {tab === 1 && (
         <>
           {userDetails.companies && userDetails.companies.length > 0 ? (
@@ -231,6 +283,7 @@ function ProfilePage() {
         </>
       )}
 
+      {/* Groups & Permissions */}
       {tab === 2 && (
         <>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -257,6 +310,122 @@ function ProfilePage() {
         </>
       )}
 
+      {/* Payments Tab */}
+      {tab === 3 && (
+        <Box>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Your Current Plan
+          </Typography>
+
+          <Grid container spacing={6} justifyContent="center">
+            {/* Starter Plan */}
+            <Grid item xs={12} md={4}>
+              <PricingCard sx={{
+                border: userDetails.selected_plan === "Starter" ? `2px solid ${accent}` : "1px solid #ddd",
+                boxShadow: userDetails.selected_plan === "Starter" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
+              }}>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: accent }}>
+                    Starter
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+                    $15<Typography component="span" variant="h6" color="text.secondary">/mo</Typography>
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mb: 3 }}>
+                    Ideal for getting your first store online.
+                  </Typography>
+                  <ul style={{ listStyle: "none", padding: 0, textAlign: "left", margin: "0 auto 20px auto", maxWidth: "200px" }}>
+                    <li><CheckIcon color="success" fontSize="small" /> Basic Store Setup</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Product Listings (up to 50)</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Standard Support</li>
+                  </ul>
+                </Box>
+                {userDetails.selected_plan === "Starter" ? (
+                  <Payment />
+                ) : (
+                  <Button variant="outlined" sx={{ borderColor: accent, color: accent, mt: 3, "&:hover": { bgcolor: accent, color: "#fff" } }} onClick={() => {userDetails.selected_plan = 'Starter'}}>
+                    Choose Plan
+                    {userDetails.selected_plan}
+                  </Button>
+                )}
+              </PricingCard>
+            </Grid>
+
+            {/* Growth Plan */}
+            <Grid item xs={12} md={4}>
+              <PricingCard sx={{
+                border: userDetails.selected_plan === "Growth" ? `2px solid ${accent}` : "1px solid #ddd",
+                boxShadow: userDetails.selected_plan === "Growth" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
+              }}>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: accent }}>
+                    Growth
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+                    $39<Typography component="span" variant="h6" color="text.secondary">/mo</Typography>
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mb: 3 }}>
+                    For growing SMEs with inventory and marketing tools.
+                  </Typography>
+                  <ul style={{ listStyle: "none", padding: 0, textAlign: "left", margin: "0 auto 20px auto", maxWidth: "200px" }}>
+                    <li><CheckIcon color="success" fontSize="small" /> All Starter Features</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Unlimited Products</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Inventory Management</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Email Marketing Tools</li>
+                  </ul>
+                </Box>
+                {userDetails.selected_plan === "Growth" ? (
+                  <AccentButton sx={{ mt: 3 }} onClick={() => {/* trigger payment logic */ }}>
+                    Pay Now
+                  </AccentButton>
+                ) : (
+                  <Button variant="outlined" sx={{ borderColor: accent, color: accent, mt: 3, "&:hover": { bgcolor: accent, color: "#fff" } }}>
+                    Choose Plan
+                  </Button>
+                )}
+              </PricingCard>
+            </Grid>
+
+            {/* Pro Plan */}
+            <Grid item xs={12} md={4}>
+              <PricingCard sx={{
+                border: userDetails.selected_plan === "Pro" ? `2px solid ${accent}` : "1px solid #ddd",
+                boxShadow: userDetails.selected_plan === "Pro" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
+              }}>
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: accent }}>
+                    Pro
+                  </Typography>
+                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+                    $79<Typography component="span" variant="h6" color="text.secondary">/mo</Typography>
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mb: 3 }}>
+                    For established sellers with advanced needs and priority support.
+                  </Typography>
+                  <ul style={{ listStyle: "none", padding: 0, textAlign: "left", margin: "0 auto 20px auto", maxWidth: "200px" }}>
+                    <li><CheckIcon color="success" fontSize="small" /> All Growth Features</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Advanced Analytics</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Multi-User Access</li>
+                    <li><CheckIcon color="success" fontSize="small" /> Priority Support</li>
+                  </ul>
+                </Box>
+                {userDetails.selected_plan === "Pro" ? (
+                  <AccentButton sx={{ mt: 3 }} onClick={() => {/* trigger payment logic */ }}>
+                    Pay Now
+                  </AccentButton>
+                ) : (
+                  <Button variant="outlined" sx={{ borderColor: accent, color: accent, mt: 3, "&:hover": { bgcolor: accent, color: "#fff" } }}>
+                    Choose Plan
+                  </Button>
+                )}
+              </PricingCard>
+            </Grid>
+          </Grid>
+        </Box>
+
+      )}
+
+      {/* Edit Button */}
       <Button
         variant="contained"
         sx={{

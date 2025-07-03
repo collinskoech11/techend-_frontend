@@ -1,5 +1,6 @@
 import { YourChildProps } from "@/Types";
 import { PhotoCamera } from "@mui/icons-material";
+import Payment from "@/Components/Company/Payment"
 import {
     TextField,
     Button,
@@ -69,6 +70,7 @@ const KYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyDat
                 <input hidden type="file" onChange={(e) => handleFileChange(e, "id_front_image")} />
                 <PhotoCamera sx={{ ml: "auto" }} />
             </Button>
+            {/* <Payment/> */}
             <Button component="label" variant="outlined" fullWidth
                 sx={{
                     mt: 2,
