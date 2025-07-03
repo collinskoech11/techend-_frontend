@@ -274,11 +274,11 @@ export default function PaymentDialog() {
                                                     />
                                                     <AccentButton
                                                         fullWidth
-                                                        disabled={!phone || paymentStatus === 'processing'}
+                                                        disabled={!phone || paymentStatus === 'idle'}
                                                         onClick={handleSimulatePayment}
-                                                        startIcon={paymentStatus === 'processing' ? <CircularProgress size={20} color="inherit" /> : undefined}
+                                                        startIcon={paymentStatus === 'idle' ? <CircularProgress size={20} color="inherit" /> : undefined}
                                                     >
-                                                        {paymentStatus === 'processing' ? 'Processing...' : 'Pay Now'}
+                                                        {paymentStatus === 'idle' ? 'Processing...' : 'Pay Now'}
                                                     </AccentButton>
                                                 </Box>
                                             )}
@@ -340,11 +340,11 @@ export default function PaymentDialog() {
 
                                                     <AccentButton
                                                         fullWidth
-                                                        disabled={!cardNumber || !expiry || !cvc || paymentStatus === 'processing'}
+                                                        disabled={!cardNumber || !expiry || !cvc || paymentStatus === 'idle'}
                                                         onClick={handleSimulatePayment}
-                                                        startIcon={paymentStatus === 'processing' ? <CircularProgress size={20} color="inherit" /> : undefined}
+                                                        startIcon={paymentStatus === 'idle' ? <CircularProgress size={20} color="inherit" /> : undefined}
                                                     >
-                                                        {paymentStatus === 'processing' ? 'Processing...' : 'Pay Now'}
+                                                        {paymentStatus === 'idle' ? 'Processing...' : 'Pay Now'}
                                                     </AccentButton>
                                                 </Box>
                                             )}
@@ -362,11 +362,11 @@ export default function PaymentDialog() {
                                                     />
                                                     <AccentButton
                                                         fullWidth
-                                                        disabled={!cryptoAddress || paymentStatus === 'processing'}
+                                                        disabled={!cryptoAddress || paymentStatus === 'idle'}
                                                         onClick={handleSimulatePayment}
-                                                        startIcon={paymentStatus === 'processing' ? <CircularProgress size={20} color="inherit" /> : undefined}
+                                                        startIcon={paymentStatus === 'idle' ? <CircularProgress size={20} color="inherit" /> : undefined}
                                                     >
-                                                        {paymentStatus === 'processing' ? 'Processing...' : 'Pay Now'}
+                                                        {paymentStatus === 'idle' ? 'Processing...' : 'Pay Now'}
                                                     </AccentButton>
                                                 </Box>
                                             )}
