@@ -10,6 +10,8 @@ import Typewriter from "typewriter-effect";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Cookies from 'js-cookie'
+import AuthDialog from "@/Components/AuthDialog"
 
 // Define a consistent color palette
 const primaryColor = "#be1f2f"; // Your existing accent color
@@ -137,8 +139,9 @@ const PricingCard = styled(Card)({
 });
 
 export default function LandingPage() {
+  const shopname = Cookies.get("shopname") || "techend";
   const router = useRouter();
-      const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [phone, setPhone] = useState("");
@@ -147,6 +150,17 @@ export default function LandingPage() {
   const [cvc, setCvc] = useState("");
   const [cryptoAddress, setCryptoAddress] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("idle");
+  const [showAuthDialog,  setShowAuthDialog] = useState(false)
+  const navigateOnboard = () => {
+    console.log("called &*(&*^&%^$")
+    setShowAuthDialog(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthDialog(false);
+    router.push("/company-onboarding");
+  };
+
 
   const getCardType = () => {
     if (/^4/.test(cardNumber)) return "visa";
@@ -182,11 +196,19 @@ export default function LandingPage() {
     setOpen(false);
   };
 
+
   const cardType = getCardType();
   return (
     <Box sx={{ bgcolor: lightGray }}> {/* Light background for the whole page */}
+      {showAuthDialog && (
+        <AuthDialog
+          onTrigger={handleAuthSuccess}
+          forceOpen={true}
+          showButton={false}
+        />
+      )}
       <Container maxWidth="xl" 
-          onClick={() =>{router.push("/company-onboarding")}}
+          onClick={() =>{navigateOnboard()}}
       sx={{ mx: "auto", px: 3, pt: 5, pb: 8 }}>
         {/* Hero Section */}
       <HeroSection>

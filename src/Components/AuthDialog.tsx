@@ -30,8 +30,8 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-function AuthDialog({ onTrigger }) {
-  const [open, setOpen] = useState(false);
+function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
+  const [open, setOpen] = useState(forceOpen);
   const [tabIndex, setTabIndex] = useState(0); // 0 = Login, 1 = Register
 
   const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
@@ -54,6 +54,12 @@ function AuthDialog({ onTrigger }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (forceOpen) {
+      setOpen(true);
+    }
+  }, [forceOpen]);
+
   const handleTabChange = (_e, newValue) => setTabIndex(newValue);
 
   const handleLoginChange = (e) => {
@@ -74,7 +80,7 @@ function AuthDialog({ onTrigger }) {
         Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
         Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
         Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: true, sameSite: "Strict" })
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: true, sameSite: "Strict" });
         setLoggedInUser(user.username);
         toast.success(<Typography>Log in success</Typography>);
         setOpen(false);
@@ -101,6 +107,8 @@ function AuthDialog({ onTrigger }) {
         Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
         Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
         Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: true, sameSite: "Strict" });
+        setLoggedInUser(user.username);
         toast.success("Successful registration");
         setOpen(false);
         setTabIndex(0);
@@ -110,7 +118,6 @@ function AuthDialog({ onTrigger }) {
         const usernameError = response.error?.data?.username?.[0];
         const passwordError = response.error?.data?.password?.[0];
         const errorMessage = emailError || usernameError || passwordError || "An unknown error occurred";
-
         toast.error(<Typography>{errorMessage}</Typography>);
       }
     } catch (error) {
@@ -125,18 +132,21 @@ function AuthDialog({ onTrigger }) {
   return (
     <>
       <Toaster />
-      {loggedInUser ? (
-        <IconButton onClick={() => setOpen(true)}>
-          <AccountCircleOutlined sx={{ color: "#BE1E2D", fontSize: 32 }} />
-        </IconButton>
-      ) : (
-        <Button
-          variant="contained"
-          sx={{ background: "#BE1E2D", border: "1px solid #fff", color: "#fff" }}
-          onClick={() => setOpen(true)}
-        >
-          Login
-        </Button>
+      
+      {showButton && (
+        loggedInUser ? (
+          <IconButton onClick={() => setOpen(true)}>
+            <AccountCircleOutlined sx={{ color: "#BE1E2D", fontSize: 32 }} />
+          </IconButton>
+        ) : (
+          <Button
+            variant="contained"
+            sx={{ background: "#BE1E2D", border: "1px solid #fff", color: "#fff" }}
+            onClick={() => setOpen(true)}
+          >
+            Login
+          </Button>
+        )
       )}
 
       <Dialog open={open} onClose={() => setOpen(false)}>

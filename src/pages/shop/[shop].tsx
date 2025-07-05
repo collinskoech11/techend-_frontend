@@ -22,8 +22,8 @@ import Cookies from "js-cookie";
 
 const Shop = forwardRef((props:any, ref:any) => {
   const router = useRouter();
-    const cartRef = useRef<any>(null);
-    const [shopname, setShopName] =  useState(Cookies.get("shopname") || "techend");
+  const cartRef = useRef<any>(null);
+  const [shopname, setShopName] =  useState(Cookies.get("shopname") || "techend");
   const [category, setCategory] = useState<any>("");
 
   useEffect(() => {
@@ -68,8 +68,8 @@ const Shop = forwardRef((props:any, ref:any) => {
     </Box> */}
       <BreadCrumbContainer >
         <Breadcrumbs aria-label="breadcrumb">
-          <Link underline="hover" color="inherit" href="/">
-            TechEnd
+          <Link underline="hover" color="inherit" href={`/_/${shopname}`}>
+            {shopname}
           </Link>
           <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>
             Shop
