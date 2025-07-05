@@ -39,6 +39,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const [anchorElsec, setAnchorElsec] = useState(null);
   const [username, setUsername] = useState(null);
   const [user, setUser] = useState(Cookies.get("username"))
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend")
   // const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const cartRef = useRef<any>(null);
   const open = Boolean(anchorEl);
@@ -105,15 +106,15 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   return (
     <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${accent} 0%, #2b0507 100%)`, color: "#fff" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${Cookies.get("shopname")}`)}>
-          {Cookies.get("shopname")}
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${shopname}`)}>
+          {shopname}
         </Typography>
 
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
           {router.pathname === "/" && (
             <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
           )}
-          <Button color="inherit" onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>Shop</Button>
+          <Button color="inherit" onClick={() => router.push(`/shop/${shopname}`)}>Shop</Button>
           {router.pathname === "/" && (
             <>
               <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
@@ -244,10 +245,10 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
           )}
           <Button color="inherit" fullWidth onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>shop</Button>
           <Button color="inherit" fullWidth ><CartMenu ref={cartRef} /> CART</Button>
-          <Button color="inherit" fullWidth >
+          <Button color="inherit" fullWidth onClick={() => router.push("/orderhistory")}>
             <Tooltip title="Order History">
               <IconButton sx={{ mr: 1 }}>
-                <HistoryOutlinedIcon sx={{ color: "#fff" }} onClick={() => router.push("/orderhistory")} />
+                <HistoryOutlinedIcon sx={{ color: "#fff" }}  />
                 &nbsp;<Typography color={'#fff'}>ORDER HISTORY</Typography>
               </IconButton>
             </Tooltip>
