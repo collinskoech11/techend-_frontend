@@ -241,12 +241,12 @@ export default function CompanyOnboarding() {
         });
 
         try {
-            if (companyDetails) {
-                await updateCompany({ token, body: formData }).unwrap();
-                toast.success("Company details updated successfully");
-            } else {
+            if (!companyDetails) {
                 await createCompany({ token, body: formData }).unwrap();
                 toast.success("Company created successfully");
+            } else {
+                await updateCompany({ token, body: formData }).unwrap();
+                toast.success("Company details updated successfully");
             }
             refetch_company_details();
         } catch (error) {
