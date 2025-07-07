@@ -176,9 +176,9 @@ export default function CompanyOnboarding() {
             const response = await login({ body: loginData });
             if (response.data) {
                 const { access, refresh, user } = response.data;
-                Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
-                Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
-                Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
+                Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+                Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+                Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
                 setUser(user.username);
                 toast.success("Login successful");
                 setActiveStep(1);
@@ -196,9 +196,9 @@ export default function CompanyOnboarding() {
             const response = await register({ body: registerData });
             if (response.data) {
                 const { access, refresh, user } = response.data;
-                Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
-                Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
-                Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
+                Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+                Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+                Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
                 setUser(user.username);
                 toast.success("Registration successful");
                 setActiveStep(1);

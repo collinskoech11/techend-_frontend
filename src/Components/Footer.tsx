@@ -46,41 +46,38 @@ function Footer() {
       <Box
         sx={{
           width: "100%",
-          // Apply the background gradient from HeroSection
+          position: "relative",
+          overflow: "hidden",
           background: `linear-gradient(135deg, ${accent} 0%, #2b0507 100%)`,
-          color: "#fff", // Text color should be white/light for this background
+          color: "#fff",
           pt: { xs: 4, md: 8 },
           pb: { xs: 4, md: 6 },
           mt: "100px",
-          position: "relative", // Needed for absolute positioning of waves
-          overflow: "hidden", // Ensures waves stay within the footer box
 
-          // Wave overlay with animation (first layer)
-          "&::before": {
+          "&::before, &::after": {
             content: '""',
             position: "absolute",
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
-            background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,229.3C960,245,1056,235,1152,208C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x center bottom`,
-            backgroundSize: '1600px 320px',
+            width: "100vw", // Ensures full viewport width
+            height: "100%",
+            backgroundRepeat: "repeat-x",
+            zIndex: 0,
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          },
+
+          "&::before": {
+            backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,229.3C960,245,1056,235,1152,208C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')`,
+            backgroundSize: "1600px 320px",
             opacity: 0.8,
-            zIndex: 0, // Behind content
             animation: `${waveAnimation} 20s linear infinite`,
           },
-          // A second wave layer for more depth
+
           "&::after": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,224L48,208C96,192,192,160,288,170.7C384,181,480,235,576,229.3C672,224,768,160,864,160C960,160,1056,224,1152,224C1248,224,1344,160,1392,128L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x center bottom`,
-            backgroundSize: '1800px 350px',
+            backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,224L48,208C96,192,192,160,288,170.7C384,181,480,235,576,229.3C672,224,768,160,864,160C960,160,1056,224,1152,224C1248,224,1344,160,1392,128L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')`,
+            backgroundSize: "1800px 350px",
             opacity: 0.6,
-            zIndex: 0, // Behind content
             animation: `${waveAnimation} 25s linear infinite reverse`,
           },
         }}
@@ -118,13 +115,13 @@ function Footer() {
               Explore
             </Typography>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Open Products</Typography>
+              <Typography variant="body2">Open Products</Typography>
             </MuiLink>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Popular Items</Typography>
+              <Typography variant="body2">Popular Items</Typography>
             </MuiLink>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Marketplace</Typography>
+              <Typography variant="body2">Marketplace</Typography>
             </MuiLink>
           </Grid>
 
@@ -134,16 +131,16 @@ function Footer() {
               About
             </Typography>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Our Mission</Typography>
+              <Typography variant="body2">Our Mission</Typography>
             </MuiLink>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Contact Us</Typography>
+              <Typography variant="body2">Contact Us</Typography>
             </MuiLink>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Community Guidelines</Typography>
+              <Typography variant="body2">Community Guidelines</Typography>
             </MuiLink>
             <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: accent } }}>
-                <Typography variant="body2">Terms & Conditions</Typography>
+              <Typography variant="body2">Terms & Conditions</Typography>
             </MuiLink>
           </Grid>
 
@@ -178,8 +175,8 @@ function Footer() {
                   },
                 },
                 "& input": {
-                    padding: "14px 14px",
-                    color: darkBackground,
+                  padding: "14px 14px",
+                  color: darkBackground,
                 },
                 width: '100%',
                 display: 'flex',
