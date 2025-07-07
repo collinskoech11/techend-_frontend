@@ -77,10 +77,10 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
       const response = await login({ body: loginData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
         setLoggedInUser(user.username);
         toast.success(<Typography>Log in success</Typography>);
         setOpen(false);
@@ -104,10 +104,10 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
       const response = await register({ body: registerData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
         setLoggedInUser(user.username);
         toast.success("Successful registration");
         setOpen(false);

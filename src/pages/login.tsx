@@ -36,9 +36,9 @@ function Login() {
       const response = await login({ body: formData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("refresh", refresh, { expires: 7, secure: true, sameSite: "Strict" });
-        Cookies.set("username", user.username, { expires: 7, secure: true, sameSite: "Strict" });
+        Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
         toast.success(<><Typography>Log in success</Typography></>);
         router.push(`/shop/${shopname}`);
       } else if (response.error) {
