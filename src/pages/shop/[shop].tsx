@@ -20,10 +20,10 @@ import { Box, Grid } from "@mui/material";
 import Footer from "@/Components/Footer";
 import Cookies from "js-cookie";
 
-const Shop = forwardRef((props:any, ref:any) => {
+const Shop = forwardRef((props: any, ref: any) => {
   const router = useRouter();
   const cartRef = useRef<any>(null);
-  const [shopname, setShopName] =  useState(Cookies.get("shopname") || "techend");
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const [category, setCategory] = useState<any>("");
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const Shop = forwardRef((props:any, ref:any) => {
       Cookies.set("shopname", urlShopName, { expires: 7, secure: false, sameSite: "Strict" });
     }
   }, [router.asPath]);
-  
+
   const {
     data: products_data,
     error: products_error,
@@ -48,10 +48,10 @@ const Shop = forwardRef((props:any, ref:any) => {
     }
   };
   useImperativeHandle(ref, () => ({
-        triggerCartRefetch() {
-          triggerCartRefetch();
-        },
-      }));
+    triggerCartRefetch() {
+      triggerCartRefetch();
+    },
+  }));
   useEffect(() => {
     if (router.isReady) {
       const { category } = router.query;
@@ -63,7 +63,7 @@ const Shop = forwardRef((props:any, ref:any) => {
 
   return (
     <>
-    {/* <Box sx={{paddingBottom:{md:"120px", xs:"50px"}}}>
+      {/* <Box sx={{paddingBottom:{md:"120px", xs:"50px"}}}>
       <Navbar ref={cartRef}/>
     </Box> */}
       <BreadCrumbContainer >
@@ -87,7 +87,7 @@ const Shop = forwardRef((props:any, ref:any) => {
           {products_loading ? (
             <Grid container spacing={2}>
               {[...Array(8)].map((_, index) => (
-                <Grid item md={3} xs={12}  key={index}>
+                <Grid item md={3} xs={12} key={index}>
                   <Skeleton variant="rectangular" width="100%" height={200} />
                   <Skeleton width="60%" height={30} sx={{ mt: 1 }} />
                   <Skeleton width="40%" height={30} />
@@ -96,16 +96,24 @@ const Shop = forwardRef((props:any, ref:any) => {
             </Grid>
           ) : products_error ? (
             <div>Error loading products</div>
+          ) : products_data.length === 0 ? (
+            <div style={{ padding: '1rem', textAlign: 'center' }}>
+              No products have been added for this shop yet.
+            </div>
           ) : (
-            <>
+            <Grid container spacing={2}>
               {products_data.map((product, index) => (
-              <ProductItem  item md={3} xs={12} key={index}>
-                <ProductCard product={product} isLoading={products_loading}   triggerCartRefetch={triggerCartRefetch}/>
-              </ProductItem>
+                <ProductItem item md={3} xs={12} key={index}>
+                  <ProductCard
+                    product={product}
+                    isLoading={products_loading}
+                    triggerCartRefetch={triggerCartRefetch}
+                  />
+                </ProductItem>
               ))}
-            </>
+            </Grid>
           )}
-          </ProductsContainer>
+        </ProductsContainer>
       </MainProductsContainer>
       {/* <Footer /> */}
     </>
