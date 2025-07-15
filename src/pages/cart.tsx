@@ -1,5 +1,7 @@
+"use client";
 import Navbar from "@/Components/Navbar";
 import { CouponButton } from "@/StyledComponents/Buttons";
+import Footer from "@/Components/Footer";
 import {
   CartBanner,
   CartSummary,
@@ -7,210 +9,269 @@ import {
   CartSummaryContent,
   CartSummarySub,
   CartSummaryTitle,
-  CartTable,
-  CartTableBody,
-  CartTableCell,
-  CartTableContainer,
-  CartTableHead,
-  CartTableRow,
   CouponContainer,
   CouponInput,
 } from "@/StyledComponents/CartComponents";
-import { Box,  Button,  Typography } from "@mui/material";
-import CircularProgress from "@mui/material/CircularProgress";
-import React, {useEffect} from "react";
+import { Skeleton } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Grid,
+} from "@mui/material";
 import { CloseOutlined } from "@mui/icons-material";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useGetCartQuery, useAddProductQtyToCartMutation, useRemoveProductFromCartMutation } from "@/Api/services";
+import {
+  useGetCartQuery,
+  useAddProductQtyToCartMutation,
+  useRemoveProductFromCartMutation,
+} from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 
-
-function cart() {
-  const { data: cart_data, error: cart_error, isLoading: cart_loading, refetch: cart_refetch } = useGetCartQuery({token: Cookies.get("access")});
-  let subTotal = 0;
+function Cart() {
+  const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } =
+    useGetCartQuery({ token: Cookies.get("access"), company_name: Cookies.get('shopname') });
   const router = useRouter();
 
-  const [updateItemQty, { isLoading:isLoadingUpdate, error:errorUpdate }] = useAddProductQtyToCartMutation();
-  const [deleteItemQty, { isLoading:isLoadingDelete, error:errorDelete }] = useRemoveProductFromCartMutation();
-  const updateItemCart = async(prod_id, direction) => {
-    const response = await updateItemQty({  product: prod_id,product_action_symbol: direction, token: Cookies.get("access")});
+  const [updateItemQty, { isLoading: isLoadingUpdate }] =
+    useAddProductQtyToCartMutation();
+  const [deleteItemQty, { isLoading: isLoadingDelete }] =
+    useRemoveProductFromCartMutation();
+
+  const updateItemCart = async (prod_id, direction) => {
+    const response = await updateItemQty({
+      product: prod_id,
+      product_action_symbol: direction,
+      token: Cookies.get("access"),
+    });
     try {
       if (response.error) {
-        const error_message: any = response.error.data.error;
-        toast.error(
-          <>
-            <Typography>{error_message}</Typography>
-          </>
-        );
-      }
-      else if (response) {
-        toast.success("product quantity  updated to cart");
+        const error_message = response.error.data.error;
+        toast.error(<Typography>{error_message}</Typography>);
+      } else {
+        toast.success("Product quantity updated");
         router.reload();
-      } 
-    } catch (error) {
-      toast.error("an Unexpected error occured");
-    }
-  };
-  const deleteItemCart = async(prod_id) => {
-    const response = await deleteItemQty({  product: prod_id, token: Cookies.get("access")});
-    try {
-      if (response.error) {
-        const error_message: any = response.error.data.error;
-        toast.error(
-          <>
-            <Typography>{error_message}</Typography>
-          </>
-        );
       }
-      else if (response) {
-        toast.success("product  deleted from cart");
-        router.reload();
-      } 
-    } catch (error) {
-      toast.error("an Unexpected error occured");
+    } catch {
+      toast.error("An unexpected error occurred");
     }
   };
 
+  const deleteItemCart = async (prod_id) => {
+    const response = await deleteItemQty({
+      product: prod_id,
+      token: Cookies.get("access"),
+    });
+    try {
+      if (response.error) {
+        const error_message = response.error.data.error;
+        toast.error(<Typography>{error_message}</Typography>);
+      } else {
+        toast.success("Product removed from cart");
+        router.reload();
+      }
+    } catch {
+      toast.error("An unexpected error occurred");
+    }
+  };
 
   useEffect(() => {
     cart_refetch();
   }, [router]);
 
-  
   const CartItems = cart_data?.items;
-  const renderCartTableRows = () => {
-    if(cart_loading){
-      return(
-        <>
-        <Box sx={{width:"100vw", maxWidth:"500px",m:"auto",height:"200px", display:"flex", alignItems:"center", justifyContent:"center"}}>
-        <CircularProgress/>
-        </Box>
-        </>
-      )
-    }
-    if(CartItems?.length === 0){
-      return(
-        <Box sx={{width:"100vw", maxWidth:"500px",m:"auto",height:"200px", display:"flex", alignItems:"center", justifyContent:"center"}}>
-          <Typography variant="h4">No items in cart</Typography>
-        </Box>
-      )
-    }
-    return CartItems.map((_, index) => {
-      const prod_total =  parseFloat(_.product.price) * parseInt(_.quantity);
-      subTotal += prod_total
-      return(
-      <CartTableRow key={index}>
-        <CartTableCell>{_.product.title}</CartTableCell>
-        <CartTableCell sx={{display:{md:"block", xs:"none"} }}>${_.product.price}</CartTableCell>
-        <CartTableCell>
-          {/* number with a - and + by its side */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              margin: "auto",
-              width: "30%",
-              textAlign: "center",
-              background: "#EDF1FF",
-            }}
-            
-          >
-            <Button onClick={() => updateItemCart(_.product.id, "decr")}  sx={{ width: "30%", textAlign: "center", cursor:"pointer" }}>
-              -
-            </Button>
-            <Typography sx={{ width: "30%", textAlign: "center" }}>
-            {isLoadingUpdate ? (
-                <CircularProgress style={{ color: "#000" }} size={24} />
-              ) : (
-                _.quantity
-              )}
-            </Typography>
-            <Button onClick={() => updateItemCart(_.product.id, "incr")} sx={{ width: "30%", textAlign: "center", cursor:"pointer" }}>
-              +
-            </Button>
-          </Box>
-        </CartTableCell>
-        <CartTableCell> ${ prod_total } </CartTableCell>
-        <CartTableCell>
-            {isLoadingDelete ? (
-                <CircularProgress style={{ color: "#000" }} size={24} />
-              ) : (
-          <CloseOutlined onClick={() => deleteItemCart(_.product.id)}  />
-              )}
-        </CartTableCell>
-      </CartTableRow>
-    )});
-  };
+  let subTotal = 0;
+
   return (
     <>
-    <Toaster/>
-      <Navbar textColor={'#000'} bgColor={'#fff'}/>
+      <Toaster />
+      {/* <Navbar textColor="#000" bgColor="#fff" /> */}
       <CartBanner>
         <Box>
-          <Typography variant="h3">Shoppping Cart</Typography>
+          <Typography variant="h3" color={'#be1f2f'}>Shopping Cart</Typography>
           <br />
           <Typography>
-            <span style={{ color: "#E6C0A4" }}>Home</span> - Shopping cart
+            <span style={{ color: "#be1f2f" }}>Home</span> - Shopping cart
           </Typography>
         </Box>
       </CartBanner>
+
       <CartSummaryContainer>
-        <CartTableContainer>
-          <CartTable>
-            <CartTableHead>
-              <CartTableRow>
-                <CartTableCell>
-                  <Typography sx={{ fontWeight: 800 }}>Products</Typography>
-                </CartTableCell>
-                <CartTableCell sx={{display:{md:"block", xs:"none"} }}>
-                  <Typography sx={{ fontWeight: 800}}>Price</Typography>
-                </CartTableCell>
-                <CartTableCell>
-                  <Typography sx={{ fontWeight: 800 }}>Quantity</Typography>
-                </CartTableCell>
-                <CartTableCell>
-                  <Typography sx={{ fontWeight: 800 }}>Total</Typography>
-                </CartTableCell>
-                <CartTableCell>
-                  <Typography sx={{ fontWeight: 800 }}>Remove</Typography>
-                </CartTableCell>
-              </CartTableRow>
-            </CartTableHead>
-            <CartTableBody>{renderCartTableRows()}</CartTableBody>
-          </CartTable>
-        </CartTableContainer>
-        <CartSummary>
-          <br/>
-          <CouponContainer>
-            <CouponInput />
-            <CouponButton>Apply Coupon</CouponButton>
-          </CouponContainer>
-          <CartSummarySub>
-            <CartSummaryTitle>Cart Summary</CartSummaryTitle>
-            <CartSummaryContent sx={{ borderBottom: "none" }}>
-              <span>subtotal</span>
-              <span>${subTotal}</span>
-            </CartSummaryContent>
-            <CartSummaryContent>
-              <span>shipping</span>
-              <span>$150</span>
-            </CartSummaryContent>
-            <CartSummaryContent>
-              <span style={{ fontWeight: "800" }}>Total</span>
-              <span style={{ fontWeight: "800" }}>${subTotal + 150}</span>
-            </CartSummaryContent>
-            <CartSummaryTitle
-              sx={{ textAlign: "center", fontSize: "14px", cursor:"pointer", background:"#BE1E2D", color:"#fff", fontWeight:"bolder" }}
-              onClick={() => router.push(`/checkout`)}
-            >
-              Proceed to Checkout
-            </CartSummaryTitle>
-          </CartSummarySub>
-        </CartSummary>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={8}>
+            <TableContainer component={Paper} sx={{ mb: 3 }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: "#BE1E2D" }}>
+                    <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                      Product
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        color: "#fff",
+                        fontWeight: "bold",
+                        display: { xs: "none", md: "table-cell" },
+                      }}
+                    >
+                      Price
+                    </TableCell>
+                    <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                      Quantity
+                    </TableCell>
+                    <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                      Total
+                    </TableCell>
+                    <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                      Remove
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {cart_loading ? (
+                    <>
+                      {[...Array(3)].map((_, idx) => (
+                        <TableRow>
+                          <TableCell>
+                            <Skeleton variant="rectangular" width={100} height={20} />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton variant="rectangular" width={60} height={20} sx={{ display: { xs: "none", md: "block" } }} />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton variant="rectangular" width={100} height={20} />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton variant="rectangular" width={80} height={20} />
+                          </TableCell>
+                          <TableCell>
+                            <Skeleton variant="circular" width={24} height={24} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </>
+                  ) : CartItems?.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        <Typography variant="h6">No items in cart</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    CartItems.map((item, index) => {
+                      const prod_total =
+                        parseFloat(item.product.price) * parseInt(item.quantity);
+                      subTotal += prod_total;
+
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>{item.product.title}</TableCell>
+                          <TableCell
+                            sx={{ display: { xs: "none", md: "table-cell" } }}
+                          >
+                            Kes {item.product.price}
+                          </TableCell>
+                          <TableCell>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                width: "120px",
+                                background: "#fbeaea",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              <Button
+                                onClick={() => updateItemCart(item.product.id, "decr")}
+                                sx={{ minWidth: "30px", color: "#BE1E2D" }}
+                              >
+                                -
+                              </Button>
+                              <Typography sx={{ mx: 1 }}>
+                                {isLoadingUpdate ? (
+                                  <CircularProgress size={20} />
+                                ) : (
+                                  item.quantity
+                                )}
+                              </Typography>
+                              <Button
+                                onClick={() => updateItemCart(item.product.id, "incr")}
+                                sx={{ minWidth: "30px", color: "#BE1E2D" }}
+                              >
+                                +
+                              </Button>
+                            </Box>
+                          </TableCell>
+                          <TableCell>Kes {prod_total.toFixed(2)}</TableCell>
+                          <TableCell>
+                            {isLoadingDelete ? (
+                              <CircularProgress size={20} />
+                            ) : (
+                              <CloseOutlined
+                                sx={{ color: "#BE1E2D", cursor: "pointer" }}
+                                onClick={() => deleteItemCart(item.product.id)}
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <CartSummary>
+              {/* <CouponContainer>
+                <CouponInput />
+                <CouponButton>Apply Coupon</CouponButton>
+              </CouponContainer> */}
+              <CartSummarySub>
+                <CartSummaryTitle style={{color:'#be1f2f'}}>Cart Summary</CartSummaryTitle>
+                <CartSummaryContent>
+                  <span>Subtotal</span>
+                  <span>Kes {subTotal.toFixed(2)}</span>
+                </CartSummaryContent>
+                <CartSummaryContent>
+                  <span>Shipping</span>
+                  <span>Kes 150.00</span>
+                </CartSummaryContent>
+                <CartSummaryContent>
+                  <span style={{ fontWeight: "bold" }}>Total</span>
+                  <span style={{ fontWeight: "bold" }}>
+                    Kes {(subTotal + 150).toFixed(2)}
+                  </span>
+                </CartSummaryContent>
+                <CartSummaryTitle
+                  sx={{
+                    textAlign: "center",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    background: "#BE1E2D",
+                    color: "#fff",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => router.push(`/checkout`)}
+                >
+                  Proceed to Checkout
+                </CartSummaryTitle>
+              </CartSummarySub>
+            </CartSummary>
+          </Grid>
+        </Grid>
       </CartSummaryContainer>
+            {/* <Footer /> */}
     </>
   );
 }
 
-export default cart;
+export default Cart;

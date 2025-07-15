@@ -1,4 +1,3 @@
-import Navbar from "@/Components/Navbar";
 import { Box, CircularProgress, Typography, IconButton, InputAdornment, TextField } from "@mui/material";
 import React, { useState } from "react";
 import { useUserRegistrationMutation } from "@/Api/services";
@@ -24,6 +23,7 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+    const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,11 +37,11 @@ function Register() {
       const response = await register({ body: formData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7 });
-        Cookies.set("refresh", refresh, { expires: 7 });
-        Cookies.set("user", user, { expires: 7 });
+        Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("user", user, { expires: 7, secure: false, sameSite: "Strict" });
         toast.success("Successful registration");
-        router.push("/shop");
+        router.push(`/shop/${shopname}`);
       } else if (response.error) {
         const emailError = response.error?.data?.email?.[0];
         const usernameError = response.error?.data?.username?.[0];
@@ -66,8 +66,15 @@ function Register() {
   return (
     <>
       <Toaster />
-      <Navbar textColor={'#000'} bgColor={'#fff'}/>
-      <Box sx={{ display: "flex", alignItems: "center", pt:8 }}>
+      <Box 
+        sx={{
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          minHeight: "calc(100dvh - 64px)", 
+          pt: 8, 
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -75,7 +82,6 @@ function Register() {
             height: "auto",
             margin: "auto",
             padding: "20px",
-            marginTop: "50px",
             background: "#fff",
             borderRadius: "5px",
             boxShadow: "0 0 10px rgb(0,0,0,0.1)",

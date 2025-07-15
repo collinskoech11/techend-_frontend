@@ -22,6 +22,7 @@ function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+    const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,11 +36,11 @@ function Login() {
       const response = await login({ body: formData });
       if (response.data) {
         const { access, refresh, user } = response.data;
-        Cookies.set("access", access, { expires: 7 });
-        Cookies.set("refresh", refresh, { expires: 7 });
-        Cookies.set("username", user.username, { expires: 7 });
+        Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
         toast.success(<><Typography>Log in success</Typography></>);
-        router.push("/shop");
+        router.push(`/shop/${shopname}`);
       } else if (response.error) {
         toast.error(<><Typography>{response.error.data.non_field_errors[0]}</Typography></>);
       }
@@ -55,9 +56,16 @@ function Login() {
   return (
     <>
       <Toaster />
-      <Navbar textColor={'#000'} bgColor={'#fff'}/>
-            
-            <Box sx={{ display: "flex", alignItems: "center", pt:8 }}>
+      {/* <Navbar textColor={'#000'} bgColor={'#fff'} /> */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "calc(100dvh - 64px)", 
+          pt: 8,
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -65,7 +73,6 @@ function Login() {
             height: "auto",
             margin: "auto",
             padding: "20px",
-            marginTop: "50px",
             background: "#fff",
             borderRadius: "5px",
             boxShadow: "0 0 10px rgb(0,0,0,0.1)",

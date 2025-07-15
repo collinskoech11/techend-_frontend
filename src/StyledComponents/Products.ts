@@ -28,7 +28,7 @@ export const ExtendedFilters = styled(Box)({
 });
 
 export const ProductsContainer = styled(Grid)({
-  width: "80%",
+  width: "100%",
   maxWidth: "1400px",
   marginTop: "20px",
   "@media screen and (max-width:800px)":{

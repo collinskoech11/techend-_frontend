@@ -47,7 +47,6 @@ export const CartTableBody = styled(TableBody)({
 
 })
 export const CartSummary = styled(Box)({
-  width: "28%",
   minHeight: "200px",
   "@media screen and (max-width:800px)":{
     width:"100%"

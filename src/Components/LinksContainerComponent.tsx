@@ -1,68 +1,91 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
 import { useRouter } from "next/router";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import Drawer from "@mui/material/Drawer";
 import {
-  LinksContainer,
-  LinksSubContainer,
-  NavLink,
-  NavButton,
-} from "@/StyledComponents/NavComponents";
-import { useTheme } from "@mui/material/styles";
-import { LoginButton } from "@/StyledComponents/Buttons";
-import { Box, Typography, styled } from "@mui/material";
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button,
+  Menu,
+  MenuItem,
+  Drawer,
+  Box,
+  Typography,
+  useTheme,
+  Divider, ListItemIcon,
+  Tooltip,
+  Badge
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import Cookies from "js-cookie";
+import { Person2Outlined } from "@mui/icons-material";
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
+import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SettingsIcon from "@mui/icons-material/Settings";
+import CartMenu from "./CartMin";
 import Image from "next/image";
+import Cookies from "js-cookie";
+import AuthDialog from "./AuthDialog";
+import Shop2Icon from '@mui/icons-material/Shop2';
 
-function LinksContainerComponent({ textColor, bgColor }) {
-  console.log(textColor, bgColor, "+_+_+_+_+)_");
+
+
+const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const router = useRouter();
-  const navigate = (link: string) => {
-    router.push(link);
+  const theme = useTheme();
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElsec, setAnchorElsec] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [user, setUser] = useState(Cookies.get("username"))
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend")
+  // const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const cartRef = useRef<any>(null);
+  const open = Boolean(anchorEl);
+  const opensec = Boolean(anchorElsec);
+
+  // const user = Cookies.get("username");
+
+  const refetchUser = () => {
+    console.log("called from child")
+    setUser(Cookies.get("username"));
+  }
+  const triggerCartRefetch = () => {
+    if (cartRef.current) {
+      cartRef.current.cart_refetch();
+    }
   };
 
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
-
-  const toggleDrawer = (open) => (event) => {
-    if (
-      event &&
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
+  useImperativeHandle(ref, () => ({
+    triggerCartRefetch() {
+      triggerCartRefetch();
+    },
+  }));
+  const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = (link: string) => {
+
+  const handleClose = (link) => {
     router.push(link);
     setAnchorEl(null);
   };
 
-  const [anchorElsec, setAnchorElsec] = React.useState(null);
-  const opensec = Boolean(anchorElsec);
   const handleClicksec = (event) => {
     setAnchorElsec(event.currentTarget);
   };
-  const handleClosesec = (link: string) => {
-    router.push(link);
+
+  const handleClosesec = (link: any) => {
+    if (link !== "") {
+      router.push(link);
+    }
     setAnchorElsec(null);
   };
-
-  const theme = useTheme();
-
-  const [username, setUsername] = useState<any>(null);
-
-  const user = Cookies.get("username");
 
   const LogoutFx = () => {
     Cookies.remove("username");
@@ -70,317 +93,278 @@ function LinksContainerComponent({ textColor, bgColor }) {
     Cookies.remove("refresh");
     router.push("/login");
   };
-  const StandardImage = styled("img")({
-    padding: 0,
-    height: "25px",
-  });
-  const LinkText = styled(Box)({
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    fontWeight: "bolder",
-    color: textColor,
-  });
+
+  const handleCartClick = () => {
+    router.push("/cart");
+  };
+
+  const accent = "#be1f2f";
+
   useEffect(() => {
-    // Get the user from cookies
-    if (user) {
-      setUsername(user);
-    }
-  }, [username]);
+    if (user) setUsername(user);
+  }, [user]);
 
   return (
-    <>
-      <LinksContainer>
-        <Box sx={{ marginLeft:"15px", display: { xs: "flex", sm: "none" } }}>
-            {username ? (
-              <>
-              <Box sx={{display:"flex"}}>
-                <Box
-                  sx={{
-                    margin: "auto",
-                    background: "#BE1E2D",
-                    textAlign: "center",
-                    p: 1,
-                    // mt: 2,
-                    borderRadius: "5px",
+    <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${accent} 0%, #2b0507 100%)`, color: "#fff" }}>
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${shopname}`)}>
+          {shopname}
+        </Typography>
+
+        {/* <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}> */}
+        <Box sx={{ display: { sm: "flex" }, alignItems: "center", borderRadius: "8px" }}>
+          {router.pathname === "/" && (
+            <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
+          )}
+          {/* <Button color="inherit" onClick={() => router.push(`/shop/${shopname}`)}>Shop</Button> */}
+          {router.pathname === "/" && (
+            <>
+              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
+                <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
+                <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="#" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
+                <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
+              </IconButton>
+            </>
+          )}
+          {user ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Tooltip title="Shop">
+                <IconButton sx={{ mr: 1 }}>
+                  <Badge color="warning">
+                    <Shop2Icon sx={{ color: "#fff" }} onClick={() => router.push(`/shop/${shopname}`)}/>
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              <CartMenu ref={cartRef} />
+              <Tooltip title="Order History">
+                <IconButton sx={{ mr: 1 }}>
+                  <Badge badgeContent={1} color="warning">
+                    <HistoryOutlinedIcon sx={{ color: "#fff" }} onClick={() => router.push("/orderhistory")} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Notifications">
+                <IconButton sx={{ mr: 1 }}>
+                  <Badge badgeContent={1} color="warning">
+                    <NotificationsOutlinedIcon sx={{ color: "#fff" }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              <IconButton
+                color="inherit"
+                onClick={handleClick}
+                aria-controls={open ? "user-menu" : undefined}
+                aria-haspopup="true"
+              >
+                <Person2Outlined />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={() => setAnchorEl(null)}
+                PaperProps={{
+                  elevation: 4,
+                  sx: {
+                    mt: 1,
+                    minWidth: 180,
+                    borderRadius: 2,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                    "& .MuiMenuItem-root": {
+                      px: 2,
+                      py: 1.5,
+                      fontSize: "0.95rem",
+                      "&:hover": {
+                        backgroundColor: "#f5f5f5",
+                      },
+                    },
+                  },
+                }}
+              >
+                <MenuItem onClick={() => handleClose("/profile")}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  Profile
+                </MenuItem>
+
+                <MenuItem onClick={() => handleClose("/settings")}>
+                  <ListItemIcon>
+                    <SettingsIcon fontSize="small" />
+                  </ListItemIcon>
+                  Settings
+                </MenuItem>
+
+                <Divider />
+
+                <MenuItem
+                  onClick={() => {
+                    // You can replace this with your logout logic
+                    Cookies.remove("access");
+                    Cookies.remove("refresh");
+                    Cookies.remove("username");
+                    handleClose("/");
                   }}
-                  onClick={() => LogoutFx()}
+                  sx={{
+                    color: "#BE1E2D",
+                    fontWeight: "600",
+                    "&:hover": {
+                      backgroundColor: "#ffebeb",
+                    },
+                  }}
                 >
-                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
-                    Log out
-                  </Typography>
-                </Box>
-              </Box>
-              </>
-            ) : (
-              <LoginButton onClick={() => navigate("/login")}>Join Us</LoginButton>
-            )}
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" sx={{ color: "#BE1E2D" }} />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
+              {/* <Button variant="outlined" color="inherit" onClick={LogoutFx}>Log out</Button> */}
+            </Box>
+          ) : (
+              <AuthDialog onTrigger={refetchUser} />
+          )}
         </Box>
-        <IconButton
-          sx={{
-            display: {
-              xs: "block",
-              sm: "none",
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "end",
-              textAlign: "right",
-            },
-          }}
-          aria-label="menu"
+
+        {/* <IconButton
+          color="inherit"
+          edge="end"
+          sx={{ display: { xs: "block", sm: "none" } }}
           onClick={toggleDrawer(true)}
         >
-          <MenuIcon sx={{color:"#fff"}} />
-        </IconButton>
-        <LinksSubContainer sx={{ display: { xs: "none", sm: "flex" } }}>
-          <NavLink href="/">
-            <LinkText>home</LinkText>
-          </NavLink>
-          <NavLink href="/shop">
-            <LinkText>Merchendise</LinkText>
-          </NavLink>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <NavLink href="https://www.youtube.com/@TechendForgranted">
-            <StandardImage src="/assets/youtube.svg" alt="YouTube logo" />
-          </NavLink>
-          <NavLink href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k">
-            <StandardImage src="/assets/instagram.svg" alt="Instagram logo" />
-          </NavLink>
-          <NavLink href="#">
-            <StandardImage
-              src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png"
-              alt="TikTok logo"
-            />
-          </NavLink>
-        </div>
-          <Box sx={{ width: "80%", margin: "auto" }}>
-            {username ? (
-              <>
-              <Box sx={{display:"flex"}}>
-                {/* <Box
-                  sx={{
-                    width: "100%",
-                    margin: "auto",
-                    background: "#BE1E2D",
-                    textAlign: "center",
-                    p: 1,
-                    borderRadius: "5px",
-                  }}
-                >
-                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
-                    Welcome : {username}
-                  </Typography>
-                </Box> */}
-                <Box
-                  sx={{
-                    width: "100%",
-                    margin: "auto",
-                    background: "#BE1E2D",
-                    textAlign: "center",
-                    p: 1,
-                    // mt: 2,
-                    borderRadius: "5px",
-                  }}
-                  onClick={() => LogoutFx()}
-                >
-                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
-                    Log out
-                  </Typography>
-                </Box>
-              </Box>
-              </>
-            ) : (
-              <LoginButton onClick={() => navigate("/login")}>Join</LoginButton>
-            )}
-          </Box>
-          {/* <NavButton
-            id="basic-button"
-            aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-            onClick={handleClick}
-          >
-            collection
-          </NavButton>
-          <NavButton
-            id="basic-button-two"
-            aria-controls={opensec ? "basic-menu-two" : undefined}
-            aria-haspopup="true"
-            aria-expanded={opensec ? "true" : undefined}
-            onClick={handleClicksec}
-          >
-            men's essentials
-          </NavButton>
-          <NavLink href="#">our laundry</NavLink> */}
-        </LinksSubContainer>
-      </LinksContainer>
+          <MenuIcon />
+        </IconButton> */}
+      </Toolbar>
 
-      <Drawer anchor="top" open={drawerOpen} onClose={toggleDrawer(false)}>
-        <LinksSubContainer
-          sx={{
-            display: { xs: "block", sm: "flex" }, // Conditionally set display property
-            [theme.breakpoints.down("xs")]: {
-              // Apply styles for xs breakpoint
-              display: "block",
-            },
-          }}
-        >
-          <Box>
-            {/* close button */}
-            <Box
+      {/* <Drawer anchor="top" open={drawerOpen} onClose={toggleDrawer(false)}>
+        <Box sx={{ p: 2, background: "#BE1E2D", color: "#fff", height: "100vh" }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <IconButton color="inherit" onClick={toggleDrawer(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          {router.pathname === "/" && (
+            <Button color="inherit" fullWidth onClick={() => router.push("/")}>Home</Button>
+          )}
+          <Button color="inherit" fullWidth onClick={() => router.push(`/shop/${Cookies.get("shopname")}`)}>shop</Button>
+          <Button color="inherit" fullWidth ><CartMenu ref={cartRef} /> CART</Button>
+          <Button color="inherit" fullWidth onClick={() => router.push("/orderhistory")}>
+            <Tooltip title="Order History">
+              <IconButton sx={{ mr: 1 }}>
+                <HistoryOutlinedIcon sx={{ color: "#fff" }}  />
+                &nbsp;<Typography color={'#fff'}>ORDER HISTORY</Typography>
+              </IconButton>
+            </Tooltip>
+          </Button>
+          <Button color="inherit" fullWidth >
+            <Tooltip title="Notifications">
+              <IconButton sx={{ mr: 1 }}>
+                <NotificationsOutlinedIcon sx={{ color: "#fff" }} />
+                &nbsp;<Typography color={'#fff'}>NOTIFICATIONS</Typography>
+
+              </IconButton>
+            </Tooltip>
+          </Button>
+          <Button color="inherit" fullWidth >
+            <IconButton
+              color="inherit"
+              onClick={handleClick}
+              aria-controls={open ? "user-menu" : undefined}
+              aria-haspopup="true"
+            >
+              <Person2Outlined />
+              &nbsp;<Typography color={'#fff'}>PROFILE</Typography>
+            </IconButton>
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={() => setAnchorEl(null)}
+            PaperProps={{
+              elevation: 4,
+              sx: {
+                mt: 1,
+                minWidth: 180,
+                borderRadius: 2,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                "& .MuiMenuItem-root": {
+                  px: 2,
+                  py: 1.5,
+                  fontSize: "0.95rem",
+                  "&:hover": {
+                    backgroundColor: "#f5f5f5",
+                  },
+                },
+              },
+            }}
+          >
+            <MenuItem onClick={() => handleClose("/profile")}>
+              <ListItemIcon>
+                <AccountCircleIcon fontSize="small" />
+              </ListItemIcon>
+              Profile
+            </MenuItem>
+
+            <MenuItem onClick={() => handleClose("/settings")}>
+              <ListItemIcon>
+                <SettingsIcon fontSize="small" />
+              </ListItemIcon>
+              Settings
+            </MenuItem>
+
+            <Divider />
+
+            <MenuItem
+              onClick={() => {
+                Cookies.remove("access");
+                Cookies.remove("refresh");
+                Cookies.remove("username");
+                handleClose("/");
+              }}
               sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                width: "100vw",
+                color: "#BE1E2D",
+                fontWeight: "600",
+                "&:hover": {
+                  backgroundColor: "#ffebeb",
+                },
               }}
             >
-              <IconButton aria-label="close" onClick={toggleDrawer(false)}>
-                <CloseIcon />
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" sx={{ color: "#BE1E2D" }} />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
+          {router.pathname === "/" && (
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
+              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
+                <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
+                <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
+              </IconButton>
+              <IconButton color="inherit" href="#" target="_blank">
+                <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
               </IconButton>
             </Box>
-          </Box>
-          <br />
-          <br />
-
-          <NavLink href="/">home</NavLink>
-          <br />
-          <br />
-          <NavLink href="/shop">shop</NavLink>
-          <br />
-          <br />
-          <Box sx={{ display:"flex", maxWidth:"150px", "*":{marginRight:"10px"}}}>
-            <NavLink href="https://www.youtube.com/@TechendForgranted">
-              <StandardImage src="/assets/youtube.svg" alt="youtube logo" />
-            </NavLink>
-            <NavLink href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k">
-              <StandardImage src="/assets/instagram.svg" alt="youtube logo" />
-            </NavLink>
-            <NavLink href="#">
-              <StandardImage
-                src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png"
-                alt="youtube logo"
-              />
-            </NavLink>
-          </Box>
-          {/* <NavButton
-            id="basic-button"
-            aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-            onClick={handleClick}
-          >
-            collection
-          </NavButton>
-          <br />
-          <NavButton
-            id="basic-button-two"
-            aria-controls={opensec ? "basic-menu-two" : undefined}
-            aria-haspopup="true"
-            aria-expanded={opensec ? "true" : undefined}
-            onClick={handleClicksec}
-          >
-            men's essentials
-          </NavButton>
-          <br />
-          <NavLink href="#">our laundry</NavLink> */}
-          <br />
-          <br />
-          <Box sx={{ width: "95%", margin: "auto" }}>
-            {username ? (
-              <>
-                <Box
-                  sx={{
-                    width: "100%",
-                    margin: "auto",
-                    background: "#BE1E2D",
-                    textAlign: "center",
-                    p: 1,
-                    borderRadius: "5px",
-                  }}
-                >
-                  <Typography sx={{ color: "#fff", fontWeight: "700" }}>
-                    Welcome : {username}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    width: "100%",
-                    margin: "auto",
-                    border: " 1px solid #BE1E2D",
-                    textAlign: "center",
-                    p: 1,
-                    mt: 2,
-                    borderRadius: "5px",
-                  }}
-                  onClick={() => LogoutFx()}
-                >
-                  <Typography sx={{ color: "#BE1E2D", fontWeight: "700" }}>
-                    Log out
-                  </Typography>
-                </Box>
-              </>
-            ) : (
-              <LoginButton onClick={() => navigate("/login")}>Join</LoginButton>
-            )}
-          </Box>
-          <br />
-          <br />
-        </LinksSubContainer>
-      </Drawer>
-
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-        <MenuItem onClick={() => handleClose("/shop?category=suits")}>
-          Suits
-        </MenuItem>
-        <MenuItem onClick={() => handleClose("/shop?category=casualWear")}>
-          Casual Wear
-        </MenuItem>
-        <MenuItem onClick={() => handleClose("/shop?category=footWear")}>
-          Foot Wear
-        </MenuItem>
-      </Menu>
-      <Menu
-        id="basic-menu-two"
-        anchorEl={anchorElsec}
-        open={opensec}
-        onClose={handleClosesec}
-        MenuListProps={{
-          "aria-labelledby": "basic-button-two",
-        }}
-      >
-        <MenuItem onClick={() => handleClosesec("/shop?category=socks")}>
-          Socks
-        </MenuItem>
-        <MenuItem onClick={() => handleClosesec("/shop?category=Underwear")}>
-          Underwear
-        </MenuItem>
-        <MenuItem onClick={() => handleClosesec("/shop?category=Undershirts")}>
-          Undershirts
-        </MenuItem>
-        <MenuItem onClick={() => handleClosesec("/shop?category=Belts")}>
-          Belts
-        </MenuItem>
-        <MenuItem onClick={() => handleClosesec("/shop?category=Watches")}>
-          Watches
-        </MenuItem>
-        <MenuItem onClick={() => handleClosesec("/shop?category=Hats")}>
-          Hats
-        </MenuItem>
-        <MenuItem onClick={() => handleClosesec("/shop?category=SunGlasses")}>
-          SunGlasses
-        </MenuItem>
-      </Menu>
-    </>
+          )}
+        </Box>
+      </Drawer> */}
+      {/* {username ? (
+        <Button variant="outlined" color="inherit" fullWidth sx={{ mt: 2 }} onClick={LogoutFx}>
+          Log out
+        </Button>
+      ) : (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <AuthDialog onTrigger={refetchUser} />
+        </Box>
+      )} */}
+    </AppBar>
   );
-}
+})
 
 export default LinksContainerComponent;

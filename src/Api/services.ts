@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
+import Cookies from "js-cookie";
+
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -32,7 +34,7 @@ export const AuthApi = createApi({
     }),
     getProducts: builder.query({
       query: data => ({
-        url: `products/all/?category=${data.category}`,
+        url: `products/all/?company=${data.company}&category=${data.category}`,
         method: "GET"
       }),
     }),
@@ -43,13 +45,18 @@ export const AuthApi = createApi({
       }),
     }),
     addToCart: builder.mutation({
-      query: data => ({
-        url: `cart/cart/add/${data.product}/`,
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${data.token}`,
-        },
-      }),
+      query: (data) => {
+        const shopname = Cookies.get("shopname") || "techend";
+        const token = Cookies.get("access");
+
+        return {
+          url: `cart/cart/add/${data.product}/${shopname}`,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+      },
     }),
     addProductQtyToCart: builder.mutation({
       query: data => ({
@@ -70,11 +77,11 @@ export const AuthApi = createApi({
       }),
     }),
     getCart: builder.query({
-      query: data => ({
-        url: `cart/cart`,
+      query: ({ token, company_name }) => ({
+        url: `cart/cart/${company_name}`,
         method: "GET",
         headers: {
-          Authorization: `Bearer ${data.token}`,
+          Authorization: `Bearer ${token}`,
         },
       }),
     }),
@@ -107,6 +114,35 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    getCompany: builder.query({
+     query: (token) => ({
+       url: `companies/my/status/`,
+       method: "GET",
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     }),
+    }),
+    createCompany: builder.mutation({
+      query: (data) => ({
+        url: `companies/my/create/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+        body: data.body,
+      }),
+    }),
+    updateCompany: builder.mutation({
+      query: (data) => ({
+        url: `companies/my/onboard/`,
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+        body: data.body,
+      }),
+    }),
   }),
 });
 export const {
@@ -120,5 +156,8 @@ export const {
   useRemoveProductFromCartMutation,
   useGetCartQuery,
   useCheckoutCartMutation,
-  useGetCheckoutHistoryQuery
+  useGetCheckoutHistoryQuery,
+  useGetCompanyQuery,
+  useCreateCompanyMutation,
+  useUpdateCompanyMutation,
 }: any = AuthApi;
