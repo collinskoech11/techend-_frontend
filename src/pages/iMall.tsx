@@ -259,7 +259,7 @@ export default function LandingPage() {
           </Typography>
           <Grid container spacing={6} justifyContent="center">
             <Grid item xs={12} md={4}>
-              <Fade direction="left" duration={1000}>
+              <Fade direction="down" duration={1000}>
                 <FeatureCard>
                   <StoreIcon sx={{ fontSize: 70, color: primaryColor, mb: 3 }} />
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: darkText }}>
@@ -287,7 +287,7 @@ export default function LandingPage() {
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <Fade direction="right" delay={400} duration={1000}>
+              <Fade direction="up" delay={400} duration={1000}>
                 <FeatureCard>
                   <TrendingUpIcon sx={{ fontSize: 70, color: primaryColor, mb: 3 }} />
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: darkText }}>

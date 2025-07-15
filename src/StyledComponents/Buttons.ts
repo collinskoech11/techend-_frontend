@@ -22,18 +22,6 @@ export const ShopNowButton = styled(Button)({
   paddingRight: "20px"
 });
 
-export const GreenButton = styled(Button)({
-  padding: "10px",
-  color: "#fff",
-  borderRadius: "0px",
-  width: "160px",
-  textAlign: "left",
-  background: "#BE1E2D",
-  "&:hover": {
-    border: "1px solid #BE1E2D",
-    color:"#BE1E2D",
-  },
-});
 export const CouponButton = styled(Button)({
   background: "#EDF1FF",
   width: "30%",
@@ -52,15 +40,32 @@ export const YellowButton = styled(Button)({
 });
 
 
-export const BorderedButton = styled(Button)({
-  color: "#000",
-  background: "#fff",
-  border: "1px solid #000",
-  borderRadius:"0",
-  textTransform:"capitalize",
-  width:"100%",
+const primaryColor = "#be1f2f"; // Ensure this matches your global primaryColor
+
+export const BorderedButton = styled(Button)(({ theme }) => ({
+  borderColor: primaryColor,
+  color: primaryColor,
+  textTransform: "uppercase",
+  fontWeight: 600,
+  borderRadius: "8px", // Slightly less rounded for a modern edge
+  padding: theme.spacing(1, 2),
   "&:hover": {
-    background: "#000",
-    color:"#fff",
+    backgroundColor: "rgba(190, 31, 47, 0.08)", // Light hover background
+    borderColor: primaryColor,
   },
-});
+}));
+
+export const GreenButton = styled(Button)(({ theme }) => ({
+  backgroundColor: primaryColor, // Use primary color for main action
+  color: "#fff",
+  textTransform: "uppercase",
+  fontWeight: 600,
+  borderRadius: "8px",
+  padding: theme.spacing(1, 2),
+  boxShadow: "0 3px 8px rgba(0, 0, 0, 0.15)", // Subtle shadow
+  "&:hover": {
+    backgroundColor: "#a01624", // Darker shade on hover
+    boxShadow: "0 5px 12px rgba(0, 0, 0, 0.25)",
+  },
+}));
+

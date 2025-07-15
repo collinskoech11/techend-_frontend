@@ -1,4 +1,4 @@
-import { styled, Box, Grid } from "@mui/material";
+import { styled, Box, Grid, Card } from "@mui/material";
 
 export const MainProductsContainer = styled(Box)({
   maxWidth: "1500px",
@@ -29,7 +29,7 @@ export const ExtendedFilters = styled(Box)({
 
 export const ProductsContainer = styled(Grid)({
   width: "100%",
-  maxWidth: "1400px",
+  maxWidth: "1500px",
   marginTop: "20px",
   "@media screen and (max-width:800px)":{
     width:"100%"
@@ -37,34 +37,6 @@ export const ProductsContainer = styled(Grid)({
 });
 
 export const ProductItem = styled(Grid)({});
-export const ProductItemStyled = styled(Box)({
-  width: "94%",
-  margin: "auto",
-  border: "1px solid rgb(0,0,0,0.2)",
-  minHeight:"400px",
-  height: "auto",
-  borderRadius: "5px",
-  padding: "15px",
-  textAlign: "center",
-  marginBottom: "40px",
-  overflow: "hidden",
-  cursor: "pointer",
-});
-
-
-export const ProductImage = styled("img")({
-  width: "100%",
-  height: "400px", // Set a fixed height
-  objectFit: "cover",
-});
-export const RatingContainer = styled(Box)({
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  margin: "auto",
-  width: "160px",
-  alignItems: "center",
-});
 
 export const IconsContainer = styled(Box)({
   position: "relative",
@@ -99,3 +71,78 @@ export const IconWrapper = styled(Box)({
     },
   },
 });
+
+
+export const ProductItemStyled = styled(Card)(({ theme }) => ({
+  width: "100%",
+  maxWidth: "350px", // Set a max-width for better responsiveness and grid alignment
+  borderRadius: "12px", // Softer rounded corners
+  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08)", // Softer initial shadow
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden", // Ensures image border-radius applies
+  position: "relative", // For image overlay
+  "&:hover": {
+    transform: "translateY(-5px)", // Slight lift on hover
+    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)", // Enhanced shadow on hover
+  },
+  paddingBottom: theme.spacing(2), // Padding at the bottom for content
+}));
+
+export const ProductImageWrapper = styled(Box)(({ theme }) => ({
+  width: "100%",
+  height: "220px", // Increased height for better product visibility
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  overflow: "hidden",
+  position: "relative", // For hover overlay
+  borderTopLeftRadius: "12px", // Match card border-radius
+  borderTopRightRadius: "12px",
+}));
+
+export const ProductImage = styled('img')({
+  width: "100%",
+  height: "100%",
+  objectFit: "cover", // Ensure image covers the area
+  transition: "transform 0.3s ease",
+  "&:hover": {
+    transform: "scale(1.05)", // Gentle zoom on image hover
+  },
+});
+
+export const ProductInfoContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2), // Consistent padding for text content
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start", // Align text to left
+}));
+
+export const RatingContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "2px", // Closer stars
+  marginBottom: theme.spacing(1),
+  "& .MuiSvgIcon-root": {
+    fontSize: "1rem", // Slightly larger stars
+    color: "#FFD700", // Gold color for stars
+  },
+}));
+
+export const ProductOverlay = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)", // Darker overlay
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  opacity: 0,
+  transition: "opacity 0.3s ease",
+  "&:hover": {
+    opacity: 1,
+  },
+}));

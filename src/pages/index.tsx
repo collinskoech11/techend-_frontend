@@ -1,114 +1,166 @@
 "use client";
 
-import { Box, Typography, Button, Grid, Card, Container } from "@mui/material";
-import { styled, keyframes } from "@mui/material/styles"; // Import keyframes
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import StoreIcon from "@mui/icons-material/Store";
+import StorefrontIcon from '@mui/icons-material/Storefront'; // More specific icon
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import Typewriter from "typewriter-effect";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import Cookies from 'js-cookie'
-import AuthDialog from "@/Components/AuthDialog"
+import AuthDialog from "@/Components/AuthDialog";
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
 
 // Define a consistent color palette
-const primaryColor = "#be1f2f"; // Your existing accent color
+const primaryColor = "#be1f2f"; // Your existing accent color (Deep Red)
+const primaryDark = "#8f1721"; // Darker shade for hover/accents
 const secondaryColor = "#3f51b5"; // A complementary blue
-const lightGray = "#f8f8f8";
-const darkText = "#333";
-const lightText = "#666";
+const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
+const mediumGray = "#e0e0e0"; // For borders and subtle dividers
+const darkText = "#212121"; // Very dark gray for main headings and strong text
+const lightText = "#555555"; // Softer dark gray for body text
 
-// Keyframes for the wave animation
+// Keyframes for wave animation (from previous version, keeping if desired)
 const waveAnimation = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 `;
 
-const HeroSection = styled(Box)({
-  background: `linear-gradient(135deg, ${primaryColor} 0%, #2b0507 100%)`, // Still a base gradient
+// Keyframes for subtle floating effect
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+`;
+
+const HeroSection = styled(Box)(({ theme }) => ({
+  background: `linear-gradient(145deg, ${primaryColor} 0%, ${primaryDark} 100%)`, // Deeper gradient
   color: "#fff",
   textAlign: "center",
-  // padding: "120px 0",
-  borderRadius: "16px",
-  marginBottom: "80px",
+  borderRadius: "20px", // More rounded for a modern feel
+  marginBottom: "100px", // More space after hero
   position: "relative",
-  overflow: "hidden", // Ensure waves don't spill
-  // Wave overlay with animation
-  "&::before": {
+  overflow: "hidden",
+  padding: "120px 0", // Generous padding
+  [theme.breakpoints.down('sm')]: {
+    padding: "80px 0",
+    borderRadius: "10px",
+  },
+
+  // Diagonal split overlay (new design element)
+  '&::before': {
     content: '""',
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
-    // Using a subtle linear gradient for wave-like texture, animated horizontally
-    background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,229.3C960,245,1056,235,1152,208C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x center bottom`,
-    backgroundSize: '1600px 320px', // Adjust size for desired wave pattern
-    opacity: 0.8, // Make it semi-transparent
-    zIndex: 1,
-    animation: `${waveAnimation} 20s linear infinite`, // Apply animation
+    width: '100%',
+    height: '100%',
+    background: `linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent)`,
+    backgroundSize: '80px 80px',
+    opacity: 0.2,
+    zIndex: 0,
   },
-   // A second wave layer for more depth
-  "&::after": {
+  '&::after': { // Second, more subtle layer
     content: '""',
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
-    bottom: 0,
-    background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,224L48,208C96,192,192,160,288,170.7C384,181,480,235,576,229.3C672,224,768,160,864,160C960,160,1056,224,1152,224C1248,224,1344,160,1392,128L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x center bottom`,
-    backgroundSize: '1800px 350px', // Slightly different size for variation
-    opacity: 0.6,
-    zIndex: 1,
-    animation: `${waveAnimation} 25s linear infinite reverse`, // Animate in reverse for counter-motion
+    width: '100%',
+    height: '100%',
+    background: `linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.03) 75%, transparent 75%, transparent)`,
+    backgroundSize: '60px 60px',
+    opacity: 0.1,
+    zIndex: 0,
   },
+}));
+
+const HeroGraphic = styled(Box)({
+  position: 'absolute',
+  // You would replace these with actual SVG or image components
+  // For demonstration, these are placeholder circles
+  background: 'rgba(255,255,255,0.08)',
+  borderRadius: '50%',
+  animation: `${floatAnimation} 4s ease-in-out infinite`,
+  zIndex: 1, // Below content but above background patterns
 });
 
-const AccentButton = styled(Button)({
+const AccentButton = styled(Button)(({ theme }) => ({
   backgroundColor: primaryColor,
   color: "#fff",
-  textTransform: "capitalize",
+  textTransform: "uppercase", // More professional
   padding: "16px 40px",
-  borderRadius: "30px", // More rounded for a softer feel
-  fontWeight: 600,
-  fontSize: "1.15rem",
-  boxShadow: "0 8px 20px rgba(0,0,0,0.3)", // Stronger shadow
-  transition: "all 0.4s ease",
+  borderRadius: "30px",
+  fontWeight: 700, // Bolder
+  fontSize: "1.1rem",
+  boxShadow: "0 10px 25px rgba(0,0,0,0.35)", // Stronger, more defined shadow
+  transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: "#a01624",
-    transform: "translateY(-3px) scale(1.02)", // Enhanced hover effect
-    boxShadow: "0 12px 25px rgba(0,0,0,0.4)",
+    backgroundColor: primaryDark,
+    transform: "translateY(-5px) scale(1.03)", // Enhanced hover effect
+    boxShadow: "0 15px 35px rgba(0,0,0,0.45)",
   },
-});
+  "& .MuiButton-endIcon": {
+    marginLeft: theme.spacing(1), // Space for icon
+  }
+}));
 
-const FeatureCard = styled(Card)({
+const FeatureCard = styled(Card)(({ theme }) => ({
   textAlign: "center",
   padding: "40px 25px",
-  borderRadius: "20px", // More rounded corners
-  boxShadow: "0 10px 30px rgba(0,0,0,0.08)", // Softer, more pronounced shadow
+  borderRadius: "20px",
+  boxShadow: "0 12px 30px rgba(0,0,0,0.08)", // Softer, more pronounced shadow
   height: "100%",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "center",
-  transition: "transform 0.4s ease, box-shadow 0.4s ease",
-  border: `1px solid ${lightGray}`, // Subtle border
-  "&:hover": {
-    transform: "translateY(-10px) scale(1.02)", // Lift and slightly scale
-    boxShadow: "0 15px 40px rgba(0,0,0,0.15)",
+  alignItems: 'center',
+  justifyContent: "flex-start", // Align content to top
+  transition: "transform 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease",
+  border: `1px solid ${mediumGray}`, // Subtle border
+  position: 'relative',
+  overflow: 'hidden',
+
+  '&::before': { // Subtle pattern/texture
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: `linear-gradient(45deg, rgba(0,0,0,0.02) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.02) 50%, rgba(0,0,0,0.02) 75%, transparent 75%, transparent)`,
+    backgroundSize: '40px 40px',
+    opacity: 0.5,
+    zIndex: 0,
   },
-});
+
+  "&:hover": {
+    transform: "translateY(-12px) scale(1.02)", // Lift and slightly scale
+    boxShadow: "0 20px 45px rgba(0,0,0,0.18)", // More intense shadow on hover
+    backgroundColor: '#ffffff', // Ensure background stays light
+  },
+  "& .MuiSvgIcon-root": { // Style for icons within FeatureCard
+    fontSize: 70,
+    color: primaryColor,
+    mb: 3,
+    position: 'relative',
+    zIndex: 1,
+    padding: theme.spacing(2),
+    borderRadius: '50%',
+    background: '#ffebee', // Light background for icon
+    boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+  }
+}));
 
 const ImageCard = styled(Card)({
   overflow: "hidden",
   borderRadius: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+  boxShadow: "0 15px 40px rgba(0,0,0,0.12)", // More prominent shadow
   transition: "transform 0.4s ease, box-shadow 0.4s ease",
   "&:hover": {
-    transform: "scale(1.05)",
-    boxShadow: "0 15px 40px rgba(0,0,0,0.2)",
+    transform: "scale(1.01)", // Subtle scale on card hover
+    boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
   },
   "& img": {
     width: "100%",
@@ -116,43 +168,51 @@ const ImageCard = styled(Card)({
     display: "block",
     transition: "transform 0.5s ease",
     "&:hover": {
-      transform: "scale(1.1)", // Zoom effect on image hover
+      transform: "scale(1.05)", // Gentle zoom effect on image hover
     },
   },
 });
 
-const PricingCard = styled(Card)({
+const PricingCard = styled(Card)(({ theme }) => ({
   textAlign: "center",
-  padding: "40px 30px",
+  padding: "50px 30px", // More vertical padding
   borderRadius: "20px",
-  boxShadow: "0 8px 25px rgba(0,0,0,0.07)",
-  border: `1px solid ${lightGray}`,
+  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+  border: `1px solid ${mediumGray}`,
   height: "100%",
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  transition: "transform 0.4s ease, box-shadow 0.4s ease",
+  transition: "transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease",
+  background: '#ffffff',
+
   "&:hover": {
-    transform: "translateY(-8px) scale(1.01)",
-    boxShadow: "0 12px 35px rgba(0,0,0,0.12)",
+    transform: "translateY(-12px) scale(1.02)", // More lift on hover
+    boxShadow: "0 20px 45px rgba(0,0,0,0.15)",
+    borderColor: primaryColor, // Highlight border on hover
   },
-});
+  "&.featured": { // Styling for the featured card (Growth)
+    border: `3px solid ${primaryColor}`,
+    boxShadow: `0 20px 50px rgba(190, 31, 47, 0.3)`,
+    transform: "translateY(-15px) scale(1.03)", // Even more lift for featured
+    "&:hover": {
+      transform: "translateY(-18px) scale(1.04)",
+      boxShadow: `0 25px 60px rgba(190, 31, 47, 0.4)`,
+    }
+  },
+  "& .MuiListItem-root": {
+    padding: theme.spacing(0.5, 0), // Tighter list items
+  },
+  "& .MuiListItemIcon-root": {
+    minWidth: '32px', // Adjust icon spacing
+  }
+}));
 
 export default function LandingPage() {
-  const shopname = Cookies.get("shopname") || "techend";
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [phone, setPhone] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
-  const [cryptoAddress, setCryptoAddress] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState("idle");
-  const [showAuthDialog,  setShowAuthDialog] = useState(false)
-  const navigateOnboard = () => {
-    console.log("called &*(&*^&%^$")
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
+  const handleAuthTrigger = () => {
     setShowAuthDialog(true);
   };
 
@@ -161,45 +221,8 @@ export default function LandingPage() {
     router.push("/company-onboarding");
   };
 
-
-  const getCardType = () => {
-    if (/^4/.test(cardNumber)) return "visa";
-    if (/^5[1-5]/.test(cardNumber)) return "mastercard";
-    if (/^3[47]/.test(cardNumber)) return "amex";
-    if (/^6(?:011|5)/.test(cardNumber)) return "discover";
-    return null;
-  };
-
-  const handleSimulatePayment = () => {
-    setPaymentStatus("processing");
-    setTimeout(() => {
-      const isSuccess = Math.random() > 0.1;
-      setPaymentStatus(isSuccess ? "success" : "error");
-
-      if (isSuccess) {
-        setTimeout(() => {
-          reset();
-        }, 2000);
-      }
-    }, 2000);
-  };
-
-  const reset = () => {
-    setPaymentStatus("idle");
-    setPhone("");
-    setCardNumber("");
-    setExpiry("");
-    setCvc("");
-    setCryptoAddress("");
-    setSelectedPaymentMethod("");
-    setSelectedPlan("");
-    setOpen(false);
-  };
-
-
-  const cardType = getCardType();
   return (
-    <Box sx={{ bgcolor: lightGray }}> {/* Light background for the whole page */}
+    <Box sx={{ bgcolor: lightGray, minHeight: '100vh' }}>
       {showAuthDialog && (
         <AuthDialog
           onTrigger={handleAuthSuccess}
@@ -207,88 +230,92 @@ export default function LandingPage() {
           showButton={false}
         />
       )}
-      <Container maxWidth="xl" 
-          onClick={() =>{navigateOnboard()}}
-      sx={{ mx: "auto", px: 3, pt: 5, pb: 8 }}>
+      <Container maxWidth="xl" sx={{ mx: "auto", px: 3, pt: 5, pb: 8 }}>
         {/* Hero Section */}
-      <HeroSection>
-        <Zoom duration={1200}>
-          <Box sx={{
-            position: 'relative',
-            zIndex: 2,
-            px: { xs: 2, sm: 4, md: 8 },
-            py: { xs: 8, sm: 10, md: 12 },
-            maxWidth: '1200px',
-            mx: 'auto',
-          }}
-          >
-            <Typography
-              variant="h2"
-              sx={{
-                fontWeight: 800,
-                mb: { xs: 2, md: 3 },
-                color: "#fff",
-                fontSize: {
-                  xs: '2.5rem',
-                  sm: '3.25rem',
-                  md: '4rem',
-                  lg: '4.5rem',
-                },
-                lineHeight: { xs: 1.2, sm: 1.15, md: 1.1 },
-              }}
-            >
-              <Typewriter
-                options={{
-                  strings: ["Smart eCommerce for SMEs", "Sell Online with Confidence", "Your Business, Simplified"],
-                  autoStart: true,
-                  loop: true,
+        <HeroSection onClick={handleAuthTrigger}>
+          {/* Decorative floating graphics */}
+          <HeroGraphic sx={{ width: 100, height: 100, top: '10%', left: '10%', animationDelay: '0s' }} />
+          <HeroGraphic sx={{ width: 150, height: 150, bottom: '15%', right: '10%', animationDelay: '1s' }} />
+          <HeroGraphic sx={{ width: 70, height: 70, top: '20%', right: '5%', animationDelay: '0.5s' }} />
+          <HeroGraphic sx={{ width: 120, height: 120, bottom: '5%', left: '5%', animationDelay: '1.5s' }} />
+
+          <Zoom duration={1200}>
+            <Box sx={{
+              position: 'relative',
+              zIndex: 2,
+              px: { xs: 2, sm: 4, md: 8 },
+              py: { xs: 8, sm: 10, md: 12 },
+              maxWidth: '1000px', // Slightly narrower for focus
+              mx: 'auto',
+            }}>
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 900, // Extra bold
+                  mb: { xs: 2, md: 3 },
+                  color: "#fff",
+                  fontSize: {
+                    xs: '2.4rem',
+                    sm: '2.8rem',
+                    md: '3.8rem',
+                    lg: '4.8rem',
+                  },
+                  lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
+                  letterSpacing: { xs: '-0.02em', md: '-0.03em' }, // Tighter letter spacing for headings
                 }}
-              />
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{
-                maxWidth: "800px",
-                mx: "auto",
-                mb: { xs: 4, md: 5 },
-                color: "rgba(255,255,255,0.9)",
-                fontSize: {
-                  xs: '1rem',
-                  sm: '1.05rem',
-                  md: '1.25rem',
-                  lg: '1.2rem',
-                },
-              }}
-            >
-              Everything you need to sell online — designed with **simplicity** and **calm** in mind. Empowering small and medium-sized enterprises to thrive in the digital marketplace.
-            </Typography>
-            <AccentButton sx={{
-                padding: { xs: '10px 20px', sm: '12px 28px' },
-                fontSize: { xs: '0.9rem', sm: '1rem' },
-            }}
-            onClick={() =>{router.push("/company-onboarding")}}
-            >Get Started for Free</AccentButton>
-          </Box>
-        </Zoom>
-      </HeroSection>
+              >
+                <Typewriter
+                  options={{
+                    strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
+                    autoStart: true,
+                    loop: true,
+                  }}
+                />
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  maxWidth: "700px", // More concise
+                  mx: "auto",
+                  mb: { xs: 5, md: 6 },
+                  color: "rgba(255,255,255,0.9)",
+                  fontSize: {
+                    xs: '1.1rem',
+                    sm: '1.25rem',
+                    md: '1.4rem',
+                  },
+                  lineHeight: 1.5,
+                }}
+              >
+                Launch, manage, and grow your enterprise with **iMall** — the all-in-one platform designed for **simplicity, speed, and success** in the digital marketplace.
+              </Typography>
+              <AccentButton
+                onClick={handleAuthTrigger}
+                endIcon={<ArrowForwardIcon />} // Add icon to main CTA
+              >
+                Get Started Today
+              </AccentButton>
+            </Box>
+          </Zoom>
+        </HeroSection>
 
-
+         
 
         {/* Features Section */}
         <Box sx={{ py: 10 }}>
-          <Typography variant="h3" sx={{ fontWeight: 700, mb: 8, textAlign: "center", color: darkText }}>
-            Why Choose <span style={{ color: primaryColor }}>iMall</span>?
+          <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
+            Why <span style={{ color: primaryColor }}>iMall</span> is Your Best Choice
           </Typography>
           <Grid container spacing={6} justifyContent="center">
             <Grid item xs={12} md={4}>
-              <Fade direction="left" duration={1000}>
+              <Fade direction="down" duration={1000}>
                 <FeatureCard>
-                  <StoreIcon sx={{ fontSize: 70, color: primaryColor, mb: 3 }} />
+                  <StorefrontIcon /> {/* Changed icon for variety */}
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: darkText }}>
-                    All-in-One Storefront
+                    Instant Storefront Creation
                   </Typography>
                   <Typography color={lightText}>
-                    Launch your store quickly with beautiful, intuitive templates and robust backend tools.
+                    Launch your fully functional online store in minutes with stunning, customizable templates.
                   </Typography>
                 </FeatureCard>
               </Fade>
@@ -297,26 +324,26 @@ export default function LandingPage() {
             <Grid item xs={12} md={4}>
               <Fade delay={200} duration={1000}>
                 <FeatureCard>
-                  <ShoppingCartIcon sx={{ fontSize: 70, color: primaryColor, mb: 3 }} />
+                  <ShoppingCartIcon />
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: darkText }}>
-                    Flexible Payments
+                    Seamless Checkout & Payments
                   </Typography>
                   <Typography color={lightText}>
-                    Accept payments globally with seamless, stress-free checkout integrations.
+                    Offer a smooth, secure shopping experience with integrated global payment solutions.
                   </Typography>
                 </FeatureCard>
               </Fade>
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <Fade direction="right" delay={400} duration={1000}>
+              <Fade direction="down" delay={400} duration={1000}>
                 <FeatureCard>
-                  <TrendingUpIcon sx={{ fontSize: 70, color: primaryColor, mb: 3 }} />
+                  <TrendingUpIcon />
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: darkText }}>
-                    Grow With Ease
+                    Scalable Growth Tools
                   </Typography>
                   <Typography color={lightText}>
-                    Start simple, scale at your pace — add advanced tools only when your business demands it.
+                    Access powerful analytics and marketing features to effortlessly expand your reach and sales.
                   </Typography>
                 </FeatureCard>
               </Fade>
@@ -324,164 +351,219 @@ export default function LandingPage() {
           </Grid>
         </Box>
 
-        {/* Explore iMall in Action Section */}
+         
+
+        {/* Explore iMall in Action Section (Alternating Layouts) */}
         <Box sx={{ py: 10 }}>
           <Slide direction="up" triggerOnce>
-            <Typography variant="h3" sx={{ fontWeight: 700, mb: 8, textAlign: "center", color: darkText }}>
-              Explore <span style={{ color: primaryColor }}>iMall</span> in Action
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
+              See <span style={{ color: primaryColor }}>iMall</span> in Action
             </Typography>
 
-            <Grid container spacing={6} justifyContent="center">
-              <Grid item xs={12} md={4}>
-                <ImageCard>
+            {/* Section 1: Sleek Storefronts */}
+            <Grid container spacing={6} alignItems="center" sx={{ mb: 12 }}>
+              <Grid item xs={12} md={6}>
+                <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
                   <img
                     src="/assets/sample_ui_2.png"
-                    alt="Modern eCommerce Storefront"
+                    alt="Sleek eCommerce Storefront Designs"
                     loading="lazy"
                   />
                 </ImageCard>
-                <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
-                  Sleek Storefront Designs
-                </Typography>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <ImageCard>
+              <Grid item xs={12} md={6}>
+                <Fade direction="down" triggerOnce>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: darkText, mb: 2 }}>
+                    Stunning, Customizable Storefronts
+                  </Typography>
+                  <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
+                    First impressions matter. iMall provides a suite of elegant, responsive templates that can be easily customized to reflect your brand's unique identity. No coding required, just pure design freedom.
+                  </Typography>
+                  <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
+                    Build Your Store
+                  </AccentButton>
+                </Fade>
+              </Grid>
+            </Grid>
+
+            {/* Section 2: Intuitive Admin Dashboard */}
+            <Grid container spacing={6} alignItems="center" direction={{ xs: 'column-reverse', md: 'row' }} sx={{ mb: 12 }}>
+              <Grid item xs={12} md={6}>
+                <Fade direction="up" triggerOnce>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: darkText, mb: 2 }}>
+                    Intuitive Admin Dashboard & Control
+                  </Typography>
+                  <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
+                    Manage products, orders, customers, and analytics from a single, easy-to-use dashboard. iMall simplifies your daily operations, giving you more time to focus on growth.
+                  </Typography>
+                  <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
+                    Explore Dashboard
+                  </AccentButton>
+                </Fade>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <ImageCard sx={{ mr: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
                   <img
                     src="/assets/sample_ui_1.png"
-                    alt="Intuitive Admin Dashboard"
+                    alt="Powerful Admin Dashboard"
                     loading="lazy"
                   />
                 </ImageCard>
-                <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
-                  Powerful Admin Dashboard
-                </Typography>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <ImageCard>
+            </Grid>
+
+            {/* Section 3: AI-Powered Insights */}
+            <Grid container spacing={6} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
                   <img
                     src="/assets/sample_ui.png"
-                    alt="Engaging Marketplace View"
+                    alt="AI-Powered Insights Dashboard"
                     loading="lazy"
                   />
                 </ImageCard>
-                <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
-                  Dynamic Marketplace Options
-                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Fade direction="down" triggerOnce>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: darkText, mb: 2 }}>
+                    AI-Powered Insights for Smarter Decisions
+                  </Typography>
+                  <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
+                    Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. iMall's AI insights give you the competitive edge.
+                  </Typography>
+                  <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
+                    Unlock Insights
+                  </AccentButton>
+                </Fade>
               </Grid>
             </Grid>
           </Slide>
         </Box>
 
+         
+
         {/* Pricing Section */}
         <Box sx={{ py: 10, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           <Fade cascade triggerOnce>
-            <Typography variant="h3" sx={{ fontWeight: 700, mb: 4, textAlign: "center", color: darkText }}>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
               Simple, Transparent Pricing
             </Typography>
-            <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 6, color: lightText, textAlign: "center" }}>
-              Affordable plans for every stage of your business — and Marketplace options with no upfront fees, just a small commission on sales.
+            <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 6, color: lightText, textAlign: "center", fontSize: { xs: '1rem', md: '1.15rem' } }}>
+              Choose the plan that fits your business needs. No hidden fees, just straightforward pricing designed for your success.
             </Typography>
 
-            <Grid container spacing={6} justifyContent="center">
+            <Grid container spacing={5} justifyContent="center"> {/* Tighter spacing */}
               <Grid item xs={12} md={4}>
                 <PricingCard>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: primaryColor }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: primaryColor }}>
                       Starter
+                    </Typography>
+                    <Typography variant="body2" color={lightText} sx={{ mb: 2 }}>
+                      Perfect for new businesses taking their first steps online.
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
                       $15<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
                     </Typography>
-                    <Typography color={lightText} sx={{ mb: 3 }}>
-                      Ideal for getting your first store online.
-                    </Typography>
-                    <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', margin: '0 auto 20px auto', maxWidth: '200px' }}>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Basic Store Setup</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Product Listings (up to 50)</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Standard Support</Typography>
-                      </li>
-                    </ul>
+                    <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Quick Store Setup</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Showcase up to 50 products</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Reliable Standard Support</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Basic Analytics</Typography>} />
+                      </ListItem>
+                    </List>
                   </Box>
-                  <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", "&:hover": { bgcolor: primaryColor, color: '#fff' } }} onClick={() =>{router.push("/company-onboarding")}}>
-                    Choose Plan
+                  <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: primaryColor, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
+                    Choose Starter
                   </Button>
                 </PricingCard>
               </Grid>
               <Grid item xs={12} md={4}>
-                <PricingCard sx={{ border: `2px solid ${primaryColor}`, boxShadow: `0 15px 40px rgba(190, 31, 47, 0.2)` }}>
+                <PricingCard className="featured"> {/* Apply featured class */}
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: primaryColor }}>
-                      Growth
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: primaryColor }}>
+                      Growth <span style={{ fontSize: '0.8em', color: primaryDark }}>(Recommended)</span>
+                    </Typography>
+                    <Typography variant="body2" color={lightText} sx={{ mb: 2 }}>
+                      Ideal for expanding SMEs ready to scale their operations.
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
                       $39<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
                     </Typography>
-                    <Typography color={lightText} sx={{ mb: 3 }}>
-                      For growing SMEs with inventory and marketing tools.
-                    </Typography>
-                    <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', margin: '0 auto 20px auto', maxWidth: '200px' }}>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>All Starter Features</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Unlimited Products</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Inventory Management</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Email Marketing Tools</Typography>
-                      </li>
-                    </ul>
+                    <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>**All Starter Features**</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>List Unlimited Products</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Effortless Inventory Management</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Integrated Email Marketing</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Advanced Sales Reports</Typography>} />
+                      </ListItem>
+                    </List>
                   </Box>
-                  <AccentButton onClick={() =>{router.push("/company-onboarding")}}>Choose Plan</AccentButton>
+                  <AccentButton onClick={handleAuthTrigger}>Choose Growth</AccentButton>
                 </PricingCard>
               </Grid>
               <Grid item xs={12} md={4}>
                 <PricingCard>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: primaryColor }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: primaryColor }}>
                       Pro
+                    </Typography>
+                    <Typography variant="body2" color={lightText} sx={{ mb: 2 }}>
+                      Designed for established enterprises seeking advanced control.
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
                       $79<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
                     </Typography>
-                    <Typography color={lightText} sx={{ mb: 3 }}>
-                      For established sellers with advanced needs and priority support.
-                    </Typography>
-                    <ul style={{ listStyle: 'none', padding: 0, textAlign: 'left', margin: '0 auto 20px auto', maxWidth: '200px' }}>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>All Growth Features</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Advanced Analytics</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Multi-User Access</Typography>
-                      </li>
-                      <li style={{ display: 'flex', alignItems: 'center' }}>
-                        <CheckCircleOutlineIcon sx={{ color: primaryColor, mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body1" color={lightText}>Priority Support</Typography>
-                      </li>
-                    </ul>
+                    <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>**All Growth Features**</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>In-depth Predictive Analytics</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Multi-User & Role Access</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Dedicated Priority Support</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Integrations</Typography>} />
+                      </ListItem>
+                    </List>
                   </Box>
-                  <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", "&:hover": { bgcolor: primaryColor, color: '#fff' } }} onClick={() =>{router.push("/company-onboarding")}}>
-                    Choose Plan
+                  <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: primaryColor, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
+                    Choose Pro
                   </Button>
                 </PricingCard>
               </Grid>
@@ -489,16 +571,20 @@ export default function LandingPage() {
           </Fade>
         </Box>
 
-        {/* Call to Action Section */}
+         
+
+        {/* Call to Action Section (Final) */}
         <Box sx={{ textAlign: "center", py: 12 }}>
           <Zoom triggerOnce>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 4, color: darkText }}>
-              Ready to simplify your online selling?
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, color: darkText }}>
+              Ready to Transform Your Business?
             </Typography>
-            <Typography variant="h6" sx={{ maxWidth: "700px", mx: "auto", mb: 5, color: lightText }}>
-              Join hundreds of SMEs already growing with iMall. Start your free trial today!
+            <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 5, color: lightText, fontSize: { xs: '1rem', md: '1.15rem' } }}>
+              Join thousands of thriving SMEs who trust iMall to power their online sales. Experience the future of eCommerce, risk-free.
             </Typography>
-            <AccentButton>Join iMall Today</AccentButton>
+            <AccentButton onClick={handleAuthTrigger} endIcon={<ArrowForwardIcon />}>
+              Start Your Free Trial Now
+            </AccentButton>
           </Zoom>
         </Box>
       </Container>
