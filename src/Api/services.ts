@@ -87,7 +87,7 @@ export const AuthApi = createApi({
     }),
     checkoutCart: builder.mutation({
       query: data => ({
-        url: `cart/checkout/`,
+        url: `cart/checkout/${data.company_name}`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${data.token}`,
