@@ -46,7 +46,7 @@ function Checkout() {
 
   const checkoutFxSubmit = async () => {
     try {
-      const response = await checkoutFx({ body: formData, token: Cookies.get("access") });
+      const response = await checkoutFx({ body: formData, token: Cookies.get("access"), company_name: shopname }).unwrap();
       if (response.data) {
         toast.success(<Typography>Order Placed Successfully</Typography>);
         router.push(`/shop/${shopname}`);
