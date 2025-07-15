@@ -28,6 +28,7 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 import AuthDialog from "./AuthDialog";
 import Shop2Icon from '@mui/icons-material/Shop2';
+import HomeIcon from '@mui/icons-material/Home';
 
 
 
@@ -107,41 +108,50 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   return (
     <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${accent} 0%, #2b0507 100%)`, color: "#fff" }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" sx={{ cursor: "pointer", textTransform:"capitalize" }} onClick={() => router.push(`/_/${shopname}`)}>
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize" }} onClick={() => router.push(`/_/${shopname}`)}>
           {shopname}
         </Typography>
 
         {/* <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}> */}
         <Box sx={{ display: { sm: "flex" }, alignItems: "center", borderRadius: "8px" }}>
-          {router.pathname === "/" && (
-            <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
-          )}
+          {/* {router.pathname === "/" && ( */}
+            {/* // <Button color="inherit" onClick={() => router.push("/")}>Home</Button> */}
+           {/* )} */}
           {/* <Button color="inherit" onClick={() => router.push(`/shop/${shopname}`)}>Shop</Button> */}
           {router.pathname === "/" && (
             <>
-              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
+              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank" sx={{ display: { xs: "none", sm: "flex" } }}>
                 <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
               </IconButton>
-              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
+              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank" sx={{ display: { xs: "none", sm: "flex" } }}>
                 <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
               </IconButton>
-              <IconButton color="inherit" href="#" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
+              <IconButton color="inherit" href="#" target="_blank" sx={{ display: { xs: "none", sm: "flex" } }}>
                 <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
               </IconButton>
             </>
           )}
           {user ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Tooltip title="Shop">
-                <IconButton sx={{ mr: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Tooltip title="Home">
+                <IconButton sx={{ md:{mr: 1, xs: 0} }}>
                   <Badge color="warning">
-                    <Shop2Icon sx={{ color: "#fff" }} onClick={() => router.push(`/shop/${shopname}`)}/>
+                    <HomeIcon sx={{ color: "#fff" }} onClick={() => router.push(`/`)} />
                   </Badge>
                 </IconButton>
               </Tooltip>
+
+              <Tooltip title="Shop">
+                <IconButton sx={{ md:{mr: 1, xs: 0} }}>
+                  <Badge color="warning">
+                    <Shop2Icon sx={{ color: "#fff" }} onClick={() => router.push(`/shop/${shopname}`)} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+
               <CartMenu ref={cartRef} />
               <Tooltip title="Order History">
-                <IconButton sx={{ mr: 1 }}>
+                <IconButton sx={{ md:{mr: 1, xs: 0} }}>
                   <Badge badgeContent={1} color="warning">
                     <HistoryOutlinedIcon sx={{ color: "#fff" }} onClick={() => router.push("/orderhistory")} />
                   </Badge>
@@ -149,7 +159,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               </Tooltip>
 
               <Tooltip title="Notifications">
-                <IconButton sx={{ mr: 1 }}>
+                <IconButton sx={{ md:{mr: 1, xs: 0} }}>
                   <Badge badgeContent={1} color="warning">
                     <NotificationsOutlinedIcon sx={{ color: "#fff" }} />
                   </Badge>
@@ -226,7 +236,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               {/* <Button variant="outlined" color="inherit" onClick={LogoutFx}>Log out</Button> */}
             </Box>
           ) : (
-              <AuthDialog onTrigger={refetchUser} />
+            <AuthDialog onTrigger={refetchUser} />
           )}
         </Box>
 
