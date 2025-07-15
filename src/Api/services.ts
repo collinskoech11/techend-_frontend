@@ -143,6 +143,12 @@ export const AuthApi = createApi({
         body: data.body,
       }),
     }),
+    getCompanies: builder.query({
+      query: data => ({
+        url: `companies/all/`,
+        method: "GET"
+      }),
+    }),
   }),
 });
 export const {
@@ -160,4 +166,5 @@ export const {
   useGetCompanyQuery,
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
+  useGetCompaniesQuery,
 }: any = AuthApi;
