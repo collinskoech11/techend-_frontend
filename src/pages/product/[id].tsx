@@ -306,7 +306,7 @@ function ProductDetailView() {
                 autoplay={{ delay: 3000, disableOnInteraction: false }}
               >
                 {imagesToDisplay.map((image, index) => (
-                  <StyledMainSwiperSlide key={index} style={{ maxWidth:"80vw", width:"400px" }}>
+                  <StyledMainSwiperSlide key={index} style={{ width:"80vw", maxWidth:"400px" }}>
                     <MainCarouselImage
                       src={`https://res.cloudinary.com/dqokryv6u/${image}`}
                       alt={`${product?.title} - Image ${index + 1}`}
@@ -314,7 +314,7 @@ function ProductDetailView() {
                   </StyledMainSwiperSlide>
                 ))}
                 {imagesToDisplay.length === 0 && (
-                    <StyledMainSwiperSlide style={{ width:"80vw", maxWidth:"500px"}}>
+                    <StyledMainSwiperSlide style={{ width:"85vw", maxWidth:"auto"}}>
                       <MainCarouselImage src="https://via.placeholder.com/500?text=No+Image+Available" alt="No Image" />
                     </StyledMainSwiperSlide>
                 )}
