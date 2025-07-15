@@ -27,6 +27,7 @@ import CartMenu from "./CartMin";
 import Image from "next/image";
 import Cookies from "js-cookie";
 import AuthDialog from "./AuthDialog";
+import Shop2Icon from '@mui/icons-material/Shop2';
 
 
 
@@ -110,26 +111,34 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
           {shopname}
         </Typography>
 
-        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
+        {/* <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}> */}
+        <Box sx={{ display: { sm: "flex" }, alignItems: "center", borderRadius: "8px" }}>
           {router.pathname === "/" && (
             <Button color="inherit" onClick={() => router.push("/")}>Home</Button>
           )}
-          <Button color="inherit" onClick={() => router.push(`/shop/${shopname}`)}>Shop</Button>
+          {/* <Button color="inherit" onClick={() => router.push(`/shop/${shopname}`)}>Shop</Button> */}
           {router.pathname === "/" && (
             <>
-              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
+              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
                 <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
               </IconButton>
-              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
+              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
                 <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
               </IconButton>
-              <IconButton color="inherit" href="#" target="_blank">
+              <IconButton color="inherit" href="#" target="_blank" sx={{ display: { xs: "none", sm: "flex" }}}>
                 <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
               </IconButton>
             </>
           )}
           {user ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Tooltip title="Shop">
+                <IconButton sx={{ mr: 1 }}>
+                  <Badge color="warning">
+                    <Shop2Icon sx={{ color: "#fff" }} onClick={() => router.push(`/shop/${shopname}`)}/>
+                  </Badge>
+                </IconButton>
+              </Tooltip>
               <CartMenu ref={cartRef} />
               <Tooltip title="Order History">
                 <IconButton sx={{ mr: 1 }}>
@@ -217,23 +226,21 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               {/* <Button variant="outlined" color="inherit" onClick={LogoutFx}>Log out</Button> */}
             </Box>
           ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <AuthDialog onTrigger={refetchUser} />
-            </Box>
           )}
         </Box>
 
-        <IconButton
+        {/* <IconButton
           color="inherit"
           edge="end"
           sx={{ display: { xs: "block", sm: "none" } }}
           onClick={toggleDrawer(true)}
         >
           <MenuIcon />
-        </IconButton>
+        </IconButton> */}
       </Toolbar>
 
-      <Drawer anchor="top" open={drawerOpen} onClose={toggleDrawer(false)}>
+      {/* <Drawer anchor="top" open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box sx={{ p: 2, background: "#BE1E2D", color: "#fff", height: "100vh" }}>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <IconButton color="inherit" onClick={toggleDrawer(false)}>
@@ -313,7 +320,6 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
 
             <MenuItem
               onClick={() => {
-                // You can replace this with your logout logic
                 Cookies.remove("access");
                 Cookies.remove("refresh");
                 Cookies.remove("username");
@@ -346,17 +352,17 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               </IconButton>
             </Box>
           )}
-          {/* {username ? (
-            <Button variant="outlined" color="inherit" fullWidth sx={{ mt: 2 }} onClick={LogoutFx}>
-              Log out
-            </Button>
-          ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <AuthDialog onTrigger={refetchUser} />
-            </Box>
-          )} */}
         </Box>
-      </Drawer>
+      </Drawer> */}
+      {/* {username ? (
+        <Button variant="outlined" color="inherit" fullWidth sx={{ mt: 2 }} onClick={LogoutFx}>
+          Log out
+        </Button>
+      ) : (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <AuthDialog onTrigger={refetchUser} />
+        </Box>
+      )} */}
     </AppBar>
   );
 })
