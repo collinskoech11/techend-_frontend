@@ -1,164 +1,407 @@
-import Navbar from "@/Components/Navbar";
 import React, { useState } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Link from "@mui/material/Link";
+import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
-import { useGetProductQuery } from "@/Api/services";
-import Footer from "@/Components/Footer";
-import { Box, Typography, Button, Grid } from "@mui/material";
+import { useGetProductQuery, useAddToCartMutation } from "@/Api/services";
+// Removed: import Navbar from "@/Components/Navbar";
+// Removed: import Footer from "@/Components/Footer";
+// Removed: import { PageContainer } from "../path/to/wherever/PageContainer/is/defined"; // Assuming PageContainer is now a global styled component or part of layout
+
+import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
 import { styled } from "@mui/system";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Autoplay, Pagination, Thumbs } from "swiper/modules";
+import "swiper/css/thumbs";
+import "swiper/css/navigation";
+import { Autoplay, Pagination, Thumbs, Navigation, FreeMode } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
 import Cookies from "js-cookie";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import StarIcon from '@mui/icons-material/Star';
+import StarHalfIcon from '@mui/icons-material/StarHalf';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import toast, { Toaster } from "react-hot-toast";
 
-// Styled components
-const ProductContainer = styled(Box)({
+// --- Color Palette (Consistent with previous suggestions) ---
+const primaryColor = "#be1f2f";
+const primaryDark = "#a01624";
+// Removed lightGray here as PageContainer will provide background
+const mediumGray = "#e0e0e0";
+const darkText = "#212121";
+const lightText = "#555555";
+const successColor = "#4CAF50";
+
+// --- Styled Components ---
+// Removed PageContainer styled component definition
+
+const ProductDetailSection = styled(Box)(({ theme }) => ({
   display: "flex",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  padding: "20px",
-  gap: "20px",
+  flexDirection: "column",
+  padding: theme.spacing(3),
+  gap: theme.spacing(4),
   margin: "20px auto",
   maxWidth: "1200px",
-});
+  backgroundColor: "#fff",
+  borderRadius: "16px",
+  boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+  [theme.breakpoints.up("md")]: {
+    flexDirection: "row",
+    padding: theme.spacing(5),
+  },
+}));
 
-const CarouselImage = styled("img")({
-  width: "100%",
-  height: "400px",
-  objectFit: "cover",
-  borderRadius: "10px",
-});
-
-const ProductDetails = styled(Box)({
+const ProductImageGallery = styled(Box)(({ theme }) => ({
   flex: 1,
   display: "flex",
   flexDirection: "column",
-  gap: "10px",
+  gap: theme.spacing(2),
+  [theme.breakpoints.up("md")]: {
+    flex: 0.6,
+  },
+}));
+
+const StyledMainSwiperSlide = styled(SwiperSlide)({
+  height: "clamp(300px, 50vh, 500px)",
+  borderRadius: "12px",
+  overflow: "hidden",
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: "#f0f0f0",
 });
 
+const MainCarouselImage = styled("img")({
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  borderRadius: "12px",
+});
+
+const ThumbnailImage = styled("img")<{ active?: boolean }>(({ theme, active }) => ({
+  width: "100%",
+  height: "80px",
+  objectFit: "cover",
+  borderRadius: "8px",
+  cursor: "pointer",
+  opacity: active ? 1 : 0.7,
+  border: active ? `2px solid ${primaryColor}` : `2px solid transparent`,
+  transition: "all 0.3s ease",
+  "&:hover": {
+    opacity: 1,
+    borderColor: primaryColor,
+  },
+}));
+
+const ProductInfo = styled(Box)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(2),
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
+  [theme.breakpoints.up("md")]: {
+    flex: 0.4,
+  },
+}));
+
 const ProductTitle = styled(Typography)({
-  fontSize: "24px",
-  fontWeight: "bold",
+  fontSize: "clamp(28px, 4vw, 36px)",
+  fontWeight: 800,
+  color: darkText,
+  lineHeight: 1.2,
 });
 
 const ProductPrice = styled(Typography)({
-  fontSize: "20px",
-  color: "#0C0C4C",
-  fontWeight: "bold",
+  fontSize: "clamp(24px, 3.5vw, 32px)",
+  color: primaryColor,
+  fontWeight: 700,
+  marginTop: '8px',
 });
 
-const AddToCartButton = styled(Button)({
-  backgroundColor: "#0C0C4C",
-  color: "#fff",
-  textTransform: "capitalize",
-  padding: "10px 20px",
-  borderRadius: "5px",
-  '&:hover': {
-    backgroundColor: "#333",
+const ProductDescription = styled(Typography)({
+  fontSize: "1rem",
+  color: lightText,
+  lineHeight: 1.6,
+  marginTop: '16px',
+});
+
+const AttributeChip = styled(Chip)({
+  backgroundColor: "#e0e0e0",
+  color: darkText,
+  fontWeight: 600,
+  marginRight: '8px',
+  marginBottom: '8px',
+});
+
+const QuantitySelector = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  "& .MuiIconButton-root": {
+    border: `1px solid ${mediumGray}`, // Changed from lightGray to mediumGray for more visibility
+    borderRadius: "8px",
+    backgroundColor: '#f0f0f0',
+    "&:hover": {
+      backgroundColor: mediumGray,
+    },
   },
+}));
+
+const AddToCartButton = styled(Button)(({ theme }) => ({
+  backgroundColor: primaryColor,
+  color: "#fff",
+  textTransform: "uppercase",
+  padding: "12px 25px",
+  borderRadius: "8px",
+  fontWeight: 700,
+  fontSize: "1.1rem",
+  boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
+  "&:hover": {
+    backgroundColor: primaryDark,
+    boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+  },
+  "&:disabled": {
+    backgroundColor: '#cccccc',
+    color: '#888888',
+    cursor: 'not-allowed',
+  }
+}));
+
+const RatingContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "2px",
+  marginBottom: theme.spacing(1),
+  "& .MuiSvgIcon-root": {
+    fontSize: "1.2rem",
+    color: "#FFD700",
+  },
+}));
+
+const SkeletonProductImage = styled(Skeleton)({
+  width: "100%",
+  height: "clamp(300px, 50vh, 500px)",
+  borderRadius: "12px",
+});
+
+const SkeletonThumbnail = styled(Skeleton)({
+  width: "100%",
+  height: "80px",
+  borderRadius: "8px",
 });
 
 function ProductDetailView() {
   const router = useRouter();
   const id = router.query.id;
-      const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-  
-  const { data: product, error, isLoading } = useGetProductQuery(id);
-const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
+  const [shopname] = useState(Cookies.get("shopname") || "techend");
+  const { data: product, isLoading, error } = useGetProductQuery(id);
+  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
+
+  const handleQuantityChange = (type: 'add' | 'remove') => {
+    if (type === 'add') {
+      setQuantity((prev) => prev + 1);
+    } else if (type === 'remove' && quantity > 1) {
+      setQuantity((prev) => prev - 1);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    const access = Cookies.get("access");
+    const refresh = Cookies.get("refresh");
+    const username = Cookies.get("username");
+
+    if (access && refresh && username) {
+      const response = await addToCart({ product: product?.id, quantity, token: access, shopname: Cookies.get("shopname") });
+      if ('error' in response) {
+        const errorMessage = (response.error as any).data?.error || "Failed to add product to cart.";
+        toast.error(errorMessage);
+      } else {
+        toast.success(`${quantity} x ${product?.title} added to cart!`);
+      }
+    } else {
+      toast.error("Please log in to add items to your cart.");
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = Math.ceil(rating) > fullStars ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
+
+    return (
+      <>
+        {Array.from({ length: fullStars }).map((_, idx) => (
+          <StarIcon key={`full-${idx}`} />
+        ))}
+        {halfStar === 1 && (
+          <StarHalfIcon />
+        )}
+        {Array.from({ length: emptyStars }).map((_, idx) => (
+          <StarBorderIcon key={`empty-${idx}`} />
+        ))}
+      </>
+    );
+  };
+
+  if (error) {
+    return (
+      // Only render the error message, assuming PageContainer and Navbar/Footer handle the overall layout
+      <Box sx={{ p: 4, textAlign: 'center', color: darkText }}>
+        <Typography variant="h5" color="error">Error loading product details.</Typography>
+        <Typography variant="body1">Please try again later or contact support.</Typography>
+      </Box>
+    );
+  }
+
+  const imagesToDisplay = (product?.images && product.images.length > 0)
+    ? product.images
+    : (product?.main_image ? [product.main_image] : []);
+
   return (
+    // Removed PageContainer wrapper here
     <>
-      {/* <Navbar textColor={"#000"} bgColor={"#fff"} /> */}
-      <Breadcrumbs aria-label="breadcrumb" sx={{ padding: "20px" }}>
-        <Link underline="hover" color="inherit" href="/">
-          TechEnd
-        </Link>
-        <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>
-          Shop
-        </Link>
-        <Typography color="text.primary">
-          {isLoading ? <Skeleton width={150} /> : product?.title}
-        </Typography>
-      </Breadcrumbs>
+      <Toaster position="top-right" />
+      {/* Removed Navbar */}
+      <Box sx={{ pt: 3, pb: 2, px: 3, maxWidth: "1200px", mx: "auto" }}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <MuiLink underline="hover" color="inherit" href="/">
+            Home
+          </MuiLink>
+          <MuiLink underline="hover" color="inherit" href={`/shop/${shopname}`}>
+            Shop
+          </MuiLink>
+          <Typography color="text.primary">
+            {isLoading ? <Skeleton width={150} /> : product?.title}
+          </Typography>
+        </Breadcrumbs>
+      </Box>
 
-      <ProductContainer>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            {isLoading ? (
-              <Skeleton variant="rectangular" width="100%" height={400} />
-            ) : (
-              <>
-                <Swiper
-                  pagination={{ clickable: true }}
-                  modules={[Pagination, Autoplay, Thumbs]}
-                  autoplay={{ delay: 3000, disableOnInteraction: false }}
-                  thumbs={{ swiper: thumbsSwiper }}
-                  style={{ borderRadius: "10px" }}
-                >
-                  {[1, 2, 3].map((_, index) => (
-                    <SwiperSlide key={index}>
-                      <CarouselImage
-                        src={`https://res.cloudinary.com/dqokryv6u/${product?.main_image}`}
-                        alt={product.title}
-                      />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
+      <ProductDetailSection>
+        <ProductImageGallery>
+          {isLoading ? (
+            <>
+              <SkeletonProductImage variant="rectangular" />
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                {[...Array(Math.min(imagesToDisplay.length > 0 ? imagesToDisplay.length : 3, 4))].map((_, index) => (
+                  <SkeletonThumbnail key={index} variant="rectangular" />
+                ))}
+              </Box>
+            </>
+          ) : (
+            <>
+              <Swiper
+                spaceBetween={10}
+                navigation={imagesToDisplay.length > 1}
+                thumbs={{ swiper: thumbsSwiper }}
+                modules={[FreeMode, Navigation, Thumbs, Pagination, Autoplay]}
+                className="mySwiper2"
+                pagination={{ clickable: true }}
+                autoplay={{ delay: 3000, disableOnInteraction: false }}
+              >
+                {imagesToDisplay.map((image, index) => (
+                  <StyledMainSwiperSlide key={index} style={{ width:"80vw", maxWidth:"500px" }}>
+                    <MainCarouselImage
+                      src={`https://res.cloudinary.com/dqokryv6u/${image}`}
+                      alt={`${product?.title} - Image ${index + 1}`}
+                    />
+                  </StyledMainSwiperSlide>
+                ))}
+                {imagesToDisplay.length === 0 && (
+                    <StyledMainSwiperSlide style={{ width:"80vw", maxWidth:"500px"}}>
+                      <MainCarouselImage src="https://via.placeholder.com/500?text=No+Image+Available" alt="No Image" />
+                    </StyledMainSwiperSlide>
+                )}
+              </Swiper>
 
+              {imagesToDisplay.length > 1 && (
                 <Box sx={{ mt: 2 }}>
                   <Swiper
                     onSwiper={setThumbsSwiper}
                     spaceBetween={10}
-                    slidesPerView={3}
+                    slidesPerView={Math.min(imagesToDisplay.length, 4)}
                     freeMode={true}
                     watchSlidesProgress
-                    modules={[Thumbs]}
+                    modules={[FreeMode, Navigation, Thumbs]}
+                    className="mySwiper"
                   >
-                    {[1, 2, 3].map((_, index) => (
+                    {imagesToDisplay.map((image, index) => (
                       <SwiperSlide key={index}>
-                        <CarouselImage
-                          src={`https://res.cloudinary.com/dqokryv6u/${product?.main_image}`}
+                        <ThumbnailImage
+                          src={`https://res.cloudinary.com/dqokryv6u/${image}`}
                           alt={`Thumbnail ${index + 1}`}
-                          style={{ height: "100px", cursor: "pointer" }}
                         />
                       </SwiperSlide>
                     ))}
                   </Swiper>
                 </Box>
-              </>
-            )}
-
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <ProductDetails>
-              {isLoading ? (
-                <>
-                  <Skeleton width="80%" height={40} />
-                  <Skeleton width="60%" height={30} />
-                  <Skeleton width="40%" height={20} />
-                  <Skeleton width="30%" height={20} />
-                  <Skeleton width="50%" height={20} />
-                  <Skeleton width="50%" height={36} sx={{ mt: 2 }} />
-                </>
-              ) : (
-                <>
-                  <ProductTitle>{product.title}</ProductTitle>
-                  <ProductPrice>Kes {product.price}</ProductPrice>
-                  <Typography>Color: {product.color}</Typography>
-                  <Typography>Size: {product.size}</Typography>
-                  <Typography>Rating: {product.rating} / 5</Typography>
-                  <AddToCartButton>Add to Cart</AddToCartButton>
-                </>
               )}
-            </ProductDetails>
-          </Grid>
-        </Grid>
-      </ProductContainer>
+            </>
+          )}
+        </ProductImageGallery>
 
-      {/* <Footer /> */}
+        <ProductInfo>
+          {isLoading ? (
+            <>
+              <Skeleton width="90%" height={50} />
+              <Skeleton width="50%" height={40} />
+              <Skeleton width="30%" height={30} />
+              <Skeleton width="40%" height={30} />
+              <Skeleton width="20%" height={30} />
+              <Skeleton width="80%" height={20} sx={{ mt: 2 }} />
+              <Skeleton width="70%" height={20} />
+              <Skeleton width="90%" height={20} />
+              <Skeleton width="100%" height={50} sx={{ mt: 4 }} />
+            </>
+          ) : (
+            <>
+              <ProductTitle>{product?.title}</ProductTitle>
+              <ProductPrice>Kes {product?.price?.toLocaleString()}</ProductPrice>
+
+              <RatingContainer>
+                {renderStars(product?.rating || 0)}
+                <Typography variant="body2" color={lightText} sx={{ ml: 0.5 }}>
+                  ({product?.reviews_count || 0} reviews)
+                </Typography>
+              </RatingContainer>
+
+              <Box>
+                {product?.color && <AttributeChip label={`Color: ${product.color}`} />}
+                {product?.size && <AttributeChip label={`Size: ${product.size}`} />}
+              </Box>
+
+              <ProductDescription>{product?.description || "No detailed description available."}</ProductDescription>
+
+              <QuantitySelector>
+                <Typography variant="h6" color={darkText}>Quantity:</Typography>
+                <IconButton onClick={() => handleQuantityChange('remove')} disabled={quantity <= 1 || isAddingToCart}>
+                  <RemoveIcon />
+                </IconButton>
+                <Typography variant="h6" sx={{ minWidth: '30px', textAlign: 'center' }}>{quantity}</Typography>
+                <IconButton onClick={() => handleQuantityChange('add')} disabled={isAddingToCart}>
+                  <AddIcon />
+                </IconButton>
+              </QuantitySelector>
+
+              <AddToCartButton onClick={handleAddToCart} disabled={isAddingToCart}>
+                {isAddingToCart ? <CircularProgress size={24} color="inherit" /> : (
+                  <>
+                    <ShoppingCartIcon sx={{ mr: 1 }} /> Add to Cart
+                  </>
+                )}
+              </AddToCartButton>
+            </>
+          )}
+        </ProductInfo>
+      </ProductDetailSection>
+
+      {/* Removed Footer */}
     </>
   );
 }
