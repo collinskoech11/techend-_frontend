@@ -1,9 +1,8 @@
 "use client";
-import { Menu, MenuItem, IconButton, Typography, Badge, Box, Divider } from "@mui/material";
+import { Menu, MenuItem, IconButton, Typography, Badge, Divider } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import { useState, useImperativeHandle, forwardRef } from "react";
-import { useGetCartQuery } from "@/Api/services";
-import Cookies from "js-cookie";
+import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
+import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/router";
 
 const CartMenu = forwardRef((props: any, ref) => {
@@ -11,13 +10,17 @@ const CartMenu = forwardRef((props: any, ref) => {
   const open = Boolean(anchorEl);
   const router = useRouter();
 
-  const { data: cart_data, isLoading, refetch: cart_refetch } = useGetCartQuery({
-    token: Cookies.get("access"),
-    company_name: Cookies.get("shopname"),
-  });
+  const { data: cart_data, isLoading, refetch: cart_refetch } = useCart();
+
+  // ✅ Log only when cart_data is defined and loading is complete
+  useEffect(() => {
+    if (!isLoading && cart_data) {
+      console.log(cart_data, "****** from context");
+    }
+  }, [cart_data, isLoading]);
 
   const CartItems = cart_data?.items || [];
-  const itemCount = CartItems.reduce((total: any, item: any) => total + parseInt(item.quantity), 0);
+  const itemCount = CartItems.reduce((total: number, item: any) => total + parseInt(item.quantity), 0);
 
   useImperativeHandle(ref, () => ({
     cart_refetch() {

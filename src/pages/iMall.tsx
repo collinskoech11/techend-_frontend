@@ -29,7 +29,7 @@ const HeroSection = styled(Box)({
   background: `linear-gradient(135deg, ${primaryColor} 0%, #2b0507 100%)`, // Still a base gradient
   color: "#fff",
   textAlign: "center",
-  // padding: "120px 0",
+  padding: "120px 0",
   borderRadius: "16px",
   marginBottom: "80px",
   position: "relative",

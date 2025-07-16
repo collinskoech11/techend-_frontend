@@ -53,6 +53,7 @@ function Cart() {
       product: prod_id,
       product_action_symbol: direction,
       token: Cookies.get("access"),
+      shopname: Cookies.get("shopname"),
     });
     try {
       if (response.error) {
@@ -71,6 +72,7 @@ function Cart() {
     const response = await deleteItemQty({
       product: prod_id,
       token: Cookies.get("access"),
+      shopname: Cookies.get("shopname"),
     });
     try {
       if (response.error) {

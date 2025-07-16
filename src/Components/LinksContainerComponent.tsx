@@ -30,6 +30,7 @@ import Cookies from "js-cookie";
 import AuthDialog from "./AuthDialog";
 import Shop2Icon from "@mui/icons-material/Shop2";
 import HomeIcon from "@mui/icons-material/Home";
+import MuseumIcon from '@mui/icons-material/Museum';
 // Added for the mobile menu cart item
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 
@@ -74,7 +75,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
 
   const handleClose = (link) => {
     if (typeof link === 'string' && link) {
-        router.push(link);
+      router.push(link);
     }
     setAnchorEl(null);
   };
@@ -143,14 +144,14 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             <ListItemIcon><HistoryOutlinedIcon fontSize="small" /></ListItemIcon>
             Order History
           </MenuItem>
-           <MenuItem>
-              <ListItemIcon>
-                <Badge badgeContent={1} color="warning">
-                  <NotificationsOutlinedIcon fontSize="small" />
-                </Badge>
-              </ListItemIcon>
-              Notifications
-            </MenuItem>
+          <MenuItem>
+            <ListItemIcon>
+              <Badge badgeContent={1} color="warning">
+                <NotificationsOutlinedIcon fontSize="small" />
+              </Badge>
+            </ListItemIcon>
+            Notifications
+          </MenuItem>
           <Divider />
           <MenuItem onClick={() => handleMobileMenuItemClick("/profile")}>
             <ListItemIcon><AccountCircleIcon fontSize="small" /></ListItemIcon>
@@ -171,9 +172,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
       ) : (
         // When not logged in, show AuthDialog or a login link
         // Here we render the AuthDialog directly as a menu item
-         <Box sx={{p:1}}>
-            <AuthDialog onTrigger={refetchUser} />
-         </Box>
+        <Box sx={{ p: 1 }}>
+          <AuthDialog onTrigger={refetchUser} />
+        </Box>
       )}
     </Menu>
   );
@@ -191,7 +192,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1 }}>
           {router.pathname === "/" && (
             <>
-              <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
+              {/* <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
                 <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
               </IconButton>
               <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
@@ -199,9 +200,14 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               </IconButton>
               <IconButton color="inherit" href="#" target="_blank">
                 <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
-              </IconButton>
+              </IconButton> */}
             </>
           )}
+          <Tooltip title="Mall">
+            <IconButton onClick={() => router.push(`/shops`)} sx={{ color: "#fff" }}>
+              <MuseumIcon />
+            </IconButton>
+          </Tooltip>
           {user ? (
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Tooltip title="Home">

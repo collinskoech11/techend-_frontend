@@ -60,7 +60,7 @@ export const AuthApi = createApi({
     }),
     addProductQtyToCart: builder.mutation({
       query: data => ({
-        url: `cart/cart-item/${data.product}/${data.product_action_symbol}/`,
+        url: `cart/cart-item/${data.product}/${data.product_action_symbol}/${data.shopname}/`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -69,7 +69,7 @@ export const AuthApi = createApi({
     }),
     removeProductFromCart: builder.mutation({
       query: data => ({
-        url: `cart/cart-item-delete/${data.product}/`,
+        url: `cart/cart-item-delete/${data.product}/${data.shopname}/`,
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${data.token}`,
