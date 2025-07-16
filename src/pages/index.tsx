@@ -306,8 +306,8 @@ export default function LandingPage() {
           <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
             Why <span style={{ color: primaryColor }}>iMall</span> is Your Best Choice
           </Typography>
-          <Grid container spacing={6} justifyContent="center">
-            <Grid item xs={12} md={4}>
+          <Grid container gap={3} justifyContent="center">
+            <Grid item xs={12} md={3}>
               <Fade direction="down" duration={1000}>
                 <FeatureCard>
                   <StorefrontIcon /> {/* Changed icon for variety */}
@@ -321,7 +321,7 @@ export default function LandingPage() {
               </Fade>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <Fade delay={200} duration={1000}>
                 <FeatureCard>
                   <ShoppingCartIcon />
@@ -335,7 +335,7 @@ export default function LandingPage() {
               </Fade>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <Fade direction="down" delay={400} duration={1000}>
                 <FeatureCard>
                   <TrendingUpIcon />
