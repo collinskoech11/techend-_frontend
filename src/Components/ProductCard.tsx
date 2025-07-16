@@ -33,20 +33,22 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading }) => {
-  console.log("ProductCard rendered with product:", isLoading);
   const router = useRouter();
-  const [isHovered, setIsHovered] = useState(false); // State for hover effect
-
+  const [isHovered, setIsHovered] = useState(false);
   const [addToCart, { isLoading: AddToCartLoading }] = useAddToCartMutation();
 
   const AddItemToCart = async (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent card click from firing when clicking add to cart
+    event.stopPropagation();
     const access = Cookies.get("access");
     const refresh = Cookies.get("refresh");
     const username = Cookies.get("username");
 
     if (access && refresh && username) {
-      const response = await addToCart({ product: product.product?.id || product.id, token: access, shopname: Cookies.get("shopname") });
+      const response = await addToCart({
+        product: product.product?.id || product.id,
+        token: access,
+        shopname: Cookies.get("shopname"),
+      });
       if (response.error) {
         const error_message = response.error.data?.error || "An error occurred";
         toast.error(<Typography>{error_message}</Typography>);
@@ -69,9 +71,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         {Array.from({ length: fullStars }).map((_, idx) => (
           <StarIcon key={`full-${idx}`} />
         ))}
-        {halfStar === 1 && (
-          <StarHalfIcon />
-        )}
+        {halfStar === 1 && <StarHalfIcon />}
         {Array.from({ length: emptyStars }).map((_, idx) => (
           <StarBorderIcon key={`empty-${idx}`} />
         ))}
@@ -79,7 +79,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
     );
   };
 
-  // Centralized product data access
   const currentProduct = product?.product || product;
 
   return (
@@ -88,14 +87,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
       <ProductItemStyled
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => router.push(`/product/${currentProduct?.id}`)} // Make the whole card clickable
+        onClick={() => !AddToCartLoading && router.push(`/product/${currentProduct?.id}`)} // disable click while loading
+        sx={{
+          pointerEvents: AddToCartLoading ? 'none' : 'auto',
+          opacity: AddToCartLoading ? 0.6 : 1,
+          position: 'relative',
+        }}
       >
         <ProductImageWrapper>
-          <ProductImage src={`https://res.cloudinary.com/dqokryv6u/${currentProduct?.main_image}`} alt={currentProduct?.title} />
-          {isHovered && (
+          <ProductImage
+            src={`https://res.cloudinary.com/dqokryv6u/${currentProduct?.main_image}`}
+            alt={currentProduct?.title}
+          />
+          {isHovered && !AddToCartLoading && (
             <ProductOverlay>
               <GreenButton
-                onClick={AddItemToCart} // Use the new GreenButton for primary action
+                onClick={AddItemToCart}
                 sx={{ mr: 1 }}
                 endIcon={!AddToCartLoading && <ShoppingBasketIcon />}
               >
@@ -103,10 +110,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
               </GreenButton>
               <BorderedButton
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent card click from firing
+                  e.stopPropagation();
                   router.push(`/product/${currentProduct?.id}`);
                 }}
-                sx={{ ml: 1, color: '#fff', borderColor: '#fff', '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)', borderColor: '#fff' } }}
+                sx={{
+                  ml: 1,
+                  color: '#fff',
+                  borderColor: '#fff',
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)', borderColor: '#fff' },
+                }}
                 endIcon={<VisibilityIcon />}
               >
                 View
@@ -118,8 +130,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         <ProductInfoContainer>
           <ProductPrice>Ksh {currentProduct?.price}</ProductPrice>
           <ProductTitle>{currentProduct?.title}</ProductTitle>
-          {/* Optional: Add a short product description if available */}
-          {/* <ProductDescription>{currentProduct?.short_description}</ProductDescription> */}
           <RatingContainer>
             {renderStars(currentProduct?.rating || 0)}
             <Typography variant="body2" color="textSecondary" sx={{ ml: 0.5 }}>
@@ -128,7 +138,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
           </RatingContainer>
         </ProductInfoContainer>
 
-        {/* Removed individual buttons here as they are now part of the hover overlay */}
+        {/* 🟡 Show loading message when adding */}
+        {AddToCartLoading && (
+          <Typography
+            variant="caption"
+            sx={{
+              position: 'absolute',
+              bottom: 8,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'text.secondary',
+              fontStyle: 'italic',
+            }}
+          >
+            Adding to cart...
+          </Typography>
+        )}
       </ProductItemStyled>
     </>
   );

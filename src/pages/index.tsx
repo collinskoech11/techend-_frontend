@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
-
+import FAQ from "@/Components/FAQ"; // Importing FAQ component
 // Define a consistent color palette
 const primaryColor = "#be1f2f"; // Your existing accent color (Deep Red)
 const primaryDark = "#8f1721"; // Darker shade for hover/accents
@@ -44,7 +44,7 @@ const HeroSection = styled(Box)(({ theme }) => ({
   marginBottom: "100px", // More space after hero
   position: "relative",
   overflow: "hidden",
-  padding: "120px 0", // Generous padding
+  // padding: "120px 0", // Generous padding
   [theme.breakpoints.down('sm')]: {
     padding: "80px 0",
     borderRadius: "10px",
@@ -230,7 +230,7 @@ export default function LandingPage() {
           showButton={false}
         />
       )}
-      <Container maxWidth="xl" sx={{ mx: "auto", px: 3, pt: 5, pb: 8 }}>
+      <Container sx={{ mx: "auto", px: 1, pt: 5, pb: 8, maxWidth: { xl: "90vw" } }}>
         {/* Hero Section */}
         <HeroSection onClick={handleAuthTrigger}>
           {/* Decorative floating graphics */}
@@ -299,7 +299,7 @@ export default function LandingPage() {
           </Zoom>
         </HeroSection>
 
-         
+
 
         {/* Features Section */}
         <Box sx={{ py: 10 }}>
@@ -351,7 +351,7 @@ export default function LandingPage() {
           </Grid>
         </Box>
 
-         
+
 
         {/* Explore iMall in Action Section (Alternating Layouts) */}
         <Box sx={{ py: 10 }}>
@@ -365,7 +365,7 @@ export default function LandingPage() {
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
                   <img
-                    src="/assets/sample_ui_2.png"
+                    src="/assets/this.png"
                     alt="Sleek eCommerce Storefront Designs"
                     loading="lazy"
                   />
@@ -404,7 +404,7 @@ export default function LandingPage() {
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ mr: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
                   <img
-                    src="/assets/sample_ui_1.png"
+                    src="/assets/admin.png"
                     alt="Powerful Admin Dashboard"
                     loading="lazy"
                   />
@@ -417,7 +417,7 @@ export default function LandingPage() {
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
                   <img
-                    src="/assets/sample_ui.png"
+                    src="/assets/simple.png"
                     alt="AI-Powered Insights Dashboard"
                     loading="lazy"
                   />
@@ -440,10 +440,10 @@ export default function LandingPage() {
           </Slide>
         </Box>
 
-         
+
 
         {/* Pricing Section */}
-        <Box sx={{ py: 10, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
           <Fade cascade triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
               Simple, Transparent Pricing
@@ -463,7 +463,19 @@ export default function LandingPage() {
                       Perfect for new businesses taking their first steps online.
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
-                      $15<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
+                      <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: lightText, textDecoration: "line-through" }}>
+                        $15 <Typography component="span" variant="h6" color={lightText}>/mo</Typography>
+                      </Typography>
+                      <Typography
+                        variant="h3"
+                        sx={{
+                          fontWeight: 800,
+                          mb: 2,
+                          color: primaryColor,
+                        }}
+                      >
+                        $0 <Typography component="span" variant="h6" sx={{ color: darkText }}>/mo</Typography>
+                      </Typography>
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
                       <ListItem>
@@ -481,6 +493,10 @@ export default function LandingPage() {
                       <ListItem>
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Basic Analytics</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Theme</Typography>} />
                       </ListItem>
                     </List>
                   </Box>
@@ -512,7 +528,7 @@ export default function LandingPage() {
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
-                        <ListItemText primary={<Typography variant="body1" color={lightText}>Effortless Inventory Management</Typography>} />
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Enhanced Notifications(SMS,  email, WhatsApp)</Typography>} />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
@@ -521,6 +537,10 @@ export default function LandingPage() {
                       <ListItem>
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Advanced Sales Reports</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Priority Shop Listing</Typography>} />
                       </ListItem>
                     </List>
                   </Box>
@@ -546,7 +566,7 @@ export default function LandingPage() {
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
-                        <ListItemText primary={<Typography variant="body1" color={lightText}>In-depth Predictive Analytics</Typography>} />
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>AI enabled targeted marketing</Typography>} />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
@@ -560,6 +580,18 @@ export default function LandingPage() {
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Integrations</Typography>} />
                       </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Full time dev support</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Landing Page</Typography>} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Domain propagation</Typography>} />
+                      </ListItem>
                     </List>
                   </Box>
                   <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: primaryColor, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
@@ -571,7 +603,10 @@ export default function LandingPage() {
           </Fade>
         </Box>
 
-         
+
+        <FAQ />
+
+
 
         {/* Call to Action Section (Final) */}
         <Box sx={{ textAlign: "center", py: 12 }}>

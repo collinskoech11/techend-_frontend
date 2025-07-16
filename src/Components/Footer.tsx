@@ -52,7 +52,7 @@ function Footer() {
           color: "#fff",
           pt: { xs: 4, md: 8 },
           pb: { xs: 4, md: 6 },
-          mt: "100px",
+          // mt: "100px",
 
           "&::before, &::after": {
             content: '""',
