@@ -15,7 +15,7 @@ const CartMenu = forwardRef((props: any, ref) => {
   // ✅ Log only when cart_data is defined and loading is complete
   useEffect(() => {
     if (!isLoading && cart_data) {
-      console.log(cart_data, "****** from context");
+      // console.log(cart_data, "****** from context");
     }
   }, [cart_data, isLoading]);
 
@@ -67,20 +67,19 @@ const CartMenu = forwardRef((props: any, ref) => {
           ))
         )}
 
-        {CartItems.length > 0 && (
-          <>
-            <Divider />
-            <MenuItem
-              sx={{ justifyContent: "center", fontWeight: "bold", color: "#BE1E2D" }}
-              onClick={() => {
-                router.push("/cart");
-                setAnchorEl(null);
-              }}
-            >
-              View Full Cart
-            </MenuItem>
-          </>
-        )}
+        {CartItems.length > 0 && [
+          <Divider key="divider" />,
+          <MenuItem
+            key="view-cart"
+            sx={{ justifyContent: "center", fontWeight: "bold", color: "#BE1E2D" }}
+            onClick={() => {
+              router.push("/cart");
+              setAnchorEl(null);
+            }}
+          >
+            View Full Cart
+          </MenuItem>,
+        ]}
       </Menu>
     </>
   );

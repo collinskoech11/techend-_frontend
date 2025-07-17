@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useImperativeHandle, useEffect } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
@@ -25,6 +25,7 @@ import StarIcon from '@mui/icons-material/Star';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import toast, { Toaster } from "react-hot-toast";
+import { useCart } from "@/contexts/CartContext";
 
 // --- Color Palette (Consistent with previous suggestions) ---
 const primaryColor = "#be1f2f";
@@ -195,7 +196,8 @@ const SkeletonThumbnail = styled(Skeleton)({
   borderRadius: "8px",
 });
 
-function ProductDetailView() {
+function ProductDetailView(ref:any) {
+  const { data: cart_data, isLoading:cart_loading, refetch: cart_refetch } = useCart();
   const router = useRouter();
   const id = router.query.id;
   const [shopname] = useState(Cookies.get("shopname") || "techend");
@@ -224,11 +226,24 @@ function ProductDetailView() {
         toast.error(errorMessage);
       } else {
         toast.success(`${quantity} x ${product?.title} added to cart!`);
+        cart_refetch(); // <--- Add this line to update the cart context
       }
     } else {
+      useImperativeHandle(ref, () => ({
+        cart_refetch() {
+          cart_refetch();
+        },
+      }));
       toast.error("Please log in to add items to your cart.");
     }
   };
+  
+
+  // useEffect(() => {
+  //     if (!isLoading && cart_data) {
+  //       console.log(cart_data, "****** from context");
+  //     }
+  //   }, [cart_data, isLoading]); 
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -297,6 +312,7 @@ function ProductDetailView() {
           ) : (
             <>
               <Swiper
+              style={{ width:"400px", maxWidth:"90vw" }}
                 spaceBetween={10}
                 navigation={imagesToDisplay.length > 1}
                 thumbs={{ swiper: thumbsSwiper }}
@@ -323,6 +339,7 @@ function ProductDetailView() {
               {imagesToDisplay.length > 1 && (
                 <Box sx={{ mt: 2 }}>
                   <Swiper
+                  style={{ width:"400px", maxWidth:"90vw" }}
                     onSwiper={setThumbsSwiper}
                     spaceBetween={10}
                     slidesPerView={Math.min(imagesToDisplay.length, 4)}

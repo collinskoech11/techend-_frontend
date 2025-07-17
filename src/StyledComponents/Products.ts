@@ -74,9 +74,9 @@ export const IconWrapper = styled(Box)({
 
 
 export const ProductItemStyled = styled(Card)(({ theme }) => ({
-  width: "90vw",
+  width: "100%",
   margin: "auto",
-  maxWidth: "95%", // Set a max-width for better responsiveness and grid alignment
+  // maxWidth: "350px", // Set a max-width for better responsiveness and grid alignment
   borderRadius: "12px", // Softer rounded corners
   boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08)", // Softer initial shadow
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
