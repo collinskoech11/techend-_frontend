@@ -11,11 +11,23 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, companyExists, refetchCompany, triggerRerender }: YourChildProps) => {
-    const [createCompany, { isLoadingCreate:isLoadingCreate }] = useCreateCompanyMutation();
-    const [updateCompany, { isLoading:isLoadingUpdate }] = useUpdateCompanyMutation();
+    const [createCompany, { isLoadingCreate: isLoadingCreate }] = useCreateCompanyMutation();
+    const [updateCompany, { isLoading: isLoadingUpdate }] = useUpdateCompanyMutation();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCompanyData({ ...companyData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        let updatedValue = value;
+
+        if (name === "website" && value && !/^https?:\/\//i.test(value)) {
+            updatedValue = `https://${value}`;
+        }
+
+        setCompanyData({
+            ...companyData,
+            [name]: updatedValue,
+        });
     };
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         if (e.target.files) {
@@ -30,13 +42,13 @@ const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setComp
                 formData.append(key, value as any);
             }
         });
-        formData.append("company_onboarding_step", (activeStep+1).toString());
+        formData.append("company_onboarding_step", (activeStep + 1).toString());
 
         try {
-            if(!companyExists){
+            if (!companyExists) {
                 await createCompany({ token, body: formData }).unwrap();
             } else {
-                await updateCompany({ token, body: formData }).unwrap(); 
+                await updateCompany({ token, body: formData }).unwrap();
             }
             refetchCompany();
             triggerRerender;
@@ -54,7 +66,7 @@ const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setComp
             <TextField fullWidth label="Website" name="website" value={companyData?.website} onChange={handleChange} margin="normal" />
             <TextField fullWidth label="Contact Email" name="contact_email" value={companyData?.contact_email} onChange={handleChange} margin="normal" />
             <TextField fullWidth label="Contact Phone" name="contact_phone" value={companyData?.contact_phone} onChange={handleChange} margin="normal" />
-            
+
             <Button
                 component="label"
                 variant="outlined"
