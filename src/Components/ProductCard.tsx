@@ -11,7 +11,7 @@ import {
   ProductTitle,
   ProductDescription, // Added for potential description
 } from "@/StyledComponents/Typos"; // Updated imports
-import React, { useState } from "react";
+import React, { useState, useImperativeHandle, useEffect } from "react";
 import StarIcon from '@mui/icons-material/Star';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -23,6 +23,7 @@ import { useAddToCartMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductCardProps {
   product: any;
@@ -30,12 +31,14 @@ interface ProductCardProps {
   // Remove if not used for individual card loading states
   triggerCartRefetch: () => void;
   isLoading?: boolean; // Optional prop to indicate loading state
+  ref?: React.Ref<any>; // Forward ref for imperative handle
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading, ref }) => {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [addToCart, { isLoading: AddToCartLoading }] = useAddToCartMutation();
+  const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } = useCart();
 
   const AddItemToCart = async (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -53,13 +56,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         const error_message = response.error.data?.error || "An error occurred";
         toast.error(<Typography>{error_message}</Typography>);
       } else {
+        cart_refetch();
         toast.success("Product added to cart!");
         triggerCartRefetch();
       }
     } else {
+      useImperativeHandle(ref, () => ({
+        cart_refetch() {
+          cart_refetch();
+        },
+      }));
       toast.error("Please log in to add an item to cart.");
     }
   };
+
+  // useEffect(() => {
+  //   if (!isLoading && cart_data) {
+  //     console.log(cart_data, "****** from context");
+  //   }
+  // }, [cart_data, isLoading]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
