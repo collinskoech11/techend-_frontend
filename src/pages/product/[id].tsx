@@ -239,11 +239,11 @@ function ProductDetailView(ref:any) {
   };
   
 
-  useEffect(() => {
-      if (!isLoading && cart_data) {
-        console.log(cart_data, "****** from context");
-      }
-    }, [cart_data, isLoading]); 
+  // useEffect(() => {
+  //     if (!isLoading && cart_data) {
+  //       console.log(cart_data, "****** from context");
+  //     }
+  //   }, [cart_data, isLoading]); 
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
