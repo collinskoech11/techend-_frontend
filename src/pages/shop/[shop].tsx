@@ -184,12 +184,12 @@ const Shop = forwardRef((props: any, ref: any) => {
     <>
       <StyledBreadcrumbWrapper>
         <StyledBreadcrumbs aria-label="breadcrumb">
-          <StyledLink underline="hover" href={`/_/${shopname}`}>
+          <Typography color="inherit">
             {shopname.charAt(0).toUpperCase() + shopname.slice(1)} {/* Capitalize shop name */}
-          </StyledLink>
-          <Typography variant="body1" className="MuiTypography-root"> {/* Use Typography for the current page */}
-            Shop
           </Typography>
+          <StyledLink variant="body1" className="MuiTypography-root" href={`/shop/${shopname}`}> {/* Use Typography for the current page */}
+            Shop
+          </StyledLink>
         </StyledBreadcrumbs>
       </StyledBreadcrumbWrapper>
 

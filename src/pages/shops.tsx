@@ -154,35 +154,8 @@ const HeroBanner: React.FC = () => {
               letterSpacing: { xs: '-0.02em', md: '-0.03em' },
             }}
           >
-            <Typewriter
-              options={{
-                strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
-                autoStart: true,
-                loop: true,
-              }}
-            />
+            Explore Shops
           </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              maxWidth: "700px",
-              mx: "auto",
-              mb: { xs: 2, md: 3 },
-              color: "rgba(255,255,255,0.9)",
-              fontSize: {
-                xs: '1.1rem',
-              },
-              lineHeight: 1.5,
-            }}
-          >
-            Launch, manage, and grow your enterprise with <strong>iMall</strong> — the all-in-one platform designed for <strong>simplicity, speed, and success</strong> in the digital marketplace.
-          </Typography>
-          <AccentButton
-            onClick={handleAuthTrigger}
-            endIcon={<ArrowForwardIcon />}
-          >
-            Get Started Today
-          </AccentButton>
         </Box>
       </Zoom>
     </HeroSection>
@@ -197,9 +170,6 @@ const CompaniesList: React.FC = () => {
     return (
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <BannerSkeleton />
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Explore Our Shops
-        </Typography>
         <Grid container spacing={3}>
           {Array.from(new Array(8)).map((_, index) => (
             <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
