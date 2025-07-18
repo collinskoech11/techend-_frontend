@@ -39,7 +39,7 @@ function Register() {
         const { access, refresh, user } = response.data;
         Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
         Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
-        Cookies.set("user", user, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
         toast.success("Successful registration");
         router.push(`/shop/${shopname}`);
       } else if (response.error) {

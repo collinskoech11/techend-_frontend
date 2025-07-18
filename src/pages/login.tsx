@@ -22,7 +22,7 @@ function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-    const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,6 +39,8 @@ function Login() {
         Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
         Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
         Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
+        Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
+
         toast.success(<><Typography>Log in success</Typography></>);
         router.push(`/shop/${shopname}`);
       } else if (response.error) {
@@ -62,7 +64,7 @@ function Login() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: "calc(100dvh - 64px)", 
+          minHeight: "calc(100dvh - 64px)",
           pt: 8,
         }}
       >
