@@ -287,7 +287,7 @@ export default function LandingPage() {
                   lineHeight: 1.5,
                 }}
               >
-                Launch, manage, and grow your enterprise with **iMall** — the all-in-one platform designed for **simplicity, speed, and success** in the digital marketplace.
+                Launch, manage, and grow your enterprise with iMall the all-in-one platform designed for simplicity, speed, and success in the digital marketplace.
               </Typography>
               <AccentButton
                 onClick={handleAuthTrigger}

@@ -92,14 +92,14 @@ export const AuthApi = createApi({
         headers: {
           Authorization: `Bearer ${data.token}`,
         },
-        body:{
+        body: {
           firstName: data.body.firstName,
           lastName: data.body.lastName,
-          phoneNumber: data.body.phoneNumber ,
+          phoneNumber: data.body.phoneNumber,
           postal_code: data.body.postal_code,
           address: data.body.address,
           city: data.body.city,
-          state: data.body.state ,
+          state: data.body.state,
           country: data.body.country,
           payment_method: data.body.payment_method,
         }
@@ -115,13 +115,13 @@ export const AuthApi = createApi({
       }),
     }),
     getCompany: builder.query({
-     query: (token) => ({
-       url: `companies/my/status/`,
-       method: "GET",
-       headers: {
-         Authorization: `Bearer ${token}`,
-       },
-     }),
+      query: (token) => ({
+        url: `companies/my/status/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
     }),
     createCompany: builder.mutation({
       query: (data) => ({
@@ -149,7 +149,21 @@ export const AuthApi = createApi({
         method: "GET"
       }),
     }),
-  }),
+    requestPasswordReset: builder.mutation({
+      query: data => ({
+        url: `auth/send-reset-otp/`,
+        method: "POST",
+        body:  data.body
+      }),
+    }),
+    confirmPasswordReset: builder.mutation({
+      query: data => ({
+        url: `auth/verify-reset-otp/`,
+        method: "POST",
+        body: data.body
+      }),
+    }),
+  })
 });
 export const {
   useGetUserQuery,
@@ -167,4 +181,6 @@ export const {
   useCreateCompanyMutation,
   useUpdateCompanyMutation,
   useGetCompaniesQuery,
+  useRequestPasswordResetMutation,
+  useConfirmPasswordResetMutation,
 }: any = AuthApi;
