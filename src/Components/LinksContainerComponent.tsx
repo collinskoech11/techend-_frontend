@@ -99,6 +99,8 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
     Cookies.remove("username");
     Cookies.remove("access");
     Cookies.remove("refresh");
+    Cookies.remove("shopname");
+    Cookies.remove("user");
     handleMobileMenuClose(); // Close mobile menu if open
     router.push("/login");
   };
