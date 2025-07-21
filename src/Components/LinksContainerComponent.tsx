@@ -138,6 +138,10 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             <ListItemIcon><Shop2Icon fontSize="small" /></ListItemIcon>
             Shop
           </MenuItem>
+           <MenuItem onClick={() => handleMobileMenuItemClick(`/shop/${shopname}`)}>
+            <ListItemIcon><MuseumIcon fontSize="small" /></ListItemIcon>
+            Mall
+          </MenuItem>
           <MenuItem onClick={() => handleMobileMenuItemClick("/cart")}>
             <ListItemIcon><ShoppingCartOutlinedIcon fontSize="small" /></ListItemIcon>
             Cart
