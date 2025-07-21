@@ -1,5 +1,12 @@
 import Navbar from "@/Components/Navbar";
-import { Box, CircularProgress, Typography, IconButton, InputAdornment, TextField } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  IconButton,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import React, { useState } from "react";
 import { useUserLoginMutation } from "@/Api/services";
 import Cookies from "js-cookie";
@@ -15,7 +22,7 @@ const loginSchema = z.object({
 });
 
 function Login() {
-  const [login, { isLoading, error }] = useUserLoginMutation();
+  const [login, { isLoading }] = useUserLoginMutation();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -41,10 +48,10 @@ function Login() {
         Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
         Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
 
-        toast.success(<><Typography>Log in success</Typography></>);
+        toast.success(<Typography>Log in success</Typography>);
         router.push(`/shop/${shopname}`);
       } else if (response.error) {
-        toast.error(<><Typography>{response.error.data.non_field_errors[0]}</Typography></>);
+        toast.error(<Typography>{response.error.data?.non_field_errors?.[0] || "Login failed"}</Typography>);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -91,6 +98,7 @@ function Login() {
             >
               Login
             </h1>
+
             <TextField
               fullWidth
               name="username"
@@ -100,6 +108,7 @@ function Login() {
               margin="normal"
               variant="outlined"
             />
+
             <TextField
               fullWidth
               name="password"
@@ -122,6 +131,22 @@ function Login() {
                 ),
               }}
             />
+
+            {/* Forgot Password Link */}
+            <Typography
+              variant="body2"
+              sx={{
+                textAlign: "right",
+                mt: 1,
+                cursor: "pointer",
+                color: "#BE1E2D",
+                fontWeight: 500,
+              }}
+              onClick={() => router.push("/forgot-password")}
+            >
+              Forgot Password?
+            </Typography>
+
             <button
               style={{
                 width: "100%",
@@ -136,6 +161,7 @@ function Login() {
                 fontWeight: "600",
               }}
               onClick={loginUser}
+              disabled={isLoading}
             >
               {isLoading ? (
                 <CircularProgress style={{ color: "#fff" }} size={24} />
@@ -143,6 +169,7 @@ function Login() {
                 "Login"
               )}
             </button>
+
             <p style={{ marginTop: "20px" }}>
               Don't have an account?{" "}
               <a

@@ -10,7 +10,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import toast, { Toaster } from "react-hot-toast";
 import Typewriter from "typewriter-effect";
 import Zoom from 'react-reveal/Zoom';
@@ -92,7 +91,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
         </ProductOverlay>
       </ProductImageWrapper>
       <ProductInfoContainer>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{  gap: 1, mb: 1 }}>
           <ProductTitle sx={{ mb: 0, flexGrow: 1 }}>{company.name}</ProductTitle>
           {company.kyc_approved && (
             <Tooltip title="This company has been verified by our team.">

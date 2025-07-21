@@ -32,7 +32,7 @@ const registerSchema = z.object({
 
 function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
   const [open, setOpen] = useState(forceOpen);
-  const [tabIndex, setTabIndex] = useState(0); // 0 = Login, 1 = Register
+  const [tabIndex, setTabIndex] = useState(0);
 
   const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
   const [register, { isLoading: isRegistering }] = useUserRegistrationMutation();
@@ -131,124 +131,138 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
 
   return (
     <>
-        <Toaster />
+      <Toaster />
 
-        {showButton && (
-          loggedInUser ? (
-            <IconButton onClick={() => setOpen(true)}>
-              <AccountCircleOutlined sx={{ color: "#BE1E2D", fontSize: 32 }} />
-            </IconButton>
-          ) : (
-            <Button
-              color="inherit"
-              // sx={{ background: "#BE1E2D", border: "1px solid #fff", color: "#fff" }}
-              onClick={() => setOpen(true)}
-            >
-              Login
-            </Button>
-          )
-        )}
+      {showButton && (
+        loggedInUser ? (
+          <IconButton onClick={() => setOpen(true)}>
+            <AccountCircleOutlined sx={{ color: "#BE1E2D", fontSize: 32 }} />
+          </IconButton>
+        ) : (
+          <Button color="inherit" onClick={() => setOpen(true)}>
+            Login
+          </Button>
+        )
+      )}
 
-        <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogContent>
-            <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px", background: "#fff", borderRadius: "5px" }}>
-              <Tabs value={tabIndex} onChange={handleTabChange} centered>
-                <Tab label="Login" />
-                <Tab label="Register" />
-              </Tabs>
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogContent>
+          <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px", background: "#fff", borderRadius: "5px" }}>
+            <Tabs value={tabIndex} onChange={handleTabChange} centered>
+              <Tab label="Login" />
+              <Tab label="Register" />
+            </Tabs>
 
-              {tabIndex === 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <TextField
-                    fullWidth
-                    name="username"
-                    label="Username"
-                    value={loginData.username}
-                    onChange={handleLoginChange}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                  <TextField
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type={showPasswordLogin ? "text" : "password"}
-                    value={loginData.password}
-                    onChange={handleLoginChange}
-                    margin="normal"
-                    variant="outlined"
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPasswordLogin(!showPasswordLogin)} edge="end">
-                            {showPasswordLogin ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <Button
-                    fullWidth
-                    sx={{ mt: 2, background: "#BE1E2D", color: "#fff", fontWeight: "600", "&:hover": { background: "#a51a27" } }}
-                    onClick={loginUser}
-                  >
-                    {isLoggingIn ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Login"}
-                  </Button>
-                </Box>
-              )}
+            {tabIndex === 0 && (
+              <Box sx={{ mt: 2 }}>
+                <TextField
+                  fullWidth
+                  name="username"
+                  label="Username"
+                  value={loginData.username}
+                  onChange={handleLoginChange}
+                  margin="normal"
+                  variant="outlined"
+                />
+                <TextField
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type={showPasswordLogin ? "text" : "password"}
+                  value={loginData.password}
+                  onChange={handleLoginChange}
+                  margin="normal"
+                  variant="outlined"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPasswordLogin(!showPasswordLogin)} edge="end">
+                          {showPasswordLogin ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-              {tabIndex === 1 && (
-                <Box sx={{ mt: 2 }}>
-                  <TextField
-                    fullWidth
-                    name="username"
-                    label="Username"
-                    value={registerData.username}
-                    onChange={handleRegisterChange}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                  <TextField
-                    fullWidth
-                    name="email"
-                    label="Email"
-                    type="email"
-                    value={registerData.email}
-                    onChange={handleRegisterChange}
-                    margin="normal"
-                    variant="outlined"
-                  />
-                  <TextField
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type={showPasswordRegister ? "text" : "password"}
-                    value={registerData.password}
-                    onChange={handleRegisterChange}
-                    margin="normal"
-                    variant="outlined"
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPasswordRegister(!showPasswordRegister)} edge="end">
-                            {showPasswordRegister ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <Button
-                    fullWidth
-                    sx={{ mt: 2, background: "#BE1E2D", color: "#fff", fontWeight: "600", "&:hover": { background: "#a51a27" } }}
-                    onClick={registerUser}
-                  >
-                    {isRegistering ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Register"}
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          </DialogContent>
-        </Dialog>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    textAlign: "right",
+                    mt: 1,
+                    cursor: "pointer",
+                    color: "#BE1E2D",
+                    fontWeight: 500,
+                  }}
+                  onClick={() => {
+                    setOpen(false);
+                    router.push("/forgot-password");
+                  }}
+                >
+                  Forgot Password?
+                </Typography>
+
+                <Button
+                  fullWidth
+                  sx={{ mt: 2, background: "#BE1E2D", color: "#fff", fontWeight: "600", "&:hover": { background: "#a51a27" } }}
+                  onClick={loginUser}
+                >
+                  {isLoggingIn ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Login"}
+                </Button>
+              </Box>
+            )}
+
+            {tabIndex === 1 && (
+              <Box sx={{ mt: 2 }}>
+                <TextField
+                  fullWidth
+                  name="username"
+                  label="Username"
+                  value={registerData.username}
+                  onChange={handleRegisterChange}
+                  margin="normal"
+                  variant="outlined"
+                />
+                <TextField
+                  fullWidth
+                  name="email"
+                  label="Email"
+                  type="email"
+                  value={registerData.email}
+                  onChange={handleRegisterChange}
+                  margin="normal"
+                  variant="outlined"
+                />
+                <TextField
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type={showPasswordRegister ? "text" : "password"}
+                  value={registerData.password}
+                  onChange={handleRegisterChange}
+                  margin="normal"
+                  variant="outlined"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPasswordRegister(!showPasswordRegister)} edge="end">
+                          {showPasswordRegister ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  fullWidth
+                  sx={{ mt: 2, background: "#BE1E2D", color: "#fff", fontWeight: "600", "&:hover": { background: "#a51a27" } }}
+                  onClick={registerUser}
+                >
+                  {isRegistering ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Register"}
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
