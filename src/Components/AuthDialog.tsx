@@ -48,24 +48,24 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
   const router = useRouter();
 
   function GoogleAccessTokenLogin() {
-    useEffect(() => {
-      window.google.accounts.oauth2.initTokenClient({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        scope: 'profile email openid',
-        callback: (response) => {
-          const accessToken = response.access_token;
+    // useEffect(() => {
+    //   window.google.accounts.oauth2.initTokenClient({
+    //     client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    //     scope: 'profile email openid',
+    //     callback: (response) => {
+    //       const accessToken = response.access_token;
 
-          // Send access token to Django backend
-          fetch('http://localhost:8000/auth/google/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ access_token: accessToken }),
-          });
-        },
-      }).requestAccessToken();
-    }, []);
+    //       // Send access token to Django backend
+    //       fetch('http://localhost:8000/auth/google/', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ access_token: accessToken }),
+    //       });
+    //     },
+    //   }).requestAccessToken();
+    // }, []);
 
-    return null;
+    // return null;
   }
 
   useEffect(() => {
