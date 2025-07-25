@@ -56,7 +56,7 @@ function Register() {
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error("an error occured");
       } else {
         toast.error("An unknown error occurred");
       }
