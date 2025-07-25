@@ -26,7 +26,7 @@ export interface CompanyData {
         acceptTerms: boolean;
 }
 
-"""export interface YourChildProps {
+export interface YourChildProps {
     token: string | undefined;
     nextStep: () => void;
     prevStep: () => void;
@@ -66,4 +66,3 @@ export interface Company {
   logo_image: string;
   kyc_approved: boolean;
 }
-""
