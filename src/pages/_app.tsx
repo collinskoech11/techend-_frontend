@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
 import { Box } from "@mui/material";
 import { CartProvider } from "@/contexts/CartContext"; // ✅ adjust this path if different
+import { GoogleOAuthProvider } from '@react-oauth/google';
 // import Script from "next/script";
 
 const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
@@ -27,6 +28,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
   return (
     <NoSSR>
       <Provider store={store}>
+        <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
         <CartProvider>
         {router.pathname !== "/" && (
         <Box sx={{ paddingBottom: { md: "50px", xs: "50px" } }}>
@@ -52,6 +54,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
         <Component {...pageProps} triggerCartRefetch={triggerCartRefetch}/>
         <Footer />
         </CartProvider>
+        </GoogleOAuthProvider>
       </Provider>
     </NoSSR>
   );
