@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useGetCompaniesQuery } from "@/Api/services";
+import { Company } from "@/Types";
 import {
   Box,
   Typography,
@@ -8,6 +9,7 @@ import {
   Chip,
   Skeleton,
   Tooltip,
+  Button,
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import toast, { Toaster } from "react-hot-toast";
@@ -33,15 +35,6 @@ import {
 } from "@/StyledComponents/Hero"; // Make sure these exist and are styled
 
 // --- Types ---
-interface Company {
-  id: number;
-  name: string;
-  sluggified_name: string;
-  description: string;
-  logo_image: string;
-  kyc_approved: boolean;
-}
-
 interface CompanyCardProps {
   company: Company;
 }
@@ -163,7 +156,8 @@ const HeroBanner: React.FC = () => {
 
 // --- Main Component ---
 const CompaniesList: React.FC = () => {
-  const { data: companiesData, error, isLoading } = useGetCompaniesQuery();
+  const [page, setPage] = useState(1);
+  const { data: companiesData, error, isLoading } = useGetCompaniesQuery({ page });
 
   if (isLoading) {
     return (
@@ -198,8 +192,8 @@ const CompaniesList: React.FC = () => {
         Explore Our Shops
       </Typography>
       <Grid container spacing={3}>
-        {companiesData && companiesData.length > 0 ? (
-          companiesData.map((company: Company) => (
+        {companiesData && companiesData.results.length > 0 ? (
+          companiesData.results.map((company: Company) => (
             <Grid item key={company.id} xs={12} sm={6} md={4} lg={3}>
               <CompanyCard company={company} />
             </Grid>
@@ -210,6 +204,20 @@ const CompaniesList: React.FC = () => {
           </Grid>
         )}
       </Grid>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Button
+          disabled={!companiesData?.previous}
+          onClick={() => setPage(page - 1)}
+        >
+          Previous
+        </Button>
+        <Button
+          disabled={!companiesData?.next}
+          onClick={() => setPage(page + 1)}
+        >
+          Next
+        </Button>
+      </Box>
     </Box>
   );
 };

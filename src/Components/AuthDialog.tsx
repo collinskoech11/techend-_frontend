@@ -18,6 +18,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { z } from "zod";
 import { Visibility, VisibilityOff, AccountCircleOutlined } from "@mui/icons-material";
+import { GoogleLogin } from '@react-oauth/google';
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -45,6 +46,27 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
 
   const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
   const router = useRouter();
+
+  function GoogleAccessTokenLogin() {
+    // useEffect(() => {
+    //   window.google.accounts.oauth2.initTokenClient({
+    //     client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    //     scope: 'profile email openid',
+    //     callback: (response) => {
+    //       const accessToken = response.access_token;
+
+    //       // Send access token to Django backend
+    //       fetch('http://localhost:8000/auth/google/', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ access_token: accessToken }),
+    //       });
+    //     },
+    //   }).requestAccessToken();
+    // }, []);
+
+    // return null;
+  }
 
   useEffect(() => {
     const username = Cookies.get("username");
@@ -90,7 +112,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error("validation failed");
       } else {
         toast.error("Login failed");
       }
@@ -122,7 +144,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error("validation error: ");
       } else {
         toast.error("Registration failed");
       }
@@ -139,9 +161,11 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
             <AccountCircleOutlined sx={{ color: "#BE1E2D", fontSize: 32 }} />
           </IconButton>
         ) : (
-          <Button color="inherit" onClick={() => setOpen(true)}>
-            Login
-          </Button>
+          <>
+            <Button color="inherit" onClick={() => setOpen(true)}>
+              Login
+            </Button>
+          </>
         )
       )}
 
@@ -151,6 +175,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
             <Tabs value={tabIndex} onChange={handleTabChange} centered>
               <Tab label="Login" />
               <Tab label="Register" />
+              <Tab label="Google" />
             </Tabs>
 
             {tabIndex === 0 && (
@@ -259,6 +284,20 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
                   {isRegistering ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Register"}
                 </Button>
               </Box>
+            )}
+            {tabIndex === 2 && (
+              <>
+                <GoogleLogin
+                  onSuccess={credentialResponse => {
+                    const accessToken = credentialResponse.credential; // Send to backend
+                    fetch('http://localhost:8000/auth/google/', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ access_token: accessToken }),
+                    });
+                  }}
+                />
+              </>
             )}
           </Box>
         </DialogContent>

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-
+import { Paginated, Product, Company } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -32,9 +32,9 @@ export const AuthApi = createApi({
         body: data.body
       })
     }),
-    getProducts: builder.query({
-      query: data => ({
-        url: `products/all/?company=${data.company}&category=${data.category}`,
+    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number }>({
+      query: ({ company, category, page = 1 }) => ({
+        url: `products/all/?company=${company}&category=${category}&page=${page}`,
         method: "GET"
       }),
     }),
@@ -143,9 +143,9 @@ export const AuthApi = createApi({
         body: data.body,
       }),
     }),
-    getCompanies: builder.query({
-      query: data => ({
-        url: `companies/all/`,
+    getCompanies: builder.query<Paginated<Company>, { page?: number; page_size?: number }>({
+      query: ({ page = 1, page_size = 10 }) => ({
+        url: `companies/all/?page=${page}&page_size=${page_size}`,
         method: "GET"
       }),
     }),

@@ -24,6 +24,7 @@ import {
   MenuItem,
   Typography,
   InputAdornment, // For adding icons to TextField
+  Button,
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
@@ -124,6 +125,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const pathParts = router.asPath.split("/");
@@ -144,7 +146,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     data: products_data,
     error: products_error,
     isLoading: products_loading,
-  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm }); // Pass searchTerm to API
+  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page }); // Pass searchTerm to API
 
   // Removed client-side filtering since API will handle it
   // const filteredProducts = (products_data || []).filter((product: any) =>
@@ -266,7 +268,7 @@ const Shop = forwardRef((props: any, ref: any) => {
                 </Typography>
               </Box>
             </Grid>
-          ) : products_data.length === 0 ? ( // Use products_data directly, as API now filters
+          ) : products_data.results.length === 0 ? ( // Use products_data directly, as API now filters
             <Grid item xs={12}>
               <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                 <Typography variant="h6" color={darkText}>
@@ -278,7 +280,7 @@ const Shop = forwardRef((props: any, ref: any) => {
               </Box>
             </Grid>
           ) : (
-            products_data.map((product: any, index: number) => (
+            products_data.results.map((product: any, index: number) => (
               <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid for ProductCard */}
                 <ProductCard
                   product={product}
@@ -289,6 +291,20 @@ const Shop = forwardRef((props: any, ref: any) => {
             ))
           )}
         </ProductsContainer>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            disabled={!products_data?.previous}
+            onClick={() => setPage(page - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            disabled={!products_data?.next}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </Button>
+        </Box>
       </MainProductsContainer>
     </>
   );
