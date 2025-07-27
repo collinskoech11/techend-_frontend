@@ -66,3 +66,51 @@ export interface Company {
   logo_image: string;
   kyc_approved: boolean;
 }
+
+export interface PickupLocation {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  delivery_fee: number;
+  company: number;
+  gmaps_link?: string; // Add this field
+}
+
+export interface CheckoutResponse {
+  id: number;
+  user: number;
+  cart: number;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  payment_method: string;
+  payment_status: string;
+  shipping_status: string;
+  total_amount: string;
+  company: number;
+  pickup_location: number | null;
+  shipping_cost: string;
+  created_at: string;
+}
+
+export type CheckoutFormData = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  payment_method: string;
+  pickup_location?: number | null;
+};
