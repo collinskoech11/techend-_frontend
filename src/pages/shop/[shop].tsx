@@ -128,17 +128,20 @@ const Shop = forwardRef((props: any, ref: any) => {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const pathParts = router.asPath.split("/");
+    const cleanPath = router.asPath.split("?")[0]; // Remove query string
+    const pathParts = cleanPath.split("/");
+
     if (pathParts[1] === "shop" && pathParts[2]) {
       const urlShopName = pathParts[2];
       setShopName(urlShopName);
       Cookies.set("shopname", urlShopName, {
         expires: 7,
-        secure: process.env.NODE_ENV === 'production', // Use secure in production
-        sameSite: "Lax", // 'Strict' can cause issues with direct navigation, 'Lax' is often safer
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: "Lax",
       });
     }
   }, [router.asPath]);
+
 
   // Adjust useGetProductsQuery to use `category` and `searchTerm`
   // You might need to update your API service to handle `search` parameter
