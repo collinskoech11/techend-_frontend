@@ -200,9 +200,9 @@ function ProductDetailView(ref:any) {
   const theme = useTheme();
   const { data: cart_data, isLoading:cart_loading, refetch: cart_refetch } = useCart();
   const router = useRouter();
-  const id = router.query.id;
+  const slug = router.query.slug;
   const [shopname] = useState(Cookies.get("shopname") || "techend");
-  const { data: product, isLoading, error } = useGetProductQuery(id);
+  const { data: product, isLoading, error } = useGetProductQuery(slug);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
