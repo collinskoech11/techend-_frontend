@@ -61,12 +61,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         triggerCartRefetch();
       }
     } else {
-      useImperativeHandle(ref, () => ({
-        cart_refetch() {
-          cart_refetch();
-        },
-      }));
       toast.error("Please log in to add an item to cart.");
+      // useImperativeHandle(ref, () => ({
+      //   cart_refetch() {
+      //     cart_refetch();
+      //   },
+      // }));
     }
   };
 
