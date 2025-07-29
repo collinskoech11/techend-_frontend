@@ -232,12 +232,12 @@ function ProductDetailView(ref:any) {
         cart_refetch(); // <--- Add this line to update the cart context
       }
     } else {
-      useImperativeHandle(ref, () => ({
-        cart_refetch() {
-          cart_refetch();
-        },
-      }));
       toast.error("Please log in to add items to your cart.");
+      // useImperativeHandle(ref, () => ({
+      //   cart_refetch() {
+      //     cart_refetch();
+      //   },
+      // }));
     }
   };
   
