@@ -21,6 +21,8 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 function Login() {
   const [login, { isLoading }] = useUserLoginMutation();
   const [formData, setFormData] = useState({
@@ -63,7 +65,7 @@ function Login() {
   };
 
   return (
-    <>
+    <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
       <Toaster />
       {/* <Navbar textColor={'#000'} bgColor={'#fff'} /> */}
       <Box
@@ -182,7 +184,7 @@ function Login() {
           </Box>
         </Box>
       </Box>
-    </>
+    </GoogleOAuthProvider>
   );
 }
 
