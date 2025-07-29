@@ -32,7 +32,7 @@ export const ProductsContainer = styled(Grid)({
   maxWidth: "1500px",
   marginTop: "20px",
   "@media screen and (max-width:800px)":{
-    width:"100%"
+    width:"100vw"
   }
 });
 
