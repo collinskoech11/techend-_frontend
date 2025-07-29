@@ -6,7 +6,8 @@ import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StoreIcon from "@mui/icons-material/Store";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import Typewriter from "typewriter-effect";
+import React, { lazy, Suspense } from "react";
+const Typewriter = lazy(() => import("typewriter-effect"));
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -218,13 +219,15 @@ export default function LandingPage() {
                 lineHeight: { xs: 1.2, sm: 1.15, md: 1.1 },
               }}
             >
-              <Typewriter
-                options={{
-                  strings: ["Smart eCommerce for SMEs", "Sell Online with Confidence", "Your Business, Simplified"],
-                  autoStart: true,
-                  loop: true,
-                }}
-              />
+              <Suspense fallback={<div>Loading...</div>}>
+                <Typewriter
+                  options={{
+                    strings: ["Smart eCommerce for SMEs", "Sell Online with Confidence", "Your Business, Simplified"],
+                    autoStart: true,
+                    loop: true,
+                  }}
+                />
+              </Suspense>
             </Typography>
             <Typography
               variant="h5"

@@ -1,18 +1,17 @@
 "use client";
 
+import React, { lazy, Suspense, useState } from "react";
 import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StorefrontIcon from '@mui/icons-material/Storefront'; // More specific icon
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import Typewriter from "typewriter-effect";
+const Typewriter = lazy(() => import("typewriter-effect"));
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { useState } from "react";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
-import React, { lazy, Suspense } from "react";
 const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
 // Define a consistent color palette
@@ -266,13 +265,15 @@ export default function LandingPage() {
                   letterSpacing: { xs: '-0.02em', md: '-0.03em' }, // Tighter letter spacing for headings
                 }}
               >
-                <Typewriter
-                  options={{
-                    strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
-                    autoStart: true,
-                    loop: true,
-                  }}
-                />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Typewriter
+                    options={{
+                      strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
+                      autoStart: true,
+                      loop: true,
+                    }}
+                  />
+                </Suspense>
               </Typography>
               <Typography
                 variant="h5"

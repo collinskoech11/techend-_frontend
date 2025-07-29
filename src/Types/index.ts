@@ -66,3 +66,7 @@ export interface Company {
   logo_image: string;
   kyc_approved: boolean;
 }
+
+export interface CompanyCardProps {
+  company: Company;
+}

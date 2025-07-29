@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef, lazy, Suspense } from "react";
 import { useRouter } from "next/router";
 import {
   AppBar,
@@ -7,11 +7,10 @@ import {
   Button,
   Menu,
   MenuItem,
-  Drawer,
+  Divider,
   Box,
   Typography,
   useTheme,
-  Divider,
   ListItemIcon,
   Tooltip,
   Badge,
@@ -27,7 +26,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import CartMenu from "./CartMin";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import AuthDialog from "./AuthDialog";
+const AuthDialog = lazy(() => import("./AuthDialog")); // Dynamic import
 import Shop2Icon from "@mui/icons-material/Shop2";
 import HomeIcon from "@mui/icons-material/Home";
 import MuseumIcon from '@mui/icons-material/Museum';
@@ -178,7 +177,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
         // When not logged in, show AuthDialog or a login link
         // Here we render the AuthDialog directly as a menu item
         <Box sx={{ p: 1 }}>
-          <AuthDialog onTrigger={refetchUser} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AuthDialog onTrigger={refetchUser} />
+          </Suspense>
         </Box>
       )}
     </Menu>
