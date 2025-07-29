@@ -4,6 +4,7 @@ import React, {
   useRef,
   useImperativeHandle,
   forwardRef,
+  use,
 } from "react";
 import MuiBreadcrumbs from "@mui/material/Breadcrumbs"; // Renamed to avoid conflict
 import MuiLink from "@mui/material/Link"; // Renamed to avoid conflict
@@ -16,7 +17,7 @@ import {
 } from "@/StyledComponents/Products";
 import ProductCard from "@/Components/ProductCard";
 import { useRouter } from "next/router";
-import { useGetProductsQuery } from "@/Api/services";
+import { useGetProductsQuery, useGetCompanyBySlugQuery } from "@/Api/services";
 import {
   Box,
   Grid,
@@ -29,10 +30,11 @@ import {
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
 import Cookies from "js-cookie";
-import { styled } from "@mui/system"; // Import styled
+import { styled, useTheme } from "@mui/system"; // Import styled
+
+
 
 // --- Color Palette (Consistent with your project) ---
-const primaryRed = "#be1f2f"; // Your main red accent
 const darkText = "#212121"; // For main text
 const lightText = "#555555"; // For secondary text/labels
 const lightGrayBackground = "#f8f8f8"; // Background for the page
@@ -60,21 +62,6 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
   },
 }));
 
-const StyledLink = styled(MuiLink)(({ theme }) => ({
-  fontWeight: 500,
-  fontSize: "0.95rem",
-  color: lightText,
-  transition: "color 0.3s ease",
-  "&:hover": {
-    color: primaryRed, // Red accent on hover
-    textDecoration: "underline",
-  },
-  "&.MuiTypography-root": { // Style for the last, non-link breadcrumb
-    fontWeight: 600,
-    color: primaryRed, // Red accent for the active page
-    cursor: "default",
-  },
-}));
 
 const FiltersContainer = styled(Box)(({ theme }) => ({
   backgroundColor: whiteBackground,
@@ -93,52 +80,88 @@ const FiltersContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& label.Mui-focused": {
-    color: primaryRed, // Red accent for focused label
-  },
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "8px", // Slightly rounded corners
-    "& fieldset": {
-      borderColor: mediumGrayBorder, // Default border color
-    },
-    "&:hover fieldset": {
-      borderColor: primaryRed, // Red accent on hover border
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: primaryRed, // Red accent on focused border
-      borderWidth: "2px", // Make border slightly thicker on focus
-    },
-  },
-  "& .MuiInputAdornment-root": {
-    color: lightText, // Icon color
-    "& .MuiSvgIcon-root": {
-      color: lightText, // Icon color
-    },
-  },
-}));
 
 
 const Shop = forwardRef((props: any, ref: any) => {
+  const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const primaryRed = theme.palette.primary.main; // Your main red accent
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  
+  const StyledTextField = styled(TextField)(({ theme }) => ({
+    "& label.Mui-focused": {
+      color: primaryRed, // Red accent for focused label
+    },
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "8px", // Slightly rounded corners
+      "& fieldset": {
+        borderColor: mediumGrayBorder, // Default border color
+      },
+      "&:hover fieldset": {
+        borderColor: primaryRed, // Red accent on hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: primaryRed, // Red accent on focused border
+        borderWidth: "2px", // Make border slightly thicker on focus
+      },
+    },
+    "& .MuiInputAdornment-root": {
+      color: lightText, // Icon color
+      "& .MuiSvgIcon-root": {
+        color: lightText, // Icon color
+      },
+    },
+  }));
+  const StyledLink = styled(MuiLink)(({ theme }) => ({
+    fontWeight: 500,
+    fontSize: "0.95rem",
+    color: lightText,
+    transition: "color 0.3s ease",
+    "&:hover": {
+      color: primaryRed, // Red accent on hover
+      textDecoration: "underline",
+    },
+    "&.MuiTypography-root": { // Style for the last, non-link breadcrumb
+      fontWeight: 600,
+      color: primaryRed, // Red accent for the active page
+      cursor: "default",
+    },
+  }));
 
-  useEffect(() => {
-    const pathParts = router.asPath.split("/");
-    if (pathParts[1] === "shop" && pathParts[2]) {
-      const urlShopName = pathParts[2];
-      setShopName(urlShopName);
-      Cookies.set("shopname", urlShopName, {
-        expires: 7,
-        secure: process.env.NODE_ENV === 'production', // Use secure in production
-        sameSite: "Lax", // 'Strict' can cause issues with direct navigation, 'Lax' is often safer
-      });
-    }
-  }, [router.asPath]);
+  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname);
+  
+useEffect(() => {
+  const cleanPath = router.asPath.split("?")[0]; // Remove query string
+  const pathParts = cleanPath.split("/");
+
+  if (pathParts[1] === "shop" && pathParts[2]) {
+    const urlShopName = pathParts[2];
+    setShopName(urlShopName);
+    Cookies.set("shopname", urlShopName, {
+      expires: 7,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: "Lax",
+    });
+  }
+}, [router.asPath]);
+
+// Wait for company data to be fetched before setting shopDetails
+useEffect(() => {
+  if (!companyLoading && companyData) {
+    Cookies.set("shopDetails", JSON.stringify(companyData), {
+      expires: 7,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: "Lax",
+    });
+
+    // ✅ Proceed to any next steps here (e.g., navigation, state updates, etc.)
+  }
+}, [companyLoading, companyData]);
+
 
   // Adjust useGetProductsQuery to use `category` and `searchTerm`
   // You might need to update your API service to handle `search` parameter

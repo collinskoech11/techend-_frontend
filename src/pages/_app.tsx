@@ -10,6 +10,7 @@ import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } f
 import { Box } from "@mui/material";
 import { CartProvider } from "@/contexts/CartContext"; // ✅ adjust this path if different
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ThemeProvider } from '../contexts/ThemeContext';
 // import Script from "next/script";
 
 const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
@@ -28,15 +29,18 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
   return (
     <NoSSR>
       <Provider store={store}>
+      <ThemeProvider>
         <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
         <CartProvider>
         {router.pathname !== "/" && (
-        <Box sx={{ paddingBottom: { md: "50px", xs: "50px" } }}>
+        <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
           <Navbar ref={cartRef}/>
         </Box>
         )}
         {router.pathname === "/" && (
-          <Navbar ref={cartRef}/>
+          <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
+            <Navbar ref={cartRef}/>
+          </Box>
         )}
         {/* <Script
           strategy="afterInteractive"
@@ -55,6 +59,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
         <Footer />
         </CartProvider>
         </GoogleOAuthProvider>
+        </ThemeProvider>
       </Provider>
     </NoSSR>
   );

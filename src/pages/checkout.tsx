@@ -15,6 +15,7 @@ import {
   FormControl,
   Paper,
   Box,
+  useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -43,6 +44,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 function Checkout() {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const theme = useTheme();
 
   const {
     register,
@@ -86,7 +88,7 @@ function Checkout() {
             <Link underline="hover" color="inherit" href="/">TechEnd</Link>
             <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>Shop</Link>
             <Link underline="hover" color="inherit" href="/cart">Cart</Link>
-            <Typography color="#be1f2f">Checkout</Typography>
+            <Typography color={theme.palette.primary.main}>Checkout</Typography>
           </Breadcrumbs>
         </BreadCrumbContainer>
 
@@ -94,7 +96,7 @@ function Checkout() {
           <Grid container spacing={4}>
             {/* Billing Form */}
             <Grid item xs={12} md={7}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
+              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
                 Billing Address
               </Typography>
               <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
@@ -126,7 +128,7 @@ function Checkout() {
 
             {/* Order Summary */}
             <Grid item xs={12} md={5}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
+              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
                 Order Summary
               </Typography>
               <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
@@ -135,7 +137,7 @@ function Checkout() {
                     Subtotal: <b>Kes {cart_data?.total || 0}</b>
                   </Typography>
                   <Typography variant="body1">Shipping: <b>Kes 150</b></Typography>
-                  <Typography variant="h6" sx={{ mt: 1, color: "#BE1E2D" }}>
+                  <Typography variant="h6" sx={{ mt: 1, color: theme.palette.primary.main }}>
                     Total: kes {cart_data?.total ? cart_data.total + 150 : 150}
                   </Typography>
                 </Box>
@@ -154,8 +156,8 @@ function Checkout() {
                   variant="contained"
                   type="submit"
                   sx={{
-                    backgroundColor: "#BE1E2D",
-                    "&:hover": { backgroundColor: "#a71824" },
+                    backgroundColor: theme.palette.primary.main,
+                    "&:hover": { backgroundColor: theme.palette.primary.dark },
                     mt: 2,
                   }}
                   disabled={isLoading}

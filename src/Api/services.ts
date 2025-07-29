@@ -32,6 +32,12 @@ export const AuthApi = createApi({
         body: data.body
       })
     }),
+    getCompanyBySlug: builder.query({
+      query: (slug) => ({
+        url: `companies/slug/${slug}/`,
+        method: "GET",
+      }),
+    }),
     getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number }>({
       query: ({ company, category, page = 1 }) => ({
         url: `products/all/?company=${company}&category=${category}&page=${page}`,
@@ -169,6 +175,7 @@ export const {
   useGetUserQuery,
   useUserRegistrationMutation,
   useUserLoginMutation,
+  useGetCompanyBySlugQuery,
   useGetProductsQuery,
   useGetProductQuery,
   useAddToCartMutation,

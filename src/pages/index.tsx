@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -14,8 +14,6 @@ import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
 import FAQ from "@/Components/FAQ"; // Importing FAQ component
 // Define a consistent color palette
-const primaryColor = "#be1f2f"; // Your existing accent color (Deep Red)
-const primaryDark = "#8f1721"; // Darker shade for hover/accents
 const secondaryColor = "#3f51b5"; // A complementary blue
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
@@ -37,7 +35,7 @@ const floatAnimation = keyframes`
 `;
 
 const HeroSection = styled(Box)(({ theme }) => ({
-  background: `linear-gradient(145deg, ${primaryColor} 0%, ${primaryDark} 100%)`, // Deeper gradient
+  background: `linear-gradient(145deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`, // Deeper gradient
   color: "#fff",
   textAlign: "center",
   borderRadius: "20px", // More rounded for a modern feel
@@ -88,7 +86,7 @@ const HeroGraphic = styled(Box)({
 });
 
 const AccentButton = styled(Button)(({ theme }) => ({
-  backgroundColor: primaryColor,
+  backgroundColor: theme.palette.primary.main,
   color: "#fff",
   textTransform: "uppercase", // More professional
   padding: "16px 40px",
@@ -98,7 +96,7 @@ const AccentButton = styled(Button)(({ theme }) => ({
   boxShadow: "0 10px 25px rgba(0,0,0,0.35)", // Stronger, more defined shadow
   transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: primaryDark,
+    backgroundColor: theme.palette.primary.dark,
     transform: "translateY(-5px) scale(1.03)", // Enhanced hover effect
     boxShadow: "0 15px 35px rgba(0,0,0,0.45)",
   },
@@ -118,7 +116,8 @@ const FeatureCard = styled(Card)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: "flex-start", // Align content to top
   transition: "transform 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease",
-  border: `1px solid ${mediumGray}`, // Subtle border
+  border: `1px solid ${mediumGray}`,
+ // Subtle border
   position: 'relative',
   overflow: 'hidden',
 
@@ -142,7 +141,7 @@ const FeatureCard = styled(Card)(({ theme }) => ({
   },
   "& .MuiSvgIcon-root": { // Style for icons within FeatureCard
     fontSize: 70,
-    color: primaryColor,
+    color: theme.palette.primary.main,
     mb: 3,
     position: 'relative',
     zIndex: 1,
@@ -189,10 +188,10 @@ const PricingCard = styled(Card)(({ theme }) => ({
   "&:hover": {
     transform: "translateY(-12px) scale(1.02)", // More lift on hover
     boxShadow: "0 20px 45px rgba(0,0,0,0.15)",
-    borderColor: primaryColor, // Highlight border on hover
+    borderColor: theme.palette.primary.main, // Highlight border on hover
   },
   "&.featured": { // Styling for the featured card (Growth)
-    border: `3px solid ${primaryColor}`,
+    border: `3px solid ${theme.palette.primary.main}`,
     boxShadow: `0 20px 50px rgba(190, 31, 47, 0.3)`,
     transform: "translateY(-15px) scale(1.03)", // Even more lift for featured
     "&:hover": {
@@ -211,6 +210,7 @@ const PricingCard = styled(Card)(({ theme }) => ({
 export default function LandingPage() {
   const router = useRouter();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const theme = useTheme();
 
   const handleAuthTrigger = () => {
     setShowAuthDialog(true);
@@ -304,7 +304,7 @@ export default function LandingPage() {
         {/* Features Section */}
         <Box sx={{ py: 10 }}>
           <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
-            Why <span style={{ color: primaryColor }}>iMall</span> is Your Best Choice
+            Why <span style={{ color: theme.palette.primary.main }}>iMall</span> is Your Best Choice
           </Typography>
           <Grid container gap={3} justifyContent="center">
             <Grid item xs={12} md={3}>
@@ -357,7 +357,7 @@ export default function LandingPage() {
         <Box sx={{ py: 10 }}>
           <Slide direction="up" triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
-              See <span style={{ color: primaryColor }}>iMall</span> in Action
+              See <span style={{ color: theme.palette.primary.main }}>iMall</span> in Action
             </Typography>
 
             {/* Section 1: Sleek Storefronts */}
@@ -456,7 +456,7 @@ export default function LandingPage() {
               <Grid item xs={12} md={4}>
                 <PricingCard>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: primaryColor }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: theme.palette.primary.main }}>
                       Starter
                     </Typography>
                     <Typography variant="body2" color={lightText} sx={{ mb: 2 }}>
@@ -471,7 +471,7 @@ export default function LandingPage() {
                         sx={{
                           fontWeight: 800,
                           mb: 2,
-                          color: primaryColor,
+                          color: theme.palette.primary.main,
                         }}
                       >
                         $0 <Typography component="span" variant="h6" sx={{ color: darkText }}>/mo</Typography>
@@ -479,28 +479,28 @@ export default function LandingPage() {
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Quick Store Setup</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Showcase up to 50 products</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Reliable Standard Support</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Basic Analytics</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Theme</Typography>} />
                       </ListItem>
                     </List>
                   </Box>
-                  <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: primaryColor, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
+                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: theme.palette.primary.main, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
                     Choose Starter
                   </Button>
                 </PricingCard>
@@ -508,8 +508,8 @@ export default function LandingPage() {
               <Grid item xs={12} md={4}>
                 <PricingCard className="featured"> {/* Apply featured class */}
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: primaryColor }}>
-                      Growth <span style={{ fontSize: '0.8em', color: primaryDark }}>(Recommended)</span>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: theme.palette.primary.main }}>
+                      Growth <span style={{ fontSize: '0.8em', color: theme.palette.primary.dark }}>(Recommended)</span>
                     </Typography>
                     <Typography variant="body2" color={lightText} sx={{ mb: 2 }}>
                       Ideal for expanding SMEs ready to scale their operations.
@@ -519,27 +519,27 @@ export default function LandingPage() {
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>**All Starter Features**</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>List Unlimited Products</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Enhanced Notifications(SMS,  email, WhatsApp)</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Integrated Email Marketing</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Advanced Sales Reports</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Priority Shop Listing</Typography>} />
                       </ListItem>
                     </List>
@@ -550,7 +550,7 @@ export default function LandingPage() {
               <Grid item xs={12} md={4}>
                 <PricingCard>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: primaryColor }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: theme.palette.primary.main }}>
                       Pro
                     </Typography>
                     <Typography variant="body2" color={lightText} sx={{ mb: 2 }}>
@@ -561,40 +561,40 @@ export default function LandingPage() {
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>**All Growth Features**</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>AI enabled targeted marketing</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Multi-User & Role Access</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Dedicated Priority Support</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Integrations</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Full time dev support</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Landing Page</Typography>} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: primaryColor, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Custom Domain propagation</Typography>} />
                       </ListItem>
                     </List>
                   </Box>
-                  <Button variant="outlined" sx={{ borderColor: primaryColor, color: primaryColor, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: primaryColor, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
+                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, padding: "10px 25px", borderRadius: "20px", fontWeight: 600, "&:hover": { bgcolor: theme.palette.primary.main, color: '#fff', boxShadow: '0 5px 15px rgba(0,0,0,0.2)' } }} onClick={handleAuthTrigger}>
                     Choose Pro
                   </Button>
                 </PricingCard>
