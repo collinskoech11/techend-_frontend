@@ -17,7 +17,8 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { PhotoCamera, Visibility, VisibilityOff } from "@mui/icons-material";
-import { SketchPicker } from "react-color";
+import React, { lazy, Suspense } from "react";
+const SketchPicker = lazy(() => import("react-color").then(module => ({ default: module.SketchPicker })));
 import Cookies from "js-cookie";
 import { useUserLoginMutation, useUserRegistrationMutation, useGetCompanyQuery, useCreateCompanyMutation, useUpdateCompanyMutation } from "@/Api/services";
 import { z } from "zod";
@@ -229,9 +230,7 @@ export default function CompanyOnboarding() {
         }
     };
 
-    const handleColorChange = (field: string, color: any) => {
-        setCompanyData({ ...companyData, [field]: color.hex });
-    };
+    
 
     const nextStep = () => setActiveStep((prev) => prev + 1);
     const prevStep = () => companyData.company_onboarding_step - 1;
@@ -400,9 +399,9 @@ export default function CompanyOnboarding() {
                         </>
                     )}
                     {companyData.company_onboarding_step === 5 && (
-                        <>
+                        <Suspense fallback={<CircularProgress />}>
                             <Branding nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
-                        </>
+                        </Suspense>
                     )}
                     {companyData.company_onboarding_step === 6 && (
                         <>

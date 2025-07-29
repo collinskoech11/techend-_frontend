@@ -1,10 +1,14 @@
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  mordern: true,
+  
   images: {
     domains: ['i.pinimg.com', 'cdn.pixabay.com', 'www.citypng.com'],
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})(nextConfig);

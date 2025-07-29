@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme } from "@mui/material";
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -12,7 +12,8 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
-import FAQ from "@/Components/FAQ"; // Importing FAQ component
+import React, { lazy, Suspense } from "react";
+const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
 // Define a consistent color palette
 const secondaryColor = "#3f51b5"; // A complementary blue
@@ -616,7 +617,9 @@ export default function LandingPage() {
         </Box>
 
 
-        <FAQ />
+        <Suspense fallback={<CircularProgress />}>
+          <FAQ />
+        </Suspense>
 
 
 
