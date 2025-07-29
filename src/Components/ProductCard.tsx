@@ -126,7 +126,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
               <BorderedButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/product/${currentProduct?.id}`);
+                  router.push(`/product/${currentProduct?.slug}`);
                 }}
                 sx={{
                   ml: 1,

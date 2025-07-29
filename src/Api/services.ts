@@ -45,8 +45,8 @@ export const AuthApi = createApi({
       }),
     }),
     getProduct: builder.query({
-      query: (id) => ({
-        url: `products/singleproduct/${id}/`,
+      query: (slug) => ({
+        url: `products/singleproduct/${slug}/`,
         method: "GET"
       }),
     }),
