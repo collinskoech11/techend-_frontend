@@ -1,31 +1,24 @@
 "use client";
 
-import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme } from "@mui/material";
+import React, { lazy, Suspense, useState } from "react";
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StorefrontIcon from '@mui/icons-material/Storefront'; // More specific icon
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import Typewriter from "typewriter-effect";
+const Typewriter = lazy(() => import("typewriter-effect"));
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { useState } from "react";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
-import FAQ from "@/Components/FAQ"; // Importing FAQ component
+const FAQ = lazy(() => import("@/Components/FAQ"));
+import Image from "next/image";
 // Define a consistent color palette
-const secondaryColor = "#3f51b5"; // A complementary blue
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
 const darkText = "#212121"; // Very dark gray for main headings and strong text
 const lightText = "#555555"; // Softer dark gray for body text
-
-// Keyframes for wave animation (from previous version, keeping if desired)
-const waveAnimation = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
 
 // Keyframes for subtle floating effect
 const floatAnimation = keyframes`
@@ -264,13 +257,15 @@ export default function LandingPage() {
                   letterSpacing: { xs: '-0.02em', md: '-0.03em' }, // Tighter letter spacing for headings
                 }}
               >
-                <Typewriter
-                  options={{
-                    strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
-                    autoStart: true,
-                    loop: true,
-                  }}
-                />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Typewriter
+                    options={{
+                      strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
+                      autoStart: true,
+                      loop: true,
+                    }}
+                  />
+                </Suspense>
               </Typography>
               <Typography
                 variant="h5"
@@ -364,11 +359,15 @@ export default function LandingPage() {
             <Grid container spacing={6} alignItems="center" sx={{ mb: 12 }}>
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
-                  <img
-                    src="/assets/this.png"
-                    alt="Sleek eCommerce Storefront Designs"
-                    loading="lazy"
-                  />
+                <Image
+                  src="/assets/this.png"
+                  alt="Sleek eCommerce Storefront Designs"
+                  width={800} // Replace with actual width
+                  height={600} // Replace with actual height
+                  layout="responsive"
+                  priority={false}
+                />
+
                 </ImageCard>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -403,10 +402,13 @@ export default function LandingPage() {
               </Grid>
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ mr: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
-                  <img
+                  <Image
                     src="/assets/admin.png"
                     alt="Powerful Admin Dashboard"
-                    loading="lazy"
+                    width={800} // Replace with actual width
+                    height={600} // Replace with actual height
+                    layout="responsive"
+                    priority={false}
                   />
                 </ImageCard>
               </Grid>
@@ -416,11 +418,15 @@ export default function LandingPage() {
             <Grid container spacing={6} alignItems="center">
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
-                  <img
-                    src="/assets/simple.png"
-                    alt="AI-Powered Insights Dashboard"
-                    loading="lazy"
-                  />
+                <Image
+                  src="/assets/simple.png"
+                  alt="AI-Powered Insights Dashboard"
+                  width={800} // Replace with actual width
+                  height={600} // Replace with actual height
+                  layout="responsive"
+                  priority={false}
+                />
+
                 </ImageCard>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -604,7 +610,9 @@ export default function LandingPage() {
         </Box>
 
 
-        <FAQ />
+        <Suspense fallback={<CircularProgress />}>
+          <FAQ />
+        </Suspense>
 
 
 

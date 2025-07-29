@@ -1,4 +1,3 @@
-import { ProductPrice, ReviewText } from "@/StyledComponents/Typos";
 import { Box, Button, Grid, TextField, Typography, Link as MuiLink, useTheme } from "@mui/material";
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles"; // Import keyframes and styled
@@ -18,27 +17,6 @@ const waveAnimation = keyframes`
 `;
 
 // Re-defining AccentButton for consistency if it's used here and elsewhere
-const AccentButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: "#fff",
-  textTransform: "capitalize",
-  padding: "12px 28px",
-  borderRadius: "10px",
-  fontWeight: 600,
-  fontSize: "1rem",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-  transition: "all 0.3s ease-in-out",
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-    boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
-    transform: "translateY(-2px)",
-  },
-  "&:disabled": {
-    backgroundColor: theme.palette.action.disabledBackground,
-    color: theme.palette.action.disabled,
-    boxShadow: "none",
-  },
-}));
 
 function Footer() {
   const theme = useTheme();
