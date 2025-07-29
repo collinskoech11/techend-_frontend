@@ -65,7 +65,7 @@ export const FilterCategory = styled(Typography)({
 export const ProductPrice = styled(Typography)(({ theme }) => ({
   fontSize: "1.25rem", // More prominent price
   fontWeight: 700,
-  color: "#be1f2f", // Primary color for price
+  color: theme.palette.primary.main, // Primary color for price
   marginBottom: theme.spacing(0.5),
 }));
 

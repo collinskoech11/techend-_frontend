@@ -9,6 +9,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   Divider,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -21,8 +22,6 @@ import PolicyIcon from "@mui/icons-material/Policy"; // Icon for Policies
 import PeopleIcon from "@mui/icons-material/People"; // Icon for Community
 
 // --- Color Palette (Consistent with your project) ---
-const primaryColor = "#be1f2f"; // Deep Red
-const primaryDark = "#a01624"; // Darker Red for hover
 const lightGray = "#f8f8f8"; // Page background
 const mediumGray = "#e0e0e0"; // Borders/dividers
 const darkText = "#212121"; // Main headings and strong text
@@ -60,7 +59,7 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
     transform: 'translateX(-50%)',
     width: '80px',
     height: '4px',
-    backgroundColor: primaryColor,
+    backgroundColor: theme.palette.primary.main,
     borderRadius: '2px',
   },
   display: 'flex',
@@ -69,7 +68,7 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
   gap: theme.spacing(2),
   "& .MuiSvgIcon-root": {
     fontSize: 'clamp(2.5rem, 4.5vw, 3.5rem)',
-    color: primaryColor,
+    color: theme.palette.primary.main,
   }
 }));
 
@@ -94,7 +93,7 @@ const ContactInfoItem = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
   marginBottom: theme.spacing(2),
   "& .MuiSvgIcon-root": {
-    color: primaryColor,
+    color: theme.palette.primary.main,
     fontSize: "2rem",
   },
 }));
@@ -121,6 +120,7 @@ const StyledAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
 
 
 function AboutPage() {
+  const theme = useTheme();
   return (
     // Assuming PageContainer from root layout wraps this component
     <Container maxWidth="lg" sx={{ py: 8 }}>
@@ -155,15 +155,15 @@ function AboutPage() {
         </BodyText>
         <Grid container spacing={4} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4} textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 700, color: primaryColor, mb: 2 }}>Innovation</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main, mb: 2 }}>Innovation</Typography>
             <BodyText>Constantly evolving our technology to provide the best tools and features.</BodyText>
           </Grid>
           <Grid item xs={12} md={4} textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 700, color: primaryColor, mb: 2 }}>Accessibility</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main, mb: 2 }}>Accessibility</Typography>
             <BodyText>Making powerful eCommerce solutions affordable and easy to use for everyone.</BodyText>
           </Grid>
           <Grid item xs={12} md={4} textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 700, color: primaryColor, mb: 2 }}>Growth</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main, mb: 2 }}>Growth</Typography>
             <BodyText>Committed to helping our users scale their businesses and reach new heights.</BodyText>
           </Grid>
         </Grid>
@@ -208,8 +208,8 @@ function AboutPage() {
             <Button
                 variant="contained"
                 sx={{
-                    backgroundColor: primaryColor,
-                    '&:hover': { backgroundColor: primaryDark },
+                    backgroundColor: theme.palette.primary.main,
+                    '&:hover': { backgroundColor: theme.palette.primary.dark },
                     padding: '12px 30px',
                     borderRadius: '8px',
                     fontSize: '1rem',

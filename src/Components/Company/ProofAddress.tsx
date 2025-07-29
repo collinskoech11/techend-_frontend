@@ -1,12 +1,15 @@
 import { YourChildProps } from "@/Types";
 import { PhotoCamera } from "@mui/icons-material";
-import { TextField, Button, Box, CircularProgress } from "@mui/material";
+import { TextField, Button, Box, CircularProgress, useTheme } from "@mui/material";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
+import { alpha } from "@mui/material/styles";
+
 
 const ProofAddress = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
     
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
+    const theme = useTheme();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCompanyData({ ...companyData, [e.target.name]: e.target.value });
@@ -52,11 +55,11 @@ const ProofAddress = ({ nextStep, prevStep, steps, activeStep, companyData, setC
                 sx={{
                     mt: 2,
                     justifyContent: "flex-start",
-                    borderColor: "#be1f2f",
-                    color: "#be1f2f",
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     "&:hover": {
-                        borderColor: "#a51a27",
-                        background: "rgba(190, 31, 47, 0.05)",
+                        borderColor: theme.palette.primary.dark,
+                        background: alpha(theme.palette.primary.main, 0.05),
                     },
                 }}>
                 {companyData.utility_bill_image ? companyData.utility_bill_image.name : "Upload Utility Bill"}
@@ -68,11 +71,11 @@ const ProofAddress = ({ nextStep, prevStep, steps, activeStep, companyData, setC
                 sx={{
                     mt: 2,
                     justifyContent: "flex-start",
-                    borderColor: "#be1f2f",
-                    color: "#be1f2f",
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     "&:hover": {
-                        borderColor: "#a51a27",
-                        background: "rgba(190, 31, 47, 0.05)",
+                        borderColor: theme.palette.primary.dark,
+                        background: alpha(theme.palette.primary.main, 0.05),
                     },
                 }}>
                 {companyData.lease_agreement_image ? companyData.lease_agreement_image.name : "Upload Lease Agreement"}
@@ -88,7 +91,7 @@ const ProofAddress = ({ nextStep, prevStep, steps, activeStep, companyData, setC
                 )}
                 <Button
                     variant="contained"
-                    sx={{ background: "#be1f2f" }}
+                    sx={{ background: theme.palette.primary.main }}
                     onClick={handleSubmit}
                     disabled={isLoading}
                 >
