@@ -11,6 +11,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { darken } from '@mui/material/styles';
+import Image from 'next/image';
 
 
 // Define a consistent color palette
@@ -314,11 +315,14 @@ export default function LandingPage() {
             <Grid container spacing={6} justifyContent="center">
               <Grid item xs={12} md={4}>
                 <ImageCard>
-                  <img
-                    src="/assets/sample_ui_2.png"
-                    alt="Modern eCommerce Storefront"
-                    loading="lazy"
-                  />
+                <Image
+                  src="/assets/sample_ui_2.png"
+                  alt="Modern eCommerce Storefront"
+                  width={800} // replace with actual width
+                  height={600} // replace with actual height
+                  layout="responsive" // makes the image responsive within its container
+                  priority={false} // set to true if it's above the fold
+                />
                 </ImageCard>
                 <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
                   Sleek Storefront Designs
@@ -326,11 +330,14 @@ export default function LandingPage() {
               </Grid>
               <Grid item xs={12} md={4}>
                 <ImageCard>
-                  <img
-                    src="/assets/sample_ui_1.png"
-                    alt="Intuitive Admin Dashboard"
-                    loading="lazy"
-                  />
+                   <Image
+                      src="/assets/sample_ui_1.png"
+                      alt="Intuitive Admin Dashboard"
+                      width={800} // Replace with actual image width
+                      height={600} // Replace with actual image height
+                      layout="responsive"
+                      priority={false} // Set to true if this image should load immediately
+                    />
                 </ImageCard>
                 <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
                   Powerful Admin Dashboard
@@ -338,11 +345,15 @@ export default function LandingPage() {
               </Grid>
               <Grid item xs={12} md={4}>
                 <ImageCard>
-                  <img
+                  <Image
                     src="/assets/sample_ui.png"
                     alt="Engaging Marketplace View"
-                    loading="lazy"
+                    width={800} // adjust based on actual image dimensions
+                    height={600} // adjust based on actual image dimensions
+                    layout="responsive"
+                    priority={false} // set to true if this image should load immediately
                   />
+
                 </ImageCard>
                 <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
                   Dynamic Marketplace Options

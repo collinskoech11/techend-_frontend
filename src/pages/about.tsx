@@ -11,7 +11,7 @@ import {
   Divider,
   useTheme,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";

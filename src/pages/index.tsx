@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
 import FAQ from "@/Components/FAQ"; // Importing FAQ component
+import Image from "next/image";
 // Define a consistent color palette
 const secondaryColor = "#3f51b5"; // A complementary blue
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
@@ -364,11 +365,15 @@ export default function LandingPage() {
             <Grid container spacing={6} alignItems="center" sx={{ mb: 12 }}>
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
-                  <img
-                    src="/assets/this.png"
-                    alt="Sleek eCommerce Storefront Designs"
-                    loading="lazy"
-                  />
+                <Image
+                  src="/assets/this.png"
+                  alt="Sleek eCommerce Storefront Designs"
+                  width={800} // Replace with actual width
+                  height={600} // Replace with actual height
+                  layout="responsive"
+                  priority={false}
+                />
+
                 </ImageCard>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -403,10 +408,13 @@ export default function LandingPage() {
               </Grid>
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ mr: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
-                  <img
+                  <Image
                     src="/assets/admin.png"
                     alt="Powerful Admin Dashboard"
-                    loading="lazy"
+                    width={800} // Replace with actual width
+                    height={600} // Replace with actual height
+                    layout="responsive"
+                    priority={false}
                   />
                 </ImageCard>
               </Grid>
@@ -416,11 +424,15 @@ export default function LandingPage() {
             <Grid container spacing={6} alignItems="center">
               <Grid item xs={12} md={6}>
                 <ImageCard sx={{ ml: { md: -5 }, zIndex: 1, position: 'relative' }}> {/* Slight overlap */}
-                  <img
-                    src="/assets/simple.png"
-                    alt="AI-Powered Insights Dashboard"
-                    loading="lazy"
-                  />
+                <Image
+                  src="/assets/simple.png"
+                  alt="AI-Powered Insights Dashboard"
+                  width={800} // Replace with actual width
+                  height={600} // Replace with actual height
+                  layout="responsive"
+                  priority={false}
+                />
+
                 </ImageCard>
               </Grid>
               <Grid item xs={12} md={6}>
