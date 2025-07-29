@@ -6,13 +6,16 @@ import {
     Button,
     Box,
     CircularProgress,
+    useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { alpha } from "@mui/material/styles";
 
 const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, companyExists, refetchCompany, triggerRerender }: YourChildProps) => {
     const [createCompany, { isLoadingCreate: isLoadingCreate }] = useCreateCompanyMutation();
     const [updateCompany, { isLoading: isLoadingUpdate }] = useUpdateCompanyMutation();
+    const theme = useTheme();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -74,17 +77,17 @@ const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setComp
                 sx={{
                     mt: 2,
                     justifyContent: "flex-start",
-                    borderColor: "#be1f2f",
-                    color: "#be1f2f",
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     "&:hover": {
-                        borderColor: "#a51a27",
-                        background: "rgba(190, 31, 47, 0.05)",
+                        borderColor: theme.palette.primary.dark,
+                        background: alpha(theme.palette.primary.main, 0.05),
                     },
                 }}
             >
                 {companyData?.logo_image ? companyData?.logo_image.name : "Upload Company Logo"}
                 <input hidden type="file" onChange={(e) => handleFileChange(e, "logo_image")} />
-                <PhotoCamera sx={{ ml: "auto", color: "#be1f2f" }} />
+                <PhotoCamera sx={{ ml: "auto", color: theme.palette.primary.main }} />
             </Button>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
@@ -95,7 +98,7 @@ const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setComp
                 )}
                 <Button
                     variant="contained"
-                    sx={{ background: "#be1f2f" }}
+                    sx={{ background: theme.palette.primary.main }}
                     onClick={handleSubmit}
                     disabled={isLoadingCreate || isLoadingUpdate}
                 >
