@@ -15,18 +15,10 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for pri
 const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
 // Define a consistent color palette
-const secondaryColor = "#3f51b5"; // A complementary blue
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
 const darkText = "#212121"; // Very dark gray for main headings and strong text
 const lightText = "#555555"; // Softer dark gray for body text
-
-// Keyframes for wave animation (from previous version, keeping if desired)
-const waveAnimation = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
 
 // Keyframes for subtle floating effect
 const floatAnimation = keyframes`

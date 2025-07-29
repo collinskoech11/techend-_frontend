@@ -3,9 +3,22 @@ import withBundleAnalyzer from '@next/bundle-analyzer';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
+
   images: {
-    domains: ['i.pinimg.com', 'cdn.pixabay.com', 'www.citypng.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.pinimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pixabay.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.citypng.com',
+      },
+    ],
   },
 };
 

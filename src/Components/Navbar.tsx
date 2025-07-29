@@ -1,17 +1,4 @@
 import React, {useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
-import {
-  ButtonsContainer,
-  MainNav,
-  OfferNav,
-} from "@/StyledComponents/NavComponents";
-import {
-  CartBalanceTypo,
-  HeaderTypo,
-  OfferNavTypo,
-} from "@/StyledComponents/Typos";
-import { LoginButton } from "@/StyledComponents/Buttons";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import LocalMallIcon from "@mui/icons-material/LocalMall";
 import { useRouter } from "next/router";
 import LinksContainerComponent from "./LinksContainerComponent";
 import  Cookies from "js-cookie";

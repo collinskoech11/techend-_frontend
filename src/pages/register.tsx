@@ -14,6 +14,8 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 function Register() {
   const [register, { isLoading, error }] = useUserRegistrationMutation();
   const [formData, setFormData] = useState({
@@ -64,7 +66,7 @@ function Register() {
   };
 
   return (
-    <>
+    <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
       <Toaster />
       <Box 
         sx={{
@@ -172,7 +174,7 @@ function Register() {
           </Box>
         </Box>
       </Box>
-    </>
+    </GoogleOAuthProvider>
   );
 }
 

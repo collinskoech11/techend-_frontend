@@ -6,7 +6,7 @@ import NoSSR from "react-no-ssr";
 import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef, lazy, Suspense } from "react";
 import { Box } from "@mui/material";
 import { CartProvider } from "@/contexts/CartContext"; // ✅ adjust this path if different
-import { GoogleOAuthProvider } from '@react-oauth/google';
+
 import { ThemeProvider } from '../contexts/ThemeContext';
 const Navbar = lazy(() => import("@/Components/Navbar"));
 const Footer = lazy(() => import("@/Components/Footer"));
@@ -30,7 +30,6 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
     <NoSSR>
       <Provider store={store}>
       <ThemeProvider>
-        <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
         <CartProvider>
         {router.pathname !== "/" && (
         <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
@@ -64,7 +63,6 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
           <Footer />
         </Suspense>
         </CartProvider>
-        </GoogleOAuthProvider>
         </ThemeProvider>
       </Provider>
     </NoSSR>
