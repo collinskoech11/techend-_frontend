@@ -102,7 +102,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
       <ProductItemStyled
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => !AddToCartLoading && router.push(`/product/${currentProduct?.id}`)} // disable click while loading
+        onClick={() => !AddToCartLoading && router.push(`/product/${currentProduct?.slug}`)} // disable click while loading
         sx={{
           pointerEvents: AddToCartLoading ? 'none' : 'auto',
           opacity: AddToCartLoading ? 0.6 : 1,
