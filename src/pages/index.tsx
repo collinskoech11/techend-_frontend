@@ -216,7 +216,7 @@ export default function LandingPage() {
 
   useEffect(() => {
   const currentDomain = window.location.hostname;
-  if (currentDomain === "cupcoutureshop.com") {
+  if (currentDomain === "www.cupcoutureshop.com") {
     router.push("/shop/the-cup-couture");
   } else {
     console.log("currentDomain  *****", currentDomain);
