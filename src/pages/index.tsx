@@ -219,7 +219,7 @@ export default function LandingPage() {
   if (currentDomain === "www.cupcoutureshop.com") {
     router.push("/shop/the-cup-couture");
   } else if (currentDomain === "www.boromoto.com") {
-    router.push("/shop/the-cup-couture");
+    router.push("/shop/boromoto");
   } else {
     console.log("currentDomain  *****", currentDomain);
   }
