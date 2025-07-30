@@ -218,6 +218,8 @@ export default function LandingPage() {
   const currentDomain = window.location.hostname;
   if (currentDomain === "www.cupcoutureshop.com") {
     router.push("/shop/the-cup-couture");
+  } else if (currentDomain === "www.boromoto.com") {
+    router.push("/shop/the-cup-couture");
   } else {
     console.log("currentDomain  *****", currentDomain);
   }
