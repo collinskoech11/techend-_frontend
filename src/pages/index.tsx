@@ -1,6 +1,6 @@
 "use client";
 
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
@@ -214,6 +214,14 @@ export default function LandingPage() {
     router.push("/company-onboarding");
   };
 
+  useEffect(() => {
+  const currentDomain = window.location.hostname;
+  if (currentDomain === "cupcoutureshop.com") {
+    router.push("/shop/the-cup-couture");
+  } else {
+    console.log("currentDomain  *****", currentDomain);
+  }
+}, []);
   return (
     <Box sx={{ bgcolor: lightGray, minHeight: '100vh' }}>
       {showAuthDialog && (
