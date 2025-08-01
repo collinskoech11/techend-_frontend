@@ -261,7 +261,7 @@ export default function LandingPage() {
         {/* Features Section */}
         <Box sx={{ py: 10 }}>
           <Typography variant="h3" sx={{ fontWeight: 700, mb: 8, textAlign: "center", color: darkText }}>
-            Why Choose <span style={{ color: theme.palette.primary.main }}>iMall</span>?
+            Why Choose <span style={{ color: theme.palette.primary.main }}>sokoJunction</span>?
           </Typography>
           <Grid container spacing={6} justifyContent="center">
             <Grid item xs={12} md={4}>
@@ -308,11 +308,11 @@ export default function LandingPage() {
           </Grid>
         </Box>
 
-        {/* Explore iMall in Action Section */}
+        {/* Explore sokoJunction in Action Section */}
         <Box sx={{ py: 10 }}>
           <Slide direction="up" triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 700, mb: 8, textAlign: "center", color: darkText }}>
-              Explore <span style={{ color: theme.palette.primary.main }}>iMall</span> in Action
+              Explore <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> in Action
             </Typography>
 
             <Grid container spacing={6} justifyContent="center">
@@ -490,9 +490,9 @@ export default function LandingPage() {
               Ready to simplify your online selling?
             </Typography>
             <Typography variant="h6" sx={{ maxWidth: "700px", mx: "auto", mb: 5, color: lightText }}>
-              Join hundreds of SMEs already growing with iMall. Start your free trial today!
+              Join hundreds of SMEs already growing with sokoJunction. Start your free trial today!
             </Typography>
-            <AccentButton>Join iMall Today</AccentButton>
+            <AccentButton>Join sokoJunction Today</AccentButton>
           </Zoom>
         </Box>
       </Container>
