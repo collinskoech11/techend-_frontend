@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useUserRegistrationMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { z } from "zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -15,6 +15,7 @@ const registerSchema = z.object({
 });
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useRouter } from "next/router";
 
 function Register() {
   const [register, { isLoading, error }] = useUserRegistrationMutation();
@@ -164,12 +165,12 @@ function Register() {
             </button>
             <p style={{ marginTop: "20px" }}>
               Already have an account?{" "}
-              <a
+              <Link
                 href="/login"
                 style={{ color: "#BE1E2D", textDecoration: "none" }}
               >
                 Login
-              </a>
+              </Link>
             </p>
           </Box>
         </Box>

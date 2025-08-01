@@ -173,7 +173,7 @@ function AboutPage() {
       <SectionWrapper>
         <SectionTitle>Contact Us</SectionTitle>
         <BodyText sx={{ textAlign: 'center', maxWidth: '700px', mx: 'auto', mb: 4 }}>
-          We're here to help! Whether you have a question, need support, or just want to chat, feel free to reach out to our team.
+          We&apos;re here to help! Whether you have a question, need support, or just want to chat, feel free to reach out to our team.
         </BodyText>
         <Grid container spacing={4} justifyContent="center" sx={{ mt: 4 }}>
           <Grid item xs={12} md={4}>
@@ -269,7 +269,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              Do not engage in any activity that could compromise the security or integrity of the iMall platform or its users' data. Report any suspicious activity or vulnerabilities immediately.
+              Do not engage in any activity that could compromise the security or integrity of the iMall platform or its users&apos; data. Report any suspicious activity or vulnerabilities immediately.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>

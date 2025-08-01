@@ -74,7 +74,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
       setLoggedInUser(username);
       onTrigger();
     }
-  }, []);
+  }, [onTrigger]);
 
   useEffect(() => {
     if (forceOpen) {

@@ -163,7 +163,7 @@ export default function CompanyOnboarding() {
             // 
             setActiveStep(companyDetails?.company_onboarding_step + 1 || 1)
         }
-    }, [companyDetails]);
+    }, [companyDetails, error_company_data?.status, loading_get_my_company, user.id]);
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
