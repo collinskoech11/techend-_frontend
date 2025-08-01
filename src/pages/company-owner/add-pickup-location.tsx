@@ -29,7 +29,7 @@ interface AddPickupLocationFormData {
   gmaps_link?: string;
 }
 
-const addPickupLocationSchema: z.ZodSchema<AddPickupLocationFormData> = z.object({
+const addPickupLocationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
@@ -293,7 +293,7 @@ const AddPickupLocation = () => {
               Login to Add Pickup Location
             </Button>
           </Box>
-          <AuthDialog open={isAuthDialogOpen} onClose={() => setIsAuthDialogOpen(false)} />
+          <AuthDialog forceOpen={true} onTrigger={setIsAuthDialogOpen} showButton={false} />
         </>
       )}
     </Box>

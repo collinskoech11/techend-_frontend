@@ -93,9 +93,9 @@ function Discover() {
               <br />
               <RevealMainTypo>WEEK DEAL</RevealMainTypo>
               <MiniTypo>
-                Our customers speak for us! 'The best suit shopping experience
-                I've ever had,' says John D. 'Exceptional quality and impeccable
-                service,' adds Sarah M. Join our community of satisfied clients
+                Our customers speak for us! &apos;The best suit shopping experience
+                I&apos;ve ever had,&apos; says John D. &apos;Exceptional quality and impeccable
+                service,&apos; adds Sarah M. Join our community of satisfied clients
                 and experience the TechEnd difference.
               </MiniTypo>
               <br />
