@@ -90,7 +90,7 @@ function Cart() {
 
   useEffect(() => {
     cart_refetch();
-  }, [router]);
+  }, [router, cart_refetch]);
 
   const CartItems = cart_data?.items;
   let subTotal = 0;
@@ -143,7 +143,7 @@ function Cart() {
                   {cart_loading ? (
                     <>
                       {[...Array(3)].map((_, idx) => (
-                        <TableRow>
+                        <TableRow key={idx}>
                           <TableCell>
                             <Skeleton variant="rectangular" width={100} height={20} />
                           </TableCell>

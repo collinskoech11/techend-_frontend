@@ -131,8 +131,6 @@ function Checkout() {
           <Grid container spacing={4}>
             {/* Pickup Location Selection */}
             <Grid item xs={12} md={7}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
-                Billing Address
               <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f", marginTop: "20px" }}>
                 Pickup Location
               </Typography>

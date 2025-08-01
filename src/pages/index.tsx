@@ -223,7 +223,7 @@ export default function LandingPage() {
   } else {
     console.log("currentDomain  *****", currentDomain);
   }
-}, []);
+}, [router]);
   return (
     <Box sx={{ bgcolor: lightGray, minHeight: '100vh' }}>
       {showAuthDialog && (
@@ -386,7 +386,7 @@ export default function LandingPage() {
                     Stunning, Customizable Storefronts
                   </Typography>
                   <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
-                    First impressions matter. iMall provides a suite of elegant, responsive templates that can be easily customized to reflect your brand's unique identity. No coding required, just pure design freedom.
+                    First impressions matter. iMall provides a suite of elegant, responsive templates that can be easily customized to reflect your brand&apos;s unique identity. No coding required, just pure design freedom.
                   </Typography>
                   <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
                     Build Your Store
@@ -445,7 +445,7 @@ export default function LandingPage() {
                     AI-Powered Insights for Smarter Decisions
                   </Typography>
                   <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
-                    Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. iMall's AI insights give you the competitive edge.
+                    Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. iMall&apos;s AI insights give you the competitive edge.
                   </Typography>
                   <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
                     Unlock Insights

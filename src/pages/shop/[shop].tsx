@@ -85,6 +85,7 @@ const FiltersContainer = styled(Box)(({ theme }) => ({
 
 
 const Shop = forwardRef((props: any, ref: any) => {
+  Shop.displayName = "Shop";
   const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context

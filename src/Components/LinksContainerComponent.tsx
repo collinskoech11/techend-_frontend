@@ -35,6 +35,7 @@ import { darken } from '@mui/material/styles';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 
 const LinksContainerComponent = forwardRef((props: any, ref: any) => {
+  LinksContainerComponent.displayName = "LinksContainerComponent";
   const router = useRouter();
   const theme = useTheme();
 

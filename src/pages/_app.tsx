@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 // import Script from "next/script";
 
 const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
+  App.displayName = "App";
   const router = useRouter();
   const cartRef = useRef<any>(null);
   const triggerCartRefetch = () => {
