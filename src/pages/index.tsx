@@ -14,6 +14,9 @@ import AuthDialog from "@/Components/AuthDialog";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Icon for primary CTA
 const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
+
+import FuturisticButton from "@/Components/FuturisticButton";
+import { AccentButton } from "@/StyledComponents/Hero";
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
@@ -27,21 +30,40 @@ const floatAnimation = keyframes`
   100% { transform: translateY(0px); }
 `;
 
+const glowAnimation = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
+`;
+
+const gridAnimation = keyframes`
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+`;
+
+const rotateGlobe = keyframes`
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+`;
+
+const moveMap = keyframes`
+  from { background-position: 0 0; }
+  to { background-position: 300px 0; }
+`;
+
 const HeroSection = styled(Box)(({ theme }) => ({
-  background: `linear-gradient(145deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`, // Deeper gradient
+  background: `
+    radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%)
+  `,
   color: "#fff",
   textAlign: "center",
-  borderRadius: "20px", // More rounded for a modern feel
-  marginBottom: "100px", // More space after hero
+  borderRadius: "30px",
+  marginBottom: "100px",
   position: "relative",
   overflow: "hidden",
-  // padding: "120px 0", // Generous padding
-  [theme.breakpoints.down('sm')]: {
-    padding: "80px 0",
-    borderRadius: "10px",
-  },
+  padding: "60px 0", // Adjusted padding
 
-  // Diagonal split overlay (new design element)
+  // Animated grid overlay
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -49,54 +71,26 @@ const HeroSection = styled(Box)(({ theme }) => ({
     left: 0,
     width: '100%',
     height: '100%',
-    background: `linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent)`,
-    backgroundSize: '80px 80px',
-    opacity: 0.2,
-    zIndex: 0,
-  },
-  '&::after': { // Second, more subtle layer
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    background: `linear-gradient(225deg, rgba(255,255,255,0.03) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.03) 75%, transparent 75%, transparent)`,
-    backgroundSize: '60px 60px',
-    opacity: 0.1,
-    zIndex: 0,
+    background: `
+      linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 2px, transparent 0),
+      linear-gradient(45deg, rgba(255, 255, 255, 0.05) 2px, transparent 0)
+    `,
+    backgroundSize: '40px 40px',
+    animation: `${gridAnimation} 4s linear infinite`,
+    zIndex: 1,
   },
 }));
 
 const HeroGraphic = styled(Box)({
   position: 'absolute',
-  // You would replace these with actual SVG or image components
-  // For demonstration, these are placeholder circles
   background: 'rgba(255,255,255,0.08)',
   borderRadius: '50%',
-  animation: `${floatAnimation} 4s ease-in-out infinite`,
-  zIndex: 1, // Below content but above background patterns
+  animation: `${floatAnimation} 4s ease-in-out infinite, ${glowAnimation} 2s ease-in-out infinite alternate`,
+  zIndex: 1,
+  filter: 'blur(2px)', // Subtle blur for a futuristic feel
 });
 
-const AccentButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: "#fff",
-  textTransform: "uppercase", // More professional
-  padding: "16px 40px",
-  borderRadius: "30px",
-  fontWeight: 700, // Bolder
-  fontSize: "1.1rem",
-  boxShadow: "0 10px 25px rgba(0,0,0,0.35)", // Stronger, more defined shadow
-  transition: "all 0.3s ease",
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-    transform: "translateY(-5px) scale(1.03)", // Enhanced hover effect
-    boxShadow: "0 15px 35px rgba(0,0,0,0.45)",
-  },
-  "& .MuiButton-endIcon": {
-    marginLeft: theme.spacing(1), // Space for icon
-  }
-}));
+
 
 const FeatureCard = styled(Card)(({ theme }) => ({
   textAlign: "center",
@@ -215,15 +209,38 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-  const currentDomain = window.location.hostname;
-  if (currentDomain === "www.cupcoutureshop.com") {
-    router.push("/shop/the-cup-couture");
-  } else if (currentDomain === "www.boromoto.com") {
-    router.push("/shop/boromoto");
-  } else {
-    console.log("currentDomain  *****", currentDomain);
-  }
-}, [router]);
+    const currentDomain = window.location.hostname;
+    if (currentDomain === "www.cupcoutureshop.com") {
+      router.push("/shop/the-cup-couture");
+    } else if (currentDomain === "www.boromoto.com") {
+      router.push("/shop/boromoto");
+    } else {
+      console.log("currentDomain  *****", currentDomain);
+    }
+
+    const heroSection = document.getElementById("hero-section");
+    const globe = document.getElementById("globe");
+
+    if (heroSection && globe) {
+      const handleMouseMove = (e: MouseEvent) => {
+        const { clientX, clientY } = e;
+        const { offsetWidth, offsetHeight } = heroSection;
+        const centerX = offsetWidth / 2;
+        const centerY = offsetHeight / 2;
+
+        const rotateX = ((clientY - centerY) / centerY) * 10; // Max 10deg rotation
+        const rotateY = ((clientX - centerX) / centerX) * -10; // Max 10deg rotation
+
+        globe.style.transform = `translateY(-50%) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      };
+
+      heroSection.addEventListener("mousemove", handleMouseMove);
+
+      return () => {
+        heroSection.removeEventListener("mousemove", handleMouseMove);
+      };
+    }
+  }, [router]);
   return (
     <Box sx={{ bgcolor: lightGray, minHeight: '100vh' }}>
       {showAuthDialog && (
@@ -235,12 +252,58 @@ export default function LandingPage() {
       )}
       <Container sx={{ mx: "auto", px: 1, pt: 5, pb: 8, maxWidth: { xl: "90vw" } }}>
         {/* Hero Section */}
-        <HeroSection onClick={handleAuthTrigger}>
+        <HeroSection>
           {/* Decorative floating graphics */}
           <HeroGraphic sx={{ width: 100, height: 100, top: '10%', left: '10%', animationDelay: '0s' }} />
           <HeroGraphic sx={{ width: 150, height: 150, bottom: '15%', right: '10%', animationDelay: '1s' }} />
           <HeroGraphic sx={{ width: 70, height: 70, top: '20%', right: '5%', animationDelay: '0.5s' }} />
           <HeroGraphic sx={{ width: 120, height: 120, bottom: '5%', left: '5%', animationDelay: '1.5s' }} />
+
+          {/* Interactive Globe */}
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '50px',
+              height: '50px',
+              right: '10%',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 1,
+              display: { xs: 'none', md: 'block' },
+              perspective: '1000px',
+            }}
+          >
+            <Box
+              id="globe"
+              sx={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 100px 100px, #555, #000)',
+                position: 'relative',
+                transformStyle: 'preserve-3d',
+                animation: `${rotateGlobe} 30s linear infinite`,
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: 'url(/assets/globe-map.png) repeat-x',
+                  backgroundSize: 'cover',
+                  animation: 'moveMap 30s linear infinite',
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 50% 50%, transparent 70%, rgba(0,0,0,0.5) 100%)',
+                },
+              }}
+            />
+          </Box>
 
           <Zoom duration={1200}>
             <Box sx={{
@@ -248,15 +311,21 @@ export default function LandingPage() {
               zIndex: 2,
               px: { xs: 2, sm: 4, md: 8 },
               py: { xs: 8, sm: 10, md: 12 },
-              maxWidth: '1000px', // Slightly narrower for focus
+              maxWidth: '1000px',
               mx: 'auto',
+              background: 'rgba(255, 255, 255, 0.05)', // Semi-transparent background
+              backdropFilter: 'blur(10px)', // Glassmorphism blur
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.1)', // Subtle border
+              boxShadow: '0 8px 32px 0 rgba( 31, 38, 135, 0.37 )' // Glassmorphism shadow
             }}>
               <Typography
                 variant="h2"
                 sx={{
-                  fontWeight: 900, // Extra bold
+                  fontWeight: 900,
                   mb: { xs: 2, md: 3 },
                   color: "#fff",
+                  minHeight: '140px', // Ensure space for typewriter effect
                   fontSize: {
                     xs: '2.4rem',
                     sm: '2.8rem',
@@ -264,7 +333,8 @@ export default function LandingPage() {
                     lg: '4.8rem',
                   },
                   lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
-                  letterSpacing: { xs: '-0.02em', md: '-0.03em' }, // Tighter letter spacing for headings
+                  letterSpacing: { xs: '-0.02em', md: '-0.03em' },
+                  textShadow: '0 0 10px rgba(255,255,255,0.5)' // Subtle text glow
                 }}
               >
                 <Suspense fallback={<div>Loading...</div>}>
@@ -280,7 +350,7 @@ export default function LandingPage() {
               <Typography
                 variant="h5"
                 sx={{
-                  maxWidth: "700px", // More concise
+                  maxWidth: "700px",
                   mx: "auto",
                   mb: { xs: 5, md: 6 },
                   color: "rgba(255,255,255,0.9)",
@@ -290,16 +360,17 @@ export default function LandingPage() {
                     md: '1.4rem',
                   },
                   lineHeight: 1.5,
+                  textShadow: '0 0 5px rgba(255,255,255,0.3)' // Subtle text glow
                 }}
               >
                 Launch, manage, and grow your enterprise with sokoJunction the all-in-one platform designed for simplicity, speed, and success in the digital marketplace.
               </Typography>
-              <AccentButton
+              <FuturisticButton
                 onClick={handleAuthTrigger}
                 endIcon={<ArrowForwardIcon />} // Add icon to main CTA
               >
                 Get Started Today
-              </AccentButton>
+              </FuturisticButton>
             </Box>
           </Zoom>
         </HeroSection>
