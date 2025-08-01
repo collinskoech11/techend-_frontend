@@ -292,7 +292,7 @@ export default function LandingPage() {
                   lineHeight: 1.5,
                 }}
               >
-                Launch, manage, and grow your enterprise with iMall the all-in-one platform designed for simplicity, speed, and success in the digital marketplace.
+                Launch, manage, and grow your enterprise with sokoJunction the all-in-one platform designed for simplicity, speed, and success in the digital marketplace.
               </Typography>
               <AccentButton
                 onClick={handleAuthTrigger}
@@ -309,7 +309,7 @@ export default function LandingPage() {
         {/* Features Section */}
         <Box sx={{ py: 10 }}>
           <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
-            Why <span style={{ color: theme.palette.primary.main }}>iMall</span> is Your Best Choice
+            Why <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> is Your Best Choice
           </Typography>
           <Grid container gap={3} justifyContent="center">
             <Grid item xs={12} md={3}>
@@ -358,11 +358,11 @@ export default function LandingPage() {
 
 
 
-        {/* Explore iMall in Action Section (Alternating Layouts) */}
+        {/* Explore sokoJunction in Action Section (Alternating Layouts) */}
         <Box sx={{ py: 10 }}>
           <Slide direction="up" triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
-              See <span style={{ color: theme.palette.primary.main }}>iMall</span> in Action
+              See <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> in Action
             </Typography>
 
             {/* Section 1: Sleek Storefronts */}
@@ -386,7 +386,7 @@ export default function LandingPage() {
                     Stunning, Customizable Storefronts
                   </Typography>
                   <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
-                    First impressions matter. iMall provides a suite of elegant, responsive templates that can be easily customized to reflect your brand&apos;s unique identity. No coding required, just pure design freedom.
+                    First impressions matter. sokoJunction provides a suite of elegant, responsive templates that can be easily customized to reflect your brand&apos;s unique identity. No coding required, just pure design freedom.
                   </Typography>
                   <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
                     Build Your Store
@@ -403,7 +403,7 @@ export default function LandingPage() {
                     Intuitive Admin Dashboard & Control
                   </Typography>
                   <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
-                    Manage products, orders, customers, and analytics from a single, easy-to-use dashboard. iMall simplifies your daily operations, giving you more time to focus on growth.
+                    Manage products, orders, customers, and analytics from a single, easy-to-use dashboard. sokoJunction simplifies your daily operations, giving you more time to focus on growth.
                   </Typography>
                   <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
                     Explore Dashboard
@@ -445,7 +445,7 @@ export default function LandingPage() {
                     AI-Powered Insights for Smarter Decisions
                   </Typography>
                   <Typography variant="body1" color={lightText} sx={{ mb: 3 }}>
-                    Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. iMall&apos;s AI insights give you the competitive edge.
+                    Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. sokoJunction&apos;s AI insights give you the competitive edge.
                   </Typography>
                   <AccentButton sx={{ py: '12px', px: '25px', fontSize: '1rem' }} onClick={handleAuthTrigger}>
                     Unlock Insights
@@ -633,7 +633,7 @@ export default function LandingPage() {
               Ready to Transform Your Business?
             </Typography>
             <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 5, color: lightText, fontSize: { xs: '1rem', md: '1.15rem' } }}>
-              Join thousands of thriving SMEs who trust iMall to power their online sales. Experience the future of eCommerce, risk-free.
+              Join thousands of thriving SMEs who trust sokoJunction to power their online sales. Experience the future of eCommerce, risk-free.
             </Typography>
             <AccentButton onClick={handleAuthTrigger} endIcon={<ArrowForwardIcon />}>
               Start Your Free Trial Now

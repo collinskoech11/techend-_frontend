@@ -48,7 +48,7 @@ This is a Next.js project, bootstrapped with `create-next-app`. It appears to be
 
 *   **Dynamic Theming:** The application now supports dynamic theming using Material-UI's `ThemeProvider` and a custom theme context (`src/contexts/ThemeContext.tsx`). Theme colors are dynamically configurable based on shop requirements.
 *   **Code Splitting & Performance Optimizations:** Implemented dynamic imports for several components and libraries to reduce initial bundle sizes and improve Total Blocking Time (TBT). This includes:
-    *   `typewriter-effect` (in `src/pages/iMall.tsx`, `src/pages/index.tsx`, `src/pages/shops.tsx`)
+    *   `typewriter-effect` (in `src/pages/sokoJunction.tsx`, `src/pages/index.tsx`, `src/pages/shops.tsx`)
     *   `FAQ` (in `src/pages/index.tsx`)
     *   `AuthDialog` (in `src/Components/LinksContainerComponent.tsx`)
     *   `Navbar` and `Footer` (in `src/pages/_app.tsx`)
