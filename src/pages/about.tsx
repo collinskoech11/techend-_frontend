@@ -127,21 +127,21 @@ function AboutPage() {
 
       {/* About Section */}
       <SectionWrapper>
-        <SectionTitle><InfoIcon /> About iMall</SectionTitle>
+        <SectionTitle><InfoIcon /> About sokoJunction</SectionTitle>
         <BodyText sx={{ fontSize: '1.1rem', textAlign: 'center', maxWidth: '800px', mx: 'auto', mb: 4 }}>
-          Welcome to **iMall**, your premier destination for building and growing successful online businesses. We believe in empowering entrepreneurs and small-to-medium enterprises (SMEs) with cutting-edge eCommerce solutions that are powerful, intuitive, and designed for scalability.
+          Welcome to **sokoJunction**, your premier destination for building and growing successful online businesses. We believe in empowering entrepreneurs and small-to-medium enterprises (SMEs) with cutting-edge eCommerce solutions that are powerful, intuitive, and designed for scalability.
         </BodyText>
         <Grid container spacing={4} sx={{ mt: 4 }}>
           <Grid item xs={12} md={6}>
             <Subheading>Our Story</Subheading>
             <BodyText>
-              Founded in 2023, iMall emerged from a passion for simplifying the complexities of online retail. We saw a gap in the market for a platform that truly understood the needs of growing businesses – offering robust features without the prohibitive costs or steep learning curves. Our journey began with a commitment to democratize eCommerce, making it accessible and profitable for everyone.
+              Founded in 2023, sokoJunction emerged from a passion for simplifying the complexities of online retail. We saw a gap in the market for a platform that truly understood the needs of growing businesses – offering robust features without the prohibitive costs or steep learning curves. Our journey began with a commitment to democratize eCommerce, making it accessible and profitable for everyone.
             </BodyText>
           </Grid>
           <Grid item xs={12} md={6}>
             <Subheading>What We Offer</Subheading>
             <BodyText>
-              iMall provides an all-in-one suite of tools including customizable storefronts, secure payment gateways, comprehensive inventory management, advanced analytics, and integrated marketing features. Our platform is built on a foundation of innovation, security, and exceptional user experience, ensuring that you have everything you need to thrive in the digital marketplace.
+              sokoJunction provides an all-in-one suite of tools including customizable storefronts, secure payment gateways, comprehensive inventory management, advanced analytics, and integrated marketing features. Our platform is built on a foundation of innovation, security, and exceptional user experience, ensuring that you have everything you need to thrive in the digital marketplace.
             </BodyText>
           </Grid>
         </Grid>
@@ -151,7 +151,7 @@ function AboutPage() {
       <SectionWrapper>
         <SectionTitle><RocketLaunchIcon /> Our Mission</SectionTitle>
         <BodyText sx={{ fontSize: '1.1rem', textAlign: 'center', maxWidth: '800px', mx: 'auto', mb: 4 }}>
-          Our mission at iMall is to **empower businesses of all sizes to achieve their fullest potential in the digital realm.** We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
+          Our mission at sokoJunction is to **empower businesses of all sizes to achieve their fullest potential in the digital realm.** We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
         </BodyText>
         <Grid container spacing={4} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4} textAlign="center">
@@ -181,7 +181,7 @@ function AboutPage() {
               <EmailIcon />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Email Support</Typography>
-                <Typography variant="body1" color={lightText}>support@imall.com</Typography>
+                <Typography variant="body1" color={lightText}>support@sokoJunction.com</Typography>
               </Box>
             </ContactInfoItem>
           </Grid>
@@ -216,7 +216,7 @@ function AboutPage() {
                     fontWeight: 600,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 }}
-                href="mailto:support@imall.com"
+                href="mailto:support@sokoJunction.com"
             >
                 Send Us an Email
             </Button>
@@ -227,7 +227,7 @@ function AboutPage() {
       <SectionWrapper>
         <SectionTitle><PeopleIcon /> Community Guidelines</SectionTitle>
         <BodyText sx={{ textAlign: 'center', maxWidth: '700px', mx: 'auto', mb: 4 }}>
-          Our community thrives on respect and integrity. These guidelines are designed to ensure a safe and positive environment for all iMall users.
+          Our community thrives on respect and integrity. These guidelines are designed to ensure a safe and positive environment for all sokoJunction users.
         </BodyText>
 
         <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
@@ -236,7 +236,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              Treat all members of the iMall community with respect. Harassment, discrimination, hate speech, or any form of abuse will not be tolerated. Engage in constructive dialogue and maintain professionalism in all interactions.
+              Treat all members of the sokoJunction community with respect. Harassment, discrimination, hate speech, or any form of abuse will not be tolerated. Engage in constructive dialogue and maintain professionalism in all interactions.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
@@ -258,7 +258,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              All activities on iMall must comply with applicable local, national, and international laws and regulations. This includes laws related to consumer protection, intellectual property, data privacy, and taxation.
+              All activities on sokoJunction must comply with applicable local, national, and international laws and regulations. This includes laws related to consumer protection, intellectual property, data privacy, and taxation.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
@@ -269,7 +269,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              Do not engage in any activity that could compromise the security or integrity of the iMall platform or its users&apos; data. Report any suspicious activity or vulnerabilities immediately.
+              Do not engage in any activity that could compromise the security or integrity of the sokoJunction platform or its users&apos; data. Report any suspicious activity or vulnerabilities immediately.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
@@ -279,7 +279,7 @@ function AboutPage() {
       <SectionWrapper>
         <SectionTitle><PolicyIcon /> Terms & Conditions</SectionTitle>
         <BodyText sx={{ textAlign: 'center', maxWidth: '700px', mx: 'auto', mb: 4 }}>
-          By using iMall, you agree to abide by these terms. Please read them carefully.
+          By using sokoJunction, you agree to abide by these terms. Please read them carefully.
         </BodyText>
 
         <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
@@ -288,7 +288,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              By accessing or using the iMall platform, you agree to be bound by these Terms and Conditions and our Privacy Policy. If you do not agree to all the terms and conditions of this agreement, then you may not access the website or use any services.
+              By accessing or using the sokoJunction platform, you agree to be bound by these Terms and Conditions and our Privacy Policy. If you do not agree to all the terms and conditions of this agreement, then you may not access the website or use any services.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
@@ -299,7 +299,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              To access certain features of iMall, you may be required to create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.
+              To access certain features of sokoJunction, you may be required to create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
@@ -310,7 +310,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              All content on iMall, including text, graphics, logos, images, and software, is the property of iMall or its content suppliers and protected by international copyright laws. You may not reproduce, distribute, or create derivative works from any content without explicit permission.
+              All content on sokoJunction, including text, graphics, logos, images, and software, is the property of sokoJunction or its content suppliers and protected by international copyright laws. You may not reproduce, distribute, or create derivative works from any content without explicit permission.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
@@ -321,7 +321,7 @@ function AboutPage() {
           </StyledAccordionSummary>
           <StyledAccordionDetails>
             <BodyText>
-              iMall will not be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses, resulting from the use or the inability to use the service.
+              sokoJunction will not be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses, resulting from the use or the inability to use the service.
             </BodyText>
           </StyledAccordionDetails>
         </Accordion>
