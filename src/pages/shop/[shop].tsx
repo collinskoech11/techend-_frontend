@@ -4,6 +4,7 @@ import React, {
   useRef,
   useImperativeHandle,
   forwardRef,
+  use,
 } from "react";
 import MuiBreadcrumbs from "@mui/material/Breadcrumbs"; // Renamed to avoid conflict
 import MuiLink from "@mui/material/Link"; // Renamed to avoid conflict
@@ -16,7 +17,7 @@ import {
 } from "@/StyledComponents/Products";
 import ProductCard from "@/Components/ProductCard";
 import { useRouter } from "next/router";
-import { useGetProductsQuery } from "@/Api/services";
+import { useGetProductsQuery, useGetCompanyBySlugQuery } from "@/Api/services";
 import {
   Box,
   Grid,
@@ -25,14 +26,17 @@ import {
   Typography,
   InputAdornment, // For adding icons to TextField
   Button,
+  IconButton,
+  Menu,
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
 import Cookies from "js-cookie";
-import { styled } from "@mui/system"; // Import styled
+import { styled, useTheme } from "@mui/system"; // Import styled
+
+
 
 // --- Color Palette (Consistent with your project) ---
-const primaryRed = "#be1f2f"; // Your main red accent
 const darkText = "#212121"; // For main text
 const lightText = "#555555"; // For secondary text/labels
 const lightGrayBackground = "#f8f8f8"; // Background for the page
@@ -60,21 +64,6 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
   },
 }));
 
-const StyledLink = styled(MuiLink)(({ theme }) => ({
-  fontWeight: 500,
-  fontSize: "0.95rem",
-  color: lightText,
-  transition: "color 0.3s ease",
-  "&:hover": {
-    color: primaryRed, // Red accent on hover
-    textDecoration: "underline",
-  },
-  "&.MuiTypography-root": { // Style for the last, non-link breadcrumb
-    fontWeight: 600,
-    color: primaryRed, // Red accent for the active page
-    cursor: "default",
-  },
-}));
 
 const FiltersContainer = styled(Box)(({ theme }) => ({
   backgroundColor: whiteBackground,
@@ -93,52 +82,102 @@ const FiltersContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& label.Mui-focused": {
-    color: primaryRed, // Red accent for focused label
-  },
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "8px", // Slightly rounded corners
-    "& fieldset": {
-      borderColor: mediumGrayBorder, // Default border color
-    },
-    "&:hover fieldset": {
-      borderColor: primaryRed, // Red accent on hover border
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: primaryRed, // Red accent on focused border
-      borderWidth: "2px", // Make border slightly thicker on focus
-    },
-  },
-  "& .MuiInputAdornment-root": {
-    color: lightText, // Icon color
-    "& .MuiSvgIcon-root": {
-      color: lightText, // Icon color
-    },
-  },
-}));
 
 
 const Shop = forwardRef((props: any, ref: any) => {
+  Shop.displayName = "Shop";
+  const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const primaryRed = theme.palette.primary.main; // Your main red accent
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const open = Boolean(anchorEl);
+  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleFilterClose = () => {
+    setAnchorEl(null);
+  };
+  const handleCategorySelect = (value: string) => {
+    setCategory(value);
+    handleFilterClose();
+  };
+
+  const StyledTextField = styled(TextField)(({ theme }) => ({
+    "& label.Mui-focused": {
+      color: primaryRed, // Red accent for focused label
+    },
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "8px", // Slightly rounded corners
+      "& fieldset": {
+        borderColor: mediumGrayBorder, // Default border color
+      },
+      "&:hover fieldset": {
+        borderColor: primaryRed, // Red accent on hover border
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: primaryRed, // Red accent on focused border
+        borderWidth: "2px", // Make border slightly thicker on focus
+      },
+    },
+    "& .MuiInputAdornment-root": {
+      color: lightText, // Icon color
+      "& .MuiSvgIcon-root": {
+        color: lightText, // Icon color
+      },
+    },
+  }));
+  const StyledLink = styled(MuiLink)(({ theme }) => ({
+    fontWeight: 500,
+    fontSize: "0.95rem",
+    color: lightText,
+    transition: "color 0.3s ease",
+    "&:hover": {
+      color: primaryRed, // Red accent on hover
+      textDecoration: "underline",
+    },
+    "&.MuiTypography-root": { // Style for the last, non-link breadcrumb
+      fontWeight: 600,
+      color: primaryRed, // Red accent for the active page
+      cursor: "default",
+    },
+  }));
+
+  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname);
 
   useEffect(() => {
-    const pathParts = router.asPath.split("/");
+    const cleanPath = router.asPath.split("?")[0]; // Remove query string
+    const pathParts = cleanPath.split("/");
+
     if (pathParts[1] === "shop" && pathParts[2]) {
       const urlShopName = pathParts[2];
       setShopName(urlShopName);
       Cookies.set("shopname", urlShopName, {
         expires: 7,
-        secure: process.env.NODE_ENV === 'production', // Use secure in production
-        sameSite: "Lax", // 'Strict' can cause issues with direct navigation, 'Lax' is often safer
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: "Lax",
       });
     }
   }, [router.asPath]);
+
+  // Wait for company data to be fetched before setting shopDetails
+  useEffect(() => {
+    if (!companyLoading && companyData) {
+      Cookies.set("shopDetails", JSON.stringify(companyData), {
+        expires: 7,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: "Lax",
+      });
+
+      // ✅ Proceed to any next steps here (e.g., navigation, state updates, etc.)
+    }
+  }, [companyLoading, companyData]);
+
 
   // Adjust useGetProductsQuery to use `category` and `searchTerm`
   // You might need to update your API service to handle `search` parameter
@@ -197,54 +236,68 @@ const Shop = forwardRef((props: any, ref: any) => {
 
       <MainProductsContainer sx={{ mt: 0, px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}> {/* Adjust margin and padding */}
         {/* Filters Section */}
-        <FiltersContainer>
-          <Grid item xs={12} md={6}> {/* Use Grid item for responsiveness */}
-            <StyledTextField
-              fullWidth
-              label="Search Products"
-              variant="outlined"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
+        <Box sx={{ mb: 2 }}>
+          <Grid
+            container
+            spacing={1}
+            alignItems="center"
+            justifyContent="space-between"
+            wrap="nowrap"
+          >
+            <Grid item xs>
+              <TextField
+                fullWidth
+                placeholder="Search Products"
+                variant="outlined"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+
+            <Grid item>
+              {/* Show Filter Icon instead of select on mobile */}
+              <IconButton
+                aria-label="filter categories"
+                onClick={handleFilterClick}
+                sx={{
+                  ml: 1,
+                  border: "1px solid #ccc",
+                  borderRadius: 1,
+                }}
+              >
+                <FilterListIcon />
+              </IconButton>
+
+              <Menu anchorEl={anchorEl} open={open} onClose={handleFilterClose}>
+                <MenuItem onClick={() => handleCategorySelect("")}>All Categories</MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("electronics")}>Electronics</MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("fashion")}>Fashion</MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("beauty")}>Beauty</MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("home-appliances")}>Home Appliances</MenuItem>
+                <MenuItem onClick={() => handleCategorySelect("books")}>Books</MenuItem>
+              </Menu>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={4}> {/* Use Grid item for responsiveness */}
-            <StyledTextField
-              select
-              fullWidth
-              label="Filter by Category"
-              variant="outlined"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FilterListIcon />
-                  </InputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value="">All Categories</MenuItem>
-              {/* These should ideally come from your API or a predefined list */}
-              <MenuItem value="electronics">Electronics</MenuItem>
-              <MenuItem value="fashion">Fashion</MenuItem>
-              <MenuItem value="beauty">Beauty</MenuItem>
-              <MenuItem value="home-appliances">Home Appliances</MenuItem>
-              <MenuItem value="books">Books</MenuItem>
-            </StyledTextField>
-          </Grid>
-        </FiltersContainer>
+        </Box>
+
+
 
         {/* Products Display */}
         <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
           {products_loading ? (
-            // Skeletons mimicking the ProductCard structure
+             <Typography variant="h6" sx={{ width: "100%", textAlign: "center", mb: 2 }}>
+               Loading Products...
+             </Typography>
+          ):<></>}
+          {products_loading ? (
             [...Array(8)].map((_, index) => (
               <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid */}
                 <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: '12px' }} />

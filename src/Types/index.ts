@@ -67,6 +67,9 @@ export interface Company {
   kyc_approved: boolean;
 }
 
+export interface CompanyCardProps {
+  company: Company;
+}
 export interface PickupLocation {
   id: number;
   name: string;

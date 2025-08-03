@@ -12,7 +12,7 @@ import {
   CouponContainer,
   CouponInput,
 } from "@/StyledComponents/CartComponents";
-import { Skeleton } from "@mui/material";
+import { Skeleton, useTheme } from "@mui/material";
 import {
   Box,
   Button,
@@ -42,6 +42,7 @@ function Cart() {
   const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } =
     useGetCartQuery({ token: Cookies.get("access"), company_name: Cookies.get('shopname') });
   const router = useRouter();
+  const theme = useTheme();
 
   const [updateItemQty, { isLoading: isLoadingUpdate }] =
     useAddProductQtyToCartMutation();
@@ -89,7 +90,7 @@ function Cart() {
 
   useEffect(() => {
     cart_refetch();
-  }, [router]);
+  }, [router, cart_refetch]);
 
   const CartItems = cart_data?.items;
   let subTotal = 0;
@@ -100,10 +101,10 @@ function Cart() {
       {/* <Navbar textColor="#000" bgColor="#fff" /> */}
       <CartBanner>
         <Box>
-          <Typography variant="h3" color={'#be1f2f'}>Shopping Cart</Typography>
+          <Typography variant="h3" color={theme.palette.primary.main}>Shopping Cart</Typography>
           <br />
           <Typography>
-            <span style={{ color: "#be1f2f" }}>Home</span> - Shopping cart
+            <span style={{ color: theme.palette.primary.main }}>Home</span> - Shopping cart
           </Typography>
         </Box>
       </CartBanner>
@@ -114,7 +115,7 @@ function Cart() {
             <TableContainer component={Paper} sx={{ mb: 3 }}>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: "#BE1E2D" }}>
+                  <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
                     <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
                       Product
                     </TableCell>
@@ -142,7 +143,7 @@ function Cart() {
                   {cart_loading ? (
                     <>
                       {[...Array(3)].map((_, idx) => (
-                        <TableRow>
+                        <TableRow key={idx}>
                           <TableCell>
                             <Skeleton variant="rectangular" width={100} height={20} />
                           </TableCell>
@@ -193,7 +194,7 @@ function Cart() {
                             >
                               <Button
                                 onClick={() => updateItemCart(item.product.id, "decr")}
-                                sx={{ minWidth: "30px", color: "#BE1E2D" }}
+                                sx={{ minWidth: "30px", color: theme.palette.primary.main }}
                               >
                                 -
                               </Button>
@@ -206,7 +207,7 @@ function Cart() {
                               </Typography>
                               <Button
                                 onClick={() => updateItemCart(item.product.id, "incr")}
-                                sx={{ minWidth: "30px", color: "#BE1E2D" }}
+                                sx={{ minWidth: "30px", color: theme.palette.primary.main }}
                               >
                                 +
                               </Button>
@@ -218,7 +219,7 @@ function Cart() {
                               <CircularProgress size={20} />
                             ) : (
                               <CloseOutlined
-                                sx={{ color: "#BE1E2D", cursor: "pointer" }}
+                                sx={{ color: theme.palette.primary.main, cursor: "pointer" }}
                                 onClick={() => deleteItemCart(item.product.id)}
                               />
                             )}
@@ -238,7 +239,7 @@ function Cart() {
                 <CouponButton>Apply Coupon</CouponButton>
               </CouponContainer> */}
               <CartSummarySub>
-                <CartSummaryTitle style={{color:'#be1f2f'}}>Cart Summary</CartSummaryTitle>
+                <CartSummaryTitle style={{color:theme.palette.primary.main}}>Cart Summary</CartSummaryTitle>
                 <CartSummaryContent>
                   <span>Subtotal</span>
                   <span>Kes {subTotal.toFixed(2)}</span>
@@ -258,7 +259,7 @@ function Cart() {
                     textAlign: "center",
                     fontSize: "14px",
                     cursor: "pointer",
-                    background: "#BE1E2D",
+                    background: theme.palette.primary.main,
                     color: "#fff",
                     fontWeight: "bold",
                   }}

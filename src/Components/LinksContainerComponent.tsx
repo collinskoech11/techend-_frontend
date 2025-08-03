@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef, lazy, Suspense } from "react";
 import { useRouter } from "next/router";
 import {
   AppBar,
@@ -7,11 +7,10 @@ import {
   Button,
   Menu,
   MenuItem,
-  Drawer,
+  Divider,
   Box,
   Typography,
   useTheme,
-  Divider,
   ListItemIcon,
   Tooltip,
   Badge,
@@ -27,14 +26,16 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import CartMenu from "./CartMin";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import AuthDialog from "./AuthDialog";
+const AuthDialog = lazy(() => import("./AuthDialog")); // Dynamic import
 import Shop2Icon from "@mui/icons-material/Shop2";
 import HomeIcon from "@mui/icons-material/Home";
 import MuseumIcon from '@mui/icons-material/Museum';
+import { darken } from '@mui/material/styles';
 // Added for the mobile menu cart item
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 
 const LinksContainerComponent = forwardRef((props: any, ref: any) => {
+  LinksContainerComponent.displayName = "LinksContainerComponent";
   const router = useRouter();
   const theme = useTheme();
 
@@ -105,8 +106,6 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
     router.push("/login");
   };
 
-  const accent = "#be1f2f";
-
   useEffect(() => {
     if (user) setUsername(user);
   }, [user]);
@@ -138,7 +137,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             <ListItemIcon><Shop2Icon fontSize="small" /></ListItemIcon>
             Shop
           </MenuItem>
-           <MenuItem onClick={() => handleMobileMenuItemClick(`/shop/${shopname}`)}>
+           <MenuItem onClick={() => handleMobileMenuItemClick(`/shops`)}>
             <ListItemIcon><MuseumIcon fontSize="small" /></ListItemIcon>
             Mall
           </MenuItem>
@@ -169,9 +168,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
           </MenuItem>
           <MenuItem
             onClick={LogoutFx}
-            sx={{ color: "#BE1E2D", fontWeight: '600' }}
+            sx={{ color: theme.palette.primary.main, fontWeight: '600' }}
           >
-            <ListItemIcon><LogoutIcon fontSize="small" sx={{ color: "#BE1E2D" }} /></ListItemIcon>
+            <ListItemIcon><LogoutIcon fontSize="small" sx={{ color: theme.palette.primary.main }} /></ListItemIcon>
             Logout
           </MenuItem>
         </div>
@@ -179,7 +178,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
         // When not logged in, show AuthDialog or a login link
         // Here we render the AuthDialog directly as a menu item
         <Box sx={{ p: 1 }}>
-          <AuthDialog onTrigger={refetchUser} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AuthDialog onTrigger={refetchUser} />
+          </Suspense>
         </Box>
       )}
     </Menu>
@@ -188,9 +189,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
 
 
   return (
-    <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${accent} 0%, #2b0507 100%)`, color: "#fff" }}>
+    <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.primary.main, 0.8)} 100%)`, color: "#fff", position:"fixed", zIndex: 1201 }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize" }} onClick={() => router.push(`/_/${shopname}`)}>
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#fff" }} onClick={() => router.push(`/_/${shopname}`)}>
           {shopname}
         </Typography>
 
@@ -269,9 +270,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
                 <Divider />
                 <MenuItem
                   onClick={LogoutFx}
-                  sx={{ color: "#BE1E2D", fontWeight: "600" }}
+                  sx={{ color: theme.palette.primary.main, fontWeight: "600" }}
                 >
-                  <ListItemIcon><LogoutIcon fontSize="small" sx={{ color: "#BE1E2D" }} /></ListItemIcon>
+                  <ListItemIcon><LogoutIcon fontSize="small" sx={{ color: theme.palette.primary.main }} /></ListItemIcon>
                   Logout
                 </MenuItem>
               </Menu>

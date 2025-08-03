@@ -14,6 +14,7 @@ import {
   FormControl,
   Paper,
   Box,
+  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -50,6 +51,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 function Checkout() {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const theme = useTheme();
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -121,7 +123,7 @@ function Checkout() {
             <Link underline="hover" color="inherit" href="/">TechEnd</Link>
             <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>Shop</Link>
             <Link underline="hover" color="inherit" href="/cart">Cart</Link>
-            <Typography color="#be1f2f">Checkout</Typography>
+            <Typography color={theme.palette.primary.main}>Checkout</Typography>
           </Breadcrumbs>
         </BreadCrumbContainer>
 
@@ -186,7 +188,7 @@ function Checkout() {
 
             {/* Order Summary */}
             <Grid item xs={12} md={5}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
+              <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
                 Order Summary
               </Typography>
               <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
@@ -214,8 +216,8 @@ function Checkout() {
                   variant="contained"
                   type="submit"
                   sx={{
-                    backgroundColor: "#BE1E2D",
-                    "&:hover": { backgroundColor: "#a71824" },
+                    backgroundColor: theme.palette.primary.main,
+                    "&:hover": { backgroundColor: theme.palette.primary.dark },
                     mt: 2,
                   }}
                   disabled={isLoading}

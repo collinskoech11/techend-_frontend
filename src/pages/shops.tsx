@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useRouter } from "next/router";
 import { useGetCompaniesQuery } from "@/Api/services";
-import { Company } from "@/Types";
+import { Company, CompanyCardProps } from "@/Types";
 import {
   Box,
   Typography,
@@ -13,8 +13,8 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import toast, { Toaster } from "react-hot-toast";
-import Typewriter from "typewriter-effect";
-import Zoom from 'react-reveal/Zoom';
+const Typewriter = lazy(() => import("typewriter-effect"));
+const Zoom = lazy(() => import('react-reveal/Zoom'));
 
 import { GreenButton } from "@/StyledComponents/Buttons";
 import {
@@ -33,11 +33,6 @@ import {
   HeroGraphic,
   AccentButton,
 } from "@/StyledComponents/Hero"; // Make sure these exist and are styled
-
-// --- Types ---
-interface CompanyCardProps {
-  company: Company;
-}
 
 // --- Skeletons ---
 const BannerSkeleton: React.FC = () => (
@@ -123,33 +118,43 @@ const HeroBanner: React.FC = () => {
       <HeroGraphic sx={{ width: 70, height: 70, top: '20%', right: '5%', animationDelay: '0.5s' }} />
       <HeroGraphic sx={{ width: 120, height: 120, bottom: '5%', left: '5%', animationDelay: '1.5s' }} />
 
-      <Zoom duration={1200}>
-        <Box sx={{
-          position: 'relative',
-          zIndex: 2,
-          px: { xs: 2, sm: 4, md: 3 },
-          py: { xs: 8, sm: 10, md: 4 },
-          maxWidth: '1000px',
-          mx: 'auto',
-        }}>
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 900,
-              mb: { xs: 2, md: 3 },
-              color: "#fff",
-              fontSize: {
-                xs: '2.4rem',
-                sm: '2.8rem',
-              },
-              lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
-              letterSpacing: { xs: '-0.02em', md: '-0.03em' },
-            }}
-          >
-            Explore Shops
-          </Typography>
-        </Box>
-      </Zoom>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Zoom duration={1200}>
+          <Box sx={{
+            position: 'relative',
+            zIndex: 2,
+            px: { xs: 2, sm: 4, md: 3 },
+            py: { xs: 8, sm: 10, md: 4 },
+            maxWidth: '1000px',
+            mx: 'auto',
+          }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 900,
+                mb: { xs: 2, md: 3 },
+                color: "#fff",
+                fontSize: {
+                  xs: '2.4rem',
+                  sm: '2.8rem',
+                },
+                lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
+                letterSpacing: { xs: '-0.02em', md: '-0.03em' },
+              }}
+            >
+              <Suspense fallback={<div>Loading...</div>}>
+                <Typewriter
+                  options={{
+                    strings: ["Explore Shops"],
+                    autoStart: true,
+                    loop: true,
+                  }}
+                />
+              </Suspense>
+            </Typography>
+          </Box>
+        </Zoom>
+      </Suspense>
     </HeroSection>
   );
 };

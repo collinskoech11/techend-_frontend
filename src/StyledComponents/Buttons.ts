@@ -1,8 +1,8 @@
 import { Button, styled } from "@mui/material";
-
-export const LoginButton = styled(Button)({
+import { alpha } from "@mui/material/styles";
+export const LoginButton = styled(Button)(({ theme }) => ({
   color: "#fff",
-  background: "#BE1E2D",
+  background: theme.palette.primary.main,
   textTransform: "capitalize",
   // fontSize: "10px",
   fontWeight:"bolder",
@@ -10,7 +10,7 @@ export const LoginButton = styled(Button)({
   "&:hover": {
     background: "#0C0C4C", 
   },
-});
+}));
 
 export const ShopNowButton = styled(Button)({
   background: "#000",
@@ -39,24 +39,21 @@ export const YellowButton = styled(Button)({
   width:"100%",
 });
 
-
-const primaryColor = "#be1f2f"; // Ensure this matches your global primaryColor
-
 export const BorderedButton = styled(Button)(({ theme }) => ({
-  borderColor: primaryColor,
-  color: primaryColor,
+  borderColor: theme.palette.primary.main,
+  color: theme.palette.primary.main,
   textTransform: "uppercase",
   fontWeight: 600,
   borderRadius: "8px", // Slightly less rounded for a modern edge
   padding: theme.spacing(1, 2),
   "&:hover": {
-    backgroundColor: "rgba(190, 31, 47, 0.08)", // Light hover background
-    borderColor: primaryColor,
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    borderColor: theme.palette.primary.main,
   },
 }));
 
 export const GreenButton = styled(Button)(({ theme }) => ({
-  backgroundColor: primaryColor, // Use primary color for main action
+  backgroundColor: theme.palette.primary.main, // Use primary color for main action
   color: "#fff",
   textTransform: "uppercase",
   fontWeight: 600,
@@ -64,7 +61,7 @@ export const GreenButton = styled(Button)(({ theme }) => ({
   padding: theme.spacing(1, 2),
   boxShadow: "0 3px 8px rgba(0, 0, 0, 0.15)", // Subtle shadow
   "&:hover": {
-    backgroundColor: "#a01624", // Darker shade on hover
+    backgroundColor: theme.palette.primary.dark, // Darker shade on hover
     boxShadow: "0 5px 12px rgba(0, 0, 0, 0.25)",
   },
 }));

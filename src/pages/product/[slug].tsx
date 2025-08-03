@@ -9,7 +9,7 @@ import { useGetProductQuery, useAddToCartMutation } from "@/Api/services";
 // Removed: import { PageContainer } from "../path/to/wherever/PageContainer/is/defined"; // Assuming PageContainer is now a global styled component or part of layout
 
 import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled, useTheme } from "@mui/system";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -26,10 +26,10 @@ import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import toast, { Toaster } from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
+import { darken } from '@mui/material/styles';
+
 
 // --- Color Palette (Consistent with previous suggestions) ---
-const primaryColor = "#be1f2f";
-const primaryDark = "#a01624";
 // Removed lightGray here as PageContainer will provide background
 const mediumGray = "#e0e0e0";
 const darkText = "#212121";
@@ -89,11 +89,11 @@ const ThumbnailImage = styled("img")<{ active?: boolean }>(({ theme, active }) =
   borderRadius: "8px",
   cursor: "pointer",
   opacity: active ? 1 : 0.7,
-  border: active ? `2px solid ${primaryColor}` : `2px solid transparent`,
+  border: active ? `2px solid ${theme.palette.primary.main}` : `2px solid transparent`,
   transition: "all 0.3s ease",
   "&:hover": {
     opacity: 1,
-    borderColor: primaryColor,
+    borderColor: theme.palette.primary.main,
   },
 }));
 
@@ -115,12 +115,12 @@ const ProductTitle = styled(Typography)({
   lineHeight: 1.2,
 });
 
-const ProductPrice = styled(Typography)({
+const ProductPrice = styled(Typography)(({theme}) => ({
   fontSize: "clamp(24px, 3.5vw, 32px)",
-  color: primaryColor,
+  color: theme.palette.primary.main,
   fontWeight: 700,
   marginTop: '8px',
-});
+}));
 
 const ProductDescription = styled(Typography)({
   fontSize: "1rem",
@@ -154,7 +154,7 @@ const QuantitySelector = styled(Box)(({ theme }) => ({
 }));
 
 const AddToCartButton = styled(Button)(({ theme }) => ({
-  backgroundColor: primaryColor,
+  backgroundColor: theme.palette.primary.main,
   color: "#fff",
   textTransform: "uppercase",
   padding: "12px 25px",
@@ -163,7 +163,7 @@ const AddToCartButton = styled(Button)(({ theme }) => ({
   fontSize: "1.1rem",
   boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
   "&:hover": {
-    backgroundColor: primaryDark,
+    backgroundColor: darken(theme.palette.primary.main, 0.6),
     boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
   },
   "&:disabled": {
@@ -197,15 +197,18 @@ const SkeletonThumbnail = styled(Skeleton)({
 });
 
 function ProductDetailView(ref:any) {
+  const theme = useTheme();
   const { data: cart_data, isLoading:cart_loading, refetch: cart_refetch } = useCart();
   const router = useRouter();
-  const id = router.query.id;
+  const slug = router.query.slug;
   const [shopname] = useState(Cookies.get("shopname") || "techend");
-  const { data: product, isLoading, error } = useGetProductQuery(id);
+  const { data: product, isLoading, error } = useGetProductQuery(slug);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
-
+  const primaryDark = darken(theme.palette.primary.main, 0.6);
+  const primaryColor = theme.palette.primary.main;
+  
   const handleQuantityChange = (type: 'add' | 'remove') => {
     if (type === 'add') {
       setQuantity((prev) => prev + 1);
@@ -229,12 +232,12 @@ function ProductDetailView(ref:any) {
         cart_refetch(); // <--- Add this line to update the cart context
       }
     } else {
-      useImperativeHandle(ref, () => ({
-        cart_refetch() {
-          cart_refetch();
-        },
-      }));
       toast.error("Please log in to add items to your cart.");
+      // useImperativeHandle(ref, () => ({
+      //   cart_refetch() {
+      //     cart_refetch();
+      //   },
+      // }));
     }
   };
   
