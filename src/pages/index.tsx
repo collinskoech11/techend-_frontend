@@ -16,6 +16,8 @@ const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
 
 import FuturisticButton from "@/Components/FuturisticButton";
+import { useCreateContactMessageMutation } from "@/Api/services";
+import toast, { Toaster } from "react-hot-toast";
 import { AccentButton } from "@/StyledComponents/Hero";
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
@@ -198,6 +200,23 @@ export default function LandingPage() {
   const router = useRouter();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const theme = useTheme();
+  const [createContactMessage, { isLoading }] = useCreateContactMessageMutation();
+  const [formState, setFormState] = useState({ name: "", email: "", message: "" });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await createContactMessage({ body: formState }).unwrap();
+      toast.success("Message sent successfully!");
+      setFormState({ name: "", email: "", message: "" });
+    } catch (error) {
+      toast.error("Failed to send message.");
+    }
+  };
 
   const handleAuthTrigger = () => {
     setShowAuthDialog(true);
@@ -629,6 +648,10 @@ export default function LandingPage() {
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Priority Shop Listing</Typography>} />
                       </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Payments Automation (Mpesa, Crypto, Cards)</Typography>} />
+                      </ListItem>
                     </List>
                   </Box>
                   <AccentButton onClick={handleAuthTrigger}>Choose Growth</AccentButton>
@@ -708,22 +731,24 @@ export default function LandingPage() {
             </Typography>
             <Grid container spacing={2} justifyContent="center">
               <Grid item xs={12} md={8}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Name" variant="outlined" />
+                <form onSubmit={handleSubmit}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField fullWidth label="Name" name="name" value={formState.name} onChange={handleInputChange} variant="outlined" />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField fullWidth label="Email" name="email" value={formState.email} onChange={handleInputChange} variant="outlined" />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField fullWidth multiline rows={4} label="Message" name="message" value={formState.message} onChange={handleInputChange} variant="outlined" />
+                    </Grid>
+                    <Grid item xs={12} sx={{ textAlign: 'center' }}>
+                      <Button type="submit" variant="contained" color="primary" sx={{ mt: 2, py: '12px', px: '30px', fontSize: '1rem', borderRadius: '20px', fontWeight: 600 }}>
+                        {isLoading ? <CircularProgress size={24} /> : "Send Message"}
+                      </Button>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Email" variant="outlined" />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField fullWidth multiline rows={4} label="Message" variant="outlined" />
-                  </Grid>
-                  <Grid item xs={12} sx={{ textAlign: 'center' }}>
-                    <Button variant="contained" color="primary" sx={{ mt: 2, py: '12px', px: '30px', fontSize: '1rem', borderRadius: '20px', fontWeight: 600 }}>
-                      Send Message
-                    </Button>
-                  </Grid>
-                </Grid>
+                </form>
               </Grid>
             </Grid>
           </Fade>
@@ -745,6 +770,7 @@ export default function LandingPage() {
             </AccentButton>
           </Zoom>
         </Box>
+      <Toaster />
       </Container>
     </Box>
   );

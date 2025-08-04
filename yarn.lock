@@ -2693,7 +2693,7 @@ __metadata:
     react-color: "npm:^2.19.3"
     react-dom: "npm:^18"
     react-hook-form: "npm:^7.60.0"
-    react-hot-toast: "npm:^2.4.1"
+    react-hot-toast: "npm:^2.5.2"
     react-no-ssr: "npm:^1.1.0"
     react-redux: "npm:^9.1.0"
     react-responsive-carousel: "npm:^3.2.23"
@@ -3912,7 +3912,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hot-toast@npm:^2.4.1":
+"react-hot-toast@npm:^2.5.2":
   version: 2.5.2
   resolution: "react-hot-toast@npm:2.5.2"
   dependencies:
