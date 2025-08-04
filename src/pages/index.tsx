@@ -1,7 +1,7 @@
 "use client";
 
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress } from "@mui/material";
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress, TextField } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -378,7 +378,7 @@ export default function LandingPage() {
 
 
         {/* Features Section */}
-        <Box sx={{ py: 10 }}>
+        <Box sx={{ py: 10 }} id="features">
           <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
             Why <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> is Your Best Choice
           </Typography>
@@ -430,7 +430,7 @@ export default function LandingPage() {
 
 
         {/* Explore sokoJunction in Action Section (Alternating Layouts) */}
-        <Box sx={{ py: 10 }}>
+        <Box sx={{ py: 10 }} id="showcase">
           <Slide direction="up" triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
               See <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> in Action
@@ -530,7 +530,7 @@ export default function LandingPage() {
 
 
         {/* Pricing Section */}
-        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="pricing">
           <Fade cascade triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
               Simple, Transparent Pricing
@@ -692,8 +692,42 @@ export default function LandingPage() {
 
 
         <Suspense fallback={<CircularProgress />}>
-          <FAQ />
+          <div id="faq">
+            <FAQ />
+          </div>
         </Suspense>
+
+        {/* Contact Us Section */}
+        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="contact">
+          <Fade cascade triggerOnce>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
+              Contact Us
+            </Typography>
+            <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 6, color: lightText, textAlign: "center", fontSize: { xs: '1rem', md: '1.15rem' } }}>
+              Have a question or want to learn more? Send us a message and we&apos;ll get back to you as soon as possible.
+            </Typography>
+            <Grid container spacing={2} justifyContent="center">
+              <Grid item xs={12} md={8}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="Name" variant="outlined" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="Email" variant="outlined" />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField fullWidth multiline rows={4} label="Message" variant="outlined" />
+                  </Grid>
+                  <Grid item xs={12} sx={{ textAlign: 'center' }}>
+                    <Button variant="contained" color="primary" sx={{ mt: 2, py: '12px', px: '30px', fontSize: '1rem', borderRadius: '20px', fontWeight: 600 }}>
+                      Send Message
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Fade>
+        </Box>
 
 
 

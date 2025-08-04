@@ -73,117 +73,54 @@ function Footer() {
             zIndex: 1, // Ensures grid content sits above waves
           }}
         >
-          {/* Talk to Us Section */}
-          <Grid item md={3} xs={12} sm={6} sx={{ mb: { xs: 3, md: 0 } }}>
+          {/* Contact Us Section */}
+          <Grid item md={4} xs={12} sm={6} sx={{ mb: { xs: 3, md: 0 } }}>
             <Box>
               <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5, color: brighterText }}>
-                Talk to Us
+                Contact Us
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
+                techendforgranted@gmail.com
               </Typography>
               <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
                 +254 728 000 107
               </Typography>
               <Typography variant="body2" sx={{ color: lightText }}>
-                Join our open eCommerce community
+                Nairobi, Kenya
               </Typography>
             </Box>
           </Grid>
 
-          {/* Explore Section */}
-          <Grid item md={2} xs={12} sm={6} sx={{ mb: { xs: 3, md: 0 } }}>
+          {/* Quick Links Section */}
+          <Grid item md={4} xs={12} sm={6} sx={{ mb: { xs: 3, md: 0 } }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5, color: brighterText }}>
-              Explore
+              Quick Links
             </Typography>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
-              <Typography variant="body2">Open Products</Typography>
+            <MuiLink href="https://sokojunction.com/#features" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+              <Typography variant="body2">Features</Typography>
             </MuiLink>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
-              <Typography variant="body2">Popular Items</Typography>
+            <MuiLink href="https://sokojunction.com/#pricing" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+              <Typography variant="body2">Pricing</Typography>
             </MuiLink>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
-              <Typography variant="body2">Marketplace</Typography>
+            <MuiLink href="https://sokojunction.com/#showcase" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+              <Typography variant="body2">Showcase</Typography>
             </MuiLink>
           </Grid>
 
-          {/* About Section */}
-          <Grid item md={2} xs={12} sm={6} sx={{ mb: { xs: 3, md: 0 } }}>
+          {/* Support Section */}
+          <Grid item md={4} xs={12} sm={6} sx={{ mb: { xs: 3, md: 0 } }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5, color: brighterText }}>
-              About
+              Support
             </Typography>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
-              <Typography variant="body2">Our Mission</Typography>
+            <MuiLink href="https://sokojunction.com/#faq" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+              <Typography variant="body2">FAQ</Typography>
             </MuiLink>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+            <MuiLink href="https://sokojunction.com/#contact" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
               <Typography variant="body2">Contact Us</Typography>
             </MuiLink>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
-              <Typography variant="body2">Community Guidelines</Typography>
+            <MuiLink href="https://sokojunction.com/terms" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+              <Typography variant="body2">Terms of Service</Typography>
             </MuiLink>
-            <MuiLink href="#" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
-              <Typography variant="body2">Terms & Conditions</Typography>
-            </MuiLink>
-          </Grid>
-
-          {/* Stay Connected Section */}
-          <Grid item md={5} xs={12} sm={6}>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5, color: brighterText }}>
-              Stay Connected
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: lightText }}>
-              Enter your email to get updates on new features, products, and community events.
-            </Typography>
-
-            <TextField
-              placeholder="Enter your email..."
-              variant="outlined"
-              size="medium"
-              sx={{
-                background: "#fff",
-                borderRadius: "8px",
-                overflow: 'hidden',
-                "& .MuiOutlinedInput-root": {
-                  paddingRight: 0,
-                  borderRadius: "8px",
-                  '& fieldset': {
-                    borderColor: 'transparent',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'transparent',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'transparent',
-                  },
-                },
-                "& input": {
-                  padding: "14px 14px",
-                  color: darkBackground,
-                },
-                width: '100%',
-                display: 'flex',
-              }}
-              InputProps={{
-                endAdornment: (
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: theme.palette.primary.main,
-                      color: "#fff",
-                      fontSize: { xs: "0.85rem", sm: "1rem" },
-                      textTransform: "capitalize",
-                      padding: { xs: "12px 20px", sm: "15px 35px" },
-                      borderRadius: "0 8px 8px 0",
-                      height: '100%',
-                      minWidth: { xs: '90px', sm: '120px' },
-                      "&:hover": {
-                        background: theme.palette.primary.dark,
-                      },
-                    }}
-                  >
-                    Subscribe
-                  </Button>
-                ),
-              }}
-              fullWidth
-            />
           </Grid>
         </Grid>
       </Box>
