@@ -188,6 +188,13 @@ export const AuthApi = createApi({
         body,
       }),
     }),
+    createContactMessage: builder.mutation({
+      query: (data) => ({
+        url: `api/contact/`,
+        method: "POST",
+        body: data.body,
+      }),
+    }),
   })
 });
 export const {
@@ -211,4 +218,5 @@ export const {
   useConfirmPasswordResetMutation,
   useGetPickupLocationsQuery,
   useCreatePickupLocationMutation,
+  useCreateContactMessageMutation,
 }: any = AuthApi;

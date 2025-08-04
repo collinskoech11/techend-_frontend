@@ -56,3 +56,5 @@ This is a Next.js project, bootstrapped with `create-next-app`. It appears to be
 
 ## Gemini Added Memories
 - The currency for this project is always Kes.
+- Commits should only be made when prompted by the user.
+- NEVER remove the import: `import { AccentButton } from "@/StyledComponents/Hero";`

@@ -191,9 +191,17 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   return (
     <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.primary.main, 0.8)} 100%)`, color: "#fff", position:"fixed", zIndex: 1201 }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
+        {router.pathname === "/" ? (
         <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#fff" }} onClick={() => router.push(`/_/${shopname}`)}>
+          SokoJunction
+        </Typography>
+        ): (
+        <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#fff" }} onClick={() => router.push(`/shop/${shopname}`)}>
           {shopname}
         </Typography>
+        )}
+
+        {/* --- START: Mobile Menu Icon (Visible on mobile only) --- */}
 
         {/* --- START: Desktop Icons (Hidden on mobile) --- */}
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1 }}>
