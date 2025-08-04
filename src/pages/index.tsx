@@ -1,7 +1,7 @@
 "use client";
 
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress } from "@mui/material";
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress, TextField } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -16,6 +16,10 @@ const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
 
 import FuturisticButton from "@/Components/FuturisticButton";
+import { useCreateContactMessageMutation, useGetCompaniesQuery } from "@/Api/services";
+import toast, { Toaster } from "react-hot-toast";
+import Carousel from 'react-material-ui-carousel';
+import TestimonialCard from "@/Components/TestimonialCard";
 import { AccentButton } from "@/StyledComponents/Hero";
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
@@ -198,6 +202,23 @@ export default function LandingPage() {
   const router = useRouter();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const theme = useTheme();
+  const [createContactMessage, { isLoading }] = useCreateContactMessageMutation();
+  const [formState, setFormState] = useState({ name: "", email: "", message: "" });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await createContactMessage({ body: formState }).unwrap();
+      toast.success("Message sent successfully!");
+      setFormState({ name: "", email: "", message: "" });
+    } catch (error) {
+      toast.error("Failed to send message.");
+    }
+  };
 
   const handleAuthTrigger = () => {
     setShowAuthDialog(true);
@@ -207,6 +228,7 @@ export default function LandingPage() {
     setShowAuthDialog(false);
     router.push("/company-onboarding");
   };
+  const { data: companiesData, isLoading: isLoadingCompanies, isError: isErrorCompanies } = useGetCompaniesQuery({});
 
   useEffect(() => {
     const currentDomain = window.location.hostname;
@@ -329,8 +351,8 @@ export default function LandingPage() {
                   fontSize: {
                     xs: '2.4rem',
                     sm: '2.8rem',
-                    md: '3.8rem',
-                    lg: '4.8rem',
+                    md: '2.8rem',
+                    lg: '3.8rem',
                   },
                   lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
                   letterSpacing: { xs: '-0.02em', md: '-0.03em' },
@@ -340,7 +362,7 @@ export default function LandingPage() {
                 <Suspense fallback={<div>Loading...</div>}>
                   <Typewriter
                     options={{
-                      strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
+                      strings: ["Empower Your Business","Set up an e-commerce website in minutes...", "Next-Gen e-commerce", "Simplify, Grow Online", "Set up an e-commerce website in minutes..."],
                       autoStart: true,
                       loop: true,
                     }}
@@ -378,7 +400,7 @@ export default function LandingPage() {
 
 
         {/* Features Section */}
-        <Box sx={{ py: 10 }}>
+        <Box sx={{ py: 10 }} id="features">
           <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
             Why <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> is Your Best Choice
           </Typography>
@@ -430,7 +452,7 @@ export default function LandingPage() {
 
 
         {/* Explore sokoJunction in Action Section (Alternating Layouts) */}
-        <Box sx={{ py: 10 }}>
+        <Box sx={{ py: 10 }} id="showcase">
           <Slide direction="up" triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
               See <span style={{ color: theme.palette.primary.main }}>sokoJunction</span> in Action
@@ -530,7 +552,7 @@ export default function LandingPage() {
 
 
         {/* Pricing Section */}
-        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="pricing">
           <Fade cascade triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
               Simple, Transparent Pricing
@@ -629,6 +651,10 @@ export default function LandingPage() {
                         <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
                         <ListItemText primary={<Typography variant="body1" color={lightText}>Priority Shop Listing</Typography>} />
                       </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: '1.3rem' }} /></ListItemIcon>
+                        <ListItemText primary={<Typography variant="body1" color={lightText}>Payments Automation (Mpesa, Crypto, Cards)</Typography>} />
+                      </ListItem>
                     </List>
                   </Box>
                   <AccentButton onClick={handleAuthTrigger}>Choose Growth</AccentButton>
@@ -692,8 +718,93 @@ export default function LandingPage() {
 
 
         <Suspense fallback={<CircularProgress />}>
-          <FAQ />
+          <div id="faq">
+            <FAQ />
+          </div>
         </Suspense>
+
+        {/* Testimonials Section */}
+        <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
+          <Fade cascade triggerOnce>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
+              What Our <span style={{ color: theme.palette.primary.main }}>Partners</span> Say
+            </Typography>
+            <Carousel
+              autoPlay={true}
+              animation="slide"
+              indicators={true}
+              navButtonsAlwaysVisible={false}
+              cycleNavigation={true}
+              interval={6000}
+              sx={{
+                width: '100%',
+                maxWidth: '1200px',
+                mx: 'auto',
+                '.MuiIconButton-root': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiButtonBase-root.MuiIconButton-root': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiSvgIcon-root': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiCarousel-indicator': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiCarousel-indicator.Mui-active': {
+                  color: theme.palette.primary.dark,
+                },
+              }}
+            >
+              {companiesData?.results?.map((company: any) => (
+                company.testimonial && company.testimonial.trim() !== '' ? (
+                  <Box key={company.id} sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <TestimonialCard
+                      name={company.name}
+                      testimonial={company.testimonial}
+                      avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`} // Assuming logo can be used as avatar
+                    />
+                  </Box>
+                ) : null
+              ))}
+            </Carousel>
+          </Fade>
+        </Box>
+
+        {/* Contact Us Section */}
+        <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="contact">
+          <Fade cascade triggerOnce>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
+              Contact Us
+            </Typography>
+            <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 6, color: lightText, textAlign: "center", fontSize: { xs: '1rem', md: '1.15rem' } }}>
+              Have a question or want to learn more? Send us a message and we&apos;ll get back to you as soon as possible.
+            </Typography>
+            <Grid container spacing={2} justifyContent="center">
+              <Grid item xs={12} md={8}>
+                <form onSubmit={handleSubmit}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField fullWidth label="Name" name="name" value={formState.name} onChange={handleInputChange} variant="outlined" />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField fullWidth label="Email" name="email" value={formState.email} onChange={handleInputChange} variant="outlined" />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField fullWidth multiline rows={4} label="Message" name="message" value={formState.message} onChange={handleInputChange} variant="outlined" />
+                    </Grid>
+                    <Grid item xs={12} sx={{ textAlign: 'center' }}>
+                      <Button type="submit" variant="contained" color="primary" sx={{ mt: 2, py: '12px', px: '30px', fontSize: '1rem', borderRadius: '20px', fontWeight: 600 }}>
+                        {isLoading ? <CircularProgress size={24} /> : "Send Message"}
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </form>
+              </Grid>
+            </Grid>
+          </Fade>
+        </Box>
 
 
 
@@ -711,6 +822,7 @@ export default function LandingPage() {
             </AccentButton>
           </Zoom>
         </Box>
+      <Toaster />
       </Container>
     </Box>
   );
