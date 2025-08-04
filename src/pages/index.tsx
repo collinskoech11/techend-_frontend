@@ -774,7 +774,7 @@ export default function LandingPage() {
                         key={company.id}
                         name={company.name}
                         testimonial={company.testimonial}
-                        avatarSrc={company.logo} // Assuming logo can be used as avatar
+                        avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`} // Assuming logo can be used as avatar
                       />
                     ))}
                   </Box>
