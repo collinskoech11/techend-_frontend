@@ -757,17 +757,28 @@ export default function LandingPage() {
                 },
               }}
             >
-              {companiesData?.results?.map((company: any) => (
-                company.testimonial && company.testimonial.trim() !== '' ? (
-                  <Box key={company.id} sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                    <TestimonialCard
-                      name={company.name}
-                      testimonial={company.testimonial}
-                      avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`} // Assuming logo can be used as avatar
-                    />
+              {companiesData?.results
+                ?.filter((company: any) => company.testimonial && company.testimonial.trim() !== '')
+                .reduce((acc: any[], company: any, index: number) => {
+                  if (index % 2 === 0) {
+                    acc.push([company]);
+                  } else {
+                    acc[acc.length - 1].push(company);
+                  }
+                  return acc;
+                }, [])
+                .map((pair: any[], index: number) => (
+                  <Box key={index} sx={{ display: 'flex', justifyContent: 'center', gap: 4, p: 2 }}>
+                    {pair.map((company: any) => (
+                      <TestimonialCard
+                        key={company.id}
+                        name={company.name}
+                        testimonial={company.testimonial}
+                        avatarSrc={company.logo} // Assuming logo can be used as avatar
+                      />
+                    ))}
                   </Box>
-                ) : null
-              ))}
+                ))}
             </Carousel>
           </Fade>
         </Box>
