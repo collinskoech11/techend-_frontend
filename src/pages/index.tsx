@@ -18,8 +18,9 @@ import Image from "next/image";
 import FuturisticButton from "@/Components/FuturisticButton";
 import { useCreateContactMessageMutation, useGetCompaniesQuery } from "@/Api/services";
 import toast, { Toaster } from "react-hot-toast";
-import { AccentButton } from "@/StyledComponents/Hero";
+import Carousel from 'react-material-ui-carousel';
 import TestimonialCard from "@/Components/TestimonialCard";
+import { AccentButton } from "@/StyledComponents/Hero";
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
@@ -729,19 +730,44 @@ export default function LandingPage() {
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
               What Our <span style={{ color: theme.palette.primary.main }}>Partners</span> Say
             </Typography>
-            <Grid container spacing={4} justifyContent="center">
-              {isLoadingCompanies && <CircularProgress />}
-              {isErrorCompanies && <Typography color="error">Error loading testimonials.</Typography>}
+            <Carousel
+              autoPlay={true}
+              animation="slide"
+              indicators={true}
+              navButtonsAlwaysVisible={false}
+              cycleNavigation={true}
+              interval={6000}
+              sx={{
+                width: '100%',
+                maxWidth: '1200px',
+                mx: 'auto',
+                '.MuiIconButton-root': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiButtonBase-root.MuiIconButton-root': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiSvgIcon-root': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiCarousel-indicator': {
+                  color: theme.palette.primary.main,
+                },
+                '.MuiCarousel-indicator.Mui-active': {
+                  color: theme.palette.primary.dark,
+                },
+              }}
+            >
               {companiesData?.results?.map((company: any) => (
-                <Grid item xs={12} sm={6} md={4} key={company.id}>
+                <Box key={company.id} sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
                   <TestimonialCard
                     name={company.name}
                     description={company.description}
                     avatarSrc={company.logo} // Assuming logo can be used as avatar
                   />
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Carousel>
           </Fade>
         </Box>
 
