@@ -228,7 +228,6 @@ export default function LandingPage() {
     setShowAuthDialog(false);
     router.push("/company-onboarding");
   };
-
   const { data: companiesData, isLoading: isLoadingCompanies, isError: isErrorCompanies } = useGetCompaniesQuery({});
 
   useEffect(() => {
@@ -759,13 +758,15 @@ export default function LandingPage() {
               }}
             >
               {companiesData?.results?.map((company: any) => (
-                <Box key={company.id} sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                  <TestimonialCard
-                    name={company.name}
-                    description={company.description}
-                    avatarSrc={company.logo} // Assuming logo can be used as avatar
-                  />
-                </Box>
+                company.testimonial && company.testimonial.trim() !== '' ? (
+                  <Box key={company.id} sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <TestimonialCard
+                      name={company.name}
+                      testimonial={company.testimonial}
+                      avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`} // Assuming logo can be used as avatar
+                    />
+                  </Box>
+                ) : null
               ))}
             </Carousel>
           </Fade>

@@ -4,7 +4,7 @@ import { styled } from "@mui/material/styles";
 
 interface TestimonialCardProps {
   name: string;
-  description: string;
+  testimonial: string;
   avatarSrc?: string;
 }
 
@@ -32,7 +32,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   border: `3px solid ${theme.palette.primary.main}`,
 }));
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ name, description, avatarSrc }) => {
+const TestimonialCard: React.FC<TestimonialCardProps> = ({ name, testimonial, avatarSrc }) => {
   return (
     <StyledCard>
       <StyledAvatar src={avatarSrc} alt={name}>
@@ -42,7 +42,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ name, description, av
         {name}
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        &quot;{description}&quot;
+        &quot;{testimonial}&quot;
       </Typography>
     </StyledCard>
   );
