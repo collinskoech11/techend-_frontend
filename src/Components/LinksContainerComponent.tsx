@@ -197,7 +197,8 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
         </Typography>
         ): (
         <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#fff" }} onClick={() => router.push(`/shop/${shopname}`)}>
-          {shopname}
+          {/* {shopname} */}
+          Shop
         </Typography>
         )}
 
