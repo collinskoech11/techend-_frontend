@@ -359,7 +359,7 @@ export default function LandingPage() {
                 <Suspense fallback={<div>Loading...</div>}>
                   <Typewriter
                     options={{
-                      strings: ["Empower Your Business", "Next-Gen eCommerce", "Simplify, Grow Online"],
+                      strings: ["Empower Your Business","Set up an ecomerce website in minutes...", "Next-Gen eCommerce", "Simplify, Grow Online", "Set up an ecomerce website in minutes..."],
                       autoStart: true,
                       loop: true,
                     }}
