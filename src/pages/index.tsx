@@ -16,9 +16,10 @@ const FAQ = lazy(() => import("@/Components/FAQ"));
 import Image from "next/image";
 
 import FuturisticButton from "@/Components/FuturisticButton";
-import { useCreateContactMessageMutation } from "@/Api/services";
+import { useCreateContactMessageMutation, useGetCompaniesQuery } from "@/Api/services";
 import toast, { Toaster } from "react-hot-toast";
 import { AccentButton } from "@/StyledComponents/Hero";
+import TestimonialCard from "@/Components/TestimonialCard";
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
@@ -227,6 +228,8 @@ export default function LandingPage() {
     router.push("/company-onboarding");
   };
 
+  const { data: companiesData, isLoading: isLoadingCompanies, isError: isErrorCompanies } = useGetCompaniesQuery({});
+
   useEffect(() => {
     const currentDomain = window.location.hostname;
     if (currentDomain === "www.cupcoutureshop.com") {
@@ -346,8 +349,8 @@ export default function LandingPage() {
                   color: "#fff",
                   minHeight: '140px', // Ensure space for typewriter effect
                   fontSize: {
-                    xs: '1.4rem',
-                    sm: '1.8rem',
+                    xs: '2.4rem',
+                    sm: '2.8rem',
                     md: '2.8rem',
                     lg: '3.8rem',
                   },
@@ -719,6 +722,28 @@ export default function LandingPage() {
             <FAQ />
           </div>
         </Suspense>
+
+        {/* Testimonials Section */}
+        <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
+          <Fade cascade triggerOnce>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
+              What Our <span style={{ color: theme.palette.primary.main }}>Partners</span> Say
+            </Typography>
+            <Grid container spacing={4} justifyContent="center">
+              {isLoadingCompanies && <CircularProgress />}
+              {isErrorCompanies && <Typography color="error">Error loading testimonials.</Typography>}
+              {companiesData?.results?.map((company: any) => (
+                <Grid item xs={12} sm={6} md={4} key={company.id}>
+                  <TestimonialCard
+                    name={company.name}
+                    description={company.description}
+                    avatarSrc={company.logo} // Assuming logo can be used as avatar
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Fade>
+        </Box>
 
         {/* Contact Us Section */}
         <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="contact">

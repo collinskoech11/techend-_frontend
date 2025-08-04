@@ -105,6 +105,9 @@ function Footer() {
             <MuiLink href="https://sokojunction.com/#showcase" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
               <Typography variant="body2">Showcase</Typography>
             </MuiLink>
+            <MuiLink href="https://sokojunction.com/#testimonials" color="inherit" underline="none" sx={{ display: 'block', mb: 0.5, '&:hover': { color: theme.palette.primary.main } }}>
+              <Typography variant="body2">Testimonials</Typography>
+            </MuiLink>
           </Grid>
 
           {/* Support Section */}
