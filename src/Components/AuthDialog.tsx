@@ -175,7 +175,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
             <Tabs value={tabIndex} onChange={handleTabChange} centered>
               <Tab label="Login" />
               <Tab label="Register" />
-              <Tab label="Google" />
+              {/* <Tab label="Google" /> */}
             </Tabs>
 
             {tabIndex === 0 && (
@@ -285,7 +285,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
                 </Button>
               </Box>
             )}
-            {tabIndex === 2 && (
+            {/* {tabIndex === 2 && (
               <>
                 <GoogleLogin
                   onSuccess={credentialResponse => {
@@ -298,7 +298,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
                   }}
                 />
               </>
-            )}
+            )} */}
           </Box>
         </DialogContent>
       </Dialog>
