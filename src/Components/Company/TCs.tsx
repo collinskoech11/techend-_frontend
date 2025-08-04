@@ -1,11 +1,12 @@
 import { YourChildProps } from "@/Types";
-import { Box, Button, Typography, CircularProgress } from "@mui/material";
+import { Box, Button, Typography, CircularProgress, useTheme } from "@mui/material";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
 
 const TCs = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
 
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
+    const theme = useTheme();
 
     const handleSubmit = async () => {
         const formData = new FormData();
@@ -80,7 +81,7 @@ const TCs = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyDat
                 </Button>
                 <Button
                     variant="contained"
-                    sx={{ background: "#be1f2f" }}
+                    sx={{ background: theme.palette.primary.main }}
                     disabled={!companyData.acceptTerms || isLoading}
                     onClick={handleSubmit}
                 >

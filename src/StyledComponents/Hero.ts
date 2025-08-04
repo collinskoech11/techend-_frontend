@@ -1,8 +1,6 @@
 import { Box, Button, Input, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, keyframes, styled } from "@mui/material";
 
 // Define a consistent color palette
-const primaryColor = "#be1f2f"; // Your existing accent color (Deep Red)
-const primaryDark = "#8f1721"; // Darker shade for hover/accents
 const secondaryColor = "#3f51b5"; // A complementary blue
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
@@ -24,7 +22,7 @@ const floatAnimation = keyframes`
 `;
 
 export const HeroSection = styled(Box)(({ theme }) => ({
-  background: `linear-gradient(145deg, ${primaryColor} 0%, ${primaryDark} 100%)`, // Deeper gradient
+  background: `linear-gradient(145deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`, // Deeper gradient
   color: "#fff",
   textAlign: "center",
   borderRadius: "20px", // More rounded for a modern feel
@@ -75,7 +73,7 @@ export const HeroGraphic = styled(Box)({
 });
 
 export const AccentButton = styled(Button)(({ theme }) => ({
-  backgroundColor: primaryColor,
+  backgroundColor: theme.palette.primary.main,
   color: "#fff",
   textTransform: "uppercase", // More professional
   padding: "16px 40px",
@@ -85,7 +83,7 @@ export const AccentButton = styled(Button)(({ theme }) => ({
   boxShadow: "0 10px 25px rgba(0,0,0,0.35)", // Stronger, more defined shadow
   transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: primaryDark,
+    backgroundColor: theme.palette.primary.dark,
     transform: "translateY(-5px) scale(1.03)", // Enhanced hover effect
     boxShadow: "0 15px 35px rgba(0,0,0,0.45)",
   },

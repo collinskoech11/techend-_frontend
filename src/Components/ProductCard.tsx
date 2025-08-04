@@ -61,12 +61,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         triggerCartRefetch();
       }
     } else {
-      useImperativeHandle(ref, () => ({
-        cart_refetch() {
-          cart_refetch();
-        },
-      }));
       toast.error("Please log in to add an item to cart.");
+      // useImperativeHandle(ref, () => ({
+      //   cart_refetch() {
+      //     cart_refetch();
+      //   },
+      // }));
     }
   };
 
@@ -102,7 +102,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
       <ProductItemStyled
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => !AddToCartLoading && router.push(`/product/${currentProduct?.id}`)} // disable click while loading
+        onClick={() => !AddToCartLoading && router.push(`/product/${currentProduct?.slug}`)} // disable click while loading
         sx={{
           pointerEvents: AddToCartLoading ? 'none' : 'auto',
           opacity: AddToCartLoading ? 0.6 : 1,
@@ -126,7 +126,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
               <BorderedButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/product/${currentProduct?.id}`);
+                  router.push(`/product/${currentProduct?.slug}`);
                 }}
                 sx={{
                   ml: 1,

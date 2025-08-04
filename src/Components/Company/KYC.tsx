@@ -5,10 +5,12 @@ import {
     TextField,
     Button,
     Box,
-    CircularProgress
+    CircularProgress,
+    useTheme
 } from "@mui/material";
 import { useState } from "react";
 import { useUpdateCompanyMutation } from "@/Api/services";
+import { alpha } from "@mui/material/styles";
 
 interface BasicInfoProps extends YourChildProps {
     companyData: any;
@@ -17,6 +19,7 @@ interface BasicInfoProps extends YourChildProps {
 
 const KYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: BasicInfoProps) => {
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
+    const theme = useTheme();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCompanyData({ ...companyData, [e.target.name]: e.target.value });
@@ -59,11 +62,11 @@ const KYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyDat
                 sx={{
                     mt: 2,
                     justifyContent: "flex-start",
-                    borderColor: "#be1f2f",
-                    color: "#be1f2f",
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     "&:hover": {
-                        borderColor: "#a51a27",
-                        background: "rgba(190, 31, 47, 0.05)",
+                        borderColor: theme.palette.primary.dark,
+                        background: alpha(theme.palette.primary.main, 0.05),
                     },
                 }}>
                 {companyData.id_front_image ? companyData.id_front_image.name : "Upload ID Front"}
@@ -75,11 +78,11 @@ const KYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyDat
                 sx={{
                     mt: 2,
                     justifyContent: "flex-start",
-                    borderColor: "#be1f2f",
-                    color: "#be1f2f",
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     "&:hover": {
-                        borderColor: "#a51a27",
-                        background: "rgba(190, 31, 47, 0.05)",
+                        borderColor: theme.palette.primary.dark,
+                        background: alpha(theme.palette.primary.main, 0.05),
                     },
                 }}>
                 {companyData.id_back_image ? companyData.id_back_image.name : "Upload ID Back"}
@@ -94,7 +97,7 @@ const KYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyDat
                 )}
                 <Button
                     variant="contained"
-                    sx={{ background: "#be1f2f" }}
+                    sx={{ background: theme.palette.primary.main }}
                     onClick={handleSubmit}
                     disabled={isLoading}
                 >

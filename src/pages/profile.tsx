@@ -9,7 +9,8 @@ import {
   Grid,
   Chip,
   Divider,
-  Card
+  Card,
+  useTheme
 } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles"; // Import keyframes
 import { useState } from "react";
@@ -19,14 +20,12 @@ import CheckIcon from "@mui/icons-material/Check"
 
 
 
-const accent = "#be1f2f";
-
 function ProfilePage() {
-  const primaryColor = "#be1f2f"; // Your existing accent color
-const secondaryColor = "#3f51b5"; // A complementary blue
-const lightGray = "#f8f8f8";
-const darkText = "#333";
-const lightText = "#666";
+  const theme = useTheme();
+  const secondaryColor = "#3f51b5"; // A complementary blue
+  const lightGray = "#f8f8f8";
+  const darkText = "#333";
+  const lightText = "#666";
 
   const PricingCard:any = styled(Card)({
         textAlign: "center",
@@ -45,8 +44,8 @@ const lightText = "#666";
         },
       });
 
-      const AccentButton = styled(Button)({
-        backgroundColor: primaryColor,
+      const AccentButton = styled(Button)(({ theme }) => ({
+        backgroundColor: theme.palette.primary.main,
         color: "#fff",
         textTransform: "capitalize",
         padding: "16px 40px",
@@ -56,11 +55,11 @@ const lightText = "#666";
         boxShadow: "0 8px 20px rgba(0,0,0,0.3)", // Stronger shadow
         transition: "all 0.4s ease",
         "&:hover": {
-          backgroundColor: "#a01624",
+          backgroundColor: theme.palette.primary.dark,
           transform: "translateY(-3px) scale(1.02)", // Enhanced hover effect
           boxShadow: "0 12px 25px rgba(0,0,0,0.4)",
         },
-      });
+      }));
       
   const router = useRouter();
   const [userDetails, setUserDetails] = useState<any>(
@@ -140,9 +139,9 @@ const lightText = "#666";
         indicatorColor="secondary"
         sx={{
           mb: 3,
-          "& .MuiTabs-indicator": { backgroundColor: accent },
+          "& .MuiTabs-indicator": { backgroundColor: theme.palette.primary.main },
           "& .MuiTab-root": { color: "#000" },
-          "& .Mui-selected": { color: accent },
+          "& .Mui-selected": { color: theme.palette.primary.main },
         }}
       >
         <Tab label="Personal Info" />
@@ -175,7 +174,7 @@ const lightText = "#666";
                 key={company.id}
                 sx={{ mb: 3, p: 2, border: "1px solid #ddd", borderRadius: "4px" }}
               >
-                <Typography variant="h6" sx={{ mb: 2, color: accent }}>
+                <Typography variant="h6" sx={{ mb: 2, color: theme.palette.primary.main }}>
                   Company {index + 1}
                 </Typography>
 
@@ -186,9 +185,9 @@ const lightText = "#666";
                   indicatorColor="secondary"
                   sx={{
                     mb: 2,
-                    "& .MuiTabs-indicator": { backgroundColor: accent },
+                    "& .MuiTabs-indicator": { backgroundColor: theme.palette.primary.main },
                     "& .MuiTab-root": { color: "#000" },
-                    "& .Mui-selected": { color: accent },
+                    "& .Mui-selected": { color: theme.palette.primary.main },
                   }}
                 >
                   <Tab label="General Info" />
@@ -321,11 +320,11 @@ const lightText = "#666";
             {/* Starter Plan */}
             <Grid item xs={12} md={4}>
               <PricingCard sx={{
-                border: userDetails.selected_plan === "Starter" ? `2px solid ${accent}` : "1px solid #ddd",
+                border: userDetails.selected_plan === "Starter" ? `2px solid ${theme.palette.primary.main}` : "1px solid #ddd",
                 boxShadow: userDetails.selected_plan === "Starter" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
               }}>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: accent }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
                     Starter
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
@@ -343,7 +342,7 @@ const lightText = "#666";
                 {userDetails.selected_plan === "Starter" ? (
                   <Payment />
                 ) : (
-                  <Button variant="outlined" sx={{ borderColor: accent, color: accent, mt: 3, "&:hover": { bgcolor: accent, color: "#fff" } }} onClick={() => {userDetails.selected_plan = 'Starter'}}>
+                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, "&:hover": { bgcolor: theme.palette.primary.main, color: "#fff" } }} onClick={() => {userDetails.selected_plan = 'Starter'}}>
                     Choose Plan
                     {userDetails.selected_plan}
                   </Button>
@@ -354,11 +353,11 @@ const lightText = "#666";
             {/* Growth Plan */}
             <Grid item xs={12} md={4}>
               <PricingCard sx={{
-                border: userDetails.selected_plan === "Growth" ? `2px solid ${accent}` : "1px solid #ddd",
+                border: userDetails.selected_plan === "Growth" ? `2px solid ${theme.palette.primary.main}` : "1px solid #ddd",
                 boxShadow: userDetails.selected_plan === "Growth" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
               }}>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: accent }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
                     Growth
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
@@ -379,7 +378,7 @@ const lightText = "#666";
                     Pay Now
                   </AccentButton>
                 ) : (
-                  <Button variant="outlined" sx={{ borderColor: accent, color: accent, mt: 3, "&:hover": { bgcolor: accent, color: "#fff" } }}>
+                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, "&:hover": { bgcolor: theme.palette.primary.main, color: "#fff" } }}>
                     Choose Plan
                   </Button>
                 )}
@@ -389,11 +388,11 @@ const lightText = "#666";
             {/* Pro Plan */}
             <Grid item xs={12} md={4}>
               <PricingCard sx={{
-                border: userDetails.selected_plan === "Pro" ? `2px solid ${accent}` : "1px solid #ddd",
+                border: userDetails.selected_plan === "Pro" ? `2px solid ${theme.palette.primary.main}` : "1px solid #ddd",
                 boxShadow: userDetails.selected_plan === "Pro" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
               }}>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: accent }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
                     Pro
                   </Typography>
                   <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
@@ -414,7 +413,7 @@ const lightText = "#666";
                     Pay Now
                   </AccentButton>
                 ) : (
-                  <Button variant="outlined" sx={{ borderColor: accent, color: accent, mt: 3, "&:hover": { bgcolor: accent, color: "#fff" } }}>
+                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, "&:hover": { bgcolor: theme.palette.primary.main, color: "#fff" } }}>
                     Choose Plan
                   </Button>
                 )}
@@ -429,10 +428,10 @@ const lightText = "#666";
       <Button
         variant="contained"
         sx={{
-          backgroundColor: accent,
+          backgroundColor: theme.palette.primary.main,
           mt: 3,
           textTransform: "capitalize",
-          "&:hover": { backgroundColor: "#a01624" },
+          "&:hover": { backgroundColor: theme.palette.primary.dark },
         }}
         onClick={() => setEditMode(!editMode)}
       >

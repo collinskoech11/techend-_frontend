@@ -13,6 +13,7 @@ import {
     Card,
     CircularProgress,
     IconButton,
+    useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -31,7 +32,7 @@ const successColor = "#4CAF50";
 const errorColor = "#F44336";
 
 const AccentButton = styled(Button)(({ theme }) => ({
-    backgroundColor: accent,
+    backgroundColor: theme.palette.primary.main,
     color: "#fff",
     textTransform: "capitalize",
     padding: "12px 28px",
@@ -41,7 +42,7 @@ const AccentButton = styled(Button)(({ theme }) => ({
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     transition: "all 0.3s ease-in-out",
     "&:hover": {
-        backgroundColor: "#a01624",
+        backgroundColor: theme.palette.primary.dark,
         boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
         transform: "translateY(-2px)",
     },

@@ -13,10 +13,12 @@ import {
     Tab,
     Grid,
     Skeleton,
+    useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { PhotoCamera, Visibility, VisibilityOff } from "@mui/icons-material";
-import { SketchPicker } from "react-color";
+import React, { lazy, Suspense } from "react";
+const SketchPicker = lazy(() => import("react-color").then(module => ({ default: module.SketchPicker })));
 import Cookies from "js-cookie";
 import { useUserLoginMutation, useUserRegistrationMutation, useGetCompanyQuery, useCreateCompanyMutation, useUpdateCompanyMutation } from "@/Api/services";
 import { z } from "zod";
@@ -49,6 +51,7 @@ export default function CompanyOnboarding() {
     const [register, { isLoading: isRegistering }] = useUserRegistrationMutation();
     const token = Cookies.get("access");
     const [refresh, setRefresh] = useState(0);
+    const theme = useTheme();
 
     const triggerRerender = () => {
         console.log("trying to rerender parent")
@@ -87,7 +90,7 @@ export default function CompanyOnboarding() {
         city: "",
         state: "",
         postal_code: "",
-        primary_color: "#be1f2f",
+        primary_color: theme.palette.primary.main,
         secondary_color: "#000000",
         accent_color: "#cccccc",
         acceptTerms: false,
@@ -160,7 +163,7 @@ export default function CompanyOnboarding() {
             // 
             setActiveStep(companyDetails?.company_onboarding_step + 1 || 1)
         }
-    }, [companyDetails]);
+    }, [companyDetails, error_company_data?.status, loading_get_my_company, user.id]);
 
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -227,9 +230,7 @@ export default function CompanyOnboarding() {
         }
     };
 
-    const handleColorChange = (field: string, color: any) => {
-        setCompanyData({ ...companyData, [field]: color.hex });
-    };
+    
 
     const nextStep = () => setActiveStep((prev) => prev + 1);
     const prevStep = () => companyData.company_onboarding_step - 1;
@@ -269,7 +270,7 @@ export default function CompanyOnboarding() {
             }}
         >
             <Toaster />
-            <Typography variant="h5" sx={{ textAlign: "center", mb: 3, fontWeight: 600, color: "#be1f2f" }}>
+            <Typography variant="h5" sx={{ textAlign: "center", mb: 3, fontWeight: 600, color: theme.palette.primary.main }}>
                 Company Onboarding
             </Typography>
 
@@ -292,7 +293,7 @@ export default function CompanyOnboarding() {
                             <Step key={label}>
                                 <StepLabel
                                     StepIconProps={{
-                                        sx: { color: "#be1f2f !important" },
+                                        sx: { color: `${theme.palette.primary.main} !important` },
                                     }}
                                 />
                             </Step>
@@ -305,7 +306,7 @@ export default function CompanyOnboarding() {
                                 <Typography
                                     variant="caption"
                                     sx={{
-                                        color: index === companyData.company_onboarding_step ? "#be1f2f" : "#777",
+                                        color: index === companyData.company_onboarding_step ? theme.palette.primary.main : "#777",
                                         fontWeight: index === companyData.company_onboarding_step ? "bold" : "normal",
                                     }}
                                 >
@@ -342,7 +343,7 @@ export default function CompanyOnboarding() {
                                             ),
                                         }}
                                     />
-                                    <Button fullWidth sx={{ mt: 2, background: "#be1f2f", color: "#fff" }} onClick={loginUser}>
+                                    <Button fullWidth sx={{ mt: 2, background: theme.palette.primary.main, color: "#fff" }} onClick={loginUser}>
                                         {isLoggingIn ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Login"}
                                     </Button>
                                 </>
@@ -370,7 +371,7 @@ export default function CompanyOnboarding() {
                                             ),
                                         }}
                                     />
-                                    <Button fullWidth sx={{ mt: 2, background: "#be1f2f", color: "#fff" }} onClick={registerUser}>
+                                    <Button fullWidth sx={{ mt: 2, background: theme.palette.primary.main, color: "#fff" }} onClick={registerUser}>
                                         {isRegistering ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Register"}
                                     </Button>
                                 </>
@@ -398,9 +399,9 @@ export default function CompanyOnboarding() {
                         </>
                     )}
                     {companyData.company_onboarding_step === 5 && (
-                        <>
+                        <Suspense fallback={<CircularProgress />}>
                             <Branding nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
-                        </>
+                        </Suspense>
                     )}
                     {companyData.company_onboarding_step === 6 && (
                         <>

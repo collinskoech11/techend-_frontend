@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/router";
 
 const CartMenu = forwardRef((props: any, ref) => {
+  CartMenu.displayName = "CartMenu";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const router = useRouter();

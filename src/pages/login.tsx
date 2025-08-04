@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import { useUserLoginMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { z } from "zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
@@ -20,6 +20,9 @@ const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
 });
+
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useRouter } from "next/router";
 
 function Login() {
   const [login, { isLoading }] = useUserLoginMutation();
@@ -63,7 +66,7 @@ function Login() {
   };
 
   return (
-    <>
+    <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
       <Toaster />
       {/* <Navbar textColor={'#000'} bgColor={'#fff'} /> */}
       <Box
@@ -171,18 +174,18 @@ function Login() {
             </button>
 
             <p style={{ marginTop: "20px" }}>
-              Don't have an account?{" "}
-              <a
+              Don&apos;t have an account?{" "}
+              <Link
                 href="/register"
                 style={{ color: "#BE1E2D", textDecoration: "none" }}
               >
                 Register
-              </a>
+              </Link>
             </p>
           </Box>
         </Box>
       </Box>
-    </>
+    </GoogleOAuthProvider>
   );
 }
 

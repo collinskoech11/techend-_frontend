@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -32,6 +32,12 @@ export const AuthApi = createApi({
         body: data.body
       })
     }),
+    getCompanyBySlug: builder.query({
+      query: (slug) => ({
+        url: `companies/slug/${slug}/`,
+        method: "GET",
+      }),
+    }),
     getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number }>({
       query: ({ company, category, page = 1 }) => ({
         url: `products/all/?company=${company}&category=${category}&page=${page}`,
@@ -39,8 +45,8 @@ export const AuthApi = createApi({
       }),
     }),
     getProduct: builder.query({
-      query: (id) => ({
-        url: `products/singleproduct/${id}/`,
+      query: (slug) => ({
+        url: `products/singleproduct/${slug}/`,
         method: "GET"
       }),
     }),
@@ -85,7 +91,7 @@ export const AuthApi = createApi({
         },
       }),
     }),
-    checkoutCart: builder.mutation({
+    checkoutCart: builder.mutation<CheckoutResponse, { body: CheckoutFormData; token: string; company_name: string }>({
       query: data => ({
         url: `cart/checkout/${data.company_name}/`,
         method: "POST",
@@ -111,6 +117,15 @@ export const AuthApi = createApi({
         method: "GET",
         headers: {
           Authorization: `Bearer ${data.token}`,
+        },
+      }),
+    }),
+    getPickupLocations: builder.query<PickupLocation[], { company_slug: string, token: string }>({ // New endpoint
+      query: ({ company_slug, token }) => ({
+        url: `companies/${company_slug}/pickup-locations/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       }),
     }),
@@ -163,12 +178,23 @@ export const AuthApi = createApi({
         body: data.body
       }),
     }),
+    createPickupLocation: builder.mutation<PickupLocation, { company_slug: string; token: string; body: Partial<PickupLocation> }>({ // New mutation
+      query: ({ company_slug, token, body }) => ({
+        url: `companies/${company_slug}/pickup-locations/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body,
+      }),
+    }),
   })
 });
 export const {
   useGetUserQuery,
   useUserRegistrationMutation,
   useUserLoginMutation,
+  useGetCompanyBySlugQuery,
   useGetProductsQuery,
   useGetProductQuery,
   useAddToCartMutation,
@@ -183,4 +209,6 @@ export const {
   useGetCompaniesQuery,
   useRequestPasswordResetMutation,
   useConfirmPasswordResetMutation,
+  useGetPickupLocationsQuery,
+  useCreatePickupLocationMutation,
 }: any = AuthApi;

@@ -1,6 +1,6 @@
 import { YourChildProps } from "@/Types";
 import { PhotoCamera } from "@mui/icons-material";
-import { Box, Button, Grid, Typography, CircularProgress } from "@mui/material";
+import { Box, Button, Grid, Typography, CircularProgress, useTheme } from "@mui/material";
 import { SketchPicker } from "react-color";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
 
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
+    const theme = useTheme();
 
     const handleColorChange = (field: string, color: any) => {
         setCompanyData({ ...companyData, [field]: color?.hex });
@@ -59,7 +60,7 @@ const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompa
                 )}
                 <Button
                     variant="contained"
-                    sx={{ background: "#be1f2f" }}
+                    sx={{ background: theme.palette.primary.main }}
                     onClick={handleSubmit}
                     disabled={isLoading}
                 >
