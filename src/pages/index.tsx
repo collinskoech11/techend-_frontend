@@ -346,10 +346,10 @@ export default function LandingPage() {
                   color: "#fff",
                   minHeight: '140px', // Ensure space for typewriter effect
                   fontSize: {
-                    xs: '2.4rem',
-                    sm: '2.8rem',
-                    md: '3.8rem',
-                    lg: '4.8rem',
+                    xs: '1.4rem',
+                    sm: '1.8rem',
+                    md: '2.8rem',
+                    lg: '3.8rem',
                   },
                   lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
                   letterSpacing: { xs: '-0.02em', md: '-0.03em' },
