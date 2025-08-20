@@ -6,25 +6,27 @@ import Cookies from "js-cookie";
 const CartContext = createContext<any>(null);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [enabled, setEnabled] = useState(false);
-
   const token = Cookies.get("access");
   const company_name = Cookies.get("shopname");
 
-  // Avoid running this query during SSR
-  useEffect(() => {
-    if (token && company_name) setEnabled(true);
-  }, [token, company_name]);
-
+  // The query is skipped if the user is not logged in.
+  // This is re-evaluated on every render, avoiding stale state.
   const {
     data,
     isLoading,
     refetch,
     error,
-  } = useGetCartQuery({ token, company_name }, { skip: !enabled });
+  } = useGetCartQuery(
+    { token, company_name },
+    { skip: !token || !company_name }
+  );
 
   const triggerCartRefetch = useCallback(() => {
-    refetch();
+    // Guard against calling refetch if the user is not logged in,
+    // which could happen if this function is called from a stale closure.
+    if (Cookies.get("access")) {
+      refetch();
+    }
   }, [refetch]);
 
   return (
