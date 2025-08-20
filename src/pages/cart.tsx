@@ -240,18 +240,14 @@ function Cart() {
               </CouponContainer> */}
               <CartSummarySub>
                 <CartSummaryTitle style={{color:theme.palette.primary.main}}>Cart Summary</CartSummaryTitle>
-                <CartSummaryContent>
+                {/* <CartSummaryContent>
                   <span>Subtotal</span>
                   <span>Kes {subTotal.toFixed(2)}</span>
-                </CartSummaryContent>
-                <CartSummaryContent>
-                  <span>Shipping</span>
-                  <span>Kes 150.00</span>
-                </CartSummaryContent>
+                </CartSummaryContent> */}
                 <CartSummaryContent>
                   <span style={{ fontWeight: "bold" }}>Total</span>
                   <span style={{ fontWeight: "bold" }}>
-                    Kes {(subTotal + 150).toFixed(2)}
+                    Kes {(subTotal).toFixed(2)}
                   </span>
                 </CartSummaryContent>
                 <CartSummaryTitle
@@ -262,6 +258,7 @@ function Cart() {
                     background: theme.palette.primary.main,
                     color: "#fff",
                     fontWeight: "bold",
+                    mt:3,
                   }}
                   onClick={() => router.push(`/checkout`)}
                 >
