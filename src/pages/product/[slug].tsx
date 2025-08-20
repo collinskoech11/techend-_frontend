@@ -27,6 +27,7 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import toast, { Toaster } from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
 import { darken } from '@mui/material/styles';
+import Image from "next/image";
 
 
 // --- Color Palette (Consistent with previous suggestions) ---
@@ -75,14 +76,42 @@ const StyledMainSwiperSlide = styled(SwiperSlide)({
   backgroundColor: "#f0f0f0",
 });
 
-const MainCarouselImage = styled("img")({
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  borderRadius: "12px",
-});
+const MainCarouselImage = (props: React.ComponentProps<typeof Image>) => (
+  <Image
+    {...props}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      borderRadius: "12px",
+      ...props.style,
+    }}
+    sizes="(max-width: 600px) 90vw, 400px"
+    fill
+    priority
+    alt={props.alt || ""}
+  />
+);
 
-const ThumbnailImage = styled("img")<{ active?: boolean }>(({ theme, active }) => ({
+const ThumbnailImage = styled((props: React.ComponentProps<typeof Image> & { active?: boolean }) => (
+  <Image
+    {...props}
+    style={{
+      width: "100%",
+      height: "80px",
+      objectFit: "cover",
+      borderRadius: "8px",
+      cursor: "pointer",
+      opacity: props.active ? 1 : 0.7,
+      transition: "all 0.3s ease",
+      ...(props.style || {}),
+    }}
+    sizes="80px"
+    width={80}
+    height={80}
+    alt={props.alt || ""}
+  />
+))<{ active?: boolean }>(({ theme, active }) => ({
   width: "100%",
   height: "80px",
   objectFit: "cover",

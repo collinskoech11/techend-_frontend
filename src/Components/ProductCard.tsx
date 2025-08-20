@@ -110,10 +110,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         }}
       >
         <ProductImageWrapper>
-          <ProductImage
-            src={`https://res.cloudinary.com/dqokryv6u/${currentProduct?.main_image}`}
-            alt={currentProduct?.title}
-          />
+          {currentProduct?.main_image && (
+            <ProductImage
+              src={`https://res.cloudinary.com/dqokryv6u/${currentProduct.main_image}`}
+              alt={currentProduct.title || 'Product Image'}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          )}
           {isHovered && !AddToCartLoading && (
             <ProductOverlay>
               <GreenButton

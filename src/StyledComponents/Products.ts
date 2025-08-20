@@ -1,4 +1,5 @@
 import { styled, Box, Grid, Card } from "@mui/material";
+import Image, { ImageProps } from "next/image";
 
 export const MainProductsContainer = styled(Box)({
   maxWidth: "1500px",
@@ -103,7 +104,7 @@ export const ProductImageWrapper = styled(Box)(({ theme }) => ({
   borderTopRightRadius: "12px",
 }));
 
-export const ProductImage = styled('img')({
+export const ProductImage = styled(Image)<ImageProps>(({
   width: "100%",
   height: "100%",
   objectFit: "cover", // Ensure image covers the area
@@ -111,7 +112,7 @@ export const ProductImage = styled('img')({
   "&:hover": {
     transform: "scale(1.05)", // Gentle zoom on image hover
   },
-});
+}));
 
 export const ProductInfoContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2), // Consistent padding for text content
