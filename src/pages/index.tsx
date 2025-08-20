@@ -1,7 +1,9 @@
 "use client";
 
+"use client";
+
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress, TextField } from "@mui/material";
+import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress, TextField, useMediaQuery } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -202,6 +204,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [createContactMessage, { isLoading }] = useCreateContactMessageMutation();
   const [formState, setFormState] = useState({ name: "", email: "", message: "" });
 
@@ -757,28 +760,39 @@ export default function LandingPage() {
                 },
               }}
             >
-              {companiesData?.results
-                ?.filter((company: any) => company.testimonial && company.testimonial.trim() !== '')
-                .reduce((acc: any[], company: any, index: number) => {
-                  if (index % 2 === 0) {
-                    acc.push([company]);
-                  } else {
-                    acc[acc.length - 1].push(company);
-                  }
-                  return acc;
-                }, [])
-                .map((pair: any[], index: number) => (
-                  <Box key={index} sx={{ display: 'flex', justifyContent: 'center', gap: 4, p: 2 }}>
-                    {pair.map((company: any) => (
-                      <TestimonialCard
-                        key={company.id}
-                        name={company.name}
-                        testimonial={company.testimonial}
-                        avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`} // Assuming logo can be used as avatar
-                      />
-                    ))}
-                  </Box>
-                ))}
+              {isMobile
+                ? companiesData?.results
+                  ?.filter((company: any) => company.testimonial && company.testimonial.trim() !== '')
+                  .map((company: any) => (
+                    <TestimonialCard
+                      key={company.id}
+                      name={company.name}
+                      testimonial={company.testimonial}
+                      avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`}
+                    />
+                  ))
+                : companiesData?.results
+                  ?.filter((company: any) => company.testimonial && company.testimonial.trim() !== '')
+                  .reduce((acc: any[], company: any, index: number) => {
+                    if (index % 2 === 0) {
+                      acc.push([company]);
+                    } else {
+                      acc[acc.length - 1].push(company);
+                    }
+                    return acc;
+                  }, [])
+                  .map((pair: any[], index: number) => (
+                    <Box key={index} sx={{ display: 'flex', justifyContent: 'center', gap: 4, p: 2 }}>
+                      {pair.map((company: any) => (
+                        <TestimonialCard
+                          key={company.id}
+                          name={company.name}
+                          testimonial={company.testimonial}
+                          avatarSrc={`https://res.cloudinary.com/dqokryv6u/${company.logo_image}`}
+                        />
+                      ))}
+                    </Box>
+                  ))}
             </Carousel>
           </Fade>
         </Box>
