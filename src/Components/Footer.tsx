@@ -1,7 +1,9 @@
-import { Box, Button, Grid, TextField, Typography, Link as MuiLink, useTheme } from "@mui/material";
+import { Box, Button, Grid, TextField, Typography, Link as MuiLink, useTheme, CircularProgress } from "@mui/material";
 import React from "react";
 import { styled, keyframes } from "@mui/material/styles"; // Import keyframes and styled
 import { darken } from '@mui/material/styles';
+import { useRouter } from "next/router";
+import { useGetCompanyBySlugQuery } from "@/Api/services";
 
 // Define your brand colors (assuming these are consistent across your app)
 const darkBackground = "#1a1a1a"; // A dark, sophisticated background for the footer
@@ -16,10 +18,55 @@ const waveAnimation = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
-// Re-defining AccentButton for consistency if it's used here and elsewhere
-
 function Footer() {
   const theme = useTheme();
+  const router = useRouter();
+  const { shop } = router.query;
+
+  const { data: companyData, isLoading, isError } = useGetCompanyBySlugQuery(shop, {
+    skip: !shop,
+  });
+
+  const renderContactInfo = () => {
+    if (!shop) {
+      return (
+        <>
+          <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
+            techendforgranted@gmail.com
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
+            +254 728 000 107
+          </Typography>
+          <Typography variant="body2" sx={{ color: lightText }}>
+            Nairobi, Kenya
+          </Typography>
+        </>
+      );
+    }
+
+    if (isLoading) {
+      return <CircularProgress size={24} sx={{ color: 'white' }} />;
+    }
+
+    if (isError || !companyData) {
+      return <Typography variant="body2" sx={{ color: lightText }}>Contact information not available.</Typography>;
+    }
+
+    return (
+      <>
+        <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
+          {companyData.contact_email}
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
+          {companyData.contact_phone}
+        </Typography>
+        <Typography variant="body2" sx={{ color: lightText }}>
+          {companyData.physical_address}, {companyData.city}, {companyData.country}
+        </Typography>
+      </>
+    );
+  };
+
   return (
     <>
       <Box
@@ -79,15 +126,7 @@ function Footer() {
               <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5, color: brighterText }}>
                 Contact Us
               </Typography>
-              <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
-                techendforgranted@gmail.com
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
-                +254 728 000 107
-              </Typography>
-              <Typography variant="body2" sx={{ color: lightText }}>
-                Nairobi, Kenya
-              </Typography>
+              {renderContactInfo()}
             </Box>
           </Grid>
 
