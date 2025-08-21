@@ -201,29 +201,7 @@ function Checkout() {
               </Typography>
               <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" gutterBottom>Items</Typography>
-                  {cart_data?.items.map((item: any) => (
-                    <Box key={item.product.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography variant="body2" color="textSecondary">
-                        {item.product.title} (x{item.quantity})
-                      </Typography>
-                      {item.product.on_sale ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography variant="body2" color="error" sx={{ fontWeight: 'bold', mr: 0.5 }}>
-                            Kes {(parseFloat(item.product.discounted_price) * item.quantity).toFixed(2)}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary" sx={{ textDecoration: 'line-through' }}>
-                            Kes {(parseFloat(item.product.price) * item.quantity).toFixed(2)}
-                          </Typography>
-                        </Box>
-                      ) : (
-                        <Typography variant="body2" color="textSecondary">
-                          Kes {(parseFloat(item.product.price) * item.quantity).toFixed(2)}
-                        </Typography>
-                      )}
-                    </Box>
-                  ))}
-                  <Typography variant="body1" sx={{ mt: 2 }}>
+                  <Typography variant="body1">
                     Subtotal: <b>Kes {cart_data?.total || 0}</b>
                   </Typography>
                   <Typography variant="body1">Shipping: <b>Kes {shippingCost}</b></Typography>

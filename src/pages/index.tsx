@@ -9,7 +9,7 @@ import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StorefrontIcon from '@mui/icons-material/Storefront'; // More specific icon
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-const Typewriter = lazy(() => import("typewriter-effect"));
+import Typewriter from "typewriter-effect";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
@@ -720,9 +720,11 @@ export default function LandingPage() {
         </Box>
 
 
-        <div id="faq">
-          <FAQ />
-        </div>
+          <Suspense fallback={<div>Loading FAQs...</div>}>
+            <div id="faq">
+                <FAQ />
+            </div>
+          </Suspense>
 
         {/* Testimonials Section */}
         <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
