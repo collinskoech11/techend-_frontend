@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   Tooltip,
   Badge,
+  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -285,7 +286,9 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               </Menu>
             </Box>
           ) : (
-            <AuthDialog onTrigger={refetchUser} />
+            <Suspense fallback={<CircularProgress size={24} />}>
+              <AuthDialog onTrigger={refetchUser} />
+            </Suspense>
           )}
         </Box>
         {/* --- END: Desktop Icons --- */}
