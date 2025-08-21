@@ -178,9 +178,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
         // When not logged in, show AuthDialog or a login link
         // Here we render the AuthDialog directly as a menu item
         <Box sx={{ p: 1 }}>
-          <Suspense fallback={<div>Loading...</div>}>
-            <AuthDialog onTrigger={refetchUser} />
-          </Suspense>
+          <AuthDialog onTrigger={refetchUser} />
         </Box>
       )}
     </Menu>
