@@ -55,6 +55,8 @@ export interface Product {
   category: string;
   company: string;
   sluggified_name: string;
+  on_sale: boolean;
+  discounted_price: number;
   // Add other product properties here
 }
 

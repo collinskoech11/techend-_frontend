@@ -35,7 +35,7 @@ function Blog() {
         {products.map((product, index) => (
           <ProductItem item md={4} xs={12} key={index}>
             <ProductItemStyled sx={{ border: "none" }}>
-              <ProductImage src={product.imageUrl} />
+              <ProductImage src={product.imageUrl} alt={product.title || 'Product Image'}/>
               <ProductPrice sx={{ mt: 2 }}>{product.price}</ProductPrice>
               <ProductTitle sx={{ mt: 2 }}>{product.title}</ProductTitle>
             </ProductItemStyled>

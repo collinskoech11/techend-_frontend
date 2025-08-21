@@ -2,9 +2,10 @@ import { LoginButton } from "@/StyledComponents/Buttons";
 import { ProductTitle, ReviewText } from "@/StyledComponents/Typos";
 import { Box, Grid, styled, Typography } from "@mui/material";
 import React from "react";
+import Image from "next/image"; // Ensure you have next/image for optimized images
 
 function Special() {
-  const ImageContainer = styled("img")({
+  const ImageContainer = styled(Image)({
 
   })
   return (
@@ -21,16 +22,22 @@ function Special() {
               justifyContent: "space-around",
             }}
           >
-            <ImageContainer
-              src="https://res.cloudinary.com/dqokryv6u/image/upload/v1721422692/ge0lnkyjez93mbcjtrss.jpg"
-              alt="Special"
-              sx={{ width: {xs:"90%",md:"40%"}, height: "350px", mb:"30px" }}
+            <Box sx={{ position: 'relative', width: {xs:"90%",md:"40%"}, height: "350px", mb:"30px" }}>
+              <ImageContainer
+                src="https://res.cloudinary.com/dqokryv6u/image/upload/v1721422692/ge0lnkyjez93mbcjtrss.jpg"
+                alt="Special"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
-            <ImageContainer
-              src="https://res.cloudinary.com/dqokryv6u/image/upload/v1721152227/dap2dqll2u5i64qee7z3.jpg"
-              alt="Special"
-              sx={{ width: "50%", height: "450px", display:{xs:"none", md:"block"} }}
-            />
+            </Box>
+            <Box sx={{ position: 'relative', width: "50%", height: "450px", display:{xs:"none", md:"block"} }}>
+              <ImageContainer
+                src="https://res.cloudinary.com/dqokryv6u/image/upload/v1721152227/dap2dqll2u5i64qee7z3.jpg"
+                alt="Special"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </Box>
           </Grid>
           <Grid
             item
