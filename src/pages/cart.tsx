@@ -181,7 +181,7 @@ function Cart() {
                         <TableRow key={index}>
                           <TableCell>{item.product.title}</TableCell>
                           <TableCell
-                            sx={{ display: { xs: "none", md: "table-cell", border:'1px solid red' } }}
+                            sx={{ display: { xs: "none", md: "table-cell" } }}
                           >
                             {item.product.on_sale ? (
                               <Box>
