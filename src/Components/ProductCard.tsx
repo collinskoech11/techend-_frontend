@@ -110,6 +110,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         }}
       >
         <ProductImageWrapper>
+          {currentProduct?.on_sale && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                bgcolor: 'red',
+                color: 'white',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                zIndex: 1,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Sale
+            </Box>
+          )}
           {currentProduct?.main_image && (
             <ProductImage
               src={`https://res.cloudinary.com/dqokryv6u/${currentProduct.main_image}`}
@@ -147,7 +166,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         </ProductImageWrapper>
 
         <ProductInfoContainer>
-          <ProductPrice>Ksh {currentProduct?.price}</ProductPrice>
+          {currentProduct?.on_sale ? (
+            <Box>
+              <ProductPrice sx={{ color: 'red', fontWeight: 'bold' }}>
+                Ksh {currentProduct?.discounted_price}
+              </ProductPrice>
+              <Typography
+                variant="body2"
+                sx={{
+                  textDecoration: 'line-through',
+                  color: 'text.secondary',
+                  ml: 1,
+                }}
+              >
+                Ksh {currentProduct?.price}
+              </Typography>
+            </Box>
+          ) : (
+            <ProductPrice>Ksh {currentProduct?.price}</ProductPrice>
+          )}
           <ProductTitle>{currentProduct?.title}</ProductTitle>
           <RatingContainer>
             {renderStars(currentProduct?.rating || 0)}

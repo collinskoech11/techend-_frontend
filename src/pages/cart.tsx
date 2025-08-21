@@ -93,6 +93,7 @@ function Cart() {
   }, [router, cart_refetch]);
 
   const CartItems = cart_data?.items;
+  console.log(CartItems, "Cart Items");
   let subTotal = 0;
 
   return (
@@ -171,16 +172,35 @@ function Cart() {
                   ) : (
                     CartItems.map((item, index) => {
                       const prod_total =
-                        parseFloat(item.product.price) * parseInt(item.quantity);
+                        item.product.on_sale
+                          ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
+                          : parseFloat(item.product.price) * parseInt(item.quantity);
                       subTotal += prod_total;
 
                       return (
                         <TableRow key={index}>
                           <TableCell>{item.product.title}</TableCell>
                           <TableCell
-                            sx={{ display: { xs: "none", md: "table-cell" } }}
+                            sx={{ display: { xs: "none", md: "table-cell", border:'1px solid red' } }}
                           >
-                            Kes {item.product.price}
+                            {item.product.on_sale ? (
+                              <Box>
+                                <Typography sx={{ color: 'red', fontWeight: 'bold' }}>
+                                  Kes {parseFloat(item.product.discounted_price).toFixed(2)}
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    textDecoration: 'line-through',
+                                    color: 'text.secondary',
+                                  }}
+                                >
+                                  Kes {parseFloat(item.product.price).toFixed(2)}
+                                </Typography>
+                              </Box>
+                            ) : (
+                              `Kes ${parseFloat(item.product.price).toFixed(2)}`
+                            )}
                           </TableCell>
                           <TableCell>
                             <Box

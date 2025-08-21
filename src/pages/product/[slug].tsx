@@ -332,6 +332,25 @@ function ProductDetailView(ref:any) {
 
       <ProductDetailSection>
         <ProductImageGallery>
+          {product?.on_sale && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                bgcolor: 'red',
+                color: 'white',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                zIndex: 10,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Sale
+            </Box>
+          )}
           {isLoading ? (
             <>
               <SkeletonProductImage variant="rectangular" />
@@ -411,7 +430,25 @@ function ProductDetailView(ref:any) {
           ) : (
             <>
               <ProductTitle>{product?.title}</ProductTitle>
-              <ProductPrice>Kes {product?.price?.toLocaleString()}</ProductPrice>
+              {product?.on_sale ? (
+                <Box>
+                  <ProductPrice sx={{ color: 'red', fontWeight: 'bold' }}>
+                    Kes {product?.discounted_price?.toLocaleString()}
+                  </ProductPrice>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      textDecoration: 'line-through',
+                      color: 'text.secondary',
+                      ml: 1,
+                    }}
+                  >
+                    Kes {product?.price?.toLocaleString()}
+                  </Typography>
+                </Box>
+              ) : (
+                <ProductPrice>Kes {product?.price?.toLocaleString()}</ProductPrice>
+              )}
 
               <RatingContainer>
                 {renderStars(product?.rating || 0)}
