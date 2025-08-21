@@ -43,7 +43,7 @@ function LandingProductCard({ image }) {
               overflow: "hidden",
             }}
           >
-            <ProductImage src={image} />
+            <ProductImage src={image} alt="product image"/>
           </Box>
           {isHovered && (
             <IconsContainer>

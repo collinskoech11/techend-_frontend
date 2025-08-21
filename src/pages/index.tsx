@@ -720,11 +720,9 @@ export default function LandingPage() {
         </Box>
 
 
-        <Suspense fallback={<CircularProgress />}>
-          <div id="faq">
-            <FAQ />
-          </div>
-        </Suspense>
+        <div id="faq">
+          <FAQ />
+        </div>
 
         {/* Testimonials Section */}
         <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
