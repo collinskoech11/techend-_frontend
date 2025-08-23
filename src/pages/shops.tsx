@@ -73,7 +73,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
   return (
     <CompanyCardStyled>
       <ProductImageWrapper>
-        <ProductImage src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} />
+        <ProductImage src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
         <ProductOverlay className="overlay">
           <GreenButton onClick={handleVisitShop}>Visit Shop</GreenButton>
         </ProductOverlay>

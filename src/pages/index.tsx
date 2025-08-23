@@ -576,7 +576,7 @@ export default function LandingPage() {
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
                       <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: lightText, textDecoration: "line-through" }}>
-                        $15 <Typography component="span" variant="h6" color={lightText}>/mo</Typography>
+                        450 Kes <Typography component="span" variant="h6" color={lightText}>/mo</Typography>
                       </Typography>
                       <Typography
                         variant="h3"
@@ -586,7 +586,7 @@ export default function LandingPage() {
                           color: theme.palette.primary.main,
                         }}
                       >
-                        $0 <Typography component="span" variant="h6" sx={{ color: darkText }}>/mo</Typography>
+                        0 Kes <Typography component="span" variant="h6" sx={{ color: darkText }}>/mo</Typography>
                       </Typography>
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
@@ -627,7 +627,7 @@ export default function LandingPage() {
                       Ideal for expanding SMEs ready to scale their operations.
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
-                      $39<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
+                      550 Kes<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
                       <ListItem>
@@ -673,7 +673,7 @@ export default function LandingPage() {
                       Designed for established enterprises seeking advanced control.
                     </Typography>
                     <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: darkText }}>
-                      $79<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
+                      1050 Kes<Typography component="span" variant="h6" color={lightText}>/mo</Typography>
                     </Typography>
                     <List sx={{ textAlign: 'left', mx: 'auto', maxWidth: '220px', mb: 3 }}>
                       <ListItem>
