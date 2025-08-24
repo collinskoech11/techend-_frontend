@@ -28,6 +28,9 @@ import {
   Button,
   IconButton,
   Menu,
+  FormControlLabel,
+  Checkbox,
+  Switch,
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
@@ -93,6 +96,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   const primaryRed = theme.palette.primary.main; // Your main red accent
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [onSale, setOnSale] = useState(false);
   const [page, setPage] = useState(1);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -185,7 +189,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     data: products_data,
     error: products_error,
     isLoading: products_loading,
-  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page }); // Pass searchTerm to API
+  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale });
 
   // Removed client-side filtering since API will handle it
   // const filteredProducts = (products_data || []).filter((product: any) =>
@@ -202,6 +206,17 @@ const Shop = forwardRef((props: any, ref: any) => {
     }
   };
 
+  const handleOnSaleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = event.target.checked;
+    setOnSale(isChecked);
+    const { pathname, query } = router;
+    const { on_sale, ...restQuery } = query;
+
+    const newQuery = isChecked ? { ...restQuery, on_sale: 'true' } : restQuery;
+
+    router.push({ pathname, query: newQuery }, undefined, { shallow: true });
+  };
+
   useImperativeHandle(ref, () => ({
     triggerCartRefetch() {
       triggerCartRefetch();
@@ -210,12 +225,15 @@ const Shop = forwardRef((props: any, ref: any) => {
 
   useEffect(() => {
     if (router.isReady) {
-      const { category: queryCategory, search: querySearch } = router.query;
+      const { category: queryCategory, search: querySearch, on_sale: queryOnSale } = router.query;
       if (queryCategory) {
         setCategory(queryCategory as string);
       }
       if (querySearch) {
         setSearchTerm(querySearch as string);
+      }
+      if (queryOnSale) {
+        setOnSale(queryOnSale === 'true');
       }
     }
   }, [router.isReady, router.query]);
@@ -259,6 +277,13 @@ const Shop = forwardRef((props: any, ref: any) => {
                     </InputAdornment>
                   ),
                 }}
+              />
+            </Grid>
+            <Grid item>
+              <FormControlLabel
+                control={<Switch checked={onSale} onChange={handleOnSaleChange} color="primary" />}
+                label={<Typography variant="body2" sx={{ fontWeight: 500 }}>On Sale</Typography>}
+                sx={{ mr: 1 }}
               />
             </Grid>
 

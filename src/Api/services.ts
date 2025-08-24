@@ -38,11 +38,26 @@ export const AuthApi = createApi({
         method: "GET",
       }),
     }),
-    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number }>({
-      query: ({ company, category, page = 1 }) => ({
-        url: `products/all/?company=${company}&category=${category}&page=${page}`,
-        method: "GET"
-      }),
+    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number; search?: string; on_sale?: boolean; }>({
+      query: ({ company, category, page = 1, search, on_sale }) => {
+        let url = `products/all/?company=${company}`;
+        if (category) {
+          url += `&category=${category}`;
+        }
+        if (page) {
+          url += `&page=${page}`;
+        }
+        if (search) {
+          url += `&search=${search}`;
+        }
+        if (on_sale) {
+          url += '&on_sale=true';
+        }
+        return {
+          url,
+          method: "GET"
+        };
+      },
     }),
     getProduct: builder.query({
       query: (slug) => ({
