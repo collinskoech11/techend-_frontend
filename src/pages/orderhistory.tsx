@@ -249,7 +249,7 @@ function OrderHistory() {
             <TableCell>{item.product.title}</TableCell>
             <TableCell>
               <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", overflow: "hidden" }}>
-                <ProductImage src={`https://res.cloudinary.com/dqokryv6u/${item.product.main_image}`} alt={item.product.title}/>
+                <ProductImage src={`https://res.cloudinary.com/dqokryv6u/${item.product.main_image}`} alt={item.product.title} width={50} height={50}/>
               </Box>
             </TableCell>
             <TableCell>Qty: {item.quantity}</TableCell>
