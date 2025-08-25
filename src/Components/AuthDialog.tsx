@@ -21,7 +21,8 @@ import { Visibility, VisibilityOff, AccountCircleOutlined } from "@mui/icons-mat
 import { GoogleLogin } from '@react-oauth/google';
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  // username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -38,7 +39,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
   const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
   const [register, { isLoading: isRegistering }] = useUserRegistrationMutation();
 
-  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
 
   const [showPasswordLogin, setShowPasswordLogin] = useState(false);
@@ -182,9 +183,9 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
               <Box sx={{ mt: 2 }}>
                 <TextField
                   fullWidth
-                  name="username"
-                  label="Username"
-                  value={loginData.username}
+                  name="email"
+                  label="Email"
+                  value={loginData.email}
                   onChange={handleLoginChange}
                   margin="normal"
                   variant="outlined"
