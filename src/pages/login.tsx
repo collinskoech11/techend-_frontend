@@ -17,7 +17,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // Zod schema for form validation
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  // username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -27,7 +28,7 @@ import { useRouter } from "next/router";
 function Login() {
   const [login, { isLoading }] = useUserLoginMutation();
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -104,9 +105,9 @@ function Login() {
 
             <TextField
               fullWidth
-              name="username"
-              label="Username"
-              value={formData.username}
+              name="email"
+              label="Email"
+              value={formData.email}
               onChange={handleChange}
               margin="normal"
               variant="outlined"
