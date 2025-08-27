@@ -251,7 +251,7 @@ const Shop = forwardRef((props: any, ref: any) => {
           </StyledLink>
         </StyledBreadcrumbs>
       </StyledBreadcrumbWrapper>
-
+      <Box sx={{ minHeight: "calc(100dvh - 64px)" }}>
       <MainProductsContainer sx={{ mt: 0, px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}> {/* Adjust margin and padding */}
         {/* Filters Section */}
         <Box sx={{ mb: 2 }}>
@@ -312,9 +312,6 @@ const Shop = forwardRef((props: any, ref: any) => {
             </Grid>
           </Grid>
         </Box>
-
-
-
         {/* Products Display */}
         <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
           {products_loading ? (
@@ -384,6 +381,7 @@ const Shop = forwardRef((props: any, ref: any) => {
           </Button>
         </Box>
       </MainProductsContainer>
+      </Box>
     </>
   );
 });

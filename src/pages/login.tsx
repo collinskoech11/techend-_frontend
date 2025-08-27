@@ -6,6 +6,7 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
 import { useUserLoginMutation } from "@/Api/services";
@@ -26,6 +27,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useRouter } from "next/router";
 
 function Login() {
+  const theme = useTheme();
   const [login, { isLoading }] = useUserLoginMutation();
   const [formData, setFormData] = useState({
     email: "",
@@ -94,7 +96,7 @@ function Login() {
           <Box sx={{ textAlign: "center" }}>
             <h1
               style={{
-                color: "#000",
+                color: theme.palette.primary.main,
                 fontSize: "24px",
                 fontWeight: "600",
                 fontFamily: "sans-serif",
@@ -143,7 +145,7 @@ function Login() {
                 textAlign: "right",
                 mt: 1,
                 cursor: "pointer",
-                color: "#BE1E2D",
+                color: theme.palette.primary.main,
                 fontWeight: 500,
               }}
               onClick={() => router.push("/forgot-password")}
@@ -159,7 +161,7 @@ function Login() {
                 marginTop: "20px",
                 border: "1px solid rgb(0,0,0,0.2)",
                 borderRadius: "5px",
-                background: "#BE1E2D",
+                background: theme.palette.primary.main,
                 color: "#fff",
                 cursor: "pointer",
                 fontWeight: "600",
@@ -178,7 +180,7 @@ function Login() {
               Don&apos;t have an account?{" "}
               <Link
                 href="/register"
-                style={{ color: "#BE1E2D", textDecoration: "none" }}
+                style={{ color: theme.palette.primary.main, textDecoration: "none" }}
               >
                 Register
               </Link>

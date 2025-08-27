@@ -4,7 +4,6 @@ import {
   ProductImageWrapper,
   ProductInfoContainer,
   RatingContainer,
-  ProductOverlay,
 } from "@/StyledComponents/Products"; // Updated imports
 import {
   ProductPrice,
@@ -17,6 +16,7 @@ import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import VisibilityIcon from '@mui/icons-material/Visibility'; // Icon for quick view/details
+import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // Import WhatsApp icon
 import { GreenButton, BorderedButton } from "@/StyledComponents/Buttons"; // Updated imports
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { useAddToCartMutation } from "@/Api/services";
@@ -36,7 +36,6 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading, ref }) => {
   const router = useRouter();
-  const [isHovered, setIsHovered] = useState(false);
   const [addToCart, { isLoading: AddToCartLoading }] = useAddToCartMutation();
   const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } = useCart();
 
@@ -62,19 +61,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
       }
     } else {
       toast.error("Please log in to add an item to cart.");
-      // useImperativeHandle(ref, () => ({
-      //   cart_refetch() {
-      //     cart_refetch();
-      //   },
-      // }));
     }
   };
-
-  // useEffect(() => {
-  //   if (!isLoading && cart_data) {
-  //     console.log(cart_data, "****** from context");
-  //   }
-  // }, [cart_data, isLoading]);
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -96,13 +84,39 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
 
   const currentProduct = product?.product || product;
 
+  const handleWhatsAppClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const shopDetailsCookie = Cookies.get("shopDetails");
+    if (shopDetailsCookie) {
+      try {
+        const companyData = JSON.parse(shopDetailsCookie);
+        const phoneNumber = companyData.contact_phone; // Assuming contact_phone is available here
+
+        if (phoneNumber) {
+          const productName = currentProduct?.title || "Product";
+          const productPrice = currentProduct?.on_sale
+            ? currentProduct?.discounted_price
+            : currentProduct?.price;
+          const message = `Hello, I'm interested in ordering the product: ${productName} for Ksh ${productPrice}. Could you please provide more details?`;
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, "_blank");
+        } else {
+          toast.error("Shop owner's phone number not available.");
+        }
+      } catch (error) {
+        console.error("Failed to parse shopDetails cookie:", error);
+        toast.error("Could not retrieve shop details.");
+      }
+    } else {
+      toast.error("Shop details not found.");
+    }
+  };
+
   return (
     <>
       <Toaster />
       <ProductItemStyled
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onClick={() => !AddToCartLoading && router.push(`/product/${currentProduct?.slug}`)} // disable click while loading
+        onClick={() => router.push(`/product/${currentProduct?.slug}`)} // Always navigate on click
         sx={{
           pointerEvents: AddToCartLoading ? 'none' : 'auto',
           opacity: AddToCartLoading ? 0.6 : 1,
@@ -137,32 +151,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           )}
-          {isHovered && !AddToCartLoading && (
-            <ProductOverlay>
-              <GreenButton
-                onClick={AddItemToCart}
-                sx={{ mr: 1 }}
-                endIcon={!AddToCartLoading && <ShoppingBasketIcon />}
-              >
-                {AddToCartLoading ? <CircularProgress size={20} color="inherit" /> : "Add to Cart"}
-              </GreenButton>
-              <BorderedButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push(`/product/${currentProduct?.slug}`);
-                }}
-                sx={{
-                  ml: 1,
-                  color: '#fff',
-                  borderColor: '#fff',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)', borderColor: '#fff' },
-                }}
-                endIcon={<VisibilityIcon />}
-              >
-                View
-              </BorderedButton>
-            </ProductOverlay>
-          )}
         </ProductImageWrapper>
 
         <ProductInfoContainer>
@@ -192,6 +180,42 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
               ({currentProduct?.reviews_count || 0})
             </Typography>
           </RatingContainer>
+
+          {/* Buttons Section */}
+          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1, width:'100%' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <GreenButton
+                onClick={AddItemToCart}
+                sx={{ flex: 1 }}
+                endIcon={!AddToCartLoading && <ShoppingBasketIcon />}
+              >
+                {AddToCartLoading ? <CircularProgress size={20} color="inherit" /> : "Add to Cart"}
+              </GreenButton>
+              <BorderedButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/product/${currentProduct?.slug}`);
+                }}
+                sx={{ flex: 1 }}
+                endIcon={<VisibilityIcon />}
+              >
+                View
+              </BorderedButton>
+            </Box>
+            <BorderedButton
+              onClick={handleWhatsAppClick}
+              sx={{
+                width: '100%',
+                backgroundColor: '#25D366',
+                color: 'white',
+                borderColor: '#25D366',
+                '&:hover': { backgroundColor: '#1DA851', borderColor: '#1DA851' },
+              }}
+              endIcon={<WhatsAppIcon />}
+            >
+              order via whatsapp
+            </BorderedButton>
+          </Box>
         </ProductInfoContainer>
 
         {/* 🟡 Show loading message when adding */}
