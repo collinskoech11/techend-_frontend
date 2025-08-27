@@ -730,7 +730,7 @@ export default function LandingPage() {
         <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
           <Fade cascade triggerOnce>
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
-              What Our <span style={{ color: theme.palette.primary.main }}>Partners</span> Say
+              What Our <span style={{ color: theme.palette.primary.main }}>Clients</span> Say
             </Typography>
             <Carousel
               autoPlay={true}

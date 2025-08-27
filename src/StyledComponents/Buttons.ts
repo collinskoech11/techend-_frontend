@@ -40,7 +40,7 @@ export const YellowButton = styled(Button)({
 });
 
 export const BorderedButton = styled(Button)(({ theme }) => ({
-  borderColor: theme.palette.primary.main,
+  border:` ${theme.palette.primary.main} 1.5px solid`,
   color: theme.palette.primary.main,
   textTransform: "uppercase",
   fontWeight: 600,
@@ -55,8 +55,9 @@ export const BorderedButton = styled(Button)(({ theme }) => ({
 export const GreenButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main, // Use primary color for main action
   color: "#fff",
-  textTransform: "uppercase",
-  fontWeight: 600,
+  // textTransform: "uppercase",
+  fontSize: "14px",
+  fontWeight: 400,
   borderRadius: "8px",
   padding: theme.spacing(1, 2),
   boxShadow: "0 3px 8px rgba(0, 0, 0, 0.15)", // Subtle shadow

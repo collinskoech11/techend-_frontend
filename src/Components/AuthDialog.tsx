@@ -10,6 +10,7 @@ import {
   Button,
   Tabs,
   Tab,
+  useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useUserLoginMutation, useUserRegistrationMutation } from "@/Api/services";
@@ -33,6 +34,7 @@ const registerSchema = z.object({
 });
 
 function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
+  const theme = useTheme();
   const [open, setOpen] = useState(forceOpen);
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -159,7 +161,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
       {showButton && (
         loggedInUser ? (
           <IconButton onClick={() => setOpen(true)}>
-            <AccountCircleOutlined sx={{ color: "#BE1E2D", fontSize: 32 }} />
+            <AccountCircleOutlined sx={{ color: theme.palette.primary.main, fontSize: 32 }} />
           </IconButton>
         ) : (
           <>
@@ -216,7 +218,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
                     textAlign: "right",
                     mt: 1,
                     cursor: "pointer",
-                    color: "#BE1E2D",
+                    color: theme.palette.primary.main,
                     fontWeight: 500,
                   }}
                   onClick={() => {
@@ -229,7 +231,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
 
                 <Button
                   fullWidth
-                  sx={{ mt: 2, background: "#BE1E2D", color: "#fff", fontWeight: "600", "&:hover": { background: "#a51a27" } }}
+                  sx={{ mt: 2, background: theme.palette.primary.main, color: "#fff", fontWeight: "600", "&:hover": { background: theme.palette.primary.main } }}
                   onClick={loginUser}
                 >
                   {isLoggingIn ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Login"}
@@ -279,7 +281,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
                 />
                 <Button
                   fullWidth
-                  sx={{ mt: 2, background: "#BE1E2D", color: "#fff", fontWeight: "600", "&:hover": { background: "#a51a27" } }}
+                  sx={{ mt: 2, background: theme.palette.primary.main, color: "#fff", fontWeight: "600", "&:hover": { background: theme.palette.primary.main } }}
                   onClick={registerUser}
                 >
                   {isRegistering ? <CircularProgress sx={{ color: "#fff" }} size={24} /> : "Register"}
