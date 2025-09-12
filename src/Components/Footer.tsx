@@ -32,10 +32,10 @@ function Footer() {
       return (
         <>
           <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
-            techendforgranted@gmail.com
+            sokojunction@gmail.com
           </Typography>
           <Typography variant="body1" sx={{ mb: 0.5, color: lightText }}>
-            +254 728 000 107
+            +254 703 508881
           </Typography>
           <Typography variant="body2" sx={{ color: lightText }}>
             Nairobi, Kenya
