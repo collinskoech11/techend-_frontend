@@ -28,7 +28,7 @@ interface OrderDetailsCardProps {
     total_amount: number;
     payment_method?: string;
     payment_status: string;
-    shipping_cost: string;
+    delivery_fee: string;
     pickup_location?: PickupLocation | null;
     delivery_location?: DeliveryLocation | null;
     cart?: {
@@ -89,7 +89,7 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewMap }) 
               <strong>Total:</strong> Kes {item.total_amount}
             </Typography>
             <Typography>
-              <strong>Shipping Cost:</strong> Kes {item.shipping_cost}
+              <strong>Shipping Cost:</strong> Kes {item.delivery_fee}
             </Typography>
             <Typography>
               <strong>Status:</strong>{" "}

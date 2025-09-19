@@ -52,12 +52,25 @@ export interface Product {
   description: string;
   price: number;
   image: string;
+  main_image: string;
   category: string;
   company: string;
   sluggified_name: string;
   on_sale: boolean;
   discounted_price: number;
   // Add other product properties here
+}
+
+export interface CartItem {
+  id: number;
+  product: Product;
+  quantity: number;
+}
+
+export interface Cart {
+  id: number;
+  created_at: string;
+  items: CartItem[];
 }
 
 export interface Company {
@@ -100,7 +113,7 @@ export interface DeliveryLocation {
 export interface CheckoutResponse {
   id: number;
   user: number;
-  cart: number;
+  cart: Cart;
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -114,8 +127,9 @@ export interface CheckoutResponse {
   shipping_status: string;
   total_amount: string;
   company: number;
-  pickup_location: number | null;
-  shipping_cost: string;
+  pickup_location: PickupLocation | null;
+  delivery_location: DeliveryLocation | null;
+  delivery_fee: string;
   created_at: string;
 }
 
