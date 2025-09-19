@@ -67,6 +67,11 @@ export interface Company {
   description: string;
   logo_image: string;
   kyc_approved: boolean;
+  payment_method?: string;
+  mpesa_till_number?: string;
+  mpesa_paybill_number?: string;
+  mpesa_account_number?: string;
+  mpesa_phone_number?: string;
 }
 
 export interface CompanyCardProps {
@@ -83,6 +88,13 @@ export interface PickupLocation {
   delivery_fee: number;
   company: number;
   gmaps_link?: string; // Add this field
+}
+
+export interface DeliveryLocation {
+  id: number;
+  route: string;
+  location_name: string;
+  delivery_fee: number;
 }
 
 export interface CheckoutResponse {
@@ -118,4 +130,5 @@ export type CheckoutFormData = {
   country: string;
   payment_method: string;
   pickup_location?: number | null;
+  delivery_location?: number | null;
 };
