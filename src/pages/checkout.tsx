@@ -161,7 +161,7 @@ function Checkout() {
       });
       if (response.data) {
         toast.success(<Typography>Order Placed Successfully</Typography>);
-        setShippingCost(parseFloat(response.data.shipping_cost));
+        setShippingCost(parseFloat(response.data.delivery_fee));
         setTotalAmount(parseFloat(response.data.total_amount));
         handleNext(); // Move to the next step (Review Order)
       } else if (response.error) {
