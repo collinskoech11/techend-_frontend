@@ -46,7 +46,7 @@ function OrderHistory() {
     total_amount: number;
     payment_method?: string;
     payment_status: string;
-    shipping_cost: string;
+    delivery_fee: string;
     pickup_location?: PickupLocation | null;
     delivery_location?: DeliveryLocation | null;
     cart?: {
