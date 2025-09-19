@@ -330,7 +330,7 @@ function Checkout() {
                   { label: "State", name: "state" },
                   { label: "Postal Code", name: "postal_code" },
                   { label: "Country", name: "country" },
-                  { label: "Payment Method", name: "payment_method" },
+                  // { label: "Payment Method", name: "payment_method" },
                 ].map((field, index) => (
                   <Grid item xs={12} md={field.name === "payment_method" ? 12 : 6} key={index}>
                     <TextField
