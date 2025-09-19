@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -123,6 +123,8 @@ export const AuthApi = createApi({
           state: data.body.state,
           country: data.body.country,
           payment_method: data.body.payment_method,
+          pickup_location: data.body.pickup_location,
+          delivery_location: data.body.delivery_location,
         }
       }),
     }),
@@ -138,6 +140,15 @@ export const AuthApi = createApi({
     getPickupLocations: builder.query<PickupLocation[], { company_slug: string, token: string }>({ // New endpoint
       query: ({ company_slug, token }) => ({
         url: `companies/${company_slug}/pickup-locations/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
+    getDeliveryLocations: builder.query<DeliveryLocation[], { company_slug: string, token: string }>({ // New endpoint
+      query: ({ company_slug, token }) => ({
+        url: `companies/${company_slug}/delivery-locations/`,
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -232,6 +243,7 @@ export const {
   useRequestPasswordResetMutation,
   useConfirmPasswordResetMutation,
   useGetPickupLocationsQuery,
+  useGetDeliveryLocationsQuery,
   useCreatePickupLocationMutation,
   useCreateContactMessageMutation,
 }: any = AuthApi;
