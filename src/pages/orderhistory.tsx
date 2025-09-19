@@ -21,9 +21,14 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  IconButton,
 } from "@mui/material";
 import { format } from "date-fns";
-// https://res.cloudinary.com/dqokryv6u
+import OrderDetailsCard from "@/Components/OrderDetailsCard";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CloseIcon from '@mui/icons-material/Close';
+import { DeliveryLocation, PickupLocation } from "@/Types";
+
 function OrderHistory() {
   const {
     data: checkout_data,
@@ -41,9 +46,12 @@ function OrderHistory() {
     total_amount: number;
     payment_method?: string;
     payment_status: string;
+    shipping_cost: string;
+    pickup_location?: PickupLocation | null;
+    delivery_location?: DeliveryLocation | null;
     cart?: {
       created_at?: string;
-      status?:any;
+      status?: any;
       items: {
         product: {
           title: string;
@@ -56,6 +64,13 @@ function OrderHistory() {
   };
 
   const [selectedCheckout, setSelectedCheckout] = useState<CheckoutItem | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [selectedLocationForMap, setSelectedLocationForMap] = useState<PickupLocation | null>(null);
+
+  const handleViewMap = (location: PickupLocation) => {
+    setSelectedLocationForMap(location);
+    setMapOpen(true);
+  };
 
   const formatDate = (dateString) => {
     try {
@@ -63,75 +78,6 @@ function OrderHistory() {
     } catch {
       return dateString;
     }
-  };
-
-  const HistoryItem = ({ item }) => {
-    const cartItems = item.cart?.items || [];
-    console.log(cartItems, "*&*^")
-    const totalProducts = cartItems.reduce(
-      (acc:any, curr:any) => acc + curr.quantity,
-      0
-    );
-
-    return (
-      <Card
-        sx={{
-          mb: 2,
-          borderRadius: 3,
-          boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
-          p: 2,
-        }}
-      >
-        <CardContent>
-          <Grid container spacing={1} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                Order #{item.id}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Placed on: {formatDate(item.cart?.created_at)}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Total Products: {totalProducts}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Typography>
-                <strong>Total:</strong> Ksh {item.total_amount}
-              </Typography>
-              <Typography>
-                <strong>Status:</strong>{" "}
-                <span
-                  style={{
-                    color:
-                      item.payment_status === "Paid" ? "green" : "#BE1E2D",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {item.payment_status}
-                </span>
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={3} sx={{ textAlign: { xs: "left", md: "right" } }}>
-              <Button
-                variant="contained"
-                sx={{
-                  background: "#BE1E2D",
-                  ":hover": { background: "#A31B26" },
-                }}
-                onClick={() => setSelectedCheckout(item)}
-              >
-                View Details
-              </Button>
-            </Grid>
-          </Grid>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="body2" color="text.secondary">
-            Shipping to: {item.address}, {item.city}, {item.country}
-          </Typography>
-        </CardContent>
-      </Card>
-    );
   };
 
   const SkeletonItem = () => (
@@ -165,7 +111,7 @@ function OrderHistory() {
           ))
         ) : checkout_data?.length > 0 ? (
           checkout_data.map((item) => (
-            <HistoryItem key={item.id} item={item} />
+            <OrderDetailsCard key={item.id} item={item} onViewMap={handleViewMap} />
           ))
         ) : (
           <Typography>No orders found.</Typography>
@@ -281,6 +227,44 @@ function OrderHistory() {
       Close
     </Button>
   </DialogActions>
+</Dialog>
+
+{/* Map Preview Dialog */}
+<Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
+  <DialogTitle>
+    Map Preview: {selectedLocationForMap?.name}
+    <IconButton
+      aria-label="close"
+      onClick={() => setMapOpen(false)}
+      sx={{
+        position: 'absolute',
+        right: 8,
+        top: 8,
+        color: (theme) => theme.palette.grey[500],
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+  <DialogContent dividers>
+    {selectedLocationForMap?.gmaps_link ? (
+      <iframe
+        src={selectedLocationForMap.gmaps_link}
+        width="100%"
+        height="400"
+        style={{ border: 0 }}
+        allowFullScreen={true}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      ></iframe>
+    ) : (
+      <Box sx={{ height: 400, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}>
+        <Typography variant="h6" color="textSecondary">
+          No map link available for this location.
+        </Typography>
+      </Box>
+    )}
+  </DialogContent>
 </Dialog>
     </>
   );
