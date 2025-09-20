@@ -48,7 +48,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
 
     if (access && refresh && username) {
       const response = await addToCart({
-        product: product.product?.id || product.id,
+        product: product.id,
         token: access,
         shopname: Cookies.get("shopname"),
       });
@@ -83,7 +83,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
     );
   };
 
-  const currentProduct = product?.product || product;
+  const currentProduct = product;
 
   const handleWhatsAppClick = (event: React.MouseEvent) => {
     event.stopPropagation();

@@ -22,7 +22,7 @@ import {
   ProductImage,
   ProductImageWrapper,
   ProductInfoContainer,
-  ProductOverlay,
+  // ProductOverlay, // Removed because it is not exported
 } from "@/StyledComponents/Products";
 import {
   ProductTitle,
@@ -74,9 +74,22 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
     <CompanyCardStyled>
       <ProductImageWrapper>
         <ProductImage src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
-        <ProductOverlay className="overlay">
+        <Box className="overlay" sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.3)',
+          opacity: 0,
+          transition: 'opacity 0.3s',
+          '&:hover': { opacity: 1 }
+        }}>
           <GreenButton onClick={handleVisitShop}>Visit Shop</GreenButton>
-        </ProductOverlay>
+        </Box>
       </ProductImageWrapper>
       <ProductInfoContainer>
         <Box sx={{  gap: 1, mb: 1 }}>

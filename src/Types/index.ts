@@ -47,6 +47,10 @@ export interface Paginated<T> {
 }
 
 export interface Product {
+  rating: number;
+  reviews_count: number;
+  slug: any;
+  title: string;
   id: number;
   name: string;
   description: string;
