@@ -17,16 +17,17 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import VisibilityIcon from '@mui/icons-material/Visibility'; // Icon for quick view/details
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // Import WhatsApp icon
-import { GreenButton, BorderedButton } from "@/StyledComponents/Buttons"; // Updated imports
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { IconActionsContainer } from "@/StyledComponents/Products";
+import { Box, Typography, CircularProgress, IconButton } from "@mui/material";
 import { useAddToCartMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { useCart } from "@/contexts/CartContext";
+import { Product } from "@/Types";
 
 interface ProductCardProps {
-  product: any;
+  product: Product;
   // isLoading is for the page, not individual card. If passed, it means the whole product list is loading
   // Remove if not used for individual card loading states
   triggerCartRefetch: () => void;
@@ -143,6 +144,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
               Sale
             </Box>
           )}
+          {currentProduct?.stock === 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                bgcolor: 'gray',
+                color: 'white',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                zIndex: 1,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Out of Stock
+            </Box>
+          )}
           {currentProduct?.main_image && (
             <ProductImage
               src={`https://res.cloudinary.com/dqokryv6u/${currentProduct.main_image}`}
@@ -174,48 +194,38 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
             <ProductPrice>Ksh {currentProduct?.price}</ProductPrice>
           )}
           <ProductTitle>{currentProduct?.title}</ProductTitle>
+          <Box sx={{ 
+            height: '40px', 
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            '-webkit-line-clamp': '2',
+            '-webkit-box-orient': 'vertical',
+            '&:hover': {
+              overflow: 'visible',
+              display: 'block',
+              height: 'auto',
+            }
+          }}>
+            <ProductDescription>{currentProduct?.description}</ProductDescription>
+          </Box>
           <RatingContainer>
             {renderStars(currentProduct?.rating || 0)}
             <Typography variant="body2" color="textSecondary" sx={{ ml: 0.5 }}>
               ({currentProduct?.reviews_count || 0})
             </Typography>
           </RatingContainer>
-
-          {/* Buttons Section */}
-          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1, width:'100%' }}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <GreenButton
-                onClick={AddItemToCart}
-                sx={{ flex: 1 }}
-                endIcon={!AddToCartLoading && <ShoppingBasketIcon />}
-              >
-                {AddToCartLoading ? <CircularProgress size={20} color="inherit" /> : "Add to Cart"}
-              </GreenButton>
-              <BorderedButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  router.push(`/product/${currentProduct?.slug}`);
-                }}
-                sx={{ flex: 1 }}
-                endIcon={<VisibilityIcon />}
-              >
-                View
-              </BorderedButton>
-            </Box>
-            <BorderedButton
-              onClick={handleWhatsAppClick}
-              sx={{
-                width: '100%',
-                backgroundColor: '#25D366',
-                color: 'white',
-                borderColor: '#25D366',
-                '&:hover': { backgroundColor: '#1DA851', borderColor: '#1DA851' },
-              }}
-              endIcon={<WhatsAppIcon />}
-            >
-              order via whatsapp
-            </BorderedButton>
-          </Box>
+          <IconActionsContainer>
+            <IconButton onClick={AddItemToCart} disabled={currentProduct.stock === 0 || AddToCartLoading}>
+              {AddToCartLoading ? <CircularProgress size={24} /> : <ShoppingBasketIcon />}
+            </IconButton>
+            <IconButton onClick={() => router.push(`/product/${currentProduct?.slug}`)}>
+              <VisibilityIcon />
+            </IconButton>
+            <IconButton onClick={handleWhatsAppClick} disabled={currentProduct.stock === 0}>
+              <WhatsAppIcon />
+            </IconButton>
+          </IconActionsContainer>
         </ProductInfoContainer>
 
         {/* 🟡 Show loading message when adding */}
