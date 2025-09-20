@@ -24,6 +24,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import StarIcon from '@mui/icons-material/Star';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import toast, { Toaster } from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
 import { darken } from '@mui/material/styles';
@@ -185,14 +186,13 @@ const QuantitySelector = styled(Box)(({ theme }) => ({
 const AddToCartButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: "#fff",
-  textTransform: "uppercase",
   padding: "12px 25px",
   borderRadius: "8px",
   fontWeight: 700,
-  fontSize: "1.1rem",
+  fontSize: "1rem",
   boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
   "&:hover": {
-    backgroundColor: darken(theme.palette.primary.main, 0.6),
+    backgroundColor: darken(theme.palette.primary.main, 0.2),
     boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
   },
   "&:disabled": {
@@ -267,6 +267,34 @@ function ProductDetailView(ref:any) {
       //     cart_refetch();
       //   },
       // }));
+    }
+  };
+
+  const handleWhatsAppClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const shopDetailsCookie = Cookies.get("shopDetails");
+    if (shopDetailsCookie) {
+      try {
+        const companyData = JSON.parse(shopDetailsCookie);
+        const phoneNumber = companyData.contact_phone; // Assuming contact_phone is available here
+
+        if (phoneNumber) {
+          const productName = product?.title || "Product";
+          const productPrice = product?.on_sale
+            ? product?.discounted_price
+            : product?.price;
+          const message = `Hello, I'm interested in ordering the product: ${productName} for Ksh ${productPrice}. Could you please provide more details?`;
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, "_blank");
+        } else {
+          toast.error("Shop owner's phone number not available.");
+        }
+      } catch (error) {
+        console.error("Failed to parse shopDetails cookie:", error);
+        toast.error("Could not retrieve shop details.");
+      }
+    } else {
+      toast.error("Shop details not found.");
     }
   };
   
@@ -349,6 +377,25 @@ function ProductDetailView(ref:any) {
               }}
             >
               Sale
+            </Box>
+          )}
+          {product?.stock === 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                bgcolor: 'gray',
+                color: 'white',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                zIndex: 10,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Out of Stock
             </Box>
           )}
           {isLoading ? (
@@ -464,24 +511,27 @@ function ProductDetailView(ref:any) {
 
               <ProductDescription>{product?.description || "No detailed description available."}</ProductDescription>
 
-              <QuantitySelector>
-                <Typography variant="h6" color={darkText}>Quantity:</Typography>
-                <IconButton onClick={() => handleQuantityChange('remove')} disabled={quantity <= 1 || isAddingToCart}>
-                  <RemoveIcon />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                <QuantitySelector>
+                  <IconButton onClick={() => handleQuantityChange('remove')} disabled={quantity <= 1 || isAddingToCart || product?.stock === 0}>
+                    <RemoveIcon />
+                  </IconButton>
+                  <Typography variant="h6" sx={{ minWidth: '30px', textAlign: 'center' }}>{quantity}</Typography>
+                  <IconButton onClick={() => handleQuantityChange('add')} disabled={isAddingToCart || product?.stock === 0}>
+                    <AddIcon />
+                  </IconButton>
+                </QuantitySelector>
+                <AddToCartButton onClick={handleAddToCart} disabled={isAddingToCart || product?.stock === 0} fullWidth>
+                  {isAddingToCart ? <CircularProgress size={24} color="inherit" /> : (
+                    <>
+                      <ShoppingCartIcon sx={{ mr: 1 }} /> {product?.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                    </>
+                  )}
+                </AddToCartButton>
+                <IconButton onClick={handleWhatsAppClick} disabled={product?.stock === 0} sx={{ color: '#25D366' }}>
+                  <WhatsAppIcon />
                 </IconButton>
-                <Typography variant="h6" sx={{ minWidth: '30px', textAlign: 'center' }}>{quantity}</Typography>
-                <IconButton onClick={() => handleQuantityChange('add')} disabled={isAddingToCart}>
-                  <AddIcon />
-                </IconButton>
-              </QuantitySelector>
-
-              <AddToCartButton onClick={handleAddToCart} disabled={isAddingToCart}>
-                {isAddingToCart ? <CircularProgress size={24} color="inherit" /> : (
-                  <>
-                    <ShoppingCartIcon sx={{ mr: 1 }} /> Add to Cart
-                  </>
-                )}
-              </AddToCartButton>
+              </Box>
             </>
           )}
         </ProductInfo>

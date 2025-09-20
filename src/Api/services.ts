@@ -221,6 +221,18 @@ export const AuthApi = createApi({
         body: data.body,
       }),
     }),
+    updatePaymentStatus: builder.mutation({
+      query: ({ token, pk }) => ({
+        url: `cart/update-payment-status/${pk}/`,
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: {
+          payment_status: "Paid",
+        },
+      }),
+    }),
   })
 });
 export const {
@@ -246,4 +258,5 @@ export const {
   useGetDeliveryLocationsQuery,
   useCreatePickupLocationMutation,
   useCreateContactMessageMutation,
+  useUpdatePaymentStatusMutation,
 }: any = AuthApi;

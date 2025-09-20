@@ -16,6 +16,7 @@ import { ProductImage } from "@/StyledComponents/Products";
 import { format } from "date-fns";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { PickupLocation, DeliveryLocation } from "@/Types";
+import Link from "next/link";
 
 interface OrderDetailsCardProps {
   item: {
@@ -25,7 +26,7 @@ interface OrderDetailsCardProps {
     state?: string;
     postal_code?: string;
     country: string;
-    total_amount: number;
+    total_amount: string;
     payment_method?: string;
     payment_status: string;
     delivery_fee: string;
@@ -89,9 +90,6 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewMap }) 
               <strong>Total:</strong> Kes {item.total_amount}
             </Typography>
             <Typography>
-              <strong>Shipping Cost:</strong> Kes {item.delivery_fee}
-            </Typography>
-            <Typography>
               <strong>Status:</strong>{" "}
               <span
                 style={{
@@ -103,6 +101,11 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewMap }) 
                 {item.payment_status}
               </span>
             </Typography>
+            <Link href={`/orderhistory/${item.id}`} passHref>
+              <Button variant="outlined" size="small" sx={{ mt: 1 }}>
+                View Details
+              </Button>
+            </Link>
           </Grid>
         </Grid>
         <Divider sx={{ my: 2 }} />
