@@ -194,21 +194,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
             <ProductPrice>Ksh {currentProduct?.price}</ProductPrice>
           )}
           <ProductTitle>{currentProduct?.title}</ProductTitle>
-          <Box sx={{ 
-            height: '40px', 
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            '-webkit-line-clamp': '2',
-            '-webkit-box-orient': 'vertical',
-            '&:hover': {
-              overflow: 'visible',
-              display: 'block',
-              height: 'auto',
-            }
-          }}>
-            <ProductDescription>{currentProduct?.description}</ProductDescription>
-          </Box>
+          {currentProduct?.description && (
+            <Box
+              sx={{
+                height: '40px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: '2',
+                WebkitBoxOrient: 'vertical',
+                '&:hover': {
+                  overflow: 'visible',
+                  display: 'block',
+                  height: 'auto',
+                }
+              }}
+            >
+              <ProductDescription>
+                {currentProduct.description}
+              </ProductDescription>
+            </Box>
+          )}
           <RatingContainer>
             {renderStars(currentProduct?.rating || 0)}
             <Typography variant="body2" color="textSecondary" sx={{ ml: 0.5 }}>
