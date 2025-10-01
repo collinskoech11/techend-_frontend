@@ -1,7 +1,5 @@
 "use client";
-import Navbar from "@/Components/Navbar";
 import { CouponButton } from "@/StyledComponents/Buttons";
-import Footer from "@/Components/Footer";
 import {
   CartBanner,
   CartSummary,
@@ -9,8 +7,6 @@ import {
   CartSummaryContent,
   CartSummarySub,
   CartSummaryTitle,
-  CouponContainer,
-  CouponInput,
 } from "@/StyledComponents/CartComponents";
 import { Skeleton, useTheme } from "@mui/material";
 import {
@@ -31,29 +27,31 @@ import { CloseOutlined } from "@mui/icons-material";
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import {
-  useGetCartQuery,
   useAddProductQtyToCartMutation,
   useRemoveProductFromCartMutation,
 } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
+import { useCart } from "@/contexts/CartContext";
 
 function Cart() {
-  const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } =
-    useGetCartQuery({ token: Cookies.get("access"), company_name: Cookies.get('shopname') });
+  const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } = useCart();
   const router = useRouter();
   const theme = useTheme();
 
-  const [updateItemQty, { isLoading: isLoadingUpdate }] =
-    useAddProductQtyToCartMutation();
-  const [deleteItemQty, { isLoading: isLoadingDelete }] =
-    useRemoveProductFromCartMutation();
+  const [updateItemQty, { isLoading: isLoadingUpdate }] = useAddProductQtyToCartMutation();
+  const [deleteItemQty, { isLoading: isLoadingDelete }] = useRemoveProductFromCartMutation();
 
-  const updateItemCart = async (prod_id, direction) => {
+  const updateItemCart = async (prod_id: any, direction: any) => {
+    const token = Cookies.get("access");
+    if (!token) {
+      toast.error("Please log in to modify your cart.");
+      return;
+    }
     const response = await updateItemQty({
       product: prod_id,
       product_action_symbol: direction,
-      token: Cookies.get("access"),
+      token: token,
       shopname: Cookies.get("shopname"),
     });
     try {
@@ -62,17 +60,22 @@ function Cart() {
         toast.error(<Typography>{error_message}</Typography>);
       } else {
         toast.success("Product quantity updated");
-        router.reload();
+        cart_refetch();
       }
     } catch {
       toast.error("An unexpected error occurred");
     }
   };
 
-  const deleteItemCart = async (prod_id) => {
+  const deleteItemCart = async (prod_id: any) => {
+    const token = Cookies.get("access");
+    if (!token) {
+      toast.error("Please log in to modify your cart.");
+      return;
+    }
     const response = await deleteItemQty({
       product: prod_id,
-      token: Cookies.get("access"),
+      token: token,
       shopname: Cookies.get("shopname"),
     });
     try {
@@ -81,7 +84,7 @@ function Cart() {
         toast.error(<Typography>{error_message}</Typography>);
       } else {
         toast.success("Product removed from cart");
-        router.reload();
+        cart_refetch();
       }
     } catch {
       toast.error("An unexpected error occurred");
@@ -93,13 +96,11 @@ function Cart() {
   }, [router, cart_refetch]);
 
   const CartItems = cart_data?.items;
-  console.log(CartItems, "Cart Items");
   let subTotal = 0;
 
   return (
     <>
       <Toaster />
-      {/* <Navbar textColor="#000" bgColor="#fff" /> */}
       <CartBanner>
         <Box>
           <Typography variant="h3" color={theme.palette.primary.main}>Shopping Cart</Typography>
@@ -163,7 +164,7 @@ function Cart() {
                         </TableRow>
                       ))}
                     </>
-                  ) : CartItems?.length === 0 ? (
+                  ) : CartItems?.length === 0 || !CartItems ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center">
                         <Typography variant="h6">No items in cart</Typography>
@@ -173,8 +174,8 @@ function Cart() {
                     CartItems.map((item, index) => {
                       const prod_total =
                         item.product.on_sale
-                          ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
-                          : parseFloat(item.product.price) * parseInt(item.quantity);
+                          ? parseFloat(item.product.discounted_price) * item.quantity
+                          : parseFloat(item.product.price) * item.quantity;
                       subTotal += prod_total;
 
                       return (
@@ -254,16 +255,8 @@ function Cart() {
           </Grid>
           <Grid item xs={12} md={4}>
             <CartSummary>
-              {/* <CouponContainer>
-                <CouponInput />
-                <CouponButton>Apply Coupon</CouponButton>
-              </CouponContainer> */}
               <CartSummarySub>
                 <CartSummaryTitle style={{color:theme.palette.primary.main}}>Cart Summary</CartSummaryTitle>
-                {/* <CartSummaryContent>
-                  <span>Subtotal</span>
-                  <span>Kes {subTotal.toFixed(2)}</span>
-                </CartSummaryContent> */}
                 <CartSummaryContent>
                   <span style={{ fontWeight: "bold" }}>Total</span>
                   <span style={{ fontWeight: "bold" }}>
@@ -289,7 +282,6 @@ function Cart() {
           </Grid>
         </Grid>
       </CartSummaryContainer>
-            {/* <Footer /> */}
     </>
   );
 }

@@ -1,3 +1,4 @@
+
 import {
   ProductItemStyled,
   ProductImage,
@@ -10,7 +11,7 @@ import {
   ProductTitle,
   ProductDescription, // Added for potential description
 } from "@/StyledComponents/Typos"; // Updated imports
-import React, { useState, useImperativeHandle, useEffect } from "react";
+import React from "react";
 import StarIcon from '@mui/icons-material/Star';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -19,7 +20,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility'; // Icon for quick v
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // Import WhatsApp icon
 import { IconActionsContainer } from "@/StyledComponents/Products";
 import { Box, Typography, CircularProgress, IconButton } from "@mui/material";
-import { useAddToCartMutation } from "@/Api/services";
+import { useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
@@ -28,40 +29,40 @@ import { Product } from "@/Types";
 
 interface ProductCardProps {
   product: Product;
-  // isLoading is for the page, not individual card. If passed, it means the whole product list is loading
-  // Remove if not used for individual card loading states
   triggerCartRefetch: () => void;
-  isLoading?: boolean; // Optional prop to indicate loading state
-  ref?: React.Ref<any>; // Forward ref for imperative handle
+  isLoading?: boolean; 
+  ref?: React.Ref<any>;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading, ref }) => {
   const router = useRouter();
-  const [addToCart, { isLoading: AddToCartLoading }] = useAddToCartMutation();
-  const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } = useCart();
+  const [addToCart, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
+  const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
+  const { sessionId, refetch: cart_refetch } = useCart();
 
   const AddItemToCart = async (event: React.MouseEvent) => {
     event.stopPropagation();
     const access = Cookies.get("access");
-    const refresh = Cookies.get("refresh");
-    const username = Cookies.get("username");
 
-    if (access && refresh && username) {
-      const response = await addToCart({
-        product: product.id,
-        token: access,
-        shopname: Cookies.get("shopname"),
-      });
-      if (response.error) {
-        const error_message = response.error.data?.error || "An error occurred";
-        toast.error(<Typography>{error_message}</Typography>);
-      } else {
+    const handleMutation = async (mutation: any, args: any) => {
+      try {
+        await mutation(args).unwrap();
         cart_refetch();
         toast.success("Product added to cart!");
         triggerCartRefetch();
+      } catch (error: any) {
+        const error_message = error.data?.error || "An error occurred";
+        toast.error(<Typography>{error_message}</Typography>);
       }
+    };
+
+    if (access) {
+      handleMutation(addToCart, { product: product.id, token: access, shopname: Cookies.get("shopname") });
+    } else if (sessionId) {
+      const shopname = Cookies.get("shopname") || "techend";
+      handleMutation(addToCartGuest, { productId: product.id.toString(), quantity: 1, sessionId, companyName: shopname });
     } else {
-      toast.error("Please log in to add an item to cart.");
+      toast.error("Could not add item to cart. Please refresh the page.");
     }
   };
 
@@ -84,6 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
   };
 
   const currentProduct = product;
+  const AddToCartLoading = isAddingToCartAuth || isAddingToCartGuest;
 
   const handleWhatsAppClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -121,7 +123,7 @@ const phoneNumber = rawPhoneNumber.startsWith("0")
     <>
       <Toaster />
       <ProductItemStyled
-        onClick={() => router.push(`/product/${currentProduct?.slug}`)} // Always navigate on click
+        onClick={() => router.push(`/product/${currentProduct?.slug}`)}
         sx={{
           pointerEvents: AddToCartLoading ? 'none' : 'auto',
           opacity: AddToCartLoading ? 0.6 : 1,
@@ -238,7 +240,6 @@ const phoneNumber = rawPhoneNumber.startsWith("0")
           </IconActionsContainer>
         </ProductInfoContainer>
 
-        {/* 🟡 Show loading message when adding */}
         {AddToCartLoading && (
           <Typography
             variant="caption"
