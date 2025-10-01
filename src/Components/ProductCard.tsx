@@ -93,7 +93,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
     if (shopDetailsCookie) {
       try {
         const companyData = JSON.parse(shopDetailsCookie);
-        const phoneNumber = companyData.contact_phone;
+        const rawPhoneNumber = companyData.contact_phone.replace(/\D/g, "");
+
+const phoneNumber = rawPhoneNumber.startsWith("0")
+  ? `254${rawPhoneNumber.slice(1)}`
+  : rawPhoneNumber;
 
         if (phoneNumber) {
           const productName = currentProduct?.title || "Product";
