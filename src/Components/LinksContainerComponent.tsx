@@ -28,6 +28,7 @@ import CartMenu from "./CartMin";
 import Image from "next/image";
 import Cookies from "js-cookie";
 const AuthDialog = lazy(() => import("./AuthDialog")); // Dynamic import
+import { useCart } from "@/contexts/CartContext";
 import Shop2Icon from "@mui/icons-material/Shop2";
 import HomeIcon from "@mui/icons-material/Home";
 import MuseumIcon from '@mui/icons-material/Museum';
@@ -52,6 +53,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const [username, setUsername] = useState(null);
   const [user, setUser] = useState(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
 
   const refetchUser = () => {
@@ -178,9 +180,17 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
       ) : (
         // When not logged in, show AuthDialog or a login link
         // Here we render the AuthDialog directly as a menu item
-        <Box sx={{ p: 1 }}>
-          <AuthDialog onTrigger={refetchUser} />
-        </Box>
+        <div>
+          {sessionId && (
+            <MenuItem onClick={() => handleMobileMenuItemClick("/cart")}>
+              <ListItemIcon><ShoppingCartOutlinedIcon fontSize="small" /></ListItemIcon>
+              Cart
+            </MenuItem>
+          )}
+          <Box sx={{ p: 1 }}>
+            <AuthDialog onTrigger={refetchUser} />
+          </Box>
+        </div>
       )}
     </Menu>
   );
@@ -207,15 +217,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1 }}>
           {router.pathname === "/" && (
             <>
-              {/* <IconButton color="inherit" href="https://www.youtube.com/@TechendForgranted" target="_blank">
-                <Image src="/assets/youtube.svg" alt="YouTube" width={24} height={24} />
-              </IconButton>
-              <IconButton color="inherit" href="https://www.instagram.com/techendforgranted?igsh=bTFqdGp6dTdhbm1k" target="_blank">
-                <Image src="/assets/instagram.svg" alt="Instagram" width={24} height={24} />
-              </IconButton>
-              <IconButton color="inherit" href="#" target="_blank">
-                <Image src="https://cdn.pixabay.com/photo/2021/06/15/12/28/tiktok-6338432_1280.png" alt="TikTok" width={24} height={24} />
-              </IconButton> */}
+              {/* Social media icons can go here */}
             </>
           )}
           <Tooltip title="Mall">
@@ -223,8 +225,10 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
               <MuseumIcon />
             </IconButton>
           </Tooltip>
-          {user ? (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
+
+          {/* Icons for logged-in users */}
+          {user && (
+            <>
               <Tooltip title="Home">
                 <IconButton onClick={() => router.push(`/`)} sx={{ color: "#fff" }}>
                   <HomeIcon />
@@ -235,7 +239,6 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
                   <Shop2Icon />
                 </IconButton>
               </Tooltip>
-              <CartMenu ref={cartRef} />
               <Tooltip title="Order History">
                 <IconButton onClick={() => router.push("/orderhistory")} sx={{ color: "#fff" }}>
                   <Badge badgeContent={1} color="warning">
@@ -250,6 +253,15 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
                   </Badge>
                 </IconButton>
               </Tooltip>
+            </>
+          )}
+
+          {/* Cart icon for both logged-in users and guests with a session */}
+          {(user || sessionId) && <CartMenu ref={cartRef} />}
+
+          {/* User menu or Login button */}
+          {user ? (
+            <Box>
               <IconButton
                 color="inherit"
                 onClick={handleClick}
