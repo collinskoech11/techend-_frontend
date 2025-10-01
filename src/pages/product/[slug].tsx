@@ -1,13 +1,10 @@
-import React, { useState, useImperativeHandle, useEffect } from "react";
+
+import React, { useState } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
-import { useGetProductQuery, useAddToCartMutation } from "@/Api/services";
-// Removed: import Navbar from "@/Components/Navbar";
-// Removed: import Footer from "@/Components/Footer";
-// Removed: import { PageContainer } from "../path/to/wherever/PageContainer/is/defined"; // Assuming PageContainer is now a global styled component or part of layout
-
+import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
 import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
 import { styled, useTheme } from "@mui/system";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -30,16 +27,9 @@ import { useCart } from "@/contexts/CartContext";
 import { darken } from '@mui/material/styles';
 import Image from "next/image";
 
-
-// --- Color Palette (Consistent with previous suggestions) ---
-// Removed lightGray here as PageContainer will provide background
 const mediumGray = "#e0e0e0";
 const darkText = "#212121";
 const lightText = "#555555";
-const successColor = "#4CAF50";
-
-// --- Styled Components ---
-// Removed PageContainer styled component definition
 
 const ProductDetailSection = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -174,7 +164,7 @@ const QuantitySelector = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
   "& .MuiIconButton-root": {
-    border: `1px solid ${mediumGray}`, // Changed from lightGray to mediumGray for more visibility
+    border: `1px solid ${mediumGray}`,
     borderRadius: "8px",
     backgroundColor: '#f0f0f0',
     "&:hover": {
@@ -225,19 +215,18 @@ const SkeletonThumbnail = styled(Skeleton)({
   borderRadius: "8px",
 });
 
-function ProductDetailView(ref:any) {
+function ProductDetailView() {
   const theme = useTheme();
-  const { data: cart_data, isLoading:cart_loading, refetch: cart_refetch } = useCart();
+  const { sessionId, refetch: cart_refetch } = useCart();
   const router = useRouter();
   const slug = router.query.slug;
   const [shopname] = useState(Cookies.get("shopname") || "techend");
   const { data: product, isLoading, error } = useGetProductQuery(slug);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
-  const primaryDark = darken(theme.palette.primary.main, 0.6);
-  const primaryColor = theme.palette.primary.main;
-  
+  const [addToCart, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
+  const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
+
   const handleQuantityChange = (type: 'add' | 'remove') => {
     if (type === 'add') {
       setQuantity((prev) => prev + 1);
@@ -248,25 +237,24 @@ function ProductDetailView(ref:any) {
 
   const handleAddToCart = async () => {
     const access = Cookies.get("access");
-    const refresh = Cookies.get("refresh");
-    const username = Cookies.get("username");
 
-    if (access && refresh && username) {
-      const response = await addToCart({ product: product?.id, quantity, token: access, shopname: Cookies.get("shopname") });
-      if ('error' in response) {
-        const errorMessage = (response.error as any).data?.error || "Failed to add product to cart.";
-        toast.error(errorMessage);
-      } else {
+    const handleMutation = async (mutation: any, args: any) => {
+      try {
+        await mutation(args).unwrap();
         toast.success(`${quantity} x ${product?.title} added to cart!`);
-        cart_refetch(); // <--- Add this line to update the cart context
+        cart_refetch();
+      } catch (error: any) {
+        const errorMessage = error.data?.error || "Failed to add product to cart.";
+        toast.error(errorMessage);
       }
+    };
+
+    if (access) {
+      handleMutation(addToCart, { product: product?.id, quantity, token: access, shopname: Cookies.get("shopname") });
+    } else if (sessionId) {
+      handleMutation(addToCartGuest, { productId: product?.id.toString(), quantity, sessionId, companyName: shopname });
     } else {
-      toast.error("Please log in to add items to your cart.");
-      // useImperativeHandle(ref, () => ({
-      //   cart_refetch() {
-      //     cart_refetch();
-      //   },
-      // }));
+      toast.error("Could not add item to cart. Please refresh the page.");
     }
   };
 
@@ -276,7 +264,7 @@ function ProductDetailView(ref:any) {
     if (shopDetailsCookie) {
       try {
         const companyData = JSON.parse(shopDetailsCookie);
-        const phoneNumber = companyData.contact_phone; // Assuming contact_phone is available here
+        const phoneNumber = companyData.contact_phone;
 
         if (phoneNumber) {
           const productName = product?.title || "Product";
@@ -297,13 +285,6 @@ function ProductDetailView(ref:any) {
       toast.error("Shop details not found.");
     }
   };
-  
-
-  // useEffect(() => {
-  //     if (!isLoading && cart_data) {
-  //       console.log(cart_data, "****** from context");
-  //     }
-  //   }, [cart_data, isLoading]); 
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -315,9 +296,7 @@ function ProductDetailView(ref:any) {
         {Array.from({ length: fullStars }).map((_, idx) => (
           <StarIcon key={`full-${idx}`} />
         ))}
-        {halfStar === 1 && (
-          <StarHalfIcon />
-        )}
+        {halfStar === 1 && <StarHalfIcon />}
         {Array.from({ length: emptyStars }).map((_, idx) => (
           <StarBorderIcon key={`empty-${idx}`} />
         ))}
@@ -327,7 +306,6 @@ function ProductDetailView(ref:any) {
 
   if (error) {
     return (
-      // Only render the error message, assuming PageContainer and Navbar/Footer handle the overall layout
       <Box sx={{ p: 4, textAlign: 'center', color: darkText }}>
         <Typography variant="h5" color="error">Error loading product details.</Typography>
         <Typography variant="body1">Please try again later or contact support.</Typography>
@@ -339,11 +317,11 @@ function ProductDetailView(ref:any) {
     ? product.images
     : (product?.main_image ? [product.main_image] : []);
 
+  const isAddingToCart = isAddingToCartAuth || isAddingToCartGuest;
+
   return (
-    // Removed PageContainer wrapper here
     <>
       <Toaster position="top-right" />
-      {/* Removed Navbar */}
       <Box sx={{ pt: 3, pb: 2, px: 3, maxWidth: "1200px", mx: "auto" }}>
         <Breadcrumbs aria-label="breadcrumb">
           <MuiLink underline="hover" color="inherit" href="/">
@@ -536,8 +514,6 @@ function ProductDetailView(ref:any) {
           )}
         </ProductInfo>
       </ProductDetailSection>
-
-      {/* Removed Footer */}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -71,7 +71,7 @@ export const AuthApi = createApi({
         const token = Cookies.get("access");
 
         return {
-          url: `cart/cart/add/${data.product}/${shopname}`,
+          url: `cart/cart/add/${data.product}/${shopname}/`,
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -104,6 +104,23 @@ export const AuthApi = createApi({
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      }),
+    }),
+    addToCartGuest: builder.mutation<Cart, { productId: string; quantity: number; sessionId: string; companyName: string; }>({ 
+      query: ({ productId, quantity, sessionId, companyName }) => ({
+        url: `cart/cart/add/${productId}/${companyName}/`,
+        method: "POST",
+        body: { quantity, session_id: sessionId, company_slug: companyName },
+      }),
+    }),
+    getCartGuest: builder.query<Cart, {session_id:string, company_name:string}>({
+      query: ({session_id, company_name}) => `/cart/cart/session/${session_id}/${company_name}`,
+    }),
+    placeOrderGuest: builder.mutation<GuestOrderResponse, GuestPlaceOrderArgs>({
+      query: ({ sessionId, email, company_name, ...rest }) => ({
+        url: `/cart/guest-checkout/${company_name}/`,
+        method: "POST",
+        body: { session_id: sessionId, email, ...rest },
       }),
     }),
     checkoutCart: builder.mutation<CheckoutResponse, { body: CheckoutFormData; token: string; company_name: string }>({
@@ -259,4 +276,7 @@ export const {
   useCreatePickupLocationMutation,
   useCreateContactMessageMutation,
   useUpdatePaymentStatusMutation,
+  useAddToCartGuestMutation,
+  useGetCartGuestQuery,
+  usePlaceOrderGuestMutation,
 }: any = AuthApi;

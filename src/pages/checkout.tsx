@@ -1,6 +1,15 @@
-import Navbar from "@/Components/Navbar";
-import Footer from "@/Components/Footer";
-import { BreadCrumbContainer } from "@/StyledComponents/BreadCrumb";
+
+
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation } from "@/Api/services";
+import { PickupLocation, CheckoutResponse, DeliveryLocation, GuestOrderResponse } from "@/Types";
+import Cookies from "js-cookie";
+import toast, { Toaster } from "react-hot-toast";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCart } from "@/contexts/CartContext";
 import {
   Breadcrumbs,
   Link,
@@ -22,20 +31,14 @@ import {
   Stepper,
   Step,
   StepLabel,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import LocationOnIcon from '@mui/icons-material/LocationOn'; // Import the location icon
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery } from "@/Api/services";
-import { PickupLocation, CheckoutResponse, DeliveryLocation } from "@/Types";
-import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { BreadCrumbContainer } from "@/StyledComponents/BreadCrumb";
 
-// ✅ Define validation schema
+// --- Authenticated Checkout --- //
+
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
@@ -52,7 +55,7 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
-function Checkout() {
+const AuthenticatedCheckout = () => {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const theme = useTheme();
@@ -67,13 +70,8 @@ function Checkout() {
   const [activeStep, setActiveStep] = useState(0);
   const steps = ['Select Location', 'Billing Address', 'Review Order'];
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  const handleNext = () => setActiveStep((prev) => prev + 1);
+  const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const { data: pickupLocationsData, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery({
     company_slug: shopname,
@@ -106,38 +104,20 @@ function Checkout() {
     }
   }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-  });
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
 
   const router = useRouter();
-  const { data: cart_data } = useGetCartQuery({
-    token: Cookies.get("access"),
-    company_name: shopname,
-  });
+  const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
 
   useEffect(() => {
     if (cart_data) {
-      let calculatedShippingCost: number = 0;
+      let calculatedShippingCost = 0;
       if (deliveryOrPickup === "pickup" && selectedPickupLocation && pickupLocationsData) {
-        const selectedLocation = pickupLocationsData.find(
-          (location) => location.id === selectedPickupLocation
-        );
-        if (selectedLocation) {
-          calculatedShippingCost = Number(selectedLocation.delivery_fee);
-        }
+        const selectedLocation = pickupLocationsData.find(loc => loc.id === selectedPickupLocation);
+        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
       } else if (deliveryOrPickup === "delivery" && selectedDeliveryLocation && allDeliveryLocations) {
-        const selectedLocation = allDeliveryLocations.find(
-          (location) => location.id === selectedDeliveryLocation
-        );
-        if (selectedLocation) {
-          calculatedShippingCost = Number(selectedLocation.delivery_fee);
-        }
+        const selectedLocation = allDeliveryLocations.find(loc => loc.id === selectedDeliveryLocation);
+        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
       }
       setShippingCost(calculatedShippingCost);
 
@@ -147,7 +127,6 @@ function Checkout() {
           ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
           : parseFloat(item.product.price) * parseInt(item.quantity);
       });
-
       setTotalAmount(itemsSubtotal + calculatedShippingCost);
     }
   }, [cart_data, selectedPickupLocation, pickupLocationsData, selectedDeliveryLocation, allDeliveryLocations, deliveryOrPickup]);
@@ -158,17 +137,13 @@ function Checkout() {
         body: { ...formData, pickup_location: selectedPickupLocation, delivery_location: selectedDeliveryLocation },
         token: Cookies.get("access"),
         company_name: shopname,
-      });
-      if (response.data) {
-        toast.success(<Typography>Order Placed Successfully</Typography>);
-        setShippingCost(parseFloat(response.data.delivery_fee));
-        setTotalAmount(parseFloat(response.data.total_amount));
-        handleNext(); // Move to the next step (Review Order)
-      } else if (response.error) {
-        toast.error(response.error.data?.non_field_errors?.[0] || "An error occurred");
-      }
-    } catch {
-      toast.error("An unexpected error occurred");
+      }).unwrap();
+      toast.success("Order Placed Successfully");
+      setShippingCost(parseFloat(response.delivery_fee));
+      setTotalAmount(parseFloat(response.total_amount));
+      handleNext();
+    } catch (error: any) {
+      toast.error(error.data?.non_field_errors?.[0] || "An error occurred");
     }
   };
 
@@ -330,9 +305,8 @@ function Checkout() {
                   { label: "State", name: "state" },
                   { label: "Postal Code", name: "postal_code" },
                   { label: "Country", name: "country" },
-                  // { label: "Payment Method", name: "payment_method" },
                 ].map((field, index) => (
-                  <Grid item xs={12} md={field.name === "payment_method" ? 12 : 6} key={index}>
+                  <Grid item xs={12} md={6} key={index}>
                     <TextField
                       fullWidth
                       label={field.label}
@@ -414,60 +388,44 @@ function Checkout() {
   };
 
   return (
-    <>
-      <Toaster />
-      <Box sx={{ p: { xs: 2, md: 4 } }}>
-        <BreadCrumbContainer sx={{ background: "#fff", border: "none", mb: 4 }}>
-          <Breadcrumbs>
-            <Link underline="hover" color="inherit" href="/">TechEnd</Link>
-            <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>Shop</Link>
-            <Link underline="hover" color="inherit" href="/cart">Cart</Link>
-            <Typography color={theme.palette.primary.main}>Checkout</Typography>
-          </Breadcrumbs>
-        </BreadCrumbContainer>
+    <Grid container spacing={4}>
+      <Grid item xs={12} md={7}>
+        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <form onSubmit={handleSubmit(onSubmit)}>{getStepContent(activeStep)}</form>
+      </Grid>
 
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={7}>
-            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <form onSubmit={handleSubmit(onSubmit)}>{getStepContent(activeStep)}</form>
-          </Grid>
-
-          {/* Order Summary (always visible) */}
-          <Grid item xs={12} md={5}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
-              Order Summary
+      <Grid item xs={12} md={5}>
+        <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
+          Order Summary
+        </Typography>
+        <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1">
+              Subtotal: <b>Kes {cart_data?.total || 0}</b>
             </Typography>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body1">
-                  Subtotal: <b>Kes {cart_data?.total || 0}</b>
-                </Typography>
-                <Typography variant="body1">Shipping: <b>Kes {shippingCost}</b></Typography>
-                <Typography variant="h6" sx={{ mt: 1, color: "#BE1E2D" }}>
-                  Total: kes {totalAmount}
-                </Typography>
-              </Box>
+            <Typography variant="body1">Shipping: <b>Kes {shippingCost}</b></Typography>
+            <Typography variant="h6" sx={{ mt: 1, color: "#BE1E2D" }}>
+              Total: kes {totalAmount}
+            </Typography>
+          </Box>
 
-              <Typography variant="h6" gutterBottom>Payment Method</Typography>
-              <FormControl component="fieldset" sx={{ mb: 2 }}>
-                <RadioGroup row name="paymentRadio" onChange={(e) => setValue("payment_method", e.target.value)}>
-                  <FormControlLabel value="card" control={<Radio />} label="Card" />
-                  <FormControlLabel value="mpesa" control={<Radio />} label="M-Pesa" />
-                  <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
-                </RadioGroup>
-              </FormControl>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
+          <Typography variant="h6" gutterBottom>Payment Method</Typography>
+          <FormControl component="fieldset" sx={{ mb: 2 }}>
+            <RadioGroup row name="paymentRadio" onChange={(e) => setValue("payment_method", e.target.value)}>
+              <FormControlLabel value="card" control={<Radio />} label="Card" />
+              <FormControlLabel value="mpesa" control={<Radio />} label="M-Pesa" />
+              <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
+            </RadioGroup>
+          </FormControl>
+        </Paper>
+      </Grid>
 
-      {/* Map Preview Dialog */}
       <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>
           Map Preview: {selectedLocationForMap?.name}
@@ -504,6 +462,479 @@ function Checkout() {
           )}
         </DialogContent>
       </Dialog>
+    </Grid>
+  );
+};
+
+// --- Guest Checkout --- //
+
+const GuestCheckout = () => {
+  const theme = useTheme();
+  const router = useRouter();
+  const { sessionId, refetch, data: cart_data } = useCart();
+  const [placeOrderGuest, { isLoading }] = usePlaceOrderGuestMutation();
+  const [orderResponse, setOrderResponse] = useState<GuestOrderResponse | null>(null);
+  const [shopname] = useState(Cookies.get("shopname") || "techend");
+
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
+  const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
+  const [shippingCost, setShippingCost] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [selectedLocationForMap, setSelectedLocationForMap] = useState<PickupLocation | null>(null);
+  const [deliveryOrPickup, setDeliveryOrPickup] = useState<"pickup" | "delivery">("pickup");
+
+  const [deliveryPage, setDeliveryPage] = useState(1);
+  const [deliverySearchQuery, setDeliverySearchQuery] = useState("");
+  const itemsPerPage = 5;
+
+  const { data: pickupLocationsData, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery({
+    company_slug: shopname,
+    token: "", // Guest users don't have a token
+  });
+
+  const { data: allDeliveryLocations, isLoading: deliveryLocationsLoading } = useGetDeliveryLocationsQuery({
+    company_slug: shopname,
+    token: "", // Guest users don't have a token
+  });
+
+  const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
+
+  const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
+
+  // const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
+  // const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
+  // const [shippingCost, setShippingCost] = useState<number>(0);
+  // const [totalAmount, setTotalAmount] = useState<number>(0);
+  // const [mapOpen, setMapOpen] = useState(false);
+  // const [selectedLocationForMap, setSelectedLocationForMap] = useState<PickupLocation | null>(null);
+  // const [deliveryOrPickup, setDeliveryOrPickup] = useState<"pickup" | "delivery">("pickup");
+
+  // const [deliveryPage, setDeliveryPage] = useState(1);
+  // const [deliverySearchQuery, setDeliverySearchQuery] = useState("");
+  // const itemsPerPage = 5;
+
+  const guestCheckoutSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    firstName: z.string().min(2, "First name is required"),
+    lastName: z.string().min(2, "Last name is required"),
+    phoneNumber: z.string().min(7, "Phone number is required"),
+    address: z.string().min(5, "Address is required"),
+    city: z.string().min(2, "City is required"),
+    state: z.string().min(2, "State is required"),
+    postal_code: z.string().min(4, "Postal code is required"),
+    country: z.string().min(2, "Country is required"),
+    payment_method: z.string().min(2, "Payment method is required"),
+    pickup_location: z.number().optional().nullable(),
+    delivery_location: z.number().optional().nullable(),
+  });
+  type GuestCheckoutFormData = z.infer<typeof guestCheckoutSchema>;
+
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<GuestCheckoutFormData>({
+    resolver: zodResolver(guestCheckoutSchema),
+    defaultValues: { payment_method: "card" },
+  });
+
+  useEffect(() => {
+    if (allDeliveryLocations) {
+      const filtered = allDeliveryLocations.filter(
+        (location) =>
+          location.route.toLowerCase().includes(deliverySearchQuery.toLowerCase()) ||
+          location.location_name.toLowerCase().includes(deliverySearchQuery.toLowerCase())
+      );
+      const startIndex = (deliveryPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      setFilteredDeliveryLocations(filtered.slice(startIndex, endIndex));
+    }
+  }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
+
+  useEffect(() => {
+    if (cart_data) {
+      let calculatedShippingCost = 0;
+      if (deliveryOrPickup === "pickup" && selectedPickupLocation && pickupLocationsData) {
+        const selectedLocation = pickupLocationsData.find(loc => loc.id === selectedPickupLocation);
+        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
+      } else if (deliveryOrPickup === "delivery" && selectedDeliveryLocation && allDeliveryLocations) {
+        const selectedLocation = allDeliveryLocations.find(loc => loc.id === selectedDeliveryLocation);
+        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
+      }
+      setShippingCost(calculatedShippingCost);
+
+      let itemsSubtotal = 0;
+      cart_data.items.forEach((item: any) => {
+        itemsSubtotal += item.product.on_sale
+          ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
+          : parseFloat(item.product.price) * parseInt(item.quantity);
+      });
+      setTotalAmount(itemsSubtotal + calculatedShippingCost);
+    }
+  }, [cart_data, selectedPickupLocation, pickupLocationsData, selectedDeliveryLocation, allDeliveryLocations, deliveryOrPickup]);
+
+  const onSubmit = async (formData: GuestCheckoutFormData) => {
+    if (!sessionId) {
+      toast.error("Your session has expired. Please refresh the page.");
+      return;
+    }
+
+    try {
+      const response = await placeOrderGuest({ ...formData, sessionId, company_name: shopname }).unwrap();
+      setOrderResponse(response);
+      toast.success("Your order has been placed successfully!");
+      localStorage.removeItem("session_id");
+      refetch(); // To clear the cart data
+    } catch (error: any) {
+      if (error.data?.error === "Email already exists") {
+        toast.error("An account with this email already exists. Please log in to complete your order.");
+        router.push("/login");
+      } else {
+        toast.error(error.data?.error || "An unexpected error occurred.");
+      }
+    }
+  };
+
+  if (orderResponse) {
+    return (
+      <Paper sx={{ p: 4, my: 4, textAlign: 'center' }}>
+        <Typography variant="h4" color="primary" gutterBottom>Order Successful!</Typography>
+        <Typography variant="h6">Your account has been created.</Typography>
+        <Box sx={{ my: 2, p: 2, border: '1px solid #eee', borderRadius: '8px', display: 'inline-block' }}>
+          <Typography><strong>Order ID:</strong> {orderResponse.order_id}</Typography>
+          <Typography><strong>Email:</strong> {orderResponse.user_email}</Typography>
+          <Typography><strong>Temporary Password:</strong> {orderResponse.generated_password}</Typography>
+        </Box>
+        <Typography sx={{ my: 2 }}>Please check your email for more details. We recommend logging in and changing your password.</Typography>
+        <Button variant="contained" onClick={() => router.push("/login")}>Go to Login</Button>
+      </Paper>
+    );
+  }
+
+  return (
+    <Paper sx={{ p: 4, my: 4 }}>
+      <Typography variant="h5" gutterBottom>Guest Checkout</Typography>
+      <Typography>Please provide your details to complete the order. An account will be created for you automatically.</Typography>
+      <Box sx={{ my: 3 }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
+          Delivery or Pickup
+        </Typography>
+        <FormControl component="fieldset" sx={{ mb: 2 }}>
+          <RadioGroup row name="deliveryOrPickup" value={deliveryOrPickup} onChange={(e) => setDeliveryOrPickup(e.target.value as "delivery" | "pickup")}>
+            <FormControlLabel value="pickup" control={<Radio />} label="Pickup" />
+            <FormControlLabel value="delivery" control={<Radio />} label="Delivery" />
+          </RadioGroup>
+        </FormControl>
+
+        {deliveryOrPickup === "pickup" && (
+          <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+            {pickupLocationsLoading ? (
+              <Typography>Loading pickup locations...</Typography>
+            ) : pickupLocationsData && pickupLocationsData.length > 0 ? (
+              <FormControl component="fieldset" fullWidth>
+                <RadioGroup
+                  name="pickupLocation"
+                  value={selectedPickupLocation}
+                  onChange={(e) => {
+                    setSelectedPickupLocation(Number(e.target.value));
+                    setValue("pickup_location", Number(e.target.value));
+                    setSelectedDeliveryLocation(null);
+                    setValue("delivery_location", null);
+                  }}
+                >
+                  {pickupLocationsData.map((location) => (
+                    <Box key={location.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1, border: '1px solid #eee', borderRadius: '8px', p: 1 }}>
+                      <FormControlLabel
+                        value={location.id}
+                        control={<Radio />}
+                        label={
+                          <Box>
+                            <Typography variant="body1" fontWeight="bold">{location.name}</Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              {location.address}, {location.city}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              Delivery Fee: Kes {location.delivery_fee}
+                            </Typography>
+                          </Box>
+                        }
+                        sx={{ flexGrow: 1, mr: 1 }}
+                      />
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<LocationOnIcon />}
+                        onClick={() => {
+                          setSelectedLocationForMap(location);
+                          setMapOpen(true);
+                        }}
+                      >
+                        Preview on Map
+                      </Button>
+                    </Box>
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            ) : (
+              <Typography>No pickup locations available for this shop.</Typography>
+            )}
+          </Paper>
+        )}
+
+        {deliveryOrPickup === "delivery" && (
+          <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+            <TextField
+              fullWidth
+              label="Search Delivery Locations"
+              variant="outlined"
+              value={deliverySearchQuery}
+              onChange={(e) => setDeliverySearchQuery(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            {deliveryLocationsLoading ? (
+              <Typography>Loading delivery locations...</Typography>
+            ) : filteredDeliveryLocations && filteredDeliveryLocations.length > 0 ? (
+              <FormControl component="fieldset" fullWidth>
+                <RadioGroup
+                  name="deliveryLocation"
+                  value={selectedDeliveryLocation}
+                  onChange={(e) => {
+                    setSelectedDeliveryLocation(Number(e.target.value));
+                    setValue("delivery_location", Number(e.target.value));
+                    setSelectedPickupLocation(null);
+                    setValue("pickup_location", null);
+                  }}
+                >
+                  {filteredDeliveryLocations.map((location) => (
+                    <Box key={location.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1, border: '1px solid #eee', borderRadius: '8px', p: 1 }}>
+                      <FormControlLabel
+                        value={location.id}
+                        control={<Radio />}
+                        label={
+                          <Box>
+                            <Typography variant="body1" fontWeight="bold">{location.location_name.toUpperCase()}</Typography> <Typography variant="body2" fontWeight="bold" color="textSecondary">{location.route.toLocaleLowerCase()}</Typography>
+                            <Typography variant="body2" >
+                              Delivery Fee: Kes {location.delivery_fee}
+                            </Typography>
+                          </Box>
+                        }
+                        sx={{ flexGrow: 1, mr: 1 }}
+                      />
+                    </Box>
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            ) : (
+              <Typography>No delivery locations available for this shop.</Typography>
+            )}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+              <Button
+                variant="outlined"
+                disabled={deliveryPage === 1}
+                onClick={() => setDeliveryPage(prev => prev - 1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outlined"
+                disabled={deliveryPage * itemsPerPage >= (allDeliveryLocations?.length || 0)}
+                onClick={() => setDeliveryPage(prev => prev + 1)}
+              >
+                Next
+              </Button>
+            </Box>
+          </Paper>
+        )}
+      </Box>
+
+      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Map Preview: {selectedLocationForMap?.name}
+          <IconButton
+            aria-label="close"
+            onClick={() => setMapOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedLocationForMap?.gmaps_link ? (
+            <iframe
+              src={selectedLocationForMap.gmaps_link}
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          ) : (
+            <Box sx={{ height: 400, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}>
+              <Typography variant="h6" color="textSecondary">
+                No map link available for this location.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Email Address"
+              variant="outlined"
+              {...register("email")}
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              type="email"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="First Name"
+              variant="outlined"
+              {...register("firstName")}
+              error={!!errors.firstName}
+              helperText={errors.firstName?.message}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Last Name"
+              variant="outlined"
+              {...register("lastName")}
+              error={!!errors.lastName}
+              helperText={errors.lastName?.message}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Phone Number"
+              variant="outlined"
+              {...register("phoneNumber")}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber?.message}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Address"
+              variant="outlined"
+              {...register("address")}
+              error={!!errors.address}
+              helperText={errors.address?.message}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="City"
+              variant="outlined"
+              {...register("city")}
+              error={!!errors.city}
+              helperText={errors.city?.message}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="State"
+              variant="outlined"
+              {...register("state")}
+              error={!!errors.state}
+              helperText={errors.state?.message}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Postal Code"
+              variant="outlined"
+              {...register("postal_code")}
+              error={!!errors.postal_code}
+              helperText={errors.postal_code?.message}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Country"
+              variant="outlined"
+              {...register("country")}
+              error={!!errors.country}
+              helperText={errors.country?.message}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl component="fieldset" sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>Payment Method</Typography>
+              <RadioGroup row onChange={(e) => setValue("payment_method", e.target.value)}>
+                <FormControlLabel value="card" control={<Radio />} label="Card" />
+                <FormControlLabel value="mpesa" control={<Radio />} label="M-Pesa" />
+                <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
+              </RadioGroup>
+              {errors.payment_method && (
+                <Typography color="error" variant="caption">{errors.payment_method.message}</Typography>
+              )}
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              disabled={isLoading || (!selectedPickupLocation && !selectedDeliveryLocation)}
+              sx={{ mt: 3 }}
+            >
+              {isLoading ? <CircularProgress size={24} /> : "Place Order & Create Account"}
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+    </Paper>
+  );
+};
+
+
+// --- Main Checkout Page --- //
+
+function Checkout() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const theme = useTheme();
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+
+  useEffect(() => {
+    const token = Cookies.get("access");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  return (
+    <>
+      <Toaster />
+      <Box sx={{ p: { xs: 2, md: 4 } }}>
+        <BreadCrumbContainer sx={{ background: "#fff", border: "none", mb: 4 }}>
+          <Breadcrumbs>
+            <Link underline="hover" color="inherit" href="/">TechEnd</Link>
+            <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>Shop</Link>
+            <Link underline="hover" color="inherit" href="/cart">Cart</Link>
+            <Typography color={theme.palette.primary.main}>Checkout</Typography>
+          </Breadcrumbs>
+        </BreadCrumbContainer>
+
+        {isAuthenticated ? <AuthenticatedCheckout /> : <GuestCheckout />}
+
+      </Box>
     </>
   );
 }

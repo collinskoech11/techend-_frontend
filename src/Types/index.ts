@@ -151,3 +151,15 @@ export type CheckoutFormData = {
   pickup_location?: number | null;
   delivery_location?: number | null;
 };
+
+export interface GuestOrderResponse {
+  order_id: string;
+  user_email: string;
+  generated_password: string;
+}
+
+export interface GuestPlaceOrderArgs extends CheckoutFormData {
+  sessionId: string;
+  email: string;
+  company_name: string;
+}
