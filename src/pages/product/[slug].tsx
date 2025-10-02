@@ -6,7 +6,7 @@ import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
 import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
 import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
-import { styled, useTheme } from "@mui/system";
+import { styled, useMediaQuery, useTheme } from "@mui/system";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -217,6 +217,7 @@ const SkeletonThumbnail = styled(Skeleton)({
 
 function ProductDetailView() {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { sessionId, refetch: cart_refetch } = useCart();
   const router = useRouter();
   const slug = router.query.slug;
@@ -489,24 +490,64 @@ function ProductDetailView() {
 
               <ProductDescription>{product?.description || "No detailed description available."}</ProductDescription>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-                <QuantitySelector>
-                  <IconButton onClick={() => handleQuantityChange('remove')} disabled={quantity <= 1 || isAddingToCart || product?.stock === 0}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  mt: 2,
+                  flexDirection: { xs: "column", sm: "row" }, // stack on mobile
+                  width: "100%",
+                }}
+              >
+                {/* Quantity Selector */}
+                <QuantitySelector sx={{ width: { xs: "100%", sm: "auto" } }}>
+                  <IconButton
+                    onClick={() => handleQuantityChange("remove")}
+                    disabled={quantity <= 1 || isAddingToCart || product?.stock === 0}
+                  >
                     <RemoveIcon />
                   </IconButton>
-                  <Typography variant="h6" sx={{ minWidth: '30px', textAlign: 'center' }}>{quantity}</Typography>
-                  <IconButton onClick={() => handleQuantityChange('add')} disabled={isAddingToCart || product?.stock === 0}>
+                  <Typography
+                    variant="h6"
+                    sx={{ minWidth: "30px", textAlign: "center" }}
+                  >
+                    {quantity}
+                  </Typography>
+                  <IconButton
+                    onClick={() => handleQuantityChange("add")}
+                    disabled={isAddingToCart || product?.stock === 0}
+                  >
                     <AddIcon />
                   </IconButton>
                 </QuantitySelector>
-                <AddToCartButton onClick={handleAddToCart} disabled={isAddingToCart || product?.stock === 0} fullWidth>
-                  {isAddingToCart ? <CircularProgress size={24} color="inherit" /> : (
+
+                {/* Add to Cart */}
+                <AddToCartButton
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart || product?.stock === 0}
+                  fullWidth={isMobile} // only fullWidth on mobile
+                  sx={{ flexGrow: { xs: 1, sm: 0 } }}
+                >
+                  {isAddingToCart ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
                     <>
-                      <ShoppingCartIcon sx={{ mr: 1 }} /> {product?.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                      <ShoppingCartIcon sx={{ mr: 1 }} />{" "}
+                      {product?.stock === 0 ? "Out of Stock" : "Add to Cart"}
                     </>
                   )}
                 </AddToCartButton>
-                <IconButton onClick={handleWhatsAppClick} disabled={product?.stock === 0} sx={{ color: '#25D366' }}>
+
+                {/* WhatsApp */}
+                <IconButton
+                  onClick={handleWhatsAppClick}
+                  disabled={product?.stock === 0}
+                  sx={{
+                    color: "#25D366",
+                    width: { xs: "100%", sm: "auto" }, // full width on mobile
+                  }}
+                >
                   <WhatsAppIcon />
                 </IconButton>
               </Box>
