@@ -228,7 +228,7 @@ const Shop = forwardRef((props: any, ref: any) => {
         <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
           <ShopHeader>
             <ShopLogo src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'} />
-            <Box>
+            <Box sx={{width: '600px',maxWidth:"70dvw", textAlign: 'left' }}>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
                 {companyData?.name}
               </Typography>
