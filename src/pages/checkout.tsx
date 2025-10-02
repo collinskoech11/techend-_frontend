@@ -593,17 +593,67 @@ const GuestCheckout = () => {
   };
 
   if (orderResponse) {
+    const handleConfirmPayment = () => {
+      toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
+      router.push(`/shop/${shopname}`);
+    };
+
     return (
-      <Paper sx={{ p: 4, my: 4, textAlign: 'center' }}>
+      <Paper sx={{ p: 4, my: 4 }}>
         <Typography variant="h4" color="primary" gutterBottom>Order Successful!</Typography>
-        <Typography variant="h6">Your account has been created.</Typography>
-        <Box sx={{ my: 2, p: 2, border: '1px solid #eee', borderRadius: '8px', display: 'inline-block' }}>
+        <Typography variant="h6">Your account has been created. Please check your email for your credentials.</Typography>
+        
+        <Box sx={{ my: 2, p: 2, border: '1px solid #eee', borderRadius: '8px' }}>
           <Typography><strong>Order ID:</strong> {orderResponse.order_id}</Typography>
           <Typography><strong>Email:</strong> {orderResponse.user_email}</Typography>
           <Typography><strong>Temporary Password:</strong> {orderResponse.generated_password}</Typography>
         </Box>
-        <Typography sx={{ my: 2 }}>Please check your email for more details. We recommend logging in and changing your password.</Typography>
-        <Button variant="contained" onClick={() => router.push("/login")}>Go to Login</Button>
+
+        <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f", marginTop: "20px" }}>
+          Review Order and Pay
+        </Typography>
+        <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+          <Typography variant="h6" gutterBottom>Your Total: Kes {totalAmount}</Typography>
+          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Company Payment Details:</Typography>
+          {companyDataLoading ? (
+            <Typography>Loading payment details...</Typography>
+          ) : companyData ? (
+            <Box>
+              {companyData.payment_method === "mpesa_till" && (
+                <Typography variant="body1">M-Pesa Till Number: <b>{companyData.mpesa_till_number}</b></Typography>
+              )}
+              {companyData.payment_method === "mpesa_paybill" && (
+                <>
+                  <Typography variant="body1">M-Pesa Paybill Number: <b>{companyData.mpesa_paybill_number}</b></Typography>
+                  <Typography variant="body1">M-Pesa Account Number: <b>{companyData.mpesa_account_number}</b></Typography>
+                </>
+              )}
+              {companyData.payment_method === "mpesa_send_money" && (
+                <Typography variant="body1">M-Pesa Phone Number: <b>{companyData.mpesa_phone_number}</b></Typography>
+              )}
+              {companyData.payment_method === "pochi_la_biashara" && (
+                <Typography variant="body1">Pochi la Biashara Number: <b>{companyData.mpesa_phone_number}</b></Typography>
+              )}
+              {!companyData.payment_method && (
+                <Typography>No specific payment method configured for this company.</Typography>
+              )}
+            </Box>
+          ) : (
+            <Typography>Could not load company payment details.</Typography>
+          )}
+        </Paper>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              "&:hover": { backgroundColor: theme.palette.primary.dark },
+            }}
+            onClick={handleConfirmPayment}
+          >
+            Confirm Payment & Continue Shopping
+          </Button>
+        </Box>
       </Paper>
     );
   }
