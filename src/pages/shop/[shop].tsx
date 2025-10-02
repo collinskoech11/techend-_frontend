@@ -1,3 +1,4 @@
+
 import React, {
   useEffect,
   useState,
@@ -6,10 +7,8 @@ import React, {
   forwardRef,
   use,
 } from "react";
-import MuiBreadcrumbs from "@mui/material/Breadcrumbs"; // Renamed to avoid conflict
 import MuiLink from "@mui/material/Link"; // Renamed to avoid conflict
 import Skeleton from "@mui/material/Skeleton";
-// Removed: import { BreadCrumbContainer } from "@/StyledComponents/BreadCrumb"; // Will define it here
 import {
   MainProductsContainer,
   ProductsContainer,
@@ -31,13 +30,18 @@ import {
   FormControlLabel,
   Checkbox,
   Switch,
+  CircularProgress,
+  Avatar,
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
 import Cookies from "js-cookie";
 import { styled, useTheme } from "@mui/system"; // Import styled
-
-
+import {
+  FacebookIcon,
+  TwitterIcon,
+  InstapaperIcon,
+} from "react-share";
 
 // --- Color Palette (Consistent with your project) ---
 const darkText = "#212121"; // For main text
@@ -48,41 +52,50 @@ const mediumGrayBorder = "#e0e0e0"; // For borders and dividers
 
 // --- Styled Components for UI Improvements ---
 
-const StyledBreadcrumbWrapper = styled(Box)(({ theme }) => ({
-  backgroundColor: whiteBackground,
-  padding: theme.spacing(2, 3), // Top/bottom padding, left/right padding
-  boxShadow: "0 2px 8px rgba(0,0,0,0.05)", // Subtle shadow
-  marginBottom: theme.spacing(4), // Space below breadcrumbs
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1.5, 2),
+const HeroSection = styled(Box)<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
+  position: 'relative',
+  height: '35vh',
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#fff',
+  marginTop:"-20px",
+  textAlign: 'center',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url(${bannerImage || '/assets/images2/banner-1.jpg'})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'brightness(0.4)',
+    zIndex: 1,
+  },
+  '& > *': {
+    position: 'relative',
+    zIndex: 2,
   },
 }));
 
-const StyledBreadcrumbs = styled(MuiBreadcrumbs)(({ theme }) => ({
-  "& ol": {
-    justifyContent: "flex-start", // Align items to the start
-  },
-  "& .MuiBreadcrumbs-separator": {
-    color: lightText, // Color of the separator (e.g., '/')
-  },
+const ShopHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'left',
+  textAlign: 'left',
+  marginBottom: theme.spacing(2),
+  marginTop: theme.spacing(-8),
 }));
 
-
-const FiltersContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: whiteBackground,
-  borderRadius: "12px",
-  boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-  padding: theme.spacing(3),
-  marginBottom: theme.spacing(4),
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(3),
-  [theme.breakpoints.up('md')]: {
-    flexDirection: "row", // Horizontal layout on larger screens
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: theme.spacing(2),
-  },
+const ShopLogo = styled(Avatar)(({ theme }) => ({
+  width: 120,
+  height: 120,
+  borderRadius: theme.shape.borderRadius * 2,
+  border: `4px solid ${theme.palette.background.paper}`,
+  marginBottom: theme.spacing(1),
 }));
 
 
@@ -112,45 +125,9 @@ const Shop = forwardRef((props: any, ref: any) => {
     handleFilterClose();
   };
 
-  const StyledTextField = styled(TextField)(({ theme }) => ({
-    "& label.Mui-focused": {
-      color: primaryRed, // Red accent for focused label
-    },
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "8px", // Slightly rounded corners
-      "& fieldset": {
-        borderColor: mediumGrayBorder, // Default border color
-      },
-      "&:hover fieldset": {
-        borderColor: primaryRed, // Red accent on hover border
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: primaryRed, // Red accent on focused border
-        borderWidth: "2px", // Make border slightly thicker on focus
-      },
-    },
-    "& .MuiInputAdornment-root": {
-      color: lightText, // Icon color
-      "& .MuiSvgIcon-root": {
-        color: lightText, // Icon color
-      },
-    },
-  }));
-  const StyledLink = styled(MuiLink)(({ theme }) => ({
-    fontWeight: 500,
-    fontSize: "0.95rem",
-    color: lightText,
-    transition: "color 0.3s ease",
-    "&:hover": {
-      color: primaryRed, // Red accent on hover
-      textDecoration: "underline",
-    },
-    "&.MuiTypography-root": { // Style for the last, non-link breadcrumb
-      fontWeight: 600,
-      color: primaryRed, // Red accent for the active page
-      cursor: "default",
-    },
-  }));
+  
+
+  const [products, setProducts] = useState<any[]>([]);
 
   const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname);
 
@@ -172,6 +149,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   // Wait for company data to be fetched before setting shopDetails
   useEffect(() => {
     if (!companyLoading && companyData) {
+      console.log(companyData, "(&*^&%")
       Cookies.set("shopDetails", JSON.stringify(companyData), {
         expires: 7,
         secure: process.env.NODE_ENV === 'production',
@@ -191,11 +169,15 @@ const Shop = forwardRef((props: any, ref: any) => {
     isLoading: products_loading,
   } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale });
 
-  // Removed client-side filtering since API will handle it
-  // const filteredProducts = (products_data || []).filter((product: any) =>
-  //   product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
-
+  useEffect(() => {
+    if (products_data) {
+      if (page === 1) {
+        setProducts(products_data.results);
+      } else {
+        setProducts(prev => [...prev, ...products_data.results]);
+      }
+    }
+  }, [products_data]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
@@ -209,6 +191,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   const handleOnSaleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = event.target.checked;
     setOnSale(isChecked);
+    setPage(1);
     const { pathname, query } = router;
     const { on_sale, ...restQuery } = query;
 
@@ -235,24 +218,48 @@ const Shop = forwardRef((props: any, ref: any) => {
       if (queryOnSale) {
         setOnSale(queryOnSale === 'true');
       }
+      setPage(1);
     }
   }, [router.isReady, router.query]);
 
 
   return (
     <>
-      <StyledBreadcrumbWrapper>
-        <StyledBreadcrumbs aria-label="breadcrumb">
-          <Typography color="inherit">
-            {shopname.charAt(0).toUpperCase() + shopname.slice(1)} {/* Capitalize shop name */}
-          </Typography>
-          <StyledLink variant="body1" className="MuiTypography-root" href={`/shop/${shopname}`}> {/* Use Typography for the current page */}
-            Shop
-          </StyledLink>
-        </StyledBreadcrumbs>
-      </StyledBreadcrumbWrapper>
-      <Box sx={{ minHeight: "calc(100dvh - 64px)" }}>
-      <MainProductsContainer sx={{ mt: 0, px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}> {/* Adjust margin and padding */}
+      <HeroSection bannerImage={`https://res.cloudinary.com/dqokryv6u/${companyData?.banner_image}`} />
+      <Box sx={{ minHeight: "calc(100dvh - 64px)", background:"#fff", borderTopLeftRadius:"20px", borderTopRightRadius:"20px", pt:4, mt:-2, zIndex: 10, position:"relative" }}>
+        <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
+          <ShopHeader>
+            <ShopLogo src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}`} />
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+                {companyData?.name}
+              </Typography>
+              <Typography variant="body1" sx={{ color: lightText }}>
+                {companyData?.description}
+              </Typography>
+              <Button variant="contained" sx={{ mt: 1 }}>
+                {products_data?.count} Products
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              {companyData?.social_links?.facebook && (
+                <a href={companyData.social_links.facebook} target="_blank" rel="noreferrer">
+                  <FacebookIcon size={32} round />
+                </a>
+              )}
+              {companyData?.social_links?.twitter && (
+                <a href={companyData.social_links.twitter} target="_blank" rel="noreferrer">
+                  <TwitterIcon size={32} round />
+                </a>
+              )}
+              {companyData?.social_links?.instagram && (
+                <a href={companyData.social_links.instagram} target="_blank" rel="noreferrer">
+                  <InstapaperIcon size={32} round />
+                </a>
+              )}
+            </Box>
+          </ShopHeader>
+
         {/* Filters Section */}
         <Box sx={{ mb: 2 }}>
           <Grid
@@ -262,14 +269,26 @@ const Shop = forwardRef((props: any, ref: any) => {
             justifyContent="space-between"
             wrap="nowrap"
           >
+            
             <Grid item xs>
               <TextField
                 fullWidth
                 placeholder="Search Products"
                 variant="outlined"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setPage(1);
+                  setSearchTerm(e.target.value)
+                }}
                 size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '20px',
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  },
+                }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -314,12 +333,7 @@ const Shop = forwardRef((props: any, ref: any) => {
         </Box>
         {/* Products Display */}
         <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
-          {products_loading ? (
-             <Typography variant="h6" sx={{ width: "100%", textAlign: "center", mb: 2 }}>
-               Loading Products...
-             </Typography>
-          ):<></>}
-          {products_loading ? (
+          {products_loading && page === 1 ? (
             [...Array(8)].map((_, index) => (
               <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid */}
                 <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: '12px' }} />
@@ -343,7 +357,7 @@ const Shop = forwardRef((props: any, ref: any) => {
                 </Typography>
               </Box>
             </Grid>
-          ) : products_data.results.length === 0 ? ( // Use products_data directly, as API now filters
+          ) : products.length === 0 ? ( // Use products_data directly, as API now filters
             <Grid item xs={12}>
               <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                 <Typography variant="h6" color={darkText}>
@@ -355,7 +369,7 @@ const Shop = forwardRef((props: any, ref: any) => {
               </Box>
             </Grid>
           ) : (
-            products_data.results.map((product: any, index: number) => (
+            products.map((product: any, index: number) => (
               <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid for ProductCard */}
                 <ProductCard
                   product={product}
@@ -368,16 +382,13 @@ const Shop = forwardRef((props: any, ref: any) => {
         </ProductsContainer>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Button
-            disabled={!products_data?.previous}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </Button>
-          <Button
-            disabled={!products_data?.next}
+            variant="contained"
+            color="primary"
+            disabled={!products_data?.next || products_loading}
             onClick={() => setPage(page + 1)}
+            startIcon={products_loading && <CircularProgress size={20} />}
           >
-            Next
+            {products_loading ? 'Loading...' : 'Load More'}
           </Button>
         </Box>
       </MainProductsContainer>

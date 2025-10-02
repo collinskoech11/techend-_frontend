@@ -15,6 +15,7 @@ import {
   Tooltip,
   Badge,
   CircularProgress,
+  Avatar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -28,6 +29,7 @@ import CartMenu from "./CartMin";
 import Image from "next/image";
 import Cookies from "js-cookie";
 const AuthDialog = lazy(() => import("./AuthDialog")); // Dynamic import
+import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import Shop2Icon from "@mui/icons-material/Shop2";
 import HomeIcon from "@mui/icons-material/Home";
@@ -53,6 +55,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
   const [username, setUsername] = useState(null);
   const [user, setUser] = useState(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const { data: companyData } = useGetCompanyBySlugQuery(shopname);
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
 
@@ -198,17 +201,14 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
 
 
   return (
-    <AppBar position="static" sx={{ background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${darken(theme.palette.primary.main, 0.8)} 100%)`, color: "#fff", position:"fixed", zIndex: 1201 }}>
+    <AppBar position="static" sx={{ background: "#fff", color: "#000", position:"fixed", zIndex: 1201 }}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        {router.pathname === "/" ? (
-        <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#fff" }} onClick={() => router.push(`/_/${shopname}`)}>
-          SokoJunction
-        </Typography>
-        ): (
-        <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#fff" }} onClick={() => router.push(`/shop/${shopname}`)}>
-          {/* {shopname} */}
-          Shop
-        </Typography>
+        {router.pathname.startsWith('/shop/') && companyData?.logo ? (
+          <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#000" }} onClick={() => router.push(`/`)}>
+            SokoJunction
+          </Typography>
+        ) : (
+          <Avatar src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}`} style={{ cursor: "pointer", width:50, height:50, borderRadius: theme.shape.borderRadius * 2 }} onClick={() => router.push(`/shop/${shopname}`)} />
         )}
 
         {/* --- START: Mobile Menu Icon (Visible on mobile only) --- */}
@@ -221,7 +221,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             </>
           )}
           <Tooltip title="Mall">
-            <IconButton onClick={() => router.push(`/shops`)} sx={{ color: "#fff" }}>
+            <IconButton onClick={() => router.push(`/shops`)} sx={{ color: "#000" }}>
               <MuseumIcon />
             </IconButton>
           </Tooltip>
@@ -230,24 +230,24 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
           {user && (
             <>
               <Tooltip title="Home">
-                <IconButton onClick={() => router.push(`/`)} sx={{ color: "#fff" }}>
+                <IconButton onClick={() => router.push(`/`)} sx={{ color: "#000" }}>
                   <HomeIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Shop">
-                <IconButton onClick={() => router.push(`/shop/${shopname}`)} sx={{ color: "#fff" }}>
+                <IconButton onClick={() => router.push(`/shop/${shopname}`)} sx={{ color: "#000" }}>
                   <Shop2Icon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Order History">
-                <IconButton onClick={() => router.push("/orderhistory")} sx={{ color: "#fff" }}>
+                <IconButton onClick={() => router.push("/orderhistory")} sx={{ color: "#000" }}>
                   <Badge badgeContent={1} color="warning">
                     <HistoryOutlinedIcon />
                   </Badge>
                 </IconButton>
               </Tooltip>
               <Tooltip title="Notifications">
-                <IconButton sx={{ color: "#fff" }}>
+                <IconButton sx={{ color: "#000" }}>
                   <Badge badgeContent={1} color="warning">
                     <NotificationsOutlinedIcon />
                   </Badge>
