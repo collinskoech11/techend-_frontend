@@ -70,7 +70,7 @@ const HeroSection = styled(Box)<{ bannerImage?: string }>(({ theme, bannerImage 
     backgroundImage: `url(${bannerImage || '/assets/images2/banner-1.jpg'})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    filter: 'brightness(0.8)',
+    // filter: 'brightness(0.8)',
     zIndex: 1,
   },
   '& > *': {
@@ -94,6 +94,7 @@ const ShopLogo = styled(Avatar)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2,
   border: `4px solid ${theme.palette.background.paper}`,
   marginBottom: theme.spacing(1),
+  boxShadow: '0 0 10px rgba(0,0,0,0.9)',
 }));
 
 
@@ -224,11 +225,11 @@ const Shop = forwardRef((props: any, ref: any) => {
   return (
     <>
       <HeroSection bannerImage={`https://res.cloudinary.com/dqokryv6u/${companyData?.banner_image}` || `https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1759399099/ommvqgcgupxula0d3mvj.png'} />
-      <Box sx={{ minHeight: "calc(100dvh - 64px)", background:"#fff", borderTopLeftRadius:"20px", borderTopRightRadius:"20px", pt:4, mt:-2, zIndex: 10, position:"relative" }}>
+      <Box sx={{ minHeight: "calc(100dvh - 64px)", background:"#fff", borderTopLeftRadius:"20px", borderTopRightRadius:"20px", pt:4, mt:-2, zIndex: 10, position:"relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
         <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
           <ShopHeader>
             <ShopLogo src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'} />
-            <Box>
+            <Box sx={{width: '600px',maxWidth:"70dvw", textAlign: 'left' }}>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
                 {companyData?.name}
               </Typography>
