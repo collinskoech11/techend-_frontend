@@ -208,7 +208,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             SokoJunction
           </Typography>
         ) : (
-          <Avatar src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}`} style={{ cursor: "pointer", width:50, height:50, borderRadius: theme.shape.borderRadius * 2 }} onClick={() => router.push(`/shop/${shopname}`)} />
+          <Image src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'} alt={shopname} width={40} height={40} style={{ cursor: "pointer" }} onClick={() => router.push(`/shop/${shopname}`)} />
         )}
 
         {/* --- START: Mobile Menu Icon (Visible on mobile only) --- */}
