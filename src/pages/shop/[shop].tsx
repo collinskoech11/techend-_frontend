@@ -70,7 +70,7 @@ const HeroSection = styled(Box)<{ bannerImage?: string }>(({ theme, bannerImage 
     backgroundImage: `url(${bannerImage || '/assets/images2/banner-1.jpg'})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    filter: 'brightness(0.4)',
+    filter: 'brightness(0.8)',
     zIndex: 1,
   },
   '& > *': {
