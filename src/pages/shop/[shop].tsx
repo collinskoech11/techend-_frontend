@@ -35,13 +35,11 @@ import {
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
+import InstagramIcon from '@mui/icons-material/Instagram';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import TwitterIcon from '@mui/icons-material/Twitter';
 import Cookies from "js-cookie";
 import { styled, useTheme } from "@mui/system"; // Import styled
-import {
-  FacebookIcon,
-  TwitterIcon,
-  InstapaperIcon,
-} from "react-share";
 
 // --- Color Palette (Consistent with your project) ---
 const darkText = "#212121"; // For main text
@@ -225,11 +223,11 @@ const Shop = forwardRef((props: any, ref: any) => {
 
   return (
     <>
-      <HeroSection bannerImage={`https://res.cloudinary.com/dqokryv6u/${companyData?.banner_image}`} />
+      <HeroSection bannerImage={`https://res.cloudinary.com/dqokryv6u/${companyData?.banner_image}` || `https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1759399099/ommvqgcgupxula0d3mvj.png'} />
       <Box sx={{ minHeight: "calc(100dvh - 64px)", background:"#fff", borderTopLeftRadius:"20px", borderTopRightRadius:"20px", pt:4, mt:-2, zIndex: 10, position:"relative" }}>
         <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
           <ShopHeader>
-            <ShopLogo src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}`} />
+            <ShopLogo src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'} />
             <Box>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
                 {companyData?.name}
@@ -241,23 +239,6 @@ const Shop = forwardRef((props: any, ref: any) => {
                 {products_data?.count} Products
               </Button>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-              {companyData?.social_links?.facebook && (
-                <a href={companyData.social_links.facebook} target="_blank" rel="noreferrer">
-                  <FacebookIcon size={32} round />
-                </a>
-              )}
-              {companyData?.social_links?.twitter && (
-                <a href={companyData.social_links.twitter} target="_blank" rel="noreferrer">
-                  <TwitterIcon size={32} round />
-                </a>
-              )}
-              {companyData?.social_links?.instagram && (
-                <a href={companyData.social_links.instagram} target="_blank" rel="noreferrer">
-                  <InstapaperIcon size={32} round />
-                </a>
-              )}
-            </Box>
           </ShopHeader>
 
         {/* Filters Section */}
@@ -267,10 +248,9 @@ const Shop = forwardRef((props: any, ref: any) => {
             spacing={1}
             alignItems="center"
             justifyContent="space-between"
-            wrap="nowrap"
           >
             
-            <Grid item xs>
+            <Grid item xs={8}>
               <TextField
                 fullWidth
                 placeholder="Search Products"
@@ -298,15 +278,15 @@ const Shop = forwardRef((props: any, ref: any) => {
                 }}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={2}>
               <FormControlLabel
                 control={<Switch checked={onSale} onChange={handleOnSaleChange} color="primary" />}
-                label={<Typography variant="body2" sx={{ fontWeight: 500 }}>On Sale</Typography>}
+                label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Sale</Typography>}
                 sx={{ mr: 1 }}
               />
             </Grid>
 
-            <Grid item>
+            <Grid item xs={1}>
               {/* Show Filter Icon instead of select on mobile */}
               <IconButton
                 aria-label="filter categories"
@@ -328,6 +308,25 @@ const Shop = forwardRef((props: any, ref: any) => {
                 <MenuItem onClick={() => handleCategorySelect("home-appliances")}>Home Appliances</MenuItem>
                 <MenuItem onClick={() => handleCategorySelect("books")}>Books</MenuItem>
               </Menu>
+            </Grid>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', gap: 2, mt: 1, justifyContent: 'flex-end' }}>
+                {companyData?.facebook_link && (
+                  <a href={companyData.facebook_link} target="_blank" rel="noreferrer">
+                    <FacebookIcon sx={{ color: '#1877F2', fontSize: '2rem' }} />
+                  </a>
+                )}
+                {companyData?.twitter_link && (
+                  <a href={companyData.twitter_link} target="_blank" rel="noreferrer">
+                    <TwitterIcon sx={{ color: '#1DA1F2', fontSize: '2rem' }} />
+                  </a>
+                )}
+                {companyData?.instagram_link && (
+                  <a href={companyData.instagram_link} target="_blank" rel="noreferrer">
+                    <InstagramIcon sx={{ color: '#E1306C', fontSize: '2rem' }} />
+                  </a>
+                )}
+              </Box>
             </Grid>
           </Grid>
         </Box>
