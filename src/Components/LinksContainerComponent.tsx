@@ -307,7 +307,8 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
 
 
         {/* --- START: Mobile Menu Icon (Visible on mobile only) --- */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' } }}>
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
+          {(user || sessionId) && <CartMenu ref={cartRef} />}
           <IconButton
             size="large"
             aria-label="show navigation menu"

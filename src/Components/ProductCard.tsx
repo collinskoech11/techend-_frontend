@@ -30,7 +30,7 @@ import { Product } from "@/Types";
 interface ProductCardProps {
   product: Product;
   triggerCartRefetch: () => void;
-  isLoading?: boolean; 
+  isLoading?: boolean;
   ref?: React.Ref<any>;
 }
 
@@ -95,9 +95,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         const companyData = JSON.parse(shopDetailsCookie);
         const rawPhoneNumber = companyData.contact_phone.replace(/\D/g, "");
 
-const phoneNumber = rawPhoneNumber.startsWith("0")
-  ? `254${rawPhoneNumber.slice(1)}`
-  : rawPhoneNumber;
+        const phoneNumber = rawPhoneNumber.startsWith("0")
+          ? `254${rawPhoneNumber.slice(1)}`
+          : rawPhoneNumber;
 
         if (phoneNumber) {
           const productName = currentProduct?.title || "Product";

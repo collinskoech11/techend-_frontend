@@ -4,7 +4,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
-import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
+import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation, useGetCompanyBySlugQuery } from "@/Api/services";
 import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
 import { styled, useMediaQuery, useTheme } from "@mui/system";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -260,14 +260,19 @@ function ProductDetailView() {
       toast.error("Could not add item to cart. Please refresh the page.");
     }
   };
-
+  
+  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname);
   const handleWhatsAppClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     const shopDetailsCookie = Cookies.get("shopDetails");
     if (shopDetailsCookie) {
       try {
-        const companyData = JSON.parse(shopDetailsCookie);
-        const phoneNumber = companyData.contact_phone;
+        const rawPhoneNumber = companyData.contact_phone.replace(/\D/g, "");
+
+        const phoneNumber = rawPhoneNumber.startsWith("0")
+          ? `254${rawPhoneNumber.slice(1)}`
+          : rawPhoneNumber;
+
 
         if (phoneNumber) {
           const productName = product?.title || "Product";
