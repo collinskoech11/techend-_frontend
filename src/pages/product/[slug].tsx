@@ -27,6 +27,8 @@ import { useCart } from "@/contexts/CartContext";
 import { darken } from '@mui/material/styles';
 import Image from "next/image";
 
+import Head from "next/head";
+
 const mediumGray = "#e0e0e0";
 const darkText = "#212121";
 const lightText = "#555555";
@@ -322,6 +324,15 @@ function ProductDetailView() {
 
   return (
     <>
+      <Head>
+        <title>{product?.title || "Product Details"}</title>
+        <meta name="description" content={product?.description || "Check out this amazing product!"} />
+        <meta property="og:title" content={product?.title || "Product Details"} />
+        <meta property="og:description" content={product?.description || "Check out this amazing product!"} />
+        <meta property="og:image" content={`https://res.cloudinary.com/dqokryv6u/${product?.main_image}`} />
+        <meta property="og:url" content={`https://sokojunction.com/product/${slug}`} />
+        <meta property="og:type" content="website" />
+      </Head>
       <Toaster position="top-right" />
       <Box sx={{ pt: 3, pb: 2, px: 3, maxWidth: "1200px", mx: "auto" }}>
         <Breadcrumbs aria-label="breadcrumb">
