@@ -201,7 +201,19 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
 
 
   return (
-    <AppBar position="static" sx={{ background: "#fff", color: "#000", position:"fixed", zIndex: 1201 }}>
+    <AppBar
+      position="static"
+      sx={{
+        position: "fixed",
+        zIndex: 1201,
+        backgroundColor: "rgba(255, 255, 255, 0.25)", // translucent bg
+        backdropFilter: "blur(12px) saturate(180%)", // frosted glass effect
+        WebkitBackdropFilter: "blur(12px) saturate(180%)", // Safari support
+        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // soft shadow for glass depth
+        border: "1px solid rgba(255, 255, 255, 0.18)",
+        color: (theme) => theme.palette.getContrastText("#ffffff"),
+      }}
+    >
       <Toolbar sx={{ justifyContent: "space-between" }}>
         {router.pathname.startsWith('/shop/') && companyData?.logo ? (
           <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#000" }} onClick={() => router.push(`/`)}>

@@ -50,15 +50,18 @@ const mediumGrayBorder = "#e0e0e0"; // For borders and dividers
 
 // --- Styled Components for UI Improvements ---
 
-const HeroSection = styled(Box)<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
+const HeroSection = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'bannerImage',
+})<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
   position: 'relative',
-  height: '35vh',
+  maxHeight: '40vh',
+  height: '500px',
   width: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   color: '#fff',
-  marginTop:"-20px",
+  marginTop:"-80px",
   textAlign: 'center',
   '&::before': {
     content: '""',
@@ -67,7 +70,7 @@ const HeroSection = styled(Box)<{ bannerImage?: string }>(({ theme, bannerImage 
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundImage: `url(${bannerImage || '/assets/images2/banner-1.jpg'})`,
+    backgroundImage: `url(${bannerImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     // filter: 'brightness(0.8)',
@@ -148,7 +151,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   // Wait for company data to be fetched before setting shopDetails
   useEffect(() => {
     if (!companyLoading && companyData) {
-      console.log(companyData, "(&*^&%")
+      console.log("Fetched company data:", companyData);
       Cookies.set("shopDetails", JSON.stringify(companyData), {
         expires: 7,
         secure: process.env.NODE_ENV === 'production',
@@ -224,7 +227,7 @@ const Shop = forwardRef((props: any, ref: any) => {
 
   return (
     <>
-      <HeroSection bannerImage={`https://res.cloudinary.com/dqokryv6u/${companyData?.banner_image}` || `https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1759399099/ommvqgcgupxula0d3mvj.png'} />
+      <HeroSection bannerImage={`${companyData?.banner_image}`} />
       <Box sx={{ minHeight: "calc(100dvh - 64px)", background:"#fff", borderTopLeftRadius:"20px", borderTopRightRadius:"20px", pt:4, mt:-2, zIndex: 10, position:"relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
         <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
           <ShopHeader>

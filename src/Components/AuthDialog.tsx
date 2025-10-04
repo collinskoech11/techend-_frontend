@@ -107,9 +107,9 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
         Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
         Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
         setLoggedInUser(user.username);
-        toast.success(<Typography>Log in success</Typography>);
         setOpen(false);
         onTrigger();
+        toast.success("Log in success");
       } else if (response.error) {
         toast.error(<Typography>{response.error.data.non_field_errors[0]}</Typography>);
       }
@@ -174,7 +174,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
 
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px", background: "#fff", borderRadius: "5px" }}>
+          <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px",background:"transparent", borderRadius: "5px" }}>
             <Tabs value={tabIndex} onChange={handleTabChange} centered>
               <Tab label="Login" />
               <Tab label="Register" />

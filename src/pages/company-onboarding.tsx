@@ -43,8 +43,18 @@ const steps = [
 
 export default function CompanyOnboarding() {
     const [activeStep, setActiveStep] = useState(0);
-    const [user, setUser] = useState<any>(JSON.parse(Cookies.get("user")));
-    const [authToken, setAuthToken] = useState<string | undefined>(Cookies.get("access"))
+    const [user, setUser] = useState<any>(() => {
+        const userCookie = Cookies.get("user");
+        if (userCookie) {
+            try {
+                return JSON.parse(userCookie);
+            } catch (error) {
+                console.error("Invalid user cookie:", error);
+                return null;
+            }
+        }
+        return null;
+    }); const [authToken, setAuthToken] = useState<string | undefined>(Cookies.get("access"))
     const [companyExists, setCompanyExists] = useState<boolean>(false)
     const [tabIndex, setTabIndex] = useState(0);
     const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
@@ -116,7 +126,6 @@ export default function CompanyOnboarding() {
         }
     }, [token]);
 
-    console.log(JSON.parse(Cookies.get("user")), "&*&%^$%%#$")
     useEffect(() => {
         if (error_company_data?.status == 404) {
             setCompanyData({
@@ -150,21 +159,19 @@ export default function CompanyOnboarding() {
                 "created_at": "2025-07-01T08:35:03.745481Z",
                 "updated_at": "2025-07-01T08:35:03.745497Z",
                 "company_onboarding_step": 1,
-                "owner": user.id || 90
-            })
-            setActiveStep(1)
+                "owner": user?.id || 90, // ✅ safe access
+            });
+            setActiveStep(1);
         } else {
-            console.log(loading_get_my_company, "&*&*&*&", companyDetails)
+            console.log(loading_get_my_company, "&*&*&*&", companyDetails);
             setCompanyData((prev: any) => ({
                 ...prev,
                 ...companyDetails,
             }));
-            setCompanyExists(true)
-            // 
-            setActiveStep(companyDetails?.company_onboarding_step + 1 || 1)
+            setCompanyExists(true);
+            setActiveStep(companyDetails?.company_onboarding_step + 1 || 1);
         }
-    }, [companyDetails, error_company_data?.status, loading_get_my_company, user.id]);
-
+    }, [companyDetails, error_company_data?.status, loading_get_my_company, user?.id]);
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
     };
@@ -183,7 +190,7 @@ export default function CompanyOnboarding() {
                 Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
                 Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
                 Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
-            
+
                 setUser(user.username);
                 toast.success("Login successful");
                 setActiveStep(1);
@@ -230,7 +237,7 @@ export default function CompanyOnboarding() {
         }
     };
 
-    
+
 
     const nextStep = () => setActiveStep((prev) => prev + 1);
     const prevStep = () => companyData.company_onboarding_step - 1;
@@ -380,37 +387,37 @@ export default function CompanyOnboarding() {
                     )}
                     {companyData.company_onboarding_step === 1 && (
                         <>
-                            <BasicInfo nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} companyExists={companyExists} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <BasicInfo nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} companyExists={companyExists} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
                     {companyData.company_onboarding_step === 2 && (
                         <>
-                            <KYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <KYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
                     {companyData.company_onboarding_step === 3 && (
                         <>
-                            <BusinessKYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <BusinessKYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
                     {companyData.company_onboarding_step === 4 && (
                         <>
-                            <ProofAddress nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <ProofAddress nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
                     {companyData.company_onboarding_step === 5 && (
                         <Suspense fallback={<CircularProgress />}>
-                            <Branding nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <Branding nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </Suspense>
                     )}
                     {companyData.company_onboarding_step === 6 && (
                         <>
-                            <TCs nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <TCs nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
                     {companyData.company_onboarding_step === 7 && (
                         <>
-                            <VerificationStatus nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender}/>
+                            <VerificationStatus nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
                 </>)}
