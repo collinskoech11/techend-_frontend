@@ -28,11 +28,16 @@ export const HeroSection = styled(Box)(({ theme }) => ({
   borderRadius: "20px", // More rounded for a modern feel
   marginBottom: "100px", // More space after hero
   position: "relative",
+  // minHeight: "500px", // Ensure enough height
   overflow: "hidden",
   padding: "120px 0", // Generous padding
+  paddingTop: "360px",
+  marginTop: "-360px",
   [theme.breakpoints.down('sm')]: {
     padding: "80px 0",
     borderRadius: "10px",
+      paddingTop: "360px",
+  marginTop: "-360px",
   },
 
   // Diagonal split overlay (new design element)

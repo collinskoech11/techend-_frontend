@@ -54,7 +54,7 @@ const CompanyCardSkeleton: React.FC = () => (
 const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
   const router = useRouter();
   const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dqokryv6u/';
-  const FALLBACK_IMAGE_URL = '/images/shop-placeholder.png';
+  const FALLBACK_IMAGE_URL = '/assets/techendbanner.png';
 
   const initialLogoUrl = company.logo_image
     ? `${CLOUDINARY_BASE_URL}${company.logo_image}`
@@ -92,7 +92,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
         </Box>
       </ProductImageWrapper>
       <ProductInfoContainer>
-        <Box sx={{  gap: 1, mb: 1 }}>
+        <Box sx={{ gap: 1, mb: 1 }}>
           <ProductTitle sx={{ mb: 0, flexGrow: 1 }}>{company.name}</ProductTitle>
           {company.kyc_approved && (
             <Tooltip title="This company has been verified by our team.">
@@ -203,38 +203,40 @@ const CompaniesList: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <Box sx={{ pt: 8 }}>
       <Toaster />
       <HeroBanner />
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mt: 4 }}>
-        Explore Our Shops
-      </Typography>
-      <Grid container spacing={3}>
-        {companiesData && companiesData.results.length > 0 ? (
-          companiesData.results.map((company: Company) => (
-            <Grid item key={company.id} xs={12} sm={6} md={4} lg={3}>
-              <CompanyCard company={company} />
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mt: 4 }}>
+          Explore Our Shops
+        </Typography>
+        <Grid container spacing={3}>
+          {companiesData && companiesData.results.length > 0 ? (
+            companiesData.results.map((company: Company) => (
+              <Grid item key={company.id} xs={12} sm={6} md={4} lg={3}>
+                <CompanyCard company={company} />
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Typography sx={{ p: 3, textAlign: 'center' }}>No companies are available at the moment.</Typography>
             </Grid>
-          ))
-        ) : (
-          <Grid item xs={12}>
-            <Typography sx={{ p: 3, textAlign: 'center' }}>No companies are available at the moment.</Typography>
-          </Grid>
-        )}
-      </Grid>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Button
-          disabled={!companiesData?.previous}
-          onClick={() => setPage(page - 1)}
-        >
-          Previous
-        </Button>
-        <Button
-          disabled={!companiesData?.next}
-          onClick={() => setPage(page + 1)}
-        >
-          Next
-        </Button>
+          )}
+        </Grid>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            disabled={!companiesData?.previous}
+            onClick={() => setPage(page - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            disabled={!companiesData?.next}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

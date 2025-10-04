@@ -113,6 +113,21 @@ export const createAppTheme = (primaryColor: string) => {
           },
         },
       },
+      MuiBackdrop: {
+        styleOverrides: {
+          root: {
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+          },
+        },
+      },
     },
   });
 };
