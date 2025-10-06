@@ -318,7 +318,7 @@ export default function LandingPage() {
     router.push("/company-onboarding");
   };
   return (
-    <Box sx={{ bgcolor: lightGray, minHeight: '100vh', borderTop: `1px solid yellow` }}>
+    <Box sx={{ bgcolor: lightGray, minHeight: '100vh' }}>
       {showAuthDialog && (
         <AuthDialog
           onTrigger={handleAuthSuccess}
@@ -326,7 +326,7 @@ export default function LandingPage() {
           showButton={false}
         />
       )}
-      <Container maxWidth={false} sx={{ p: 0, mt: "-100px", border:"1px solid red" }}>
+      <Container maxWidth={false} sx={{ p: 0, mt: "-100px" }}>
         {/* Hero Section */}
         <HeroSection>
           {/* Floating ecommerce icons */}
