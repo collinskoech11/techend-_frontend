@@ -45,23 +45,53 @@ const glowAnimation = keyframes`
   50% { opacity: 1; }
 `;
 
-const rotateGlobe = keyframes`
-  from { transform: rotateY(0deg); }
-  to { transform: rotateY(360deg); }
+// Hero container
+const twinkle = keyframes`
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.2; }
 `;
 
-// Hero container
 const HeroSection = styled(Box)({
   background: `radial-gradient(ellipse at bottom, #0d1b2a 0%, #000 100%)`,
   color: "#fff",
   position: "relative",
   overflow: "hidden",
-  padding: "150px 20px",
+//  padding: "150px 20px",
   minHeight: "100vh",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+
+  // Stars layer 1
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "200%",
+    height: "200%",
+    background: `transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat`,
+    backgroundSize: "300px 300px",
+    animation: `${twinkle} 3s infinite alternate`,
+    opacity: 0.7,
+    zIndex: 0,
+  },
+
+  // Stars layer 2 (different size + slower twinkle)
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "200%",
+    height: "200%",
+    background: `transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat`,
+    backgroundSize: "500px 500px",
+    animation: `${twinkle} 6s infinite alternate`,
+    opacity: 0.4,
+    zIndex: 0,
+  },
 });
 
 // Floating ecommerce icons
@@ -288,7 +318,7 @@ export default function LandingPage() {
     router.push("/company-onboarding");
   };
   return (
-    <Box sx={{ bgcolor: lightGray, minHeight: '100vh', borderTop: `1px solid yellow` }}>
+    <Box sx={{ bgcolor: lightGray, minHeight: '100vh' }}>
       {showAuthDialog && (
         <AuthDialog
           onTrigger={handleAuthSuccess}
@@ -314,31 +344,6 @@ export default function LandingPage() {
           </FloatingIcon>
 
           {/* Globe */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "200px",
-              height: "200px",
-              right: "5%",
-              top: "50%",
-              transform: "translateY(-50%)",
-              borderRadius: "50%",
-              background: "radial-gradient(circle at 100px 100px, #333, #000)",
-              animation: `${rotateGlobe} 30s linear infinite`,
-              overflow: "hidden",
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                background: "url(/assets/globe-map.png) repeat-x",
-                backgroundSize: "cover",
-                opacity: 0.6,
-              }}
-            />
-          </Box>
 
           {/* Glass content */}
           <GlassBox>
@@ -405,7 +410,7 @@ export default function LandingPage() {
           </GlassBox>
         </HeroSection>
 
-        <Container maxWidth="xl" sx={{ px: 6 }}>
+        <Container maxWidth="xl" sx={{ py: 8 }}>
           {/* Features Section */}
           <Box sx={{ py: 10 }} id="features">
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
@@ -553,7 +558,7 @@ export default function LandingPage() {
             </Slide>
           </Box>
           {/* Pricing Section */}
-          <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="pricing">
+          <Box sx={{ py: 10, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="pricing">
             <Fade cascade triggerOnce>
               <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
                 Simple, Transparent Pricing
