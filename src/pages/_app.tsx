@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "@/styles/ElectricBorder.css";
 import type { AppProps } from "next/app";
 import { store } from "../Api/store";
 import { Provider } from "react-redux";

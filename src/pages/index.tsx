@@ -1,7 +1,7 @@
 "use client";
 
 "use client";
-
+import ElectricBorder from "@/Components/styled-components/ElectricBorder";
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress, TextField, useMediaQuery } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
@@ -621,7 +621,13 @@ export default function LandingPage() {
                   </PricingCard>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <PricingCard className="featured"> {/* Apply featured class */}
+                  <ElectricBorder color="#7df9ff"
+                    speed={1}
+                    chaos={1}
+                    thickness={5}
+                    style={{ borderRadius: 16 }}
+                  >
+                  <PricingCard>
                     <Box>
                       <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: theme.palette.primary.main }}>
                         Growth <span style={{ fontSize: '0.8em', color: theme.palette.primary.dark }}>(Recommended)</span>
@@ -665,6 +671,7 @@ export default function LandingPage() {
                     </Box>
                     <AccentButton onClick={handleAuthTrigger}>Choose Growth</AccentButton>
                   </PricingCard>
+                  </ElectricBorder>
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <PricingCard>
