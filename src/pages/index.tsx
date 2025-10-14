@@ -27,6 +27,7 @@ import Carousel from 'react-material-ui-carousel';
 import TestimonialCard from "@/Components/TestimonialCard";
 import { AccentButton } from "@/StyledComponents/Hero";
 import { min } from "date-fns";
+import LiquidEther from "@/Components/styled-components/LiquidEther";
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
@@ -326,7 +327,109 @@ export default function LandingPage() {
           showButton={false}
         />
       )}
-      <Container maxWidth={false} sx={{ p: 0, mt: "-100px" }}>
+      <div style={{ width: '100%', height: 600, position: 'relative' }}>
+        <LiquidEther
+          colors={[ '#5227FF', '#FF9FFC', '#B19EEF' ]}
+          mouseForce={20}
+          cursorSize={100}
+          isViscous={false}
+          viscous={30}
+          iterationsViscous={32}
+          iterationsPoisson={32}
+          resolution={0.5}
+          isBounce={false}
+          autoDemo={true}
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
+        >
+                <HeroSection>
+          {/* Floating ecommerce icons */}
+          <FloatingIcon sx={{ top: "20%", left: "10%" }} delay={0}>
+            <ShoppingCartOutlinedIcon fontSize="inherit" />
+          </FloatingIcon>
+          <FloatingIcon sx={{ bottom: "25%", right: "12%" }} delay={2}>
+            <LocalOfferOutlinedIcon fontSize="inherit" />
+          </FloatingIcon>
+          <FloatingIcon sx={{ top: "35%", right: "20%" }} delay={1}>
+            <CreditCardOutlinedIcon fontSize="inherit" />
+          </FloatingIcon>
+          <FloatingIcon sx={{ bottom: "15%", left: "15%" }} delay={3}>
+            <LocalShippingOutlinedIcon fontSize="inherit" />
+          </FloatingIcon>
+
+          {/* Globe */}
+
+          {/* Glass content */}
+          <GlassBox>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 900,
+                mb: 3,
+                fontSize: { xs: "2.5rem", md: "3.5rem" },
+                background: "linear-gradient(90deg,#ff8a00,#e52e71)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              <Suspense fallback={<span>Loading...</span>}>
+                <Typewriter
+                  options={{
+                    strings: [
+                      "Empower Your Business",
+                      "Launch Your Online Store",
+                      "Next-Gen eCommerce",
+                      "Grow with SokoJunction",
+                    ],
+                    autoStart: true,
+                    loop: true,
+                  }}
+                />
+              </Suspense>
+            </Typography>
+
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 5,
+                color: "rgba(255,255,255,0.8)",
+                maxWidth: "700px",
+                mx: "auto",
+              }}
+            >
+              Launch, manage, and grow your enterprise with SokoJunction — the all-in-one platform built for speed and success in the digital marketplace.
+            </Typography>
+
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
+              <GradientButton endIcon={<ArrowForwardIcon />} onClick={handleNavigate}>
+                Get Started
+              </GradientButton>
+              <Button
+                variant="outlined"
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: "50px",
+                  borderColor: "rgba(255,255,255,0.5)",
+                  color: "#fff",
+                  "&:hover": {
+                    borderColor: "#fff",
+                    background: "rgba(255,255,255,0.1)",
+                  },
+                }}
+              >
+                Learn More
+              </Button>
+            </Box>
+          </GlassBox>
+        </HeroSection>
+        </LiquidEther>
+      </div>
+
+      <Box  sx={{ p: 0, mt: "-100px" }}>
         {/* Hero Section */}
         <HeroSection>
           {/* Floating ecommerce icons */}
@@ -852,7 +955,7 @@ export default function LandingPage() {
           </Box>
         </Container>
         <Toaster />
-      </Container>
+      </Box>
     </Box>
   );
 }
