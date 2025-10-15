@@ -57,7 +57,7 @@ const HeroSection = styled(Box)({
   position: "relative",
   overflow: "hidden",
 //  padding: "150px 20px",
-  minHeight: "100vh",
+  minHeight: "105vh",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -326,7 +326,7 @@ export default function LandingPage() {
           showButton={false}
         />
       )}
-      <Container maxWidth={false} sx={{ p: 0, mt: "-100px" }}>
+      <Box sx={{ p: 0, mt: "-100px" }}>
         {/* Hero Section */}
         <HeroSection>
           {/* Floating ecommerce icons */}
@@ -845,7 +845,7 @@ export default function LandingPage() {
           </Box>
         </Container>
         <Toaster />
-      </Container>
+      </Box>
     </Box>
   );
 }
