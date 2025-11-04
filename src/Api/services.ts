@@ -71,7 +71,7 @@ export const AuthApi = createApi({
         const token = Cookies.get("access");
 
         return {
-          url: `cart/cart/add/${data.product}/${shopname}/`,
+          url: `cart/add/${data.product}/${shopname}/`,
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -81,7 +81,7 @@ export const AuthApi = createApi({
     }),
     addProductQtyToCart: builder.mutation({
       query: data => ({
-        url: `cart/cart-item/${data.product}/${data.product_action_symbol}/${data.shopname}/`,
+        url: `cart/item/update/${data.product}/${data.product_action_symbol}/${data.shopname}/`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -90,7 +90,7 @@ export const AuthApi = createApi({
     }),
     removeProductFromCart: builder.mutation({
       query: data => ({
-        url: `cart/cart-item-delete/${data.product}/${data.shopname}/`,
+        url: `cart/item/delete/${data.product}/${data.shopname}/`,
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -99,7 +99,7 @@ export const AuthApi = createApi({
     }),
     getCart: builder.query({
       query: ({ token, company_name }) => ({
-        url: `cart/cart/${company_name}`,
+        url: `cart/${company_name}/`,
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -108,13 +108,13 @@ export const AuthApi = createApi({
     }),
     addToCartGuest: builder.mutation<Cart, { productId: string; quantity: number; sessionId: string; companyName: string; }>({ 
       query: ({ productId, quantity, sessionId, companyName }) => ({
-        url: `cart/cart/add/${productId}/${companyName}/`,
+        url: `cart/add/${productId}/${companyName}/`,
         method: "POST",
         body: { quantity, session_id: sessionId, company_slug: companyName },
       }),
     }),
     getCartGuest: builder.query<Cart, {session_id:string, company_name:string}>({
-      query: ({session_id, company_name}) => `/cart/cart/session/${session_id}/${company_name}`,
+      query: ({session_id, company_name}) => `/cart/session/${session_id}/${company_name}/`,
     }),
     placeOrderGuest: builder.mutation<GuestOrderResponse, GuestPlaceOrderArgs>({
       query: ({ sessionId, email, company_name, ...rest }) => ({

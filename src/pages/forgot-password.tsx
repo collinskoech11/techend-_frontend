@@ -88,7 +88,6 @@ export default function ForgotPassword() {
         background: "#f7f7f7",
       }}
     >
-      <Toaster />
       <Paper elevation={3} sx={{ p: 4, maxWidth: 400, width: "100%" }}>
         <Typography
           variant="h5"

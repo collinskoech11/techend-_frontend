@@ -338,7 +338,6 @@ function ProductDetailView() {
         <meta property="og:url" content={`https://sokojunction.com/product/${slug}`} />
         <meta property="og:type" content="website" />
       </Head>
-      <Toaster position="top-right" />
       <Box sx={{ pt: 3, pb: 2, px: 3, maxWidth: "1200px", mx: "auto" }}>
         <Breadcrumbs aria-label="breadcrumb">
           <MuiLink underline="hover" color="inherit" href="/">

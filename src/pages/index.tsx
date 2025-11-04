@@ -844,7 +844,6 @@ export default function LandingPage() {
             </Zoom>
           </Box>
         </Container>
-        <Toaster />
       </Box>
     </Box>
   );

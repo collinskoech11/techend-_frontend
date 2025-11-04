@@ -156,8 +156,6 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
 
   return (
     <>
-      <Toaster />
-
       {showButton && (
         loggedInUser ? (
           <IconButton onClick={() => setOpen(true)}>

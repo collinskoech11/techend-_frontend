@@ -85,7 +85,6 @@ const AddPickupLocation = () => {
 
     return (
     <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 800, mx: "auto", position: 'relative' }}>
-      <Toaster />
       {token ? (
         <>
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
