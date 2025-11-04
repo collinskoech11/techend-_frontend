@@ -281,7 +281,9 @@ function ProductDetailView() {
             : product?.price;
           const message = `Hello, I'm interested in ordering the product: ${productName} for Ksh ${productPrice}. Could you please provide more details?`;
           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-          window.open(whatsappUrl, "_blank");
+          if (typeof window !== "undefined") {
+            window.open(whatsappUrl, "_blank");
+          }
         } else {
           toast.error("Shop owner's phone number not available.");
         }

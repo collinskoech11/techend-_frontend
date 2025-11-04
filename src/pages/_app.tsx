@@ -38,7 +38,9 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setHostname(window.location.hostname);
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
     setIsClient(true);
   }, []);
 
