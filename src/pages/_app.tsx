@@ -12,6 +12,7 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 const Navbar = lazy(() => import("@/Components/Navbar"));
 const Footer = lazy(() => import("@/Components/Footer"));
 import { useRouter } from "next/router";
+import { Toaster } from "react-hot-toast";
 
 const GA_IDS: Record<string, string> = {
   "sokojunction.com": "G-F23L8C9HPP",
@@ -77,6 +78,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
             </Suspense>
           </Box>
         )}
+        <Toaster position="bottom-right" reverseOrder={false} />
         <Component {...pageProps} triggerCartRefetch={triggerCartRefetch}/>
         <Suspense fallback={<div>Loading Footer...</div>}>
           <Footer />

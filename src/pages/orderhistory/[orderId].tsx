@@ -71,7 +71,6 @@ function OrderDetailsPage() {
 
   return (
     <>
-      <Toaster />
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Typography variant="h5" fontWeight="bold" gutterBottom>
           Confirm Payment for Order #{order.id}

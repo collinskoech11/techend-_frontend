@@ -196,7 +196,6 @@ const CompaniesList: React.FC = () => {
     toast.error("Failed to load company data.");
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <Toaster />
         <Typography color="error">Could not retrieve companies. Please try again later.</Typography>
       </Box>
     );
@@ -204,7 +203,6 @@ const CompaniesList: React.FC = () => {
 
   return (
     <Box sx={{ pt: 8 }}>
-      <Toaster />
       <HeroBanner />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mt: 4 }}>

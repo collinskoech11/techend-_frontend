@@ -100,7 +100,6 @@ function Cart() {
 
   return (
     <>
-      <Toaster />
       <CartBanner>
         <Box>
           <Typography variant="h3" color={theme.palette.primary.main}>Shopping Cart</Typography>

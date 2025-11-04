@@ -1083,7 +1083,6 @@ function Checkout() {
 
   return (
     <>
-      <Toaster />
       <Box sx={{ m: { xs: 2, md: 4 } }}>
         <BreadCrumbContainer sx={{ background: "#fff", border: "none", mb: 4, maxWidth: '90vw' }}>
           <Breadcrumbs sx={{maxWidth: '90vw'}}>

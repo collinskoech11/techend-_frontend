@@ -121,7 +121,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
 
   return (
     <>
-      <Toaster />
       <ProductItemStyled
         onClick={() => router.push(`/product/${currentProduct?.slug}`)}
         sx={{

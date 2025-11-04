@@ -276,7 +276,6 @@ export default function CompanyOnboarding() {
                 boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             }}
         >
-            <Toaster />
             <Typography variant="h5" sx={{ textAlign: "center", mb: 3, fontWeight: 600, color: theme.palette.primary.main }}>
                 Company Onboarding
             </Typography>
