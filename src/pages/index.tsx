@@ -282,13 +282,15 @@ export default function LandingPage() {
   const { data: companiesData, isLoading: isLoadingCompanies, isError: isErrorCompanies } = useGetCompaniesQuery({});
 
   useEffect(() => {
-    const currentDomain = window.location.hostname;
-    if (currentDomain === "www.cupcoutureshop.com") {
-      router.push("/shop/the-cup-couture");
-    } else if (currentDomain === "www.boromoto.com") {
-      router.push("/shop/boromoto");
-    } else {
-      console.log("currentDomain  *****", currentDomain);
+    if (typeof window !== 'undefined') {
+      const currentDomain = window.location.hostname;
+      if (currentDomain === "www.cupcoutureshop.com") {
+        router.push("/shop/the-cup-couture");
+      } else if (currentDomain === "www.boromoto.com") {
+        router.push("/shop/boromoto");
+      } else {
+        console.log("currentDomain  *****", currentDomain);
+      }
     }
 
     const heroSection = document.getElementById("hero-section");
@@ -313,7 +315,7 @@ export default function LandingPage() {
         heroSection.removeEventListener("mousemove", handleMouseMove);
       };
     }
-  }, [router]);
+  }, []);
   const handleNavigate = () => {
     router.push("/company-onboarding");
   };
