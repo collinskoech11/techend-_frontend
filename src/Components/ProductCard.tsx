@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
   ProductItemStyled,
   ProductImage,
