@@ -35,9 +35,13 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
   }));
 
   const [hostname, setHostname] = useState("");
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setHostname(window.location.hostname);
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
+    setIsClient(true);
   }, []);
 
   const GA_ID = GA_IDS[hostname] || "G-F23L8C9HPP";
@@ -48,13 +52,12 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
       <Provider store={store}>
       <ThemeProvider>
         <CartProvider>
-        {GA_ID && (
+        {isClient && GA_ID && (
+        <>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"
         />
-      )}
-      {GA_ID && (
         <Script id="ga-script" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
@@ -63,6 +66,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
             gtag('config', '${GA_ID}');
           `}
         </Script>
+        </>
       )}
         {router.pathname !== "/" && (
         <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>

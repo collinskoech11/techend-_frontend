@@ -1,4 +1,6 @@
 
+'use client';
+
 import React, {
   useEffect,
   useState,
@@ -179,7 +181,7 @@ const Shop = forwardRef((props: any, ref: any) => {
         setProducts(prev => [...prev, ...products_data.results]);
       }
     }
-  }, [products_data]);
+  }, [products_data, page]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
