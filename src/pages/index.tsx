@@ -47,23 +47,25 @@ const glowAnimation = keyframes`
 
 // Hero container
 const twinkle = keyframes`
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 0.2; }
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
 `;
 
-const HeroSection = styled(Box)({
-  background: `radial-gradient(ellipse at bottom, #0d1b2a 0%, #000 100%)`,
-  color: "#fff",
+// Hero container
+const HeroSection = styled(Box)(({ theme }) => ({
   position: "relative",
-  overflow: "hidden",
-//  padding: "150px 20px",
-  minHeight: "105vh",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+  minHeight: "105vh",
+  padding: "0 20px",
+  color: "#fff",
+  textAlign: "center",
+  overflow: "hidden",
+  background: `radial-gradient(ellipse at bottom, #0d1b2a 0%, #000 100%)`,
 
-  // Stars layer 1
+  // Layer 1 stars (small, fast twinkle)
   "&::before": {
     content: '""',
     position: "absolute",
@@ -71,14 +73,16 @@ const HeroSection = styled(Box)({
     left: 0,
     width: "200%",
     height: "200%",
-    background: `transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat`,
+    background: `url("https://www.transparenttextures.com/patterns/stardust.png") repeat`,
     backgroundSize: "300px 300px",
     animation: `${twinkle} 3s infinite alternate`,
     opacity: 0.7,
     zIndex: 0,
+    filter: "blur(1px)", // subtle depth
+    transform: "translate(-50%, -50%)",
   },
 
-  // Stars layer 2 (different size + slower twinkle)
+  // Layer 2 stars (larger, slower twinkle)
   "&::after": {
     content: '""',
     position: "absolute",
@@ -86,13 +90,32 @@ const HeroSection = styled(Box)({
     left: 0,
     width: "200%",
     height: "200%",
-    background: `transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat`,
+    background: `url("https://www.transparenttextures.com/patterns/stardust.png") repeat`,
     backgroundSize: "500px 500px",
     animation: `${twinkle} 6s infinite alternate`,
     opacity: 0.4,
     zIndex: 0,
+    filter: "blur(2px)",
+    transform: "translate(-25%, -25%)",
   },
-});
+
+  // Inner content styling
+  "& > *": {
+    position: "relative",
+    zIndex: 1,
+  },
+
+  // Optional: gradient overlay for extra depth
+  "&::after, &::before": {
+    mixBlendMode: "screen",
+  },
+
+  // Responsive tweaks
+  [theme.breakpoints.down("sm")]: {
+    padding: "0 10px",
+  },
+}));
+
 
 // Floating ecommerce icons
 interface FloatingIconProps {
@@ -331,30 +354,57 @@ export default function LandingPage() {
       <Box sx={{ p: 0, mt: "-100px" }}>
         {/* Hero Section */}
         <HeroSection>
-          {/* Floating ecommerce icons */}
-          <FloatingIcon sx={{ top: "20%", left: "10%" }} delay={0}>
+          {/* Floating eCommerce icons */}
+          <FloatingIcon sx={{ top: "15%", left: "10%" }} delay={0}>
             <ShoppingCartOutlinedIcon fontSize="inherit" />
           </FloatingIcon>
-          <FloatingIcon sx={{ bottom: "25%", right: "12%" }} delay={2}>
+          <FloatingIcon sx={{ bottom: "20%", right: "12%" }} delay={2}>
             <LocalOfferOutlinedIcon fontSize="inherit" />
           </FloatingIcon>
-          <FloatingIcon sx={{ top: "35%", right: "20%" }} delay={1}>
+          <FloatingIcon sx={{ top: "35%", right: "25%" }} delay={1}>
             <CreditCardOutlinedIcon fontSize="inherit" />
           </FloatingIcon>
-          <FloatingIcon sx={{ bottom: "15%", left: "15%" }} delay={3}>
+          <FloatingIcon sx={{ bottom: "10%", left: "15%" }} delay={3}>
             <LocalShippingOutlinedIcon fontSize="inherit" />
           </FloatingIcon>
 
-          {/* Globe */}
+          {/* Optional globe / hero illustration */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              right: { xs: "5%", md: "10%" },
+              transform: "translateY(-50%)",
+              zIndex: 0,
+              opacity: 0.15,
+              pointerEvents: "none",
+            }}
+          >
+            {/* Replace with your SVG or 3D globe */}
+            {/* <GlobeIllustration /> */}
+          </Box>
 
-          {/* Glass content */}
-          <GlassBox>
+          {/* Glass content box */}
+          <GlassBox
+            sx={{
+              px: { xs: 3, md: 6 },
+              py: { xs: 4, md: 8 },
+              maxWidth: "900px",
+              mx: "auto",
+              backdropFilter: "blur(20px)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+              borderRadius: "20px",
+              zIndex: 1,
+            }}
+          >
+            {/* Headline with typewriter */}
             <Typography
               variant="h2"
               sx={{
                 fontWeight: 900,
                 mb: 3,
-                fontSize: { xs: "2.5rem", md: "3.5rem" },
+                fontSize: { xs: "2.2rem", sm: "2.8rem", md: "3.5rem" },
+                lineHeight: 1.2,
                 background: "linear-gradient(90deg,#ff8a00,#e52e71)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -376,30 +426,51 @@ export default function LandingPage() {
               </Suspense>
             </Typography>
 
+            {/* Subheading */}
             <Typography
               variant="h6"
               sx={{
                 mb: 5,
-                color: "rgba(255,255,255,0.8)",
+                color: "rgba(255,255,255,0.85)",
                 maxWidth: "700px",
                 mx: "auto",
+                lineHeight: 1.6,
               }}
             >
               Launch, manage, and grow your enterprise with SokoJunction — the all-in-one platform built for speed and success in the digital marketplace.
             </Typography>
 
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
-              <GradientButton endIcon={<ArrowForwardIcon />} onClick={handleNavigate}>
+            {/* Action buttons */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                justifyContent: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <GradientButton
+                endIcon={<ArrowForwardIcon />}
+                onClick={handleNavigate}
+                sx={{
+                  px: { xs: 4, md: 6 },
+                  py: { xs: 1.5, md: 2 },
+                  fontWeight: 600,
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                }}
+              >
                 Get Started
               </GradientButton>
+
               <Button
                 variant="outlined"
                 sx={{
-                  px: 4,
-                  py: 1.5,
+                  px: { xs: 4, md: 5 },
+                  py: { xs: 1.5, md: 2 },
                   borderRadius: "50px",
                   borderColor: "rgba(255,255,255,0.5)",
                   color: "#fff",
+                  fontWeight: 500,
                   "&:hover": {
                     borderColor: "#fff",
                     background: "rgba(255,255,255,0.1)",
@@ -411,6 +482,7 @@ export default function LandingPage() {
             </Box>
           </GlassBox>
         </HeroSection>
+
 
         <Container maxWidth="xl" sx={{ py: 8 }}>
           {/* Features Section */}
