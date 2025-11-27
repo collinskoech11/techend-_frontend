@@ -51,7 +51,10 @@ function Cart() {
         token,
         shopname: Cookies.get("shopname"),
       });
-      if (response.error) toast.error(response.error.data.error);
+      if ('error' in response) {
+        const errorMessage = (response.error as any)?.data?.error || "Failed to update quantity";
+        toast.error(errorMessage);
+      }
       else {
         toast.success("Product quantity updated");
         cart_refetch();
@@ -70,7 +73,11 @@ function Cart() {
         token,
         shopname: Cookies.get("shopname"),
       });
-      if (response.error) toast.error(response.error.data.error);
+      if ('error' in response) {
+        const errorMessage = (response.error as any)?.data?.error || "Failed to update quantity";
+        toast.error(errorMessage);
+      }
+
       else {
         toast.success("Product removed from cart");
         cart_refetch();
