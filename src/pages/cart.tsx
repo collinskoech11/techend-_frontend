@@ -90,19 +90,43 @@ function Cart() {
   return (
     <>
       {/* Banner */}
-      <CartBanner sx={{ pb: 4 }}>
-        <Box>
-          <Typography
-            variant="h3"
-            color={theme.palette.primary.main}
-            sx={{ fontWeight: 700 }}
-          >
-            Shopping Cart
-          </Typography>
-          <Typography sx={{ mt: 1, color: "text.secondary" }}>
-            <span style={{ color: theme.palette.primary.main }}>Home</span> - Shopping cart
-          </Typography>
-        </Box>
+      <CartBanner
+        sx={{
+          pb: 6,
+          pt: 6,
+          px: { xs: 3, md: 6 },
+          background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: "#fff",
+          borderRadius: "0 0 30px 30px",
+          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: { xs: "flex-start", md: "center" },
+          textAlign: { xs: "left", md: "center" },
+        }}
+      >
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 900,
+            fontSize: { xs: "2rem", md: "3rem" },
+            mb: 1,
+            letterSpacing: "1px",
+            color: "#fff",
+          }}
+        >
+          Shopping Cart
+        </Typography>
+
+        <Typography
+          variant="body1"
+          sx={{
+            color: "rgba(255,255,255,0.85)",
+            fontSize: { xs: "0.95rem", md: "1.1rem" },
+          }}
+        >
+          <span style={{ fontWeight: 700 }}>{/* Home link */}Home</span> - Shopping cart
+        </Typography>
       </CartBanner>
 
       {/* Cart & Summary */}
@@ -113,19 +137,19 @@ function Cart() {
             <Grid container spacing={2}>
               {cart_loading
                 ? Array.from({ length: 3 }).map((_, idx) => (
-                    <Grid item xs={12} key={idx}>
-                      <Skeleton variant="rectangular" height={120} />
-                    </Grid>
-                  ))
-                : CartItems?.length === 0 || !CartItems
-                ? (
-                  <Grid item xs={12}>
-                    <Typography variant="h6" align="center">
-                      Your cart is empty
-                    </Typography>
+                  <Grid item xs={12} key={idx}>
+                    <Skeleton variant="rectangular" height={120} />
                   </Grid>
-                )
-                : CartItems.map((item, index) => {
+                ))
+                : CartItems?.length === 0 || !CartItems
+                  ? (
+                    <Grid item xs={12}>
+                      <Typography variant="h6" align="center">
+                        Your cart is empty
+                      </Typography>
+                    </Grid>
+                  )
+                  : CartItems.map((item, index) => {
                     const prod_total =
                       item.product.on_sale
                         ? parseFloat(item.product.discounted_price) * item.quantity
@@ -147,7 +171,7 @@ function Cart() {
                           {/* Product Image */}
                           <CardMedia
                             component="img"
-                            image={`https://res.cloudinary.com/dqokryv6u/${item.product.image}` || "/placeholder.png"}
+                            image={`https://res.cloudinary.com/dqokryv6u/${item.product.main_image}` || "/placeholder.png"}
                             alt={item.product.title}
                             sx={{
                               width: 100,
@@ -157,6 +181,9 @@ function Cart() {
                               mr: 2,
                             }}
                           />
+
+
+                          {/* {`https://res.cloudinary.com/dqokryv6u/${item.product.image}`} */}
 
                           {/* Product Details */}
                           <CardContent sx={{ flex: 1, p: 0 }}>

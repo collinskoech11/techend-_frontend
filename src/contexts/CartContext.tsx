@@ -41,7 +41,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       refetchAuthCart();
     } else {
-      refetchGuestCart();
+      if (refetchGuestCart) {
+        refetchGuestCart();
+      }
     }
   }, [token, refetchAuthCart, refetchGuestCart]);
 

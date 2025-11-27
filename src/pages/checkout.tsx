@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart } from "@/contexts/CartContext";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
   Breadcrumbs,
   Link,
@@ -263,21 +265,34 @@ const AuthenticatedCheckout = () => {
                 ) : (
                   <Typography>No delivery locations available for this shop.</Typography>
                 )}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                  {/* Previous Button */}
                   <Button
                     variant="outlined"
                     disabled={deliveryPage === 1}
                     onClick={() => setDeliveryPage(prev => prev - 1)}
-                  >
-                    Previous
-                  </Button>
+                    startIcon={<ArrowBackIosNewIcon />}
+                    sx={{
+                      borderRadius: 2,
+                      minWidth: 48,
+                      px: 2,
+                      py: 1.2,
+                    }}
+                  />
+
+                  {/* Next Button */}
                   <Button
                     variant="outlined"
                     disabled={deliveryPage * itemsPerPage >= (allDeliveryLocations?.length || 0)}
                     onClick={() => setDeliveryPage(prev => prev + 1)}
-                  >
-                    Next
-                  </Button>
+                    endIcon={<ArrowForwardIosIcon />}
+                    sx={{
+                      borderRadius: 2,
+                      minWidth: 48,
+                      px: 2,
+                      py: 1.2,
+                    }}
+                  />
                 </Box>
               </Paper>
             )}
@@ -534,7 +549,7 @@ const GuestCheckout = () => {
 
   const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
 
-  
+
 
   const { register, handleSubmit, formState: { errors }, setValue, trigger, getValues, watch } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
@@ -610,7 +625,7 @@ const GuestCheckout = () => {
       <Paper sx={{ p: 4, my: 4 }}>
         <Typography variant="h4" color="primary" gutterBottom>Order Successful!</Typography>
         <Typography variant="h6">Your account has been created. Please check your email for your credentials.</Typography>
-        
+
         <Box sx={{ my: 2, p: 2, border: '1px solid #eee', borderRadius: '8px' }}>
           <Typography><strong>Order ID:</strong> {orderResponse.order_id}</Typography>
           <Typography><strong>Email:</strong> {orderResponse.user_email}</Typography>
@@ -893,21 +908,36 @@ const GuestCheckout = () => {
                 ) : (
                   <Typography>No delivery locations available for this shop.</Typography>
                 )}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                  {/* Previous Page Button */}
                   <Button
                     variant="outlined"
                     disabled={deliveryPage === 1}
                     onClick={() => setDeliveryPage(prev => prev - 1)}
-                  >
-                    Previous
-                  </Button>
+                    startIcon={<ArrowBackIosNewIcon />}
+                    sx={{
+                      borderRadius: 2,
+                      minWidth: 48,
+                      px: 2,
+                      py: 1.1,
+                      fontSize: 0, // hides text safely if present
+                    }}
+                  />
+
+                  {/* Next Page Button */}
                   <Button
                     variant="outlined"
                     disabled={deliveryPage * itemsPerPage >= (allDeliveryLocations?.length || 0)}
                     onClick={() => setDeliveryPage(prev => prev + 1)}
-                  >
-                    Next
-                  </Button>
+                    endIcon={<ArrowForwardIosIcon />}
+                    sx={{
+                      borderRadius: 2,
+                      minWidth: 48,
+                      px: 2,
+                      py: 1.1,
+                      fontSize: 0,
+                    }}
+                  />
                 </Box>
               </Paper>
             )}
@@ -992,7 +1022,7 @@ const GuestCheckout = () => {
 
   return (
     <Paper sx={{ p: 4, my: 4 }}>
-      
+
 
       <Grid container spacing={4}>
         <Grid item xs={12} md={7}>
@@ -1085,7 +1115,7 @@ function Checkout() {
     <>
       <Box sx={{ m: { xs: 2, md: 4 } }}>
         <BreadCrumbContainer sx={{ background: "#fff", border: "none", mb: 4, maxWidth: '90vw' }}>
-          <Breadcrumbs sx={{maxWidth: '90vw'}}>
+          <Breadcrumbs sx={{ maxWidth: '90vw' }}>
             <Link underline="hover" color="inherit" href="/">TechEnd</Link>
             <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>Shop</Link>
             <Link underline="hover" color="inherit" href="/cart">Cart</Link>
