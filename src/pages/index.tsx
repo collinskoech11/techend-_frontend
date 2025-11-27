@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Box, Typography, Button, Grid, Card, Container, List, ListItem, ListItemIcon, ListItemText, useTheme, CircularProgress, TextField, useMediaQuery } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
@@ -9,7 +7,6 @@ import { Fade, Slide, Zoom } from "react-awesome-reveal";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import StorefrontIcon from '@mui/icons-material/Storefront'; // More specific icon
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import Typewriter from "typewriter-effect";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
@@ -27,6 +24,9 @@ import Carousel from 'react-material-ui-carousel';
 import TestimonialCard from "@/Components/TestimonialCard";
 import { AccentButton } from "@/StyledComponents/Hero";
 import { min } from "date-fns";
+
+import dynamic from "next/dynamic";
+const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
 // Define a consistent color palette
 const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
 const mediumGray = "#e0e0e0"; // For borders and subtle dividers
