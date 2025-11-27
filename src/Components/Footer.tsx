@@ -13,6 +13,13 @@ const waveAnimation = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
+/**
+ * Renders the site footer with contact details, quick links, and support links over an animated decorative background.
+ *
+ * When a shop slug is present in the router query the contact panel displays company contact data (or loading / unavailable states); otherwise it shows a static fallback contact block.
+ *
+ * @returns A JSX element representing the footer section
+ */
 function Footer() {
   const theme = useTheme();
   const router = useRouter();
