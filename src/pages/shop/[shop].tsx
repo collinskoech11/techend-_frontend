@@ -58,7 +58,7 @@ const HeroSection = styled(Box, {
 })<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
   position: 'relative',
   maxHeight: '40vh',
-  height: '500px',
+  height: '600px',
   width: '100%',
   display: 'flex',
   alignItems: 'center',
@@ -76,7 +76,7 @@ const HeroSection = styled(Box, {
     backgroundImage: `url(${bannerImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    // filter: 'brightness(0.8)',
+    filter: 'brightness(0.6)',
     zIndex: 1,
   },
   '& > *': {
