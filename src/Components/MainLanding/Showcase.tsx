@@ -135,7 +135,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                 Stunning, Customizable Storefronts 🚀
               </Typography>
               <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.7 }}>
-                First impressions matter. sokoJunction provides a suite of elegant, responsive templates that can be easily customized to reflect your brand's unique identity. No coding required, just pure design freedom.
+                First impressions matter. sokoJunction provides a suite of elegant, responsive templates that can be easily customized to reflect your brand&apos;s unique identity. No coding required, just pure design freedom.
               </Typography>
               <AccentButton onClick={handleAuthTrigger}>
                 Build Your Store Now
@@ -207,7 +207,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                 AI-Powered Insights for Smarter Decisions 💡
               </Typography>
               <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.7 }}>
-                Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. sokoJunction's AI insights give you the competitive edge.
+                Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. sokoJunction&apos;s AI insights give you the competitive edge.
               </Typography>
               <AccentButton onClick={handleAuthTrigger}>
                 Unlock Insights
