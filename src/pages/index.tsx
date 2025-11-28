@@ -19,6 +19,13 @@ const FAQ = lazy(() => import("@/Components/FAQ"));
 
 const lightGray = "#f0f2f5";
 
+/**
+ * Render the main marketing landing page for SokoJunction, composing hero, features, showcases, pricing, FAQs, testimonials, contact form, and final call-to-action.
+ *
+ * This component also manages the contact form submission, authentication dialog flow, responsive layout adjustments, domain-based routing on mount, and testimonial data fetching.
+ *
+ * @returns The JSX element tree for the complete landing page.
+ */
 export default function LandingPage() {
   const router = useRouter();
   const [showAuthDialog, setShowAuthDialog] = useState(false);

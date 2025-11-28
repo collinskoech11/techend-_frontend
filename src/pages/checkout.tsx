@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation } from "@/Api/services";
@@ -1097,7 +1095,14 @@ const GuestCheckout = () => {
 };
 
 
-// --- Main Checkout Page --- //
+/**
+ * Render the checkout page with breadcrumb navigation and either the authenticated or guest checkout flow.
+ *
+ * Reads the "access" cookie to determine authentication state and the "shopname" cookie for shop links,
+ * then conditionally renders AuthenticatedCheckout (when authenticated) or GuestCheckout (when not).
+ *
+ * @returns The checkout page JSX element
+ */
 
 function Checkout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
