@@ -8,7 +8,7 @@ const darkText = "#212121"; // Very dark gray for main headings and strong text
 const lightText = "#555555"; // Softer dark gray for body text
 
 
-const waveAnimation = keyframes`
+const animatedGradient = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
@@ -22,7 +22,9 @@ const floatAnimation = keyframes`
 `;
 
 export const HeroSection = styled(Box)(({ theme }) => ({
-  background: `linear-gradient(145deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`, // Deeper gradient
+  background: `linear-gradient(-45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark}, ${theme.palette.secondary.main}, ${theme.palette.secondary.dark})`,
+  backgroundSize: '400% 400%',
+  animation: `${animatedGradient} 15s ease infinite`,
   color: "#fff",
   textAlign: "center",
   borderRadius: "20px", // More rounded for a modern feel

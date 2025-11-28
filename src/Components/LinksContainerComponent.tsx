@@ -15,52 +15,43 @@ import {
   Tooltip,
   Badge,
   CircularProgress,
-  Avatar,
+  Avatar, // Keeping Avatar for potential future use or custom user display
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close";
-import { Person2Outlined } from "@mui/icons-material";
-import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CartMenu from "./CartMin";
+import CloseIcon from "@mui/icons-material/Close"; // Keeping CloseIcon for mobile menu
+import { PersonOutline, HistoryOutlined, NotificationsNoneOutlined, LogoutOutlined, AccountCircleOutlined, SettingsOutlined } from "@mui/icons-material"; // Modernized icons
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; // Modernized Shop icon
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined"; // Modernized Home icon
+import StoreOutlinedIcon from '@mui/icons-material/StoreOutlined'; // Modernized Mall icon
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'; // Modernized Cart icon
 import Image from "next/image";
 import Cookies from "js-cookie";
-const AuthDialog = lazy(() => import("./AuthDialog")); // Dynamic import
+const AuthDialog = lazy(() => import("./AuthDialog"));
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
-import Shop2Icon from "@mui/icons-material/Shop2";
-import HomeIcon from "@mui/icons-material/Home";
-import MuseumIcon from '@mui/icons-material/Museum';
-import { darken } from '@mui/material/styles';
-// Added for the mobile menu cart item
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import { alpha } from '@mui/material/styles'; // For better alpha color manipulation
+import CartMenu from "./CartMin";
 
-const LinksContainerComponent = forwardRef((props: any, ref: any) => {
+// A modern, functional Navbar component
+const LinksContainerComponent = forwardRef((props, ref) => {
   LinksContainerComponent.displayName = "LinksContainerComponent";
   const router = useRouter();
   const theme = useTheme();
 
-  // State for desktop user menu
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null); // Desktop user menu
   const open = Boolean(anchorEl);
 
-  // --- START: Added for Mobile Menu ---
-  const [mobileAnchorEl, setMobileAnchorEl] = useState(null);
+  const [mobileAnchorEl, setMobileAnchorEl] = useState(null); // Mobile menu
   const isMobileMenuOpen = Boolean(mobileAnchorEl);
-  // --- END: Added for Mobile Menu ---
 
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState<any>(null);
   const [user, setUser] = useState(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-  const { data: companyData } = useGetCompanyBySlugQuery(shopname);
+  const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname); // Added isLoading
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
 
   const refetchUser = () => {
-    console.log("called from child");
     setUser(Cookies.get("username"));
   };
 
@@ -76,18 +67,17 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
     },
   }));
 
-  const handleClick = (event) => {
+  const handleUserMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (link) => {
+  const handleUserMenuClose = (link) => {
     if (typeof link === 'string' && link) {
       router.push(link);
     }
     setAnchorEl(null);
   };
 
-  // --- START: Handlers for Mobile Menu ---
   const handleMobileMenuOpen = (event) => {
     setMobileAnchorEl(event.currentTarget);
   };
@@ -100,15 +90,14 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
     router.push(path);
     handleMobileMenuClose();
   };
-  // --- END: Handlers for Mobile Menu ---
 
-  const LogoutFx = () => {
+  const handleLogout = () => {
     Cookies.remove("username");
     Cookies.remove("access");
     Cookies.remove("refresh");
     Cookies.remove("shopname");
     Cookies.remove("user");
-    handleMobileMenuClose(); // Close mobile menu if open
+    handleMobileMenuClose();
     router.push("/login");
   };
 
@@ -116,8 +105,21 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
     if (user) setUsername(user);
   }, [user]);
 
+  // Unified menu item styling for better consistency
+  const menuSx = {
+    "& .MuiMenuItem-root": {
+      borderRadius: theme.shape.borderRadius, // Rounded corners for menu items
+      mb: 0.5,
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.08), // Subtle hover effect
+      },
+    },
+    "& .MuiListItemIcon-root": {
+      minWidth: 32, // Adjust icon spacing
+      color: 'inherit', // Icons inherit text color
+    }
+  };
 
-  // --- START: Mobile Menu Definition ---
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileAnchorEl}
@@ -125,26 +127,34 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
       PaperProps={{
-        elevation: 4,
+        elevation: 8, // More prominent shadow for modern feel
         sx: {
-          mt: 1,
-          minWidth: 200,
-          borderRadius: 2,
+          mt: 1.5,
+          minWidth: 220,
+          borderRadius: theme.shape.borderRadius * 2, // More rounded
+          backgroundColor: alpha(theme.palette.background.paper, 0.9), // Slightly translucent background
+          backdropFilter: "blur(10px) saturate(150%)",
+          WebkitBackdropFilter: "blur(10px) saturate(150%)",
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          py: 1, // Padding inside the menu
         },
       }}
+      transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      sx={menuSx}
     >
       {user ? (
-        <div>
+        <Box sx={{ p: 1 }}>
           <MenuItem onClick={() => handleMobileMenuItemClick("/")}>
-            <ListItemIcon><HomeIcon fontSize="small" /></ListItemIcon>
+            <ListItemIcon><HomeOutlinedIcon fontSize="small" /></ListItemIcon>
             Home
           </MenuItem>
           <MenuItem onClick={() => handleMobileMenuItemClick(`/shop/${shopname}`)}>
-            <ListItemIcon><Shop2Icon fontSize="small" /></ListItemIcon>
+            <ListItemIcon><ShoppingBagOutlinedIcon fontSize="small" /></ListItemIcon>
             Shop
           </MenuItem>
-           <MenuItem onClick={() => handleMobileMenuItemClick(`/shops`)}>
-            <ListItemIcon><MuseumIcon fontSize="small" /></ListItemIcon>
+          <MenuItem onClick={() => handleMobileMenuItemClick(`/shops`)}>
+            <ListItemIcon><StoreOutlinedIcon fontSize="small" /></ListItemIcon>
             Mall
           </MenuItem>
           <MenuItem onClick={() => handleMobileMenuItemClick("/cart")}>
@@ -152,174 +162,210 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             Cart
           </MenuItem>
           <MenuItem onClick={() => handleMobileMenuItemClick("/orderhistory")}>
-            <ListItemIcon><HistoryOutlinedIcon fontSize="small" /></ListItemIcon>
+            <ListItemIcon><HistoryOutlined fontSize="small" /></ListItemIcon>
             Order History
           </MenuItem>
           <MenuItem>
             <ListItemIcon>
-              <Badge badgeContent={1} color="warning">
-                <NotificationsOutlinedIcon fontSize="small" />
+              <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
+                <NotificationsNoneOutlined fontSize="small" />
               </Badge>
             </ListItemIcon>
             Notifications
           </MenuItem>
-          <Divider />
+          <Divider sx={{ my: 1 }} />
           <MenuItem onClick={() => handleMobileMenuItemClick("/profile")}>
-            <ListItemIcon><AccountCircleIcon fontSize="small" /></ListItemIcon>
+            <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
             Profile
           </MenuItem>
           <MenuItem onClick={() => handleMobileMenuItemClick("/settings")}>
-            <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
+            <ListItemIcon><SettingsOutlined fontSize="small" /></ListItemIcon>
             Settings
           </MenuItem>
           <MenuItem
-            onClick={LogoutFx}
-            sx={{ color: theme.palette.primary.main, fontWeight: '600' }}
+            onClick={handleLogout}
+            sx={{ color: theme.palette.error.main, fontWeight: 'medium' }}
           >
-            <ListItemIcon><LogoutIcon fontSize="small" sx={{ color: theme.palette.primary.main }} /></ListItemIcon>
+            <ListItemIcon><LogoutOutlined fontSize="small" sx={{ color: theme.palette.error.main }} /></ListItemIcon>
             Logout
           </MenuItem>
-        </div>
+        </Box>
       ) : (
-        // When not logged in, show AuthDialog or a login link
-        // Here we render the AuthDialog directly as a menu item
-        <div>
+        <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
           {sessionId && (
             <MenuItem onClick={() => handleMobileMenuItemClick("/cart")}>
               <ListItemIcon><ShoppingCartOutlinedIcon fontSize="small" /></ListItemIcon>
               Cart
             </MenuItem>
           )}
-          <Box sx={{ p: 1 }}>
-            <AuthDialog onTrigger={refetchUser} />
-          </Box>
-        </div>
+          <AuthDialog onTrigger={refetchUser} />
+        </Box>
       )}
     </Menu>
   );
-  // --- END: Mobile Menu Definition ---
-
 
   return (
     <AppBar
-      position="static"
+      position="fixed" // Ensure it's fixed
       sx={{
-        position: "fixed",
-        zIndex: 1201,
-        backgroundColor: "rgba(255, 255, 255, 0.25)", // translucent bg
-        backdropFilter: "blur(12px) saturate(180%)", // frosted glass effect
-        WebkitBackdropFilter: "blur(12px) saturate(180%)", // Safari support
-        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // soft shadow for glass depth
-        border: "1px solid rgba(255, 255, 255, 0.18)",
-        color: (theme) => theme.palette.getContrastText("#ffffff"),
+        zIndex: theme.zIndex.appBar, // Use theme's zIndex for consistency
+        backgroundColor: alpha(theme.palette.background.paper, 0.8), // Smoother translucent bg
+        backdropFilter: "blur(18px) saturate(180%)", // Enhanced frosted glass
+        WebkitBackdropFilter: "blur(18px) saturate(180%)",
+        boxShadow: theme.shadows[3], // Use theme shadows for modern depth
+        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.12)}`, // Subtle bottom border
+        color: theme.palette.text.primary, // Inherit text color from theme
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        {router.pathname.startsWith('/shop/') && companyData?.logo ? (
-          <Typography variant="h6" sx={{ cursor: "pointer", textTransform: "capitalize", color:"#000" }} onClick={() => router.push(`/`)}>
-            SokoJunction
-          </Typography>
-        ) : (
-          <Image src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'} alt={shopname} width={40} height={40} style={{ cursor: "pointer" }} onClick={() => router.push(`/shop/${shopname}`)} />
-        )}
-
-        {/* --- START: Mobile Menu Icon (Visible on mobile only) --- */}
-
-        {/* --- START: Desktop Icons (Hidden on mobile) --- */}
-        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1 }}>
-          {router.pathname === "/" && (
-            <>
-              {/* Social media icons can go here */}
-            </>
+      <Toolbar
+        sx={{
+          justifyContent: "space-between",
+          height: 64, // Standard app bar height
+          px: { xs: 2, md: 3 }, // Responsive padding
+        }}
+      >
+        {/* Logo/Title Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {router.pathname.startsWith('/shop/') && companyData?.logo ? (
+            <Box
+              sx={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 1 }}
+              onClick={() => router.push(`/`)}
+            >
+              <Image
+                src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'}
+                alt={shopname}
+                width={32} // Slightly smaller for a cleaner look
+                height={32}
+                style={{ borderRadius: '4px' }} // Subtle rounded corners for the logo
+              />
+              {!companyLoading && ( // Only show text if data is loaded
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: theme.palette.text.primary,
+                    display: { xs: 'none', md: 'block' }, // Hide on small screens
+                  }}
+                >
+                  {shopname} {/* Display company name if available */}
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ cursor: "pointer", textTransform: "capitalize", fontWeight: 'bold' }}
+              onClick={() => router.push(`/`)}
+            >
+              {shopname || "Sokojunction"}
+            </Typography>
           )}
+        </Box>
+
+        {/* Desktop Navigation & User Actions */}
+        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
           <Tooltip title="Mall">
-            <IconButton onClick={() => router.push(`/shops`)} sx={{ color: "#000" }}>
-              <MuseumIcon />
+            <IconButton onClick={() => router.push(`/shops`)} color="inherit">
+              <StoreOutlinedIcon />
             </IconButton>
           </Tooltip>
 
-          {/* Icons for logged-in users */}
           {user && (
             <>
               <Tooltip title="Home">
-                <IconButton onClick={() => router.push(`/`)} sx={{ color: "#000" }}>
-                  <HomeIcon />
+                <IconButton onClick={() => router.push(`/`)} color="inherit">
+                  <HomeOutlinedIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Shop">
-                <IconButton onClick={() => router.push(`/shop/${shopname}`)} sx={{ color: "#000" }}>
-                  <Shop2Icon />
+                <IconButton onClick={() => router.push(`/shop/${shopname}`)} color="inherit">
+                  <ShoppingBagOutlinedIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Order History">
-                <IconButton onClick={() => router.push("/orderhistory")} sx={{ color: "#000" }}>
-                  <Badge badgeContent={1} color="warning">
-                    <HistoryOutlinedIcon />
+                <IconButton onClick={() => router.push("/orderhistory")} color="inherit">
+                  <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
+                    <HistoryOutlined />
                   </Badge>
                 </IconButton>
               </Tooltip>
               <Tooltip title="Notifications">
-                <IconButton sx={{ color: "#000" }}>
-                  <Badge badgeContent={1} color="warning">
-                    <NotificationsOutlinedIcon />
+                <IconButton color="inherit">
+                  <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
+                    <NotificationsNoneOutlined />
                   </Badge>
                 </IconButton>
               </Tooltip>
             </>
           )}
 
-          {/* Cart icon for both logged-in users and guests with a session */}
           {(user || sessionId) && <CartMenu ref={cartRef} />}
 
-          {/* User menu or Login button */}
           {user ? (
             <Box>
-              <IconButton
-                color="inherit"
-                onClick={handleClick}
-                aria-controls={open ? "user-menu" : undefined}
-                aria-haspopup="true"
-              >
-                <Person2Outlined />
-              </IconButton>
+              <Tooltip title={username || "User Account"}>
+                <IconButton
+                  color="inherit"
+                  onClick={handleUserMenuOpen}
+                  aria-controls={open ? "user-menu" : undefined}
+                  aria-haspopup="true"
+                  sx={{ p: 0 }} // Remove default padding for Avatar
+                >
+                  <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main, fontSize: '0.9rem' }}>
+                    {username ? username[0].toUpperCase() : <PersonOutline fontSize="small" />}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
               <Menu
                 anchorEl={anchorEl}
                 open={open}
-                onClose={handleClose}
+                onClose={() => handleUserMenuClose(null)}
                 PaperProps={{
-                  elevation: 4,
-                  sx: { mt: 1, minWidth: 180, borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.15)" },
+                  elevation: 8,
+                  sx: {
+                    mt: 1.5,
+                    minWidth: 180,
+                    borderRadius: theme.shape.borderRadius * 2,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                    backdropFilter: "blur(10px) saturate(150%)",
+                    WebkitBackdropFilter: "blur(10px) saturate(150%)",
+                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    py: 1,
+                  },
                 }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                sx={menuSx}
               >
-                <MenuItem onClick={() => handleClose("/profile")}>
-                  <ListItemIcon><AccountCircleIcon fontSize="small" /></ListItemIcon>
+                <MenuItem onClick={() => handleUserMenuClose("/profile")}>
+                  <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
                   Profile
                 </MenuItem>
-                <MenuItem onClick={() => handleClose("/settings")}>
-                  <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
+                <MenuItem onClick={() => handleUserMenuClose("/settings")}>
+                  <ListItemIcon><SettingsOutlined fontSize="small" /></ListItemIcon>
                   Settings
                 </MenuItem>
-                <Divider />
+                <Divider sx={{ my: 1 }} />
                 <MenuItem
-                  onClick={LogoutFx}
-                  sx={{ color: theme.palette.primary.main, fontWeight: "600" }}
+                  onClick={handleLogout}
+                  sx={{ color: theme.palette.error.main, fontWeight: "medium" }}
                 >
-                  <ListItemIcon><LogoutIcon fontSize="small" sx={{ color: theme.palette.primary.main }} /></ListItemIcon>
+                  <ListItemIcon><LogoutOutlined fontSize="small" sx={{ color: theme.palette.error.main }} /></ListItemIcon>
                   Logout
                 </MenuItem>
               </Menu>
             </Box>
           ) : (
-            <Suspense fallback={<CircularProgress size={24} />}>
+            <Suspense fallback={<CircularProgress size={24} color="inherit" />}>
               <AuthDialog onTrigger={refetchUser} />
             </Suspense>
           )}
         </Box>
-        {/* --- END: Desktop Icons --- */}
 
-
-        {/* --- START: Mobile Menu Icon (Visible on mobile only) --- */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center' }}>
+        {/* Mobile Navigation & User Actions */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1 }}>
           {(user || sessionId) && <CartMenu ref={cartRef} />}
           <IconButton
             size="large"
@@ -332,10 +378,7 @@ const LinksContainerComponent = forwardRef((props: any, ref: any) => {
             <MenuIcon />
           </IconButton>
         </Box>
-        {/* --- END: Mobile Menu Icon --- */}
-
       </Toolbar>
-      {/* This renders the mobile menu component we defined earlier */}
       {renderMobileMenu}
     </AppBar>
   );
