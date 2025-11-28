@@ -33,6 +33,15 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
 
+/**
+ * Render the shopping cart UI with item cards, quantity controls, and an order summary.
+ *
+ * The component reads cart data, displays each product with pricing (including sale prices),
+ * allows authenticated users to increment/decrement quantities and remove items (showing success
+ * or error toasts), and keeps the cart data fresh by refetching when changes occur.
+ *
+ * @returns A JSX element representing the shopping cart page
+ */
 function Cart() {
   const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch } = useCart();
   const router = useRouter();
