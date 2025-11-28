@@ -85,9 +85,9 @@ export default function Footer() {
     if (!slug)
       return (
         <Stack spacing={1}>
-          <Typography>Email: sokojunction@gmail.com</Typography>
-          <Typography>Phone: +254 703 508881</Typography>
-          <Typography>Location: Nairobi, Kenya</Typography>
+          <Typography sx={{color:"#fff"}}>Email: sokojunction@gmail.com</Typography>
+          <Typography sx={{color:"#fff"}}>Phone: +254 703 508881</Typography>
+          <Typography sx={{color:"#fff"}}>Location: Nairobi, Kenya</Typography>
         </Stack>
       );
 
