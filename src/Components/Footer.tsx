@@ -207,7 +207,7 @@ export default function Footer() {
         </Grid>
 
         {/* Quick Links */}
-        <Grid item xs={6} md={2}>
+        <Grid item xs={6} md={4}>
           <FooterSectionTitle>Quick Links</FooterSectionTitle>
 
           {["Home", "Shop", "Mall", "About Us"].map((item) => (
@@ -221,18 +221,24 @@ export default function Footer() {
         </Grid>
 
         {/* Categories */}
-        <Grid item xs={6} md={2}>
+        {/* <Grid item xs={6} md={2}>
           <FooterSectionTitle>Categories</FooterSectionTitle>
 
-          {["Fashion", "Electronics", "Home & Living", "Beauty", "Books"].map((item) => (
-            <FooterLink
-              key={item}
-              href={`/shop/category/${item.toLowerCase().replace(" & ", "-")}`}
-            >
-              {item}
-            </FooterLink>
-          ))}
-        </Grid>
+          {["Fashion", "Electronics", "Home & Living", "Beauty", "Books"].map((item) => {
+            const categorySlug = item.toLowerCase().replace(" & ", "-");
+            const href = slug
+              ? `/shop/${slug}?category=${categorySlug}`
+              : `/shops?category=${categorySlug}`;
+            return (
+              <FooterLink
+                key={item}
+                href={href}
+              >
+                {item}
+              </FooterLink>
+            );
+          })}
+        </Grid> */}
 
         {/* Contact */}
         <Grid item xs={12} md={4}>
