@@ -18,6 +18,7 @@ import {
 } from "@/StyledComponents/Products";
 import ProductCard from "@/Components/ProductCard";
 import { useRouter } from "next/router";
+import Chip from "@mui/material/Chip";
 import { useGetProductsQuery, useGetCompanyBySlugQuery } from "@/Api/services";
 import {
   Box,
@@ -63,7 +64,7 @@ const HeroSection = styled(Box, {
   alignItems: 'center',
   justifyContent: 'center',
   color: '#fff',
-  marginTop:"-80px",
+  marginTop: "-80px",
   textAlign: 'center',
   '&::before': {
     content: '""',
@@ -85,11 +86,11 @@ const HeroSection = styled(Box, {
 }));
 
 const ShopHeader = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'left',
-  textAlign: 'left',
-  marginBottom: theme.spacing(2),
+  // display: 'flex',
+  // flexDirection: 'column',
+  // alignItems: 'left',
+  // textAlign: 'left',
+  // marginBottom: theme.spacing(2),
   marginTop: theme.spacing(-8),
 }));
 
@@ -129,7 +130,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     handleFilterClose();
   };
 
-  
+
 
   const [products, setProducts] = useState<any[]>([]);
 
@@ -230,173 +231,249 @@ const Shop = forwardRef((props: any, ref: any) => {
   return (
     <>
       <HeroSection bannerImage={`${companyData?.banner_image}`} />
-      <Box sx={{ minHeight: "calc(100dvh - 64px)", background:"#fff", borderTopLeftRadius:"20px", borderTopRightRadius:"20px", pt:4, mt:-2, zIndex: 10, position:"relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
+      <Box sx={{ minHeight: "calc(100dvh - 64px)", background: "#fff", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", pt: 4, mt: -2, zIndex: 10, position: "relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
         <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
-          <ShopHeader>
-            <ShopLogo src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'} />
-            <Box sx={{width: '90dvw',maxWidth:"1200px", textAlign: 'left' }}>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+          {/* SHOP HEADER */}
+          <ShopHeader
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: "center",
+              gap: 3,
+              mb: 4,
+              p: 3,
+              borderRadius: 4,
+              background: "rgba(255,255,255,0.75)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+              width:{md:"fit-content", xs:"100%"}
+            }}
+          >
+            <ShopLogo
+              src={
+                companyData?.logo_image
+                  ? `https://res.cloudinary.com/dqokryv6u/${companyData.logo_image}`
+                  : "https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg"
+              }
+              style={{
+                width: 110,
+                height: 110,
+                borderRadius: "50%",
+                objectFit: "cover",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+              }}
+            />
+
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
                 {companyData?.name}
               </Typography>
-              <Typography variant="body1" sx={{ color: lightText }}>
+              {/* <Typography variant="body1" sx={{ maxWidth: "700px", color: lightText, mb: 1 }}>
                 {companyData?.description}
-              </Typography>
-              <Button variant="contained" sx={{ mt: 1 }}>
-                {products_data?.count} Products
-              </Button>
-            </Box>
-          </ShopHeader>
+              </Typography> */}
 
-        {/* Filters Section */}
-        <Box sx={{ mb: 2 }}>
-          <Grid
-            container
-            spacing={1}
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            
-            <Grid item xs={8}>
-              <TextField
-                fullWidth
-                placeholder="Search Products"
-                variant="outlined"
-                value={searchTerm}
-                onChange={(e) => {
-                  setPage(1);
-                  setSearchTerm(e.target.value)
-                }}
-                size="small"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '20px',
-                    '&.Mui-focused fieldset': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <FormControlLabel
-                control={<Switch checked={onSale} onChange={handleOnSaleChange} color="primary" />}
-                label={<Typography variant="body2" sx={{ fontWeight: 500 }}>Sale</Typography>}
-                sx={{ mr: 1 }}
-              />
-            </Grid>
 
-            <Grid item xs={1}>
-              {/* Show Filter Icon instead of select on mobile */}
-              <IconButton
-                aria-label="filter categories"
-                onClick={handleFilterClick}
-                sx={{
-                  ml: 1,
-                  border: "1px solid #ccc",
-                  borderRadius: 1,
-                }}
-              >
-                <FilterListIcon />
-              </IconButton>
 
-              <Menu anchorEl={anchorEl} open={open} onClose={handleFilterClose}>
-                <MenuItem onClick={() => handleCategorySelect("")}>All Categories</MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("electronics")}>Electronics</MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("fashion")}>Fashion</MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("beauty")}>Beauty</MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("home-appliances")}>Home Appliances</MenuItem>
-                <MenuItem onClick={() => handleCategorySelect("books")}>Books</MenuItem>
-              </Menu>
-            </Grid>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2, mt: 1, justifyContent: 'flex-end' }}>
+              {/* Social Icons */}
+              <Box sx={{ display: "flex", gap: 2, mt: 2, justifyContent: { xs: "center", sm: "flex-start" } }}>
+                <Chip
+                  label={`${products_data?.count} Products`}
+                  sx={{
+                    px: 2,
+                    py: 1,
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    borderRadius: "12px",
+                    // backgroundColor: theme.palette.primary.light,
+                    // color: theme.palette.primary.contrastText,
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                  }}
+                />
                 {companyData?.facebook_link && (
                   <a href={companyData.facebook_link} target="_blank" rel="noreferrer">
-                    <FacebookIcon sx={{ color: '#1877F2', fontSize: '2rem' }} />
+                    <FacebookIcon
+                      sx={{
+                        color: "#000",
+                        fontSize: "2rem",
+                        transition: "0.25s",
+                        "&:hover": { transform: "scale(1.15)" },
+                      }}
+                    />
                   </a>
                 )}
                 {companyData?.twitter_link && (
                   <a href={companyData.twitter_link} target="_blank" rel="noreferrer">
-                    <TwitterIcon sx={{ color: '#1DA1F2', fontSize: '2rem' }} />
+                    <TwitterIcon
+                      sx={{
+                        color: "#000",
+                        fontSize: "2rem",
+                        transition: "0.25s",
+                        "&:hover": { transform: "scale(1.15)" },
+                      }}
+                    />
                   </a>
                 )}
                 {companyData?.instagram_link && (
                   <a href={companyData.instagram_link} target="_blank" rel="noreferrer">
-                    <InstagramIcon sx={{ color: '#E1306C', fontSize: '2rem' }} />
+                    <InstagramIcon
+                      sx={{
+                        color: "#000",
+                        fontSize: "2rem",
+                        transition: "0.25s",
+                        "&:hover": { transform: "scale(1.15)" },
+                      }}
+                    />
                   </a>
                 )}
               </Box>
-            </Grid>
-          </Grid>
-        </Box>
-        {/* Products Display */}
-        <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
-          {products_loading && page === 1 ? (
-            [...Array(8)].map((_, index) => (
-              <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid */}
-                <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: '12px' }} />
-                <Box sx={{ p: 2 }}>
-                  <Skeleton width="80%" height={20} sx={{ mt: 1 }} />
-                  <Skeleton width="60%" height={20} />
-                  <Skeleton width="40%" height={15} />
-                  <Skeleton width="100%" height={40} sx={{ mt: 2, borderRadius: '8px' }} />
-                  <Skeleton width="100%" height={40} sx={{ mt: 1, borderRadius: '8px' }} />
-                </Box>
-              </ProductItem>
-            ))
-          ) : products_error ? (
-            <Grid item xs={12}>
-              <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                <Typography variant="h6" color="error">
-                  Failed to load products. Please try again.
-                </Typography>
-                <Typography variant="body2" color={lightText} mt={1}>
-                  {products_error.message || "An unknown error occurred."}
-                </Typography>
-              </Box>
-            </Grid>
-          ) : products.length === 0 ? ( // Use products_data directly, as API now filters
-            <Grid item xs={12}>
-              <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                <Typography variant="h6" color={darkText}>
-                  No products found.
-                </Typography>
-                <Typography variant="body1" color={lightText} mt={1}>
-                  Try adjusting your search or filters.
-                </Typography>
-              </Box>
-            </Grid>
-          ) : (
-            products.map((product: any, index: number) => (
-              <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid for ProductCard */}
-                <ProductCard
-                  product={product}
-                  isLoading={false} // ProductCard itself handles its loading state if data is ready
-                  triggerCartRefetch={triggerCartRefetch}
+
+            </Box>
+          </ShopHeader>
+
+
+
+          {/* FILTERS */}
+          <Box sx={{ mb: 4 }}>
+            <Grid container spacing={2} alignItems="center">
+
+              {/* SEARCH */}
+              <Grid item xs={12} sm={7}>
+                <TextField
+                  fullWidth
+                  placeholder="Search products…"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchTerm(e.target.value);
+                  }}
+                  size="medium"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "40px",
+                      background: "#fff",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      "&:hover": { boxShadow: "0 6px 18px rgba(0,0,0,0.12)" },
+                      "& fieldset": { border: "none" },
+                    },
+                    "& .MuiInputBase-input": {
+                      padding: "12px 16px",
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "#888", mr: 1 }} />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
-              </ProductItem>
-            ))
-          )}
-        </ProductsContainer>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            disabled={!products_data?.next || products_loading}
-            onClick={() => setPage(page + 1)}
-            startIcon={products_loading && <CircularProgress size={20} />}
-          >
-            {products_loading ? 'Loading...' : 'Load More'}
-          </Button>
-        </Box>
-      </MainProductsContainer>
+              </Grid>
+
+              {/* SALE SWITCH */}
+              <Grid item xs={6} sm={3}>
+                <FormControlLabel
+                  control={<Switch checked={onSale} onChange={handleOnSaleChange} color="primary" />}
+                  label={<Typography sx={{ fontWeight: 600, fontSize: "0.95rem" }}>Sale</Typography>}
+                  sx={{ ml: 0 }}
+                />
+              </Grid>
+
+              {/* FILTER ICON */}
+              <Grid item xs={6} sm={2} textAlign="right">
+                <IconButton
+                  onClick={handleFilterClick}
+                  sx={{
+                    borderRadius: "50%",
+                    border: "1px solid #ddd",
+                    p: 1.25,
+                    background: "#fff",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    transition: "all 0.3s",
+                    "&:hover": {
+                      background: "#f5f5f5",
+                      transform: "scale(1.1)",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+                    },
+                  }}
+                >
+                  <FilterListIcon sx={{ color: "#555" }} />
+                </IconButton>
+
+                <Menu anchorEl={anchorEl} open={open} onClose={handleFilterClose}>
+                  <MenuItem onClick={() => handleCategorySelect("")}>All Categories</MenuItem>
+                  <MenuItem onClick={() => handleCategorySelect("electronics")}>Electronics</MenuItem>
+                  <MenuItem onClick={() => handleCategorySelect("fashion")}>Fashion</MenuItem>
+                  <MenuItem onClick={() => handleCategorySelect("beauty")}>Beauty</MenuItem>
+                  <MenuItem onClick={() => handleCategorySelect("home-appliances")}>Home Appliances</MenuItem>
+                  <MenuItem onClick={() => handleCategorySelect("books")}>Books</MenuItem>
+                </Menu>
+              </Grid>
+
+            </Grid>
+          </Box>
+
+
+          {/* Products Display */}
+          <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
+            {products_loading && page === 1 ? (
+              [...Array(8)].map((_, index) => (
+                <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid */}
+                  <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: '12px' }} />
+                  <Box sx={{ p: 2 }}>
+                    <Skeleton width="80%" height={20} sx={{ mt: 1 }} />
+                    <Skeleton width="60%" height={20} />
+                    <Skeleton width="40%" height={15} />
+                    <Skeleton width="100%" height={40} sx={{ mt: 2, borderRadius: '8px' }} />
+                    <Skeleton width="100%" height={40} sx={{ mt: 1, borderRadius: '8px' }} />
+                  </Box>
+                </ProductItem>
+              ))
+            ) : products_error ? (
+              <Grid item xs={12}>
+                <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+                  <Typography variant="h6" color="error">
+                    Failed to load products. Please try again.
+                  </Typography>
+                  <Typography variant="body2" color={lightText} mt={1}>
+                    {products_error.message || "An unknown error occurred."}
+                  </Typography>
+                </Box>
+              </Grid>
+            ) : products.length === 0 ? ( // Use products_data directly, as API now filters
+              <Grid item xs={12}>
+                <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+                  <Typography variant="h6" color={darkText}>
+                    No products found.
+                  </Typography>
+                  <Typography variant="body1" color={lightText} mt={1}>
+                    Try adjusting your search or filters.
+                  </Typography>
+                </Box>
+              </Grid>
+            ) : (
+              products.map((product: any, index: number) => (
+                <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid for ProductCard */}
+                  <ProductCard
+                    product={product}
+                    isLoading={false} // ProductCard itself handles its loading state if data is ready
+                    triggerCartRefetch={triggerCartRefetch}
+                  />
+                </ProductItem>
+              ))
+            )}
+          </ProductsContainer>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={!products_data?.next || products_loading}
+              onClick={() => setPage(page + 1)}
+              startIcon={products_loading && <CircularProgress size={20} />}
+            >
+              {products_loading ? 'Loading...' : 'Load More'}
+            </Button>
+          </Box>
+        </MainProductsContainer>
       </Box>
     </>
   );
