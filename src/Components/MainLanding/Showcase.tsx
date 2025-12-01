@@ -89,6 +89,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
     <Box 
       sx={{ 
         py: 12, 
+        px:3,
         background: theme.palette.background.default, // Use theme background
         overflow: 'hidden' // Prevents layout shift from card margins
       }} 
