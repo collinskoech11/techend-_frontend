@@ -46,7 +46,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
 
   const [username, setUsername] = useState<any>(null);
   const [user, setUser] = useState(Cookies.get("username"));
-  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "Sokojunction");
   const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname); // Added isLoading
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);

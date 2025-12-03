@@ -321,6 +321,7 @@ const AuthenticatedCheckout = () => {
                 ].map((field, index) => (
                   <Grid item xs={12} md={6} key={index}>
                     <TextField
+                      autoFocus={index === 0}
                       fullWidth
                       label={field.label}
                       {...register(field.name as keyof CheckoutFormData)}
@@ -439,7 +440,7 @@ const AuthenticatedCheckout = () => {
         </Paper>
       </Grid>
 
-      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
+      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
         <DialogTitle>
           Map Preview: {selectedLocationForMap?.name}
           <IconButton
@@ -691,6 +692,7 @@ const GuestCheckout = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
+                    autoFocus
                     fullWidth
                     label="Email Address"
                     variant="outlined"
@@ -1054,7 +1056,7 @@ const GuestCheckout = () => {
         </Grid>
       </Grid>
 
-      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
+      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
         <DialogTitle>
           Map Preview: {selectedLocationForMap?.name}
           <IconButton

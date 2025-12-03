@@ -137,7 +137,7 @@ export default function PaymentDialog() {
         <>
             <AccentButton onClick={() => setOpen(true)}>Make Payment</AccentButton>
 
-            <Dialog open={open} onClose={reset} maxWidth="md" fullWidth>
+            <Dialog open={open} onClose={reset} maxWidth="md" fullWidth disablePortal keepMounted>
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1.5, borderBottom: '1px solid #eee' }}>
                     <Typography variant="h6" fontWeight={700}>
                         {paymentStatus === "success" ? "Payment Status" : "Select Your Plan & Payment Method"}
@@ -262,6 +262,7 @@ export default function PaymentDialog() {
                                             {selectedPaymentMethod === "mpesa" && (
                                                 <Box sx={{ p: 2 }}>
                                                     <TextField
+                                                        autoFocus
                                                         label="Phone Number (e.g., 2547XXXXXXXX)"
                                                         fullWidth
                                                         size="medium"
@@ -287,6 +288,7 @@ export default function PaymentDialog() {
                                             {selectedPaymentMethod === "card" && (
                                                 <Box sx={{ p: 2 }}>
                                                     <TextField
+                                                        autoFocus
                                                         label="Card Number"
                                                         fullWidth
                                                         size="medium"
@@ -353,6 +355,7 @@ export default function PaymentDialog() {
                                             {selectedPaymentMethod === "crypto" && (
                                                 <Box sx={{ p: 2 }}>
                                                     <TextField
+                                                        autoFocus
                                                         label="Crypto Wallet Address"
                                                         fullWidth
                                                         size="medium"
