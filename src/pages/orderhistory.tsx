@@ -124,6 +124,8 @@ function OrderHistory() {
   onClose={() => setSelectedCheckout(null)}
   maxWidth="sm"
   fullWidth
+  disablePortal
+  keepMounted
 >
   <DialogTitle sx={{ fontWeight: "bold" }}>Order #{selectedCheckout?.id} Details</DialogTitle>
   
@@ -230,7 +232,7 @@ function OrderHistory() {
 </Dialog>
 
 {/* Map Preview Dialog */}
-<Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
+<Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
   <DialogTitle>
     Map Preview: {selectedLocationForMap?.name}
     <IconButton
