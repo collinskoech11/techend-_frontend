@@ -170,7 +170,12 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
         )
       )}
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        disablePortal
+        keepMounted
+      >
         <DialogContent>
           <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px",background:"transparent", borderRadius: "5px" }}>
             <Tabs value={tabIndex} onChange={handleTabChange} centered>
@@ -182,6 +187,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
             {tabIndex === 0 && (
               <Box sx={{ mt: 2 }}>
                 <TextField
+                  autoFocus
                   fullWidth
                   name="email"
                   label="Email"
@@ -240,6 +246,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
             {tabIndex === 1 && (
               <Box sx={{ mt: 2 }}>
                 <TextField
+                  autoFocus
                   fullWidth
                   name="username"
                   label="Username"

@@ -163,7 +163,7 @@ function OrderDetailsPage() {
       </Box>
 
       {/* Map Preview Dialog */}
-      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth>
+      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
         <DialogTitle>
           Map Preview: {selectedLocationForMap?.name}
           <IconButton
