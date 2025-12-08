@@ -163,3 +163,8 @@ export interface GuestPlaceOrderArgs extends CheckoutFormData {
   email: string;
   company_name: string;
 }
+
+export interface LipaNaMpesaResponse {
+  message: string;
+  // Add any other fields if the backend returns them, e.g., transaction_id
+}

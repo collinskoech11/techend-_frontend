@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation } from "@/Api/services";
+import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
 import { PickupLocation, CheckoutResponse, DeliveryLocation, GuestOrderResponse } from "@/Types";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
@@ -37,6 +37,22 @@ import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { BreadCrumbContainer } from "@/StyledComponents/BreadCrumb";
 
+const formatPhoneNumber = (phoneNumber: string): string => {
+  // Remove any non-digit characters
+  const digitsOnly = phoneNumber.replace(/\D/g, '');
+
+  // If it already starts with 254, return as is
+  if (digitsOnly.startsWith("254")) {
+    return digitsOnly;
+  }
+  // If it starts with 0, replace 0 with 254
+  if (digitsOnly.startsWith("0")) {
+    return "254" + digitsOnly.substring(1);
+  }
+  // Otherwise, prepend 254
+  return "254" + digitsOnly;
+};
+
 // --- Authenticated Checkout --- //
 
 const checkoutSchema = z.object({
@@ -57,6 +73,7 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 const AuthenticatedCheckout = () => {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
+  const [lipaNaMpesaFx] = useLipaNaMpesaMutation(); // Initialize mutation
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const theme = useTheme();
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
@@ -69,6 +86,13 @@ const AuthenticatedCheckout = () => {
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = ['Select Location', 'Billing Address', 'Review Order'];
+
+  // M-Pesa specific states
+  const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
+  const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
+  const [showMpesaModal, setShowMpesaModal] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
@@ -104,10 +128,70 @@ const AuthenticatedCheckout = () => {
     }
   }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
 
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) }); // Added watch
 
   const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
+
+  // Polling for M-Pesa payment status
+  const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
+    { order_id: mpesaOrderId!, token: Cookies.get("access") },
+    { skip: !isMpesaPaymentInitiated || !mpesaOrderId } // Removed pollingInterval
+  );
+
+  useEffect(() => {
+    if (mpesaOrderDetails?.payment_status === "Paid") {
+      toast.success("M-Pesa Payment Confirmed!");
+      setShowMpesaModal(false);
+      setIsMpesaPaymentInitiated(false);
+      setMpesaOrderId(null);
+      if (pollIntervalRef.current) { // Clear interval here as well
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      router.push(`/orderhistory/${mpesaOrderDetails.id}`); // Redirect to order details page
+    }
+  }, [mpesaOrderDetails, router]);
+
+  useEffect(() => {
+    if (isMpesaPaymentInitiated && mpesaOrderId) {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+
+      setPollCount(0); // Reset poll count
+
+      pollIntervalRef.current = setInterval(() => {
+        setPollCount(prevCount => {
+          if (prevCount >= 4) { // 0-indexed, so 4 means 5 runs
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
+            toast.error("M-Pesa payment timed out. Please try again.");
+            setShowMpesaModal(false);
+            setIsMpesaPaymentInitiated(false);
+            setMpesaOrderId(null);
+            return prevCount;
+          }
+          refetchMpesaOrder();
+          return prevCount + 1;
+        });
+      }, 3000);
+    } else {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, router, shopname]); // Added router, shopname to dependencies
 
   useEffect(() => {
     if (cart_data) {
@@ -133,15 +217,26 @@ const AuthenticatedCheckout = () => {
 
   const onSubmit = async (formData: CheckoutFormData) => {
     try {
+      const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber); // Format phone number
+
       const response = await checkoutFx({
-        body: { ...formData, pickup_location: selectedPickupLocation, delivery_location: selectedDeliveryLocation },
+        body: { ...formData, phoneNumber: formattedPhoneNumber, pickup_location: selectedPickupLocation, delivery_location: selectedDeliveryLocation },
         token: Cookies.get("access"),
         company_name: shopname,
       }).unwrap();
-      toast.success("Order Placed Successfully");
-      setShippingCost(parseFloat(response.delivery_fee));
-      setTotalAmount(parseFloat(response.total_amount));
-      handleNext();
+
+      if (formData.payment_method === "mpesa") {
+        setMpesaOrderId(response.order_id);
+        setIsMpesaPaymentInitiated(true);
+        setShowMpesaModal(true);
+        await lipaNaMpesaFx({ order_id: response.order_id, token: Cookies.get("access") }).unwrap();
+        toast.success("STK Push sent to your phone. Please complete the payment.");
+      } else {
+        toast.success("Order Placed Successfully");
+        setShippingCost(parseFloat(response.delivery_fee));
+        setTotalAmount(parseFloat(response.total_amount));
+        handleNext(); // Proceed to review order step for other payment methods
+      }
     } catch (error: any) {
       toast.error(error.data?.non_field_errors?.[0] || "An error occurred");
     }
@@ -385,13 +480,14 @@ const AuthenticatedCheckout = () => {
               <Button onClick={handleBack}>Back</Button>
               <Button
                 variant="contained"
+                type="submit" // This will trigger the onSubmit function
+                disabled={isLoading || (!selectedPickupLocation && !selectedDeliveryLocation)}
                 sx={{
                   backgroundColor: theme.palette.primary.main,
                   "&:hover": { backgroundColor: theme.palette.primary.dark },
                 }}
-                onClick={handleConfirmPayment}
               >
-                Confirm Payment
+                {isLoading ? <CircularProgress size={24} /> : "Place Order"}
               </Button>
             </Box>
           </>
@@ -476,6 +572,47 @@ const AuthenticatedCheckout = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* M-Pesa Payment Modal */}
+      <Dialog open={showMpesaModal} onClose={() => setShowMpesaModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Complete M-Pesa Payment
+          <IconButton
+            aria-label="close"
+            onClick={() => setShowMpesaModal(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ textAlign: 'center', p: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6" gutterBottom>
+            Please check your phone for an M-Pesa STK Push notification.
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Complete the payment on your phone to finalize your order.
+          </Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setShowMpesaModal(false);
+              setIsMpesaPaymentInitiated(false);
+              setMpesaOrderId(null);
+              router.push(`/shop/${shopname}`); // Redirect if user cancels
+            }}
+            sx={{ mt: 3 }}
+          >
+            Cancel Payment
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Grid>
   );
 };
@@ -487,6 +624,7 @@ const GuestCheckout = () => {
   const router = useRouter();
   const { sessionId, refetch, data: cart_data } = useCart();
   const [placeOrderGuest, { isLoading }] = usePlaceOrderGuestMutation();
+  const [lipaNaMpesaFx] = useLipaNaMpesaMutation(); // Initialize mutation
   const [orderResponse, setOrderResponse] = useState<GuestOrderResponse | null>(null);
   const [shopname] = useState(Cookies.get("shopname") || "techend");
 
@@ -504,6 +642,13 @@ const GuestCheckout = () => {
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = ['Your Details', 'Delivery/Pickup & Payment', 'Review Order'];
+
+  // M-Pesa specific states for Guest Checkout
+  const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
+  const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
+  const [showMpesaModal, setShowMpesaModal] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const guestCheckoutSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -548,14 +693,72 @@ const GuestCheckout = () => {
 
   const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
 
-
-
   const { register, handleSubmit, formState: { errors }, setValue, trigger, getValues, watch } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
     defaultValues: { payment_method: "card" },
   });
 
   const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"]);
+
+  // Polling for M-Pesa payment status for Guest Checkout
+  const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
+    { order_id: mpesaOrderId!, token: "" }, // Guest users don't have a token for this endpoint either
+    { skip: !isMpesaPaymentInitiated || !mpesaOrderId } // Removed pollingInterval
+  );
+
+  useEffect(() => {
+    if (mpesaOrderDetails?.payment_status === "Paid") {
+      toast.success("M-Pesa Payment Confirmed!");
+      setShowMpesaModal(false);
+      setIsMpesaPaymentInitiated(false);
+      setMpesaOrderId(null);
+      if (pollIntervalRef.current) { // Clear interval here as well
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      router.push(`/orderhistory/${mpesaOrderDetails.id}`); // Redirect to order details page
+    }
+  }, [mpesaOrderDetails, router]);
+
+  useEffect(() => {
+    if (isMpesaPaymentInitiated && mpesaOrderId) {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+
+      setPollCount(0); // Reset poll count
+
+      pollIntervalRef.current = setInterval(() => {
+        setPollCount(prevCount => {
+          if (prevCount >= 4) { // 0-indexed, so 4 means 5 runs
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
+            toast.error("M-Pesa payment timed out. Please try again.");
+            setShowMpesaModal(false);
+            setIsMpesaPaymentInitiated(false);
+            setMpesaOrderId(null);
+            return prevCount;
+          }
+          refetchMpesaOrder();
+          return prevCount + 1;
+        });
+      }, 3000);
+    } else {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, router, shopname]); // Added router, shopname to dependencies
 
   useEffect(() => {
     if (allDeliveryLocations) {
@@ -599,11 +802,31 @@ const GuestCheckout = () => {
     }
 
     try {
-      const response = await placeOrderGuest({ ...formData, sessionId, company_name: shopname }).unwrap();
+      const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber); // Format phone number
+
+      const response = await placeOrderGuest({
+        ...formData,
+        phoneNumber: formattedPhoneNumber, // Use formatted phone number
+        sessionId,
+        company_name: shopname
+      }).unwrap();
       setOrderResponse(response);
       toast.success("Your order has been placed successfully!");
       localStorage.removeItem("session_id");
       refetch(); // To clear the cart data
+
+      if (formData.payment_method === "mpesa") {
+        setMpesaOrderId(response.order_id);
+        setIsMpesaPaymentInitiated(true);
+        setShowMpesaModal(true);
+        // For guest users, the backend might not require a token for lipa-na-mpesa if the order_id is sufficient
+        // However, if it does, we might need to handle guest authentication differently or ensure the backend allows it.
+        await lipaNaMpesaFx({ order_id: response.order_id, token: "" }).unwrap(); // Pass empty token for guest
+        toast.success("STK Push sent to your phone. Please complete the payment.");
+      } else {
+        // For other payment methods, proceed to the order confirmation screen
+        // The existing orderResponse rendering handles this.
+      }
     } catch (error: any) {
       if (error.data?.error === "Email already exists") {
         toast.error("An account with this email already exists. Please log in to complete your order.");
@@ -614,7 +837,7 @@ const GuestCheckout = () => {
     }
   };
 
-  if (orderResponse) {
+  if (orderResponse && !isMpesaPaymentInitiated) { // Only show order response if not in M-Pesa flow
     const handleConfirmPayment = () => {
       toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
       router.push(`/shop/${shopname}`);
@@ -1090,6 +1313,47 @@ const GuestCheckout = () => {
               </Typography>
             </Box>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* M-Pesa Payment Modal for Guest Checkout */}
+      <Dialog open={showMpesaModal} onClose={() => setShowMpesaModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Complete M-Pesa Payment
+          <IconButton
+            aria-label="close"
+            onClick={() => setShowMpesaModal(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ textAlign: 'center', p: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6" gutterBottom>
+            Please check your phone for an M-Pesa STK Push notification.
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Complete the payment on your phone to finalize your order.
+          </Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setShowMpesaModal(false);
+              setIsMpesaPaymentInitiated(false);
+              setMpesaOrderId(null);
+              router.push(`/shop/${shopname}`); // Redirect if user cancels
+            }}
+            sx={{ mt: 3 }}
+          >
+            Cancel Payment
+          </Button>
         </DialogContent>
       </Dialog>
     </Paper>
