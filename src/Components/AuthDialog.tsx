@@ -33,7 +33,7 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
+function AuthDialog({ onTrigger, forceOpen = false, showButton = true, onClose }) {
   const theme = useTheme();
   const [open, setOpen] = useState(forceOpen);
   const [tabIndex, setTabIndex] = useState(0);
@@ -154,26 +154,18 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <>
-      {showButton && (
-        loggedInUser ? (
-          <IconButton onClick={() => setOpen(true)}>
-            <AccountCircleOutlined sx={{ color: theme.palette.primary.main, fontSize: 32 }} />
-          </IconButton>
-        ) : (
-          <>
-            <Button color="inherit" onClick={() => setOpen(true)}>
-              Login
-            </Button>
-          </>
-        )
-      )}
-
       <Dialog
         open={open}
-        onClose={() => setOpen(false)}
-        disablePortal
+        onClose={handleClose}
         keepMounted
       >
         <DialogContent>
@@ -226,7 +218,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true }) {
                     fontWeight: 500,
                   }}
                   onClick={() => {
-                    setOpen(false);
+                    handleClose();
                     router.push("/forgot-password");
                   }}
                 >
