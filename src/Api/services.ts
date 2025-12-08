@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -145,9 +145,27 @@ export const AuthApi = createApi({
         }
       }),
     }),
+    lipaNaMpesa: builder.mutation<LipaNaMpesaResponse, { order_id: string; token: string }>({
+      query: ({ order_id, token }) => ({
+        url: `cart/lipa-na-mpesa/${order_id}/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
+    getOrderById: builder.query({
+      query: ({ order_id, token }) => ({
+        url: `cart/orders/${order_id}/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
     getCheckoutHistory: builder.query({
       query: data => ({
-        url: `cart/past-checkouts/`,
+        url: `cart/orders/past/`,
         method: "GET",
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -264,6 +282,8 @@ export const {
   useRemoveProductFromCartMutation,
   useGetCartQuery,
   useCheckoutCartMutation,
+  useLipaNaMpesaMutation, // Added
+  useGetOrderByIdQuery, // Added
   useGetCheckoutHistoryQuery,
   useGetCompanyQuery,
   useCreateCompanyMutation,
