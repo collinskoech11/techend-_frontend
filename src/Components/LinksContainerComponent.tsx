@@ -50,6 +50,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname); // Added isLoading
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   const refetchUser = () => {
     setUser(Cookies.get("username"));
@@ -198,7 +199,10 @@ const LinksContainerComponent = forwardRef((props, ref) => {
               Cart
             </MenuItem>
           )}
-          <AuthDialog onTrigger={refetchUser} />
+          <MenuItem onClick={() => { setIsAuthDialogOpen(true); handleMobileMenuClose(); }}>
+            <ListItemIcon><PersonOutline fontSize="small" /></ListItemIcon>
+            Login
+          </MenuItem>
         </Box>
       )}
     </Menu>
@@ -358,9 +362,9 @@ const LinksContainerComponent = forwardRef((props, ref) => {
               </Menu>
             </Box>
           ) : (
-            <Suspense fallback={<CircularProgress size={24} color="inherit" />}>
-              <AuthDialog onTrigger={refetchUser} />
-            </Suspense>
+            <Button color="inherit" onClick={() => setIsAuthDialogOpen(true)}>
+              Login
+            </Button>
           )}
         </Box>
 
@@ -380,6 +384,17 @@ const LinksContainerComponent = forwardRef((props, ref) => {
         </Box>
       </Toolbar>
       {renderMobileMenu}
+      <Suspense fallback={<div />}>
+        <AuthDialog
+          forceOpen={isAuthDialogOpen}
+          onTrigger={() => {
+            refetchUser();
+            setIsAuthDialogOpen(false);
+          }}
+          onClose={() => setIsAuthDialogOpen(false)}
+          showButton={false}
+        />
+      </Suspense>
     </AppBar>
   );
 });

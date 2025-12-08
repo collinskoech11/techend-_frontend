@@ -292,7 +292,12 @@ const AddPickupLocation = () => {
               Login to Add Pickup Location
             </Button>
           </Box>
-          <AuthDialog forceOpen={true} onTrigger={setIsAuthDialogOpen} showButton={false} />
+          <AuthDialog
+            forceOpen={isAuthDialogOpen}
+            onTrigger={() => setIsAuthDialogOpen(false)}
+            onClose={() => router.push("/")}
+            showButton={false}
+          />
         </>
       )}
     </Box>
