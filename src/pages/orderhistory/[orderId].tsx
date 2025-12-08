@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import {
@@ -12,10 +12,11 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { useGetCheckoutHistoryQuery, useUpdatePaymentStatusMutation, useGetCompanyBySlugQuery } from "@/Api/services";
+import { useGetCheckoutHistoryQuery, useUpdatePaymentStatusMutation, useGetCompanyBySlugQuery, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
 import { CheckoutResponse, PickupLocation } from "@/Types";
 import toast, { Toaster } from "react-hot-toast";
 import OrderDetailsCard from "@/Components/OrderDetailsCard";
@@ -37,12 +38,76 @@ function OrderDetailsPage() {
   const [updatePaymentStatus, { isLoading: isUpdating }] = useUpdatePaymentStatusMutation();
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
+  // M-Pesa specific states
+  const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
+  const [showMpesaModal, setShowMpesaModal] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
+  const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
+    { order_id: orderId as string, token: Cookies.get("access") || "" },
+    { skip: !isMpesaPaymentInitiated || !orderId }
+  );
+
   useEffect(() => {
     if (checkoutHistory && orderId) {
       const foundOrder = checkoutHistory.find((item: CheckoutResponse) => item.id === Number(orderId));
       setOrder(foundOrder || null);
     }
   }, [checkoutHistory, orderId]);
+
+  useEffect(() => {
+    if (mpesaOrderDetails?.payment_status === "Paid") {
+      toast.success("M-Pesa Payment Confirmed!");
+      setIsMpesaPaymentInitiated(false);
+      setShowMpesaModal(false);
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      refetch(); // Refetch the main order history to update the order status on the page
+    }
+  }, [mpesaOrderDetails, refetch]);
+
+  useEffect(() => {
+    if (isMpesaPaymentInitiated && orderId) {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+
+      setPollCount(0); // Reset poll count
+
+      pollIntervalRef.current = setInterval(() => {
+        setPollCount(prevCount => {
+          if (prevCount >= 4) { // 0-indexed, so 4 means 5 runs
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
+            toast.error("M-Pesa payment timed out. Please try again.");
+            setIsMpesaPaymentInitiated(false);
+            setShowMpesaModal(false);
+            return prevCount;
+          }
+          refetchMpesaOrder();
+          return prevCount + 1;
+        });
+      }, 3000);
+    } else {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [isMpesaPaymentInitiated, orderId, refetchMpesaOrder, router, shopname]);
 
   const handleViewMap = (location: PickupLocation) => {
     setSelectedLocationForMap(location);
@@ -58,6 +123,21 @@ function OrderDetailsPage() {
       refetch();
     } catch (error) {
       toast.error("Failed to confirm payment. Please try again.");
+    }
+  };
+
+  const handlePayWithMpesa = async () => {
+    if (!order || !Cookies.get("access")) return;
+
+    try {
+      setIsMpesaPaymentInitiated(true);
+      setShowMpesaModal(true);
+      await lipaNaMpesaFx({ order_id: order.id.toString(), token: Cookies.get("access") || "" }).unwrap();
+      toast.success("STK Push sent to your phone. Please complete the payment.");
+    } catch (error: any) {
+      toast.error(error.data?.detail || "Failed to initiate M-Pesa payment.");
+      setIsMpesaPaymentInitiated(false);
+      setShowMpesaModal(false);
     }
   };
 
@@ -142,6 +222,19 @@ function OrderDetailsPage() {
                   >
                     Payment Confirmed
                   </Button>
+                ) : order.payment_method === "mpesa" && order.payment_status === "Pending" ? (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      "&:hover": { backgroundColor: theme.palette.primary.dark },
+                    }}
+                    onClick={handlePayWithMpesa}
+                    disabled={isMpesaPaymentInitiated}
+                    fullWidth
+                  >
+                    {isMpesaPaymentInitiated ? "Waiting for Payment..." : "Pay with M-Pesa"}
+                  </Button>
                 ) : (
                   <Button
                     variant="contained"
@@ -149,7 +242,7 @@ function OrderDetailsPage() {
                       backgroundColor: theme.palette.primary.main,
                       "&:hover": { backgroundColor: theme.palette.primary.dark },
                     }}
-                    onClick={handleConfirmPayment}
+                    onClick={handleConfirmPayment} // Keep existing for other pending methods
                     disabled={isUpdating}
                     fullWidth
                   >
@@ -198,6 +291,50 @@ function OrderDetailsPage() {
               </Typography>
             </Box>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* M-Pesa Payment Modal */}
+      <Dialog open={showMpesaModal} onClose={() => setShowMpesaModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Complete M-Pesa Payment
+          <IconButton
+            aria-label="close"
+            onClick={() => setShowMpesaModal(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ textAlign: 'center', p: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6" gutterBottom>
+            Please check your phone for an M-Pesa STK Push notification.
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Complete the payment on your phone to finalize your order.
+          </Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setShowMpesaModal(false);
+              setIsMpesaPaymentInitiated(false);
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+              router.push(`/shop/${shopname}`); // Redirect if user cancels
+            }}
+            sx={{ mt: 3 }}
+          >
+            Cancel Payment
+          </Button>
         </DialogContent>
       </Dialog>
     </>

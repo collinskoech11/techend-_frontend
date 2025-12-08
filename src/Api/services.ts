@@ -165,7 +165,7 @@ export const AuthApi = createApi({
     }),
     getCheckoutHistory: builder.query({
       query: data => ({
-        url: `cart/past-checkouts/`,
+        url: `cart/orders/past/`,
         method: "GET",
         headers: {
           Authorization: `Bearer ${data.token}`,
