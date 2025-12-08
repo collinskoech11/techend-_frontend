@@ -64,6 +64,7 @@ export default function LandingPage() {
           onTrigger={handleAuthSuccess}
           forceOpen={true}
           showButton={false}
+          onClose={() => setShowAuthDialog(false)}
         />
       )}
       <Box sx={{ p: 0, mt: "-100px" }}>

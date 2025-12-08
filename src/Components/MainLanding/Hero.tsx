@@ -239,13 +239,13 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
             >
               Start Free Trial
             </GlowButton>
-
+{/* 
             <GlassButton 
               onClick={handleAuthTrigger}
               size="large"
             >
               View Demo
-            </GlassButton>
+            </GlassButton> */}
           </Box>
           
           {/* Optional: Add social proof text below buttons */}
