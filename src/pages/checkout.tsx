@@ -94,8 +94,8 @@ const AuthenticatedCheckout = () => {
   const [pollCount, setPollCount] = useState(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleNext = () => setActiveStep((prev) => prev + 1);
-  const handleBack = () => setActiveStep((prev) => prev - 1);
+  const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
+  const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
 
   const { data: pickupLocationsData, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery({
     company_slug: shopname,
@@ -149,9 +149,9 @@ const AuthenticatedCheckout = () => {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      router.push(`/orderhistory/${mpesaOrderDetails.id}`); // Redirect to order details page
+      handleNext();
     }
-  }, [mpesaOrderDetails, router]);
+  }, [mpesaOrderDetails, handleNext]);
 
   useEffect(() => {
     if (isMpesaPaymentInitiated && mpesaOrderId) {
@@ -172,6 +172,7 @@ const AuthenticatedCheckout = () => {
             setShowMpesaModal(false);
             setIsMpesaPaymentInitiated(false);
             setMpesaOrderId(null);
+            handleNext();
             return prevCount;
           }
           refetchMpesaOrder();
@@ -191,7 +192,7 @@ const AuthenticatedCheckout = () => {
         pollIntervalRef.current = null;
       }
     };
-  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, router, shopname]); // Added router, shopname to dependencies
+  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, handleNext]); // Added router, shopname to dependencies
 
   useEffect(() => {
     if (cart_data) {
@@ -676,8 +677,8 @@ const GuestCheckout = () => {
   });
   type GuestCheckoutFormData = z.infer<typeof guestCheckoutSchema>;
 
-  const handleNext = () => setActiveStep((prev) => prev + 1);
-  const handleBack = () => setActiveStep((prev) => prev - 1);
+  const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
+  const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
 
   const { data: pickupLocationsData, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery({
     company_slug: shopname,
@@ -716,9 +717,9 @@ const GuestCheckout = () => {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      router.push(`/orderhistory/${mpesaOrderDetails.id}`); // Redirect to order details page
+      handleNext();
     }
-  }, [mpesaOrderDetails, router]);
+  }, [mpesaOrderDetails, handleNext]);
 
   useEffect(() => {
     if (isMpesaPaymentInitiated && mpesaOrderId) {
@@ -739,6 +740,7 @@ const GuestCheckout = () => {
             setShowMpesaModal(false);
             setIsMpesaPaymentInitiated(false);
             setMpesaOrderId(null);
+            handleNext();
             return prevCount;
           }
           refetchMpesaOrder();
@@ -758,7 +760,7 @@ const GuestCheckout = () => {
         pollIntervalRef.current = null;
       }
     };
-  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, router, shopname]); // Added router, shopname to dependencies
+  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, handleNext]); // Added router, shopname to dependencies
 
   useEffect(() => {
     if (allDeliveryLocations) {
