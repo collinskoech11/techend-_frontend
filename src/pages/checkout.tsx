@@ -93,6 +93,7 @@ const AuthenticatedCheckout = () => {
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
@@ -128,7 +129,7 @@ const AuthenticatedCheckout = () => {
     }
   }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) }); // Added watch
+  const { register, handleSubmit, formState: { errors }, setValue, watch, trigger } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
 
   const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
@@ -149,9 +150,8 @@ const AuthenticatedCheckout = () => {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      handleNext();
     }
-  }, [mpesaOrderDetails, handleNext]);
+  }, [mpesaOrderDetails]);
 
   useEffect(() => {
     if (isMpesaPaymentInitiated && mpesaOrderId) {
@@ -227,10 +227,12 @@ const AuthenticatedCheckout = () => {
       }).unwrap();
 
       if (formData.payment_method === "mpesa") {
+        setIsProcessingMpesa(true);
         setMpesaOrderId(response.order_id);
+        await lipaNaMpesaFx({ order_id: response.order_id, token: Cookies.get("access") }).unwrap();
+        setIsProcessingMpesa(false);
         setIsMpesaPaymentInitiated(true);
         setShowMpesaModal(true);
-        await lipaNaMpesaFx({ order_id: response.order_id, token: Cookies.get("access") }).unwrap();
         toast.success("STK Push sent to your phone. Please complete the payment.");
       } else {
         toast.success("Order Placed Successfully");
@@ -239,6 +241,7 @@ const AuthenticatedCheckout = () => {
         handleNext(); // Proceed to review order step for other payment methods
       }
     } catch (error: any) {
+      setIsProcessingMpesa(false);
       toast.error(error.data?.non_field_errors?.[0] || "An error occurred");
     }
   };
@@ -430,13 +433,19 @@ const AuthenticatedCheckout = () => {
             </Paper>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <Button onClick={handleBack}>Back</Button>
-              <Button variant="contained" type="submit">
+              <Button variant="contained" onClick={async () => {
+                const billingFields: (keyof CheckoutFormData)[] = ["firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"];
+                const isValid = await trigger(billingFields);
+                if (isValid) {
+                  handleNext();
+                }
+              }}>
                 Next
               </Button>
             </Box>
           </>
         );
-      case 2:
+      default:
         const handleConfirmPayment = () => {
           toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
           router.push(`/shop/${shopname}`);
@@ -449,30 +458,32 @@ const AuthenticatedCheckout = () => {
             </Typography>
             <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
               <Typography variant="h6" gutterBottom>Your Total: Kes {totalAmount}</Typography>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Company Payment Details:</Typography>
+              {/* {order} */}
+              {/* <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Company Payment Details:</Typography> */}
               {companyDataLoading ? (
                 <Typography>Loading payment details...</Typography>
               ) : companyData ? (
-                <Box>
-                  {companyData.payment_method === "mpesa_till" && (
-                    <Typography variant="body1">M-Pesa Till Number: <b>{companyData.mpesa_till_number}</b></Typography>
-                  )}
-                  {companyData.payment_method === "mpesa_paybill" && (
-                    <>
-                      <Typography variant="body1">M-Pesa Paybill Number: <b>{companyData.mpesa_paybill_number}</b></Typography>
-                      <Typography variant="body1">M-Pesa Account Number: <b>{companyData.mpesa_account_number}</b></Typography>
-                    </>
-                  )}
-                  {companyData.payment_method === "mpesa_send_money" && (
-                    <Typography variant="body1">M-Pesa Phone Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-                  )}
-                  {companyData.payment_method === "pochi_la_biashara" && (
-                    <Typography variant="body1">Pochi la Biashara Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-                  )}
-                  {!companyData.payment_method && (
-                    <Typography>No specific payment method configured for this company.</Typography>
-                  )}
-                </Box>
+                <></>
+                // <Box>
+                //   {companyData.payment_method === "mpesa_till" && (
+                //     <Typography variant="body1">M-Pesa Till Number: <b>{companyData.mpesa_till_number}</b></Typography>
+                //   )}
+                //   {companyData.payment_method === "mpesa_paybill" && (
+                //     <>
+                //       <Typography variant="body1">M-Pesa Paybill Number: <b>{companyData.mpesa_paybill_number}</b></Typography>
+                //       <Typography variant="body1">M-Pesa Account Number: <b>{companyData.mpesa_account_number}</b></Typography>
+                //     </>
+                //   )}
+                //   {companyData.payment_method === "mpesa_send_money" && (
+                //     <Typography variant="body1">M-Pesa Phone Number: <b>{companyData.mpesa_phone_number}</b></Typography>
+                //   )}
+                //   {companyData.payment_method === "pochi_la_biashara" && (
+                //     <Typography variant="body1">Pochi la Biashara Number: <b>{companyData.mpesa_phone_number}</b></Typography>
+                //   )}
+                //   {!companyData.payment_method && (
+                //     <Typography>No specific payment method configured for this company.</Typography>
+                //   )}
+                // </Box>
               ) : (
                 <Typography>Could not load company payment details.</Typography>
               )}
@@ -482,19 +493,19 @@ const AuthenticatedCheckout = () => {
               <Button
                 variant="contained"
                 type="submit" // This will trigger the onSubmit function
-                disabled={isLoading || (!selectedPickupLocation && !selectedDeliveryLocation)}
+                disabled={isLoading || isProcessingMpesa || (!selectedPickupLocation && !selectedDeliveryLocation)}
                 sx={{
                   backgroundColor: theme.palette.primary.main,
                   "&:hover": { backgroundColor: theme.palette.primary.dark },
                 }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Place Order"}
+                {(isLoading || isProcessingMpesa) ? <CircularProgress size={24} /> : "Place Order"}
               </Button>
             </Box>
           </>
         );
-      default:
-        return 'Unknown step';
+      // default:
+      //   return (`Unknown step ${step}`);
     }
   };
 
@@ -650,6 +661,7 @@ const GuestCheckout = () => {
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
   const guestCheckoutSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -818,18 +830,21 @@ const GuestCheckout = () => {
       refetch(); // To clear the cart data
 
       if (formData.payment_method === "mpesa") {
+        setIsProcessingMpesa(true);
         setMpesaOrderId(response.order_id);
-        setIsMpesaPaymentInitiated(true);
-        setShowMpesaModal(true);
         // For guest users, the backend might not require a token for lipa-na-mpesa if the order_id is sufficient
         // However, if it does, we might need to handle guest authentication differently or ensure the backend allows it.
         await lipaNaMpesaFx({ order_id: response.order_id, token: "" }).unwrap(); // Pass empty token for guest
+        setIsProcessingMpesa(false);
+        setIsMpesaPaymentInitiated(true);
+        setShowMpesaModal(true);
         toast.success("STK Push sent to your phone. Please complete the payment.");
       } else {
         // For other payment methods, proceed to the order confirmation screen
         // The existing orderResponse rendering handles this.
       }
     } catch (error: any) {
+      setIsProcessingMpesa(false);
       if (error.data?.error === "Email already exists") {
         toast.error("An account with this email already exists. Please log in to complete your order.");
         router.push("/login");
@@ -1229,13 +1244,13 @@ const GuestCheckout = () => {
               <Button
                 variant="contained"
                 type="submit"
-                disabled={isLoading || (!selectedPickupLocation && !selectedDeliveryLocation)}
+                disabled={isLoading || isProcessingMpesa || (!selectedPickupLocation && !selectedDeliveryLocation)}
                 sx={{
                   backgroundColor: theme.palette.primary.main,
                   "&:hover": { backgroundColor: theme.palette.primary.dark },
                 }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Place Order & Create Account"}
+                {(isLoading || isProcessingMpesa) ? <CircularProgress size={24} /> : "Place Order & Create Account"}
               </Button>
             </Box>
           </>
