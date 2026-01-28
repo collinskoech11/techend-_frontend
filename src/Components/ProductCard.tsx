@@ -53,6 +53,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
         toast.success("Product added to cart!");
         triggerCartRefetch();
       } catch (error: any) {
+        console.error("Error adding to cart: *********", error);
         const error_message = error.data?.error || "An error occurred";
         toast.error(<Typography>{error_message}</Typography>);
       }
