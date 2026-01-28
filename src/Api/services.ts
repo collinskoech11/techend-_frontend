@@ -145,13 +145,14 @@ export const AuthApi = createApi({
         }
       }),
     }),
-    lipaNaMpesa: builder.mutation<LipaNaMpesaResponse, { order_id: string; token: string }>({
-      query: ({ order_id, token }) => ({
+    lipaNaMpesa: builder.mutation<LipaNaMpesaResponse, { order_id: string; token: string; session_id?: string }>({
+      query: ({ order_id, token, session_id }) => ({
         url: `cart/lipa-na-mpesa/${order_id}/`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        body: session_id ? { session_id } : undefined,
       }),
     }),
     getOrderById: builder.query({

@@ -834,7 +834,7 @@ const GuestCheckout = () => {
         setMpesaOrderId(response.order_id);
         // For guest users, the backend might not require a token for lipa-na-mpesa if the order_id is sufficient
         // However, if it does, we might need to handle guest authentication differently or ensure the backend allows it.
-        await lipaNaMpesaFx({ order_id: response.order_id, token: "" }).unwrap(); // Pass empty token for guest
+        await lipaNaMpesaFx({ order_id: response.order_id, token: "", session_id: sessionId }).unwrap(); // Pass empty token for guest, and session_id
         setIsProcessingMpesa(false);
         setIsMpesaPaymentInitiated(true);
         setShowMpesaModal(true);
