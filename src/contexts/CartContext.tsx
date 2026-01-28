@@ -39,7 +39,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const triggerCartRefetch = useCallback(() => {
     if (token) {
-      refetchAuthCart();
+      if (refetchAuthCart) {
+        refetchAuthCart();
+      }
     } else {
       if (refetchGuestCart) {
         refetchGuestCart();
