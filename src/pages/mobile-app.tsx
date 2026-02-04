@@ -154,7 +154,7 @@ export default function MobileAppPage() {
                 lineHeight: 1.6
               }}
             >
-              Your business doesn't stop when you leave your desk. Manage inventory, track sales, and grow your store from anywhere.
+              Your business doesn&apos;t stop when you leave your desk. Manage inventory, track sales, and grow your store from anywhere.
             </Typography>
 
             <Box sx={{ mt: 4 }}>
