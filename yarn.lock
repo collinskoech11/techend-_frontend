@@ -2751,6 +2751,7 @@ __metadata:
     eslint: "npm:^9.32.0"
     eslint-config-next: "npm:^15.4.5"
     js-cookie: "npm:^3.0.5"
+    lucide-react: "npm:^0.563.0"
     next: "npm:^15.4.5"
     react: "npm:^18"
     react-awesome-reveal: "npm:^4.3.1"
@@ -3508,6 +3509,15 @@ __metadata:
   bin:
     loose-envify: cli.js
   checksum: 10c0/655d110220983c1a4b9c0c679a2e8016d4b67f6e9c7b5435ff5979ecdb20d0813f4dec0a08674fcbdd4846a3f07edbb50a36811fd37930b94aaa0d9daceb017e
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:^0.563.0":
+  version: 0.563.0
+  resolution: "lucide-react@npm:0.563.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/4a2027be255755d64ce18040062426dec07a5da920c000d9cd330e383fa10716a584c927dc03e91daccc6e05f6f486d4f49d1bd009e5f7763aa6fcf704806554
   languageName: node
   linkType: hard
 
