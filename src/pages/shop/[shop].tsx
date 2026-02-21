@@ -110,12 +110,16 @@ const Shop = forwardRef((props: any, ref: any) => {
   const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
-  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  const [shopname, setShopName] = useState<string | null>(null); // Initialize as null
   const primaryRed = theme.palette.primary.main; // Your main red accent
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [inputValue, setInputValue] = useState(""); // New state for immediate input value
+  const [isTyping, setIsTyping] = useState(false); // New state to track typing activity
+  const [isSearching, setIsSearching] = useState(false); // New state to track active search query
   const [onSale, setOnSale] = useState(false);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Added pageSize state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
@@ -130,18 +134,35 @@ const Shop = forwardRef((props: any, ref: any) => {
     handleFilterClose();
   };
 
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value); // Update inputValue immediately
+    setIsTyping(true); // User started typing
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    debounceTimeout.current = setTimeout(() => {
+      if (value.length >= 2 || value.length === 0) {
+        setPage(1);
+        setSearchTerm(value);
+        setIsSearching(true); // Search query is about to be triggered
+      }
+      setIsTyping(false); // Debounce finished, user stopped typing
+    }, 300);
+  };
+
 
 
   const [products, setProducts] = useState<any[]>([]);
 
-  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname);
+  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname, { skip: !shopname });
 
   useEffect(() => {
-    const cleanPath = router.asPath.split("?")[0]; // Remove query string
-    const pathParts = cleanPath.split("/");
-
-    if (pathParts[1] === "shop" && pathParts[2]) {
-      const urlShopName = pathParts[2];
+    if (router.isReady && router.query.shop) {
+      const urlShopName = router.query.shop as string;
       setShopName(urlShopName);
       Cookies.set("shopname", urlShopName, {
         expires: 7,
@@ -149,7 +170,7 @@ const Shop = forwardRef((props: any, ref: any) => {
         sameSite: "Lax",
       });
     }
-  }, [router.asPath]);
+  }, [router.isReady, router.query.shop]);
 
   // Wait for company data to be fetched before setting shopDetails
   useEffect(() => {
@@ -172,7 +193,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     data: products_data,
     error: products_error,
     isLoading: products_loading,
-  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale });
+  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale, page_size: pageSize }, { skip: !shopname });
 
   useEffect(() => {
     if (products_data) {
@@ -183,6 +204,66 @@ const Shop = forwardRef((props: any, ref: any) => {
       }
     }
   }, [products_data, page]);
+
+  useEffect(() => {
+    if (products_data || products_error) {
+      setIsSearching(false);
+    }
+  }, [products_data, products_error]);
+
+  
+
+  useEffect(() => {
+    const { pathname, query } = router;
+    const newQuery: Record<string, string | string[]> = {};
+
+    // Ensure the 'shop' slug is always present in the query for dynamic routes
+    if (router.query.shop) {
+      newQuery.shop = router.query.shop as string;
+    }
+
+    // Copy existing query parameters, excluding undefined values, but prioritize newQuery.shop
+    for (const key in query) {
+      if (query[key] !== undefined && key !== 'shop') { // Exclude 'shop' from general copy to avoid overwriting
+        newQuery[key] = query[key] as string | string[];
+      }
+    }
+
+    if (searchTerm) {
+      newQuery.search = searchTerm;
+    } else {
+      delete newQuery.search;
+    }
+
+    if (category) {
+      newQuery.category = category;
+    } else {
+      delete newQuery.category;
+    }
+
+    if (onSale) {
+      newQuery.on_sale = 'true';
+    } else {
+      delete newQuery.on_sale;
+    }
+
+    if (page && page !== 1) { // Only add page to URL if it's not the first page
+      newQuery.page = page.toString();
+    } else {
+      delete newQuery.page;
+    }
+
+    if (pageSize && pageSize !== 10) { // Only add page_size to URL if it's not the default
+      newQuery.page_size = pageSize.toString();
+    } else {
+      delete newQuery.page_size;
+    }
+
+    // Only push if router is ready and shopname is available
+    if (router.isReady && router.query.shop) {
+      router.push({ pathname, query: newQuery }, undefined, { shallow: true });
+    }
+  }, [searchTerm, category, onSale, page, pageSize, router]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
@@ -213,19 +294,25 @@ const Shop = forwardRef((props: any, ref: any) => {
 
   useEffect(() => {
     if (router.isReady) {
-      const { category: queryCategory, search: querySearch, on_sale: queryOnSale } = router.query;
+      const { category: queryCategory, search: querySearch, on_sale: queryOnSale, page: queryPage, page_size: queryPageSize } = router.query;
       if (queryCategory) {
         setCategory(queryCategory as string);
       }
       if (querySearch) {
         setSearchTerm(querySearch as string);
+        setInputValue(querySearch as string); // Initialize inputValue as well
       }
       if (queryOnSale) {
         setOnSale(queryOnSale === 'true');
       }
-      setPage(1);
+      if (queryPage) {
+        setPage(Number(queryPage));
+      }
+      if (queryPageSize) {
+        setPageSize(Number(queryPageSize));
+      }
     }
-  }, [router.isReady, router.query]);
+  }, [router.isReady]);
 
 
   return (
@@ -335,17 +422,13 @@ const Shop = forwardRef((props: any, ref: any) => {
           {/* FILTERS */}
           <Box sx={{ mb: 4 }}>
             <Grid container spacing={2} alignItems="center">
-
               {/* SEARCH */}
               <Grid item xs={12} sm={7}>
                 <TextField
                   fullWidth
                   placeholder="Search products…"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setPage(1);
-                    setSearchTerm(e.target.value);
-                  }}
+                  value={inputValue}
+                  onChange={handleSearchChange}
                   size="medium"
                   sx={{
                     "& .MuiOutlinedInput-root": {
@@ -363,6 +446,11 @@ const Shop = forwardRef((props: any, ref: any) => {
                     startAdornment: (
                       <InputAdornment position="start">
                         <SearchIcon sx={{ color: "#888", mr: 1 }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {(isTyping || isSearching) && <CircularProgress size={20} sx={{ color: "blue" }} />}
                       </InputAdornment>
                     ),
                   }}

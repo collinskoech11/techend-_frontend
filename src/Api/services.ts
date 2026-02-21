@@ -38,23 +38,30 @@ export const AuthApi = createApi({
         method: "GET",
       }),
     }),
-    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number; search?: string; on_sale?: boolean; }>({
-      query: ({ company, category, page = 1, search, on_sale }) => {
-        let url = `products/all/?company=${company}`;
+    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }>({
+      query: ({ company, category, page, page_size, search, on_sale }) => {
+        const params = new URLSearchParams();
+        if (company) {
+          params.append('company', company);
+        }
         if (category) {
-          url += `&category=${category}`;
+          params.append('category', category);
         }
         if (page) {
-          url += `&page=${page}`;
+          params.append('page', page.toString());
+        }
+        if (page_size) {
+          params.append('page_size', page_size.toString());
         }
         if (search) {
-          url += `&search=${search}`;
+          params.append('search', search);
         }
         if (on_sale) {
-          url += '&on_sale=true';
+          params.append('on_sale', 'true');
         }
+        const queryString = params.toString();
         return {
-          url,
+          url: `/products/all/${queryString ? `?${queryString}` : ''}`,
           method: "GET"
         };
       },
