@@ -246,7 +246,7 @@ const Shop = forwardRef((props: any, ref: any) => {
               background: "rgba(255,255,255,0.75)",
               backdropFilter: "blur(10px)",
               boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-              width:{md:"fit-content", xs:"100%"}
+              width: { md: "fit-content", xs: "100%" }
             }}
           >
             <ShopLogo

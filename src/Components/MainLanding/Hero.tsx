@@ -151,14 +151,14 @@ const GlassButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const StyledChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-  color: theme.palette.primary.main,
-  fontWeight: 600,
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-  marginBottom: theme.spacing(3),
-  animation: `${float} 6s ease-in-out infinite`,
-}));
+// const StyledChip = styled(Chip)(({ theme }) => ({
+//   backgroundColor: alpha(theme.palette.primary.main, 0.1),
+//   color: theme.palette.primary.main,
+//   fontWeight: 600,
+//   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+//   marginBottom: theme.spacing(3),
+//   animation: `${float} 6s ease-in-out infinite`,
+// }));
 
 interface HeroProps {
   handleNavigate: () => void;
@@ -174,10 +174,10 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
         <ContentCard>
           
           {/* Badge / Announcement */}
-          <StyledChip 
+          {/* <StyledChip 
             icon={<RocketLaunchIcon fontSize="small" />} 
             label="v2.0 is now live: Start selling faster" 
-          />
+          /> */}
 
           <Typography
             variant="h1"
