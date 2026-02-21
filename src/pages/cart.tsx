@@ -108,40 +108,38 @@ function Cart() {
       {/* Banner */}
       <CartBanner
         sx={{
-          pb: 6,
-          pt: 6,
+          py: { xs: 4, md: 5 }, // Reduced padding for a cleaner profile
           px: { xs: 3, md: 6 },
-          background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: "#fff",
-          borderRadius: "0 0 30px 30px",
-          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+          backgroundColor: theme.palette.background.paper, // or '#F9FAFB'
+          borderBottom: `1px solid ${theme.palette.divider}`,
           display: "flex",
           flexDirection: "column",
-          alignItems: { xs: "flex-start", md: "center" },
-          textAlign: { xs: "left", md: "center" },
+          alignItems: "center",
+          textAlign: "center",
         }}
       >
         <Typography
-          variant="h3"
+          variant="h4" // Slightly smaller heading for sophistication
           sx={{
-            fontWeight: 900,
-            fontSize: { xs: "2rem", md: "3rem" },
-            mb: 1,
-            letterSpacing: "1px",
-            color: "#fff",
+            fontWeight: 600, // Semi-bold is more modern than heavy black
+            color: theme.palette.text.primary,
+            letterSpacing: "-0.02em", // Tighter tracking for modern look
+            mb: 0.5,
           }}
         >
           Shopping Cart
         </Typography>
 
         <Typography
-          variant="body1"
+          variant="caption"
           sx={{
-            color: "rgba(255,255,255,0.85)",
-            fontSize: { xs: "0.95rem", md: "1.1rem" },
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: theme.palette.text.secondary,
+            fontWeight: 500,
           }}
         >
-          <span style={{ fontWeight: 700 }}>{/* Home link */}Home</span> - Shopping cart
+          Home &nbsp; / &nbsp; Cart
         </Typography>
       </CartBanner>
 

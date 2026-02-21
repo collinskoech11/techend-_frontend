@@ -668,11 +668,11 @@ const GuestCheckout = () => {
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().min(2, "Last name is required"),
     phoneNumber: z.string().min(7, "Phone number is required"),
-    address: z.string().min(5, "Address is required"),
-    city: z.string().min(2, "City is required"),
-    state: z.string().min(2, "State is required"),
-    postal_code: z.string().min(4, "Postal code is required"),
-    country: z.string().min(2, "Country is required"),
+    // address: z.string().min(5, "Address is required"),
+    // city: z.string().min(2, "City is required"),
+    // state: z.string().min(2, "State is required"),
+    // postal_code: z.string().min(4, "Postal code is required"),
+    // country: z.string().min(2, "Country is required"),
     payment_method: z.string().min(2, "Payment method is required"),
     pickup_location: z.number().optional().nullable(),
     delivery_location: z.number().optional().nullable(),
@@ -711,7 +711,7 @@ const GuestCheckout = () => {
     defaultValues: { payment_method: "card" },
   });
 
-  const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"]);
+  const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber"]);
 
   // Polling for M-Pesa payment status for Guest Checkout
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
@@ -972,63 +972,13 @@ const GuestCheckout = () => {
                     helperText={errors.phoneNumber?.message}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Address"
-                    variant="outlined"
-                    {...register("address")}
-                    error={!!errors.address}
-                    helperText={errors.address?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="City"
-                    variant="outlined"
-                    {...register("city")}
-                    error={!!errors.city}
-                    helperText={errors.city?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="State"
-                    variant="outlined"
-                    {...register("state")}
-                    error={!!errors.state}
-                    helperText={errors.state?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Postal Code"
-                    variant="outlined"
-                    {...register("postal_code")}
-                    error={!!errors.postal_code}
-                    helperText={errors.postal_code?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Country"
-                    variant="outlined"
-                    {...register("country")}
-                    error={!!errors.country}
-                    helperText={errors.country?.message}
-                  />
-                </Grid>
               </Grid>
             </Paper>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
               <Button variant="contained" onClick={async () => {
-                const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"]);
+                const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
                 if (isValid) handleNext();
-              }} disabled={yourDetailsFields.some(field => !field) || !!errors.email || !!errors.firstName || !!errors.lastName || !!errors.phoneNumber || !!errors.address || !!errors.city || !!errors.state || !!errors.postal_code || !!errors.country}>
+              }} disabled={yourDetailsFields.some(field => !field) || !!errors.email || !!errors.firstName || !!errors.lastName || !!errors.phoneNumber }>
                 Next
               </Button>
             </Box>

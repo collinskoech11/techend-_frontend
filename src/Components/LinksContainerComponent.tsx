@@ -18,8 +18,7 @@ import {
   Avatar, // Keeping Avatar for potential future use or custom user display
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close"; // Keeping CloseIcon for mobile menu
-import { PersonOutline, HistoryOutlined, NotificationsNoneOutlined, LogoutOutlined, AccountCircleOutlined, SettingsOutlined } from "@mui/icons-material"; // Modernized icons
+import { PersonOutline, HistoryOutlined, NotificationsNoneOutlined, LogoutOutlined, AccountCircleOutlined } from "@mui/icons-material"; // Modernized icons
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; // Modernized Shop icon
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined"; // Modernized Home icon
 import StoreOutlinedIcon from '@mui/icons-material/StoreOutlined'; // Modernized Mall icon
@@ -178,10 +177,6 @@ const LinksContainerComponent = forwardRef((props, ref) => {
           <MenuItem onClick={() => handleMobileMenuItemClick("/profile")}>
             <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
             Profile
-          </MenuItem>
-          <MenuItem onClick={() => handleMobileMenuItemClick("/settings")}>
-            <ListItemIcon><SettingsOutlined fontSize="small" /></ListItemIcon>
-            Settings
           </MenuItem>
           <MenuItem
             onClick={handleLogout}
@@ -346,10 +341,6 @@ const LinksContainerComponent = forwardRef((props, ref) => {
                 <MenuItem onClick={() => handleUserMenuClose("/profile")}>
                   <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
                   Profile
-                </MenuItem>
-                <MenuItem onClick={() => handleUserMenuClose("/settings")}>
-                  <ListItemIcon><SettingsOutlined fontSize="small" /></ListItemIcon>
-                  Settings
                 </MenuItem>
                 <Divider sx={{ my: 1 }} />
                 <MenuItem
