@@ -204,9 +204,14 @@ const Shop = forwardRef((props: any, ref: any) => {
     const { pathname, query } = router;
     const newQuery: Record<string, string | string[]> = {};
 
-    // Copy existing query parameters, excluding undefined values
+    // Ensure the 'shop' slug is always present in the query for dynamic routes
+    if (router.query.shop) {
+      newQuery.shop = router.query.shop as string;
+    }
+
+    // Copy existing query parameters, excluding undefined values, but prioritize newQuery.shop
     for (const key in query) {
-      if (query[key] !== undefined) {
+      if (query[key] !== undefined && key !== 'shop') { // Exclude 'shop' from general copy to avoid overwriting
         newQuery[key] = query[key] as string | string[];
       }
     }
@@ -241,7 +246,10 @@ const Shop = forwardRef((props: any, ref: any) => {
       delete newQuery.page_size;
     }
 
-    router.push({ pathname, query: newQuery }, undefined, { shallow: true });
+    // Only push if router is ready and shopname is available
+    if (router.isReady && router.query.shop) {
+      router.push({ pathname, query: newQuery }, undefined, { shallow: true });
+    }
   }, [searchTerm, category, onSale, page, pageSize, router]);
 
   const triggerCartRefetch = () => {
