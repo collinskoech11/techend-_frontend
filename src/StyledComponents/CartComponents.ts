@@ -6,7 +6,7 @@ export const CartBanner = styled(Box)({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  height: "300px",
+  height: "150px",
   background: "rgb(237,241,255)",
   marginBottom:"30px"
 });

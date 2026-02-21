@@ -131,6 +131,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   };
   const handleCategorySelect = (value: string) => {
     setCategory(value);
+    setPage(1); // Reset page to 1 when category changes
     handleFilterClose();
   };
 
