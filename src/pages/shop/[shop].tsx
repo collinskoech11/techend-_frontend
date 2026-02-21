@@ -116,6 +116,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [onSale, setOnSale] = useState(false);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Added pageSize state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
@@ -172,7 +173,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     data: products_data,
     error: products_error,
     isLoading: products_loading,
-  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale });
+  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale, page_size: pageSize });
 
   useEffect(() => {
     if (products_data) {
@@ -183,6 +184,43 @@ const Shop = forwardRef((props: any, ref: any) => {
       }
     }
   }, [products_data, page]);
+
+  useEffect(() => {
+    const { pathname, query } = router;
+    const newQuery: Record<string, string | string[]> = { ...query };
+
+    if (searchTerm) {
+      newQuery.search = searchTerm;
+    } else {
+      delete newQuery.search;
+    }
+
+    if (category) {
+      newQuery.category = category;
+    } else {
+      delete newQuery.category;
+    }
+
+    if (onSale) {
+      newQuery.on_sale = 'true';
+    } else {
+      delete newQuery.on_sale;
+    }
+
+    if (page && page !== 1) { // Only add page to URL if it's not the first page
+      newQuery.page = page.toString();
+    } else {
+      delete newQuery.page;
+    }
+
+    if (pageSize && pageSize !== 10) { // Only add page_size to URL if it's not the default
+      newQuery.page_size = pageSize.toString();
+    } else {
+      delete newQuery.page_size;
+    }
+
+    router.push({ pathname, query: newQuery }, undefined, { shallow: true });
+  }, [searchTerm, category, onSale, page, pageSize, router]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
@@ -213,7 +251,7 @@ const Shop = forwardRef((props: any, ref: any) => {
 
   useEffect(() => {
     if (router.isReady) {
-      const { category: queryCategory, search: querySearch, on_sale: queryOnSale } = router.query;
+      const { category: queryCategory, search: querySearch, on_sale: queryOnSale, page: queryPage, page_size: queryPageSize } = router.query;
       if (queryCategory) {
         setCategory(queryCategory as string);
       }
@@ -223,9 +261,14 @@ const Shop = forwardRef((props: any, ref: any) => {
       if (queryOnSale) {
         setOnSale(queryOnSale === 'true');
       }
-      setPage(1);
+      if (queryPage) {
+        setPage(Number(queryPage));
+      }
+      if (queryPageSize) {
+        setPageSize(Number(queryPageSize));
+      }
     }
-  }, [router.isReady, router.query]);
+  }, [router.isReady]);
 
 
   return (
