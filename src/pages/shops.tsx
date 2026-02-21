@@ -205,9 +205,6 @@ const CompaniesList: React.FC = () => {
     <Box sx={{ pt: 8 }}>
       <HeroBanner />
       <Box sx={{ p: { xs: 2, md: 3 } }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', mt: 4 }}>
-          Explore Our Shops
-        </Typography>
         <Grid container spacing={3}>
           {companiesData && companiesData.results.length > 0 ? (
             companiesData.results.map((company: Company) => (

@@ -115,6 +115,8 @@ const Shop = forwardRef((props: any, ref: any) => {
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [inputValue, setInputValue] = useState(""); // New state for immediate input value
+  const [isTyping, setIsTyping] = useState(false); // New state to track typing activity
+  const [isSearching, setIsSearching] = useState(false); // New state to track active search query
   const [onSale, setOnSale] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // Added pageSize state
@@ -137,6 +139,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value); // Update inputValue immediately
+    setIsTyping(true); // User started typing
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -145,7 +148,9 @@ const Shop = forwardRef((props: any, ref: any) => {
       if (value.length >= 2 || value.length === 0) {
         setPage(1);
         setSearchTerm(value);
+        setIsSearching(true); // Search query is about to be triggered
       }
+      setIsTyping(false); // Debounce finished, user stopped typing
     }, 300);
   };
 
@@ -199,6 +204,14 @@ const Shop = forwardRef((props: any, ref: any) => {
       }
     }
   }, [products_data, page]);
+
+  useEffect(() => {
+    if (products_data || products_error) {
+      setIsSearching(false);
+    }
+  }, [products_data, products_error]);
+
+  
 
   useEffect(() => {
     const { pathname, query } = router;
@@ -409,7 +422,6 @@ const Shop = forwardRef((props: any, ref: any) => {
           {/* FILTERS */}
           <Box sx={{ mb: 4 }}>
             <Grid container spacing={2} alignItems="center">
-
               {/* SEARCH */}
               <Grid item xs={12} sm={7}>
                 <TextField
@@ -438,7 +450,7 @@ const Shop = forwardRef((props: any, ref: any) => {
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        {products_loading && <CircularProgress size={20} sx={{ color: "blue" }} />}
+                        {(isTyping || isSearching) && <CircularProgress size={20} sx={{ color: "blue" }} />}
                       </InputAdornment>
                     ),
                   }}
