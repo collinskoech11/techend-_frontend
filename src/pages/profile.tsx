@@ -23,6 +23,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessIcon from '@mui/icons-material/Business';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import { useGetCompanyQuery } from "@/Api/services"; // Import the new hook
 
 // --- Styled Components ---
 
@@ -60,7 +61,7 @@ const PricingCard = styled(Card)(({ theme }) => ({
       left: '50%',
       transform: 'translateX(-50%)',
       backgroundColor: theme.palette.primary.main,
-      color: '#white',
+      color: theme.palette.primary.contrastText,
       padding: '2px 12px',
       borderRadius: '12px',
       fontSize: '0.7rem',
@@ -92,6 +93,13 @@ function ProfilePage() {
   const [tab, setTab] = useState(0);
   const [editMode, setEditMode] = useState(false);
 
+  const token = Cookies.get("access");
+  console.log(token, "token in profile page");
+  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyQuery(token, {
+      skip: !token,
+    });
+  console.log(companyData, "company data in profile page");
+
   const handleTabChange = (event, newValue) => setTab(newValue);
 
   const renderField = (label, value, key, disabled = false) => (
@@ -113,6 +121,17 @@ function ProfilePage() {
           {value || "Not provided"}
         </Typography>
       )}
+    </Box>
+  );
+
+  const renderCompanyField = (label, value) => (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
+        {label}
+      </Typography>
+      <Typography variant="body1" sx={{ fontWeight: 500, color: value ? 'text.primary' : 'text.disabled' }}>
+        {value || "Not provided"}
+      </Typography>
     </Box>
   );
 
@@ -192,10 +211,36 @@ function ProfilePage() {
             )}
 
             {tab === 1 && (
-               <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <BusinessIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
-                  <Typography color="text.secondary">No company information available at this time.</Typography>
-               </Box>
+              <Box>
+                {companyLoading && <Typography>Loading company information...</Typography>}
+                {companyError && <Typography color="error">Error loading company information.</Typography>}
+                {companyData ? (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Company Details</Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Name", companyData.name)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Website", companyData.website)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Business Reg. Number", companyData.business_registration_number)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Tax PIN", companyData.tax_pin_number)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Country", companyData.country)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("City", companyData.city)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Physical Address", companyData.physical_address)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Postal Address", companyData.postal_address)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Postal Code", companyData.postal_code)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Primary Color", companyData.primary_color)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Secondary Color", companyData.secondary_color)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Accent Color", companyData.accent_color)}</Grid>
+                    </Grid>
+                  </Box>
+                ) : (
+                  !companyLoading && !companyError && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <BusinessIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                      <Typography color="text.secondary">No company information available at this time.</Typography>
+                    </Box>
+                  )
+                )}
+              </Box>
             )}
 
             {tab === 2 && (
