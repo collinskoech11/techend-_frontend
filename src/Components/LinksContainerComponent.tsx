@@ -61,6 +61,10 @@ const LinksContainerComponent = forwardRef((props, ref) => {
       skip: isDefaultBrandPage || !cookieShop,
     });
     console.log(displayShopName, companyData);
+    const brandLabel =
+  !isDefaultBrandPage && companyData?.name
+    ? companyData.name
+    : displayShopName || "SokoJunction";
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -283,7 +287,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
                     display: { xs: 'none', md: 'block' }, // Hide on small screens
                   }}
                 >
-                  {displayShopName} {/* Display company name if available */}
+                  {brandLabel} {/* Display company name if available */}
                 </Typography>
               )}
             </Box>
@@ -294,7 +298,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
               sx={{ cursor: "pointer", textTransform: "capitalize", fontWeight: 'bold' }}
               onClick={() => router.push(`/`)}
             >
-              {displayShopName} 
+              {brandLabel} 
             </Typography>
           )}
         </Box>

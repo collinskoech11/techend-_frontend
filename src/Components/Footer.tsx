@@ -61,14 +61,29 @@ const GlassBox = styled(Box)(({ theme }) => ({
   boxShadow: `0 6px 30px ${alpha("#000", 0.18)}`,
 }));
 
+const DEFAULT_BRAND_URLS = [
+  "/",
+  "/shops",
+  "/about",
+  "/contact",
+];
+
 
 export default function Footer() {
   const theme = useTheme();
   const router = useRouter();
-  const slug = router.query.shop as string | undefined;
+  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
 
-  const { data: companyData, isLoading, isError } = useGetCompanyBySlugQuery(slug!, {
-    skip: !slug,
+  const routeShopSlug =
+    !isDefaultBrandPage && router.query.shop
+      ? String(router.query.shop)
+      : null;
+  const {
+    data: companyData,
+    isLoading,
+    isError
+  } = useGetCompanyBySlugQuery(routeShopSlug, {
+    skip: !routeShopSlug,
   });
   console.log("Company Data in Footer:", companyData);
   const primaryColor = darken(theme.palette.primary.main, 0.65);
@@ -82,12 +97,12 @@ export default function Footer() {
   };
 
   const renderContactContent = () => {
-    if (!slug)
+    if (!routeShopSlug)
       return (
         <Stack spacing={1}>
-          <Typography sx={{color:"#fff"}}>Email: sokojunction@gmail.com</Typography>
-          <Typography sx={{color:"#fff"}}>Phone: +254 703 508881</Typography>
-          <Typography sx={{color:"#fff"}}>Location: Nairobi, Kenya</Typography>
+          <Typography sx={{ color: "#fff" }}>Email: sokojunction@gmail.com</Typography>
+          <Typography sx={{ color: "#fff" }}>Phone: +254 703 508881</Typography>
+          <Typography sx={{ color: "#fff" }}>Location: Nairobi, Kenya</Typography>
         </Stack>
       );
 
@@ -140,12 +155,12 @@ export default function Footer() {
         {/* Brand + Newsletter */}
         <Grid item xs={12} md={4}>
           <Stack spacing={2.5}>
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>
-              SokoJunction
+            <Typography variant="h5" sx={{ fontWeight: 800, textTransform: "capitalize" }}>
+              {routeShopSlug || "SokoJunction"}
             </Typography>
 
             <Typography variant="body2" sx={{ color: alpha("#fff", 0.8) }}>
-              Your marketplace to discover unique products from local shops.
+              {companyData?.description || "Your marketplace to discover unique products from local shops."}
             </Typography>
 
             {/* Newsletter */}
@@ -210,7 +225,7 @@ export default function Footer() {
         <Grid item xs={6} md={4}>
           <FooterSectionTitle>Quick Links</FooterSectionTitle>
 
-          {["Home",  "Shops", "About Us"].map((item) => (
+          {["Home", "Shops", "About Us"].map((item) => (
             <FooterLink
               key={item}
               href={item === "Home" ? "/" : `/${item.toLowerCase().replace(" ", "")}`}
