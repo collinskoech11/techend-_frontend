@@ -35,6 +35,8 @@ const DEFAULT_BRAND_URLS = [
   "/",
   "/about",
   "/contact",
+  "/company-onboarding",
+  "/profile",
 ];
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {

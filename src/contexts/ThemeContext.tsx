@@ -9,7 +9,7 @@ export const ThemeContext = createContext({
   setPrimaryColor: (color: string) => {},
 });
 
-const DEFAULT_BRAND_URLS = ["/shops", "/", "/about", "/contact"];
+const DEFAULT_BRAND_URLS = ["/shops", "/", "/about", "/contact","/company-onboarding","/profile"];
 const DEFAULT_PRIMARY_COLOR = "#1976d2";
 
 export const ThemeProvider = ({ children }) => {
