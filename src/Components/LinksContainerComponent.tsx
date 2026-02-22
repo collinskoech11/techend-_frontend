@@ -30,13 +30,23 @@ import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import { alpha } from '@mui/material/styles'; // For better alpha color manipulation
 import CartMenu from "./CartMin";
-
+const DEFAULT_BRAND_URLS = [
+  "/shops",
+  "/",
+  "/about",
+  "/contact",
+];
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {
-  LinksContainerComponent.displayName = "LinksContainerComponent";
+
   const router = useRouter();
   const theme = useTheme();
-
+  const cookieShop = Cookies.get("shopname");
+  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
+  LinksContainerComponent.displayName = "LinksContainerComponent";
+  const displayShopName = isDefaultBrandPage
+    ? "SokoJunction"
+    : cookieShop || "SokoJunction";
   const [anchorEl, setAnchorEl] = useState(null); // Desktop user menu
   const open = Boolean(anchorEl);
 
@@ -46,7 +56,11 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   const [username, setUsername] = useState<any>(null);
   const [user, setUser] = useState(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "Sokojunction");
-  const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname); // Added isLoading
+  const { data: companyData, isLoading: companyLoading } =
+    useGetCompanyBySlugQuery(displayShopName, {
+      skip: isDefaultBrandPage || !cookieShop,
+    });
+    console.log(displayShopName, companyData);
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -104,6 +118,28 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   useEffect(() => {
     if (user) setUsername(user);
   }, [user]);
+
+  // keep shop in sync with cookies on every navigation
+  useEffect(() => {
+    const syncShopFromCookies = () => {
+      const cookieShop = Cookies.get("shopname") || "Sokojunction";
+      setShopName(cookieShop);
+
+      const cookieUser = Cookies.get("username");
+      setUser(cookieUser);
+      setUsername(cookieUser);
+    };
+
+    // run once on mount
+    syncShopFromCookies();
+
+    // run after every route change
+    router.events.on("routeChangeComplete", syncShopFromCookies);
+
+    return () => {
+      router.events.off("routeChangeComplete", syncShopFromCookies);
+    };
+  }, [router.events]);
 
   // Unified menu item styling for better consistency
   const menuSx = {
@@ -232,7 +268,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
             >
               <Image
                 src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'}
-                alt={shopname}
+                alt={displayShopName}
                 width={32} // Slightly smaller for a cleaner look
                 height={32}
                 style={{ borderRadius: '4px' }} // Subtle rounded corners for the logo
@@ -247,7 +283,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
                     display: { xs: 'none', md: 'block' }, // Hide on small screens
                   }}
                 >
-                  {shopname} {/* Display company name if available */}
+                  {displayShopName} {/* Display company name if available */}
                 </Typography>
               )}
             </Box>
@@ -258,7 +294,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
               sx={{ cursor: "pointer", textTransform: "capitalize", fontWeight: 'bold' }}
               onClick={() => router.push(`/`)}
             >
-              {shopname || "Sokojunction"}
+              {displayShopName} 
             </Typography>
           )}
         </Box>

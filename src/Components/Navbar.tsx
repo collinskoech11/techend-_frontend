@@ -35,24 +35,6 @@ const Navbar = forwardRef((props:any, ref:any) => {
   }, [user]);
   return(
     <>
-      {/* <OfferNav>
-        <OfferNavTypo>FREE SHIPPING ON ALL ORDERS KES 2000</OfferNavTypo>
-      </OfferNav> */}
-      {/* <MainNav>
-        <HeaderTypo>TECHENDFORGRANTED</HeaderTypo>
-        <ButtonsContainer>
-        {username ? (
-          <span>{username}</span>
-        ) : (
-          <LoginButton onClick={() => navigate("/login")}>
-            Login/Register
-          </LoginButton>
-        )}
-          <StarBorderIcon></StarBorderIcon>
-          <CartBalanceTypo>${cart_data?.total || "0.00"}</CartBalanceTypo>
-          <LocalMallIcon onClick={() => navigate("/cart")} />
-        </ButtonsContainer>
-      </MainNav> */}
       <LinksContainerComponent ref={cartRef}/>
     </>
   );

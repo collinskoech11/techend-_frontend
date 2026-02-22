@@ -70,7 +70,7 @@ export default function Footer() {
   const { data: companyData, isLoading, isError } = useGetCompanyBySlugQuery(slug!, {
     skip: !slug,
   });
-
+  console.log("Company Data in Footer:", companyData);
   const primaryColor = darken(theme.palette.primary.main, 0.65);
 
   const [newsletterEmail, setNewsletterEmail] = useState("");
