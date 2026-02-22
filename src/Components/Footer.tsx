@@ -14,7 +14,7 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-
+import Cookies from "js-cookie";
 import React, { useState } from "react";
 import { darken, styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
@@ -26,6 +26,32 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import EmailIcon from "@mui/icons-material/Email";
+import { keyframes } from "@mui/system";
+
+// Bounce animation for dots
+const bounce = keyframes`
+  0%, 80%, 100% { transform: scale(0); } 
+  40% { transform: scale(1); }
+`;
+
+// Ellipsis container
+const BouncingEllipsis = styled('span')(({ theme }) => ({
+  display: 'inline-block',
+  width: '24px',
+  textAlign: 'left',
+  '& > span': {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    margin: '0 2px',
+    backgroundColor: theme.palette.common.white,
+    borderRadius: '50%',
+    animation: `${bounce} 1.4s infinite ease-in-out both`,
+  },
+  '& > span:nth-of-type(1)': { animationDelay: '0s' },
+  '& > span:nth-of-type(2)': { animationDelay: '0.2s' },
+  '& > span:nth-of-type(3)': { animationDelay: '0.4s' },
+}));
 
 
 // Footer Link
@@ -62,29 +88,40 @@ const GlassBox = styled(Box)(({ theme }) => ({
 }));
 
 const DEFAULT_BRAND_URLS = [
-  "/",
   "/shops",
+  "/",
   "/about",
   "/contact",
 ];
 
 
 export default function Footer() {
+
   const theme = useTheme();
   const router = useRouter();
-  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
+  const [cookieShopSlug, setCookieShopSlug] = React.useState(null);
 
+  React.useEffect(() => {
+    const savedShop = Cookies.get("shopname"); // 👈 cookie key
+    if (savedShop) setCookieShopSlug(savedShop);
+  }, []);
+
+  // 1️⃣ Check if current page is a default brand page
+  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
+  // 2️⃣ Extract slug from URL only if NOT default page
   const routeShopSlug =
-    !isDefaultBrandPage && router.query.shop
-      ? String(router.query.shop)
-      : null;
-  const {
-    data: companyData,
-    isLoading,
-    isError
-  } = useGetCompanyBySlugQuery(routeShopSlug, {
-    skip: !routeShopSlug,
-  });
+    isDefaultBrandPage
+    ? "SokoJunction"
+    : cookieShopSlug || "SokoJunction";
+
+  // 3️⃣ Final active slug
+  const activeShopSlug = isDefaultBrandPage
+    ? cookieShopSlug
+    : routeShopSlug || cookieShopSlug || null;
+  const { data: companyData, isLoading, isError } =
+    useGetCompanyBySlugQuery(activeShopSlug, {
+      skip: !activeShopSlug,
+    });
   console.log("Company Data in Footer:", companyData);
   const primaryColor = darken(theme.palette.primary.main, 0.65);
 
@@ -115,7 +152,15 @@ export default function Footer() {
       <Stack spacing={1}>
         {companyData.contact_email && (
           <MuiLink href={`mailto:${companyData.contact_email}`} underline="hover" color="inherit">
-            Email: {companyData.contact_email}
+            Email: {isLoading ? (
+                <BouncingEllipsis>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </BouncingEllipsis>
+              ) : (
+                companyData?.contact_email
+              )}
           </MuiLink>
         )}
         {companyData.contact_phone && (
@@ -156,7 +201,15 @@ export default function Footer() {
         <Grid item xs={12} md={4}>
           <Stack spacing={2.5}>
             <Typography variant="h5" sx={{ fontWeight: 800, textTransform: "capitalize" }}>
-              {routeShopSlug || "SokoJunction"}
+              {isLoading ? (
+                <BouncingEllipsis>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </BouncingEllipsis>
+              ) : (
+                companyData?.name || "SokoJunction"
+              )}
             </Typography>
 
             <Typography variant="body2" sx={{ color: alpha("#fff", 0.8) }}>
