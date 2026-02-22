@@ -387,7 +387,7 @@ const Shop = forwardRef((props: any, ref: any) => {
                 <Chip
                   label={
                     products_data?.count !== undefined ? (
-                      `${products_data.count} Products`
+                      `${products_data.count} Items`
                     ) : (
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <BouncingDots />
