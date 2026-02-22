@@ -210,7 +210,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     if (products_data || products_error) {
       setIsSearching(false);
     }
-  }, [products_data, products_error]);
+  }, []);
 
   
 
@@ -264,7 +264,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     if (router.isReady && router.query.shop) {
       router.push({ pathname, query: newQuery }, undefined, { shallow: true });
     }
-  }, [searchTerm, category, onSale, page, pageSize, router]);
+  }, [searchTerm, category, onSale, page, pageSize]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {

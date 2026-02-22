@@ -46,48 +46,73 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
 
   const GA_ID = GA_IDS[hostname] || "G-F23L8C9HPP";
 
+  const LoadingEllipsis = () => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, fontSize: 14, opacity: 0.7 }}>
+      Loading Navbar
+      <Box sx={{ display: "flex", gap: 0.5 }}>
+        {[0, 1, 2].map((i) => (
+          <Box
+            key={i}
+            sx={{
+              width: 4,
+              height: 4,
+              borderRadius: "50%",
+              backgroundColor: "currentColor",
+              animation: "bounce 1.2s infinite",
+              animationDelay: `${i * 0.2}s`,
+              "@keyframes bounce": {
+                "0%, 80%, 100%": { transform: "scale(0)" },
+                "40%": { transform: "scale(1)" },
+              },
+            }}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+
 
   return (
     <NoSSR>
       <Provider store={store}>
-      <ThemeProvider>
-        <CartProvider>
-        {isClient && GA_ID && (
-        <>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="ga-script" strategy="afterInteractive">
-          {`
+        <ThemeProvider>
+          <CartProvider>
+            {isClient && GA_ID && (
+              <>
+                <Script
+                  src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+                  strategy="afterInteractive"
+                />
+                <Script id="ga-script" strategy="afterInteractive">
+                  {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_ID}');
           `}
-        </Script>
-        </>
-      )}
-        {router.pathname !== "/" && (
-        <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
-          <Suspense fallback={<div>Loading Navbar...</div>}>
-            <Navbar ref={cartRef}/>
-          </Suspense>
-        </Box>
-        )}
-        {router.pathname === "/" && (
-          <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
-            <Suspense fallback={<div>Loading Navbar...</div>}>
-              <Navbar ref={cartRef}/>
+                </Script>
+              </>
+            )}
+            {router.pathname !== "/" && (
+              <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
+                <Suspense fallback={<LoadingEllipsis />}>
+                  <Navbar ref={cartRef} />
+                </Suspense>
+              </Box>
+            )}
+            {router.pathname === "/" && (
+              <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
+                <Suspense fallback={<LoadingEllipsis />}>
+                  <Navbar ref={cartRef} />
+                </Suspense>
+              </Box>
+            )}
+            <Toaster position="bottom-right" reverseOrder={false} />
+            <Component {...pageProps} triggerCartRefetch={triggerCartRefetch} />
+            <Suspense fallback={<div>Loading Footer...</div>}>
+              <Footer />
             </Suspense>
-          </Box>
-        )}
-        <Toaster position="bottom-right" reverseOrder={false} />
-        <Component {...pageProps} triggerCartRefetch={triggerCartRefetch}/>
-        <Suspense fallback={<div>Loading Footer...</div>}>
-          <Footer />
-        </Suspense>
-        </CartProvider>
+          </CartProvider>
         </ThemeProvider>
       </Provider>
     </NoSSR>
