@@ -9,6 +9,7 @@ import React, {
   forwardRef,
   use,
 } from "react";
+import { alpha } from "@mui/material/styles";
 import MuiLink from "@mui/material/Link"; // Renamed to avoid conflict
 import Skeleton from "@mui/material/Skeleton";
 import {
@@ -293,6 +294,17 @@ const Shop = forwardRef((props: any, ref: any) => {
     },
   }));
 
+
+  const categories = [
+    { label: "All Categories", value: "" },
+    { label: "Electronics", value: "electronics" },
+    { label: "Fashion", value: "fashion" },
+    { label: "Beauty", value: "beauty" },
+    { label: "Home Appliances", value: "home-appliances" },
+    { label: "Books", value: "books" },
+  ];
+
+
   useEffect(() => {
     if (router.isReady) {
       const { category: queryCategory, search: querySearch, on_sale: queryOnSale, page: queryPage, page_size: queryPageSize } = router.query;
@@ -373,7 +385,7 @@ const Shop = forwardRef((props: any, ref: any) => {
             />
 
             <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: theme.palette.primary.main }}>
                 {companyData?.name}
               </Typography>
               {/* <Typography variant="body1" sx={{ maxWidth: "700px", color: lightText, mb: 1 }}>
@@ -394,14 +406,23 @@ const Shop = forwardRef((props: any, ref: any) => {
                       </Box>
                     )
                   }
-                  sx={{
+                  sx={(theme) => ({
                     px: 2,
                     py: 1,
                     fontSize: "0.9rem",
                     fontWeight: 600,
                     borderRadius: "12px",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                  }}
+
+                    // ✨ dynamic company color styling
+                    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                    color: theme.palette.primary.main,
+
+                    // optional subtle hover polish
+                    "&:hover": {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.18),
+                    },
+                  })}
                 />
                 {companyData?.facebook_link && (
                   <a href={companyData.facebook_link} target="_blank" rel="noreferrer">
@@ -457,27 +478,52 @@ const Shop = forwardRef((props: any, ref: any) => {
                   value={inputValue}
                   onChange={handleSearchChange}
                   size="medium"
-                  sx={{
+                  sx={(theme) => ({
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "40px",
-                      background: "#fff",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                      "&:hover": { boxShadow: "0 6px 18px rgba(0,0,0,0.12)" },
+                      background: alpha(theme.palette.primary.main, 0.04), // soft brand tint
+                      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`,
+                      transition: "all 0.2s ease",
+
+                      "&:hover": {
+                        boxShadow: `0 6px 18px ${alpha(theme.palette.primary.main, 0.22)}`,
+                      },
+
+                      "&.Mui-focused": {
+                        background: alpha(theme.palette.primary.main, 0.06),
+                        boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.25)}`,
+                      },
+
                       "& fieldset": { border: "none" },
                     },
+
                     "& .MuiInputBase-input": {
                       padding: "12px 16px",
+                      color: theme.palette.primary.main,
                     },
-                  }}
+                  })}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchIcon sx={{ color: "#888", mr: 1 }} />
+                        <SearchIcon
+                          sx={(theme) => ({
+                            color: theme.palette.primary.main,
+                            mr: 1,
+                          })}
+                        />
                       </InputAdornment>
                     ),
+
                     endAdornment: (
                       <InputAdornment position="end">
-                        {(isTyping || isSearching) && <CircularProgress size={20} sx={{ color: "blue" }} />}
+                        {(isTyping || isSearching) && (
+                          <CircularProgress
+                            size={20}
+                            sx={(theme) => ({
+                              color: theme.palette.primary.main,
+                            })}
+                          />
+                        )}
                       </InputAdornment>
                     ),
                   }}
@@ -487,40 +533,129 @@ const Shop = forwardRef((props: any, ref: any) => {
               {/* SALE SWITCH */}
               <Grid item xs={6} sm={3}>
                 <FormControlLabel
-                  control={<Switch checked={onSale} onChange={handleOnSaleChange} color="primary" />}
-                  label={<Typography sx={{ fontWeight: 600, fontSize: "0.95rem" }}>Sale</Typography>}
+                  control={
+                    <Switch
+                      checked={onSale}
+                      onChange={handleOnSaleChange}
+                      sx={(theme) => ({
+                        width: 42,
+                        height: 26,
+                        padding: 0,
+
+                        "& .MuiSwitch-switchBase": {
+                          padding: "3px",
+
+                          "&.Mui-checked": {
+                            transform: "translateX(16px)",
+                            color: theme.palette.primary.main,
+
+                            "& + .MuiSwitch-track": {
+                              backgroundColor: alpha(theme.palette.primary.main, 0.25),
+                              opacity: 1,
+                              border: `1px solid ${alpha(theme.palette.primary.main, 0.35)}`,
+                            },
+                          },
+                        },
+
+                        "& .MuiSwitch-thumb": {
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                          width: 20,
+                          height: 20,
+                          backgroundColor: theme.palette.primary.main,
+                        },
+
+                        "& .MuiSwitch-track": {
+                          borderRadius: 20,
+                          backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                          opacity: 1,
+                        },
+                      })}
+                    />
+                  }
+                  label={
+                    <Typography
+                      sx={(theme) => ({
+                        fontWeight: 600,
+                        fontSize: "0.95rem",
+                        color: theme.palette.primary.main,
+                        paddingLeft: 1,
+                      })}
+                    >
+                      Sale
+                    </Typography>
+                  }
                   sx={{ ml: 0 }}
                 />
               </Grid>
-
               {/* FILTER ICON */}
               <Grid item xs={6} sm={2} textAlign="right">
                 <IconButton
                   onClick={handleFilterClick}
-                  sx={{
+                  sx={(theme) => ({
                     borderRadius: "50%",
-                    border: "1px solid #ddd",
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
                     p: 1.25,
-                    background: "#fff",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    transition: "all 0.3s",
+                    background: alpha(theme.palette.primary.main, 0.05),
+                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.18)}`,
+                    transition: "all 0.25s ease",
+
                     "&:hover": {
-                      background: "#f5f5f5",
-                      transform: "scale(1.1)",
-                      boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+                      background: alpha(theme.palette.primary.main, 0.12),
+                      transform: "scale(1.08)",
+                      boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.28)}`,
+                    },
+                  })}
+                >
+                  <FilterListIcon
+                    sx={(theme) => ({
+                      color: theme.palette.primary.main,
+                    })}
+                  />
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleFilterClose}
+                  PaperProps={{
+                    elevation: 8,
+                    sx: (theme) => ({
+                      mt: 1.5,
+                      minWidth: 220,
+                      borderRadius: theme.shape.borderRadius * 2,
+                      backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                      backdropFilter: "blur(12px) saturate(160%)",
+                      WebkitBackdropFilter: "blur(12px) saturate(160%)",
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
+                      boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.18)}`,
+                      py: 1,
+                    }),
+                  }}
+                  sx={{
+                    "& .MuiMenuItem-root": {
+                      borderRadius: 2,
+                      mx: 1,
+                      my: 0.5,
+                      fontWeight: 500,
+                      color: (theme) => theme.palette.primary.main,
+                      transition: "all 0.2s ease",
+
+                      "&:hover": {
+                        backgroundColor: (theme) =>
+                          alpha(theme.palette.primary.main, 0.12),
+                      },
                     },
                   }}
                 >
-                  <FilterListIcon sx={{ color: "#555" }} />
-                </IconButton>
-
-                <Menu anchorEl={anchorEl} open={open} onClose={handleFilterClose}>
-                  <MenuItem onClick={() => handleCategorySelect("")}>All Categories</MenuItem>
-                  <MenuItem onClick={() => handleCategorySelect("electronics")}>Electronics</MenuItem>
-                  <MenuItem onClick={() => handleCategorySelect("fashion")}>Fashion</MenuItem>
-                  <MenuItem onClick={() => handleCategorySelect("beauty")}>Beauty</MenuItem>
-                  <MenuItem onClick={() => handleCategorySelect("home-appliances")}>Home Appliances</MenuItem>
-                  <MenuItem onClick={() => handleCategorySelect("books")}>Books</MenuItem>
+                  {categories.map((cat) => (
+                    <MenuItem
+                      key={cat.value || "all"}
+                      onClick={() => handleCategorySelect(cat.value)}
+                    >
+                      {cat.label}
+                    </MenuItem>
+                  ))}
                 </Menu>
               </Grid>
 

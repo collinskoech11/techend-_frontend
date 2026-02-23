@@ -4,8 +4,11 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/router";
+import { alpha } from '@mui/material/styles'; // For better alpha color manipulation
+import { useTheme } from "@mui/material";
 
 const CartMenu = forwardRef((props: any, ref) => {
+  const theme = useTheme();
   CartMenu.displayName = "CartMenu";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -31,7 +34,11 @@ const CartMenu = forwardRef((props: any, ref) => {
 
   return (
     <>
-      <IconButton color="inherit" onClick={(e) => setAnchorEl(e.currentTarget as HTMLElement)}>
+      <IconButton sx={{
+        p: 0, color: theme.palette.primary.main, "&:hover": {
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        },
+      }} onClick={(e) => setAnchorEl(e.currentTarget as HTMLElement)}>
         <Badge badgeContent={itemCount} color="success">
           <ShoppingCartOutlinedIcon />
         </Badge>
