@@ -14,8 +14,8 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-
-import React, { useState } from "react";
+import Cookies from "js-cookie";
+import React, { useState, useEffect } from "react";
 import { darken, styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
@@ -26,7 +26,32 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import EmailIcon from "@mui/icons-material/Email";
+import { keyframes } from "@mui/system";
 
+// Bounce animation for dots
+const bounce = keyframes`
+  0%, 80%, 100% { transform: scale(0); } 
+  40% { transform: scale(1); }
+`;
+
+// Ellipsis container
+const BouncingEllipsis = styled('span')(({ theme }) => ({
+  display: 'inline-block',
+  width: '24px',
+  textAlign: 'left',
+  '& > span': {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    margin: '0 2px',
+    backgroundColor: theme.palette.common.white,
+    borderRadius: '50%',
+    animation: `${bounce} 1.4s infinite ease-in-out both`,
+  },
+  '& > span:nth-of-type(1)': { animationDelay: '0s' },
+  '& > span:nth-of-type(2)': { animationDelay: '0.2s' },
+  '& > span:nth-of-type(3)': { animationDelay: '0.4s' },
+}));
 
 // Footer Link
 const FooterLink = styled(MuiLink)(({ theme }) => ({
@@ -62,32 +87,31 @@ const GlassBox = styled(Box)(({ theme }) => ({
 }));
 
 const DEFAULT_BRAND_URLS = [
-  "/",
   "/shops",
+  "/",
   "/about",
   "/contact",
+  "/company-onboarding",
+  "/profile"
 ];
-
 
 export default function Footer() {
   const theme = useTheme();
   const router = useRouter();
+  const cookieShop = Cookies.get("shopname");
+
+
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
 
-  const routeShopSlug =
-    !isDefaultBrandPage && router.query.shop
-      ? String(router.query.shop)
-      : null;
-  const {
-    data: companyData,
-    isLoading,
-    isError
-  } = useGetCompanyBySlugQuery(routeShopSlug, {
-    skip: !routeShopSlug,
-  });
-  console.log("Company Data in Footer:", companyData);
+  // Only fetch company data if not a default page
+  const displayShopName = isDefaultBrandPage
+    ? "SokoJunction"
+    : cookieShop || "SokoJunction";
+  const { data: companyData, isLoading: companyLoading } =
+    useGetCompanyBySlugQuery(displayShopName, {
+      skip: isDefaultBrandPage || !cookieShop,
+    });
   const primaryColor = darken(theme.palette.primary.main, 0.65);
-
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -97,7 +121,8 @@ export default function Footer() {
   };
 
   const renderContactContent = () => {
-    if (!routeShopSlug)
+    // Use default contact info on default pages
+    if (isDefaultBrandPage || !companyData) {
       return (
         <Stack spacing={1}>
           <Typography sx={{ color: "#fff" }}>Email: sokojunction@gmail.com</Typography>
@@ -105,11 +130,11 @@ export default function Footer() {
           <Typography sx={{ color: "#fff" }}>Location: Nairobi, Kenya</Typography>
         </Stack>
       );
+    }
 
-    if (isLoading) return <CircularProgress size={22} color="inherit" />;
+    if (companyLoading) return <CircularProgress size={22} color="inherit" />;
 
-    if (isError || !companyData)
-      return <Typography>Contact info unavailable.</Typography>;
+    // if (isError) return <Typography>Contact info unavailable.</Typography>;
 
     return (
       <Stack spacing={1}>
@@ -156,11 +181,25 @@ export default function Footer() {
         <Grid item xs={12} md={4}>
           <Stack spacing={2.5}>
             <Typography variant="h5" sx={{ fontWeight: 800, textTransform: "capitalize" }}>
-              {routeShopSlug || "SokoJunction"}
+              {isDefaultBrandPage
+                ? "SokoJunction"
+                : companyLoading
+                  ? (
+                    <BouncingEllipsis>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </BouncingEllipsis>
+                  )
+                  : companyData?.name || "SokoJunction"
+              }
             </Typography>
 
             <Typography variant="body2" sx={{ color: alpha("#fff", 0.8) }}>
-              {companyData?.description || "Your marketplace to discover unique products from local shops."}
+              {isDefaultBrandPage
+                ? "Your marketplace to discover unique products from local shops."
+                : companyData?.description || "Your marketplace to discover unique products from local shops."
+              }
             </Typography>
 
             {/* Newsletter */}
@@ -183,9 +222,7 @@ export default function Footer() {
                       "& input": { color: "#fff" },
                     },
                   }}
-                  InputLabelProps={{
-                    sx: { color: alpha("#fff", 0.7) },
-                  }}
+                  InputLabelProps={{ sx: { color: alpha("#fff", 0.7) } }}
                 />
 
                 <Button
@@ -224,7 +261,6 @@ export default function Footer() {
         {/* Quick Links */}
         <Grid item xs={6} md={4}>
           <FooterSectionTitle>Quick Links</FooterSectionTitle>
-
           {["Home", "Shops", "About Us"].map((item) => (
             <FooterLink
               key={item}
@@ -234,26 +270,6 @@ export default function Footer() {
             </FooterLink>
           ))}
         </Grid>
-
-        {/* Categories */}
-        {/* <Grid item xs={6} md={2}>
-          <FooterSectionTitle>Categories</FooterSectionTitle>
-
-          {["Fashion", "Electronics", "Home & Living", "Beauty", "Books"].map((item) => {
-            const categorySlug = item.toLowerCase().replace(" & ", "-");
-            const href = slug
-              ? `/shop/${slug}?category=${categorySlug}`
-              : `/shops?category=${categorySlug}`;
-            return (
-              <FooterLink
-                key={item}
-                href={href}
-              >
-                {item}
-              </FooterLink>
-            );
-          })}
-        </Grid> */}
 
         {/* Contact */}
         <Grid item xs={12} md={4}>

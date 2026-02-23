@@ -35,6 +35,8 @@ const DEFAULT_BRAND_URLS = [
   "/",
   "/about",
   "/contact",
+  "/company-onboarding",
+  "/profile",
 ];
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {
@@ -42,8 +44,8 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   const router = useRouter();
   const theme = useTheme();
   const cookieShop = Cookies.get("shopname");
-  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
   LinksContainerComponent.displayName = "LinksContainerComponent";
+  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
   const displayShopName = isDefaultBrandPage
     ? "SokoJunction"
     : cookieShop || "SokoJunction";

@@ -8,435 +8,312 @@ import {
   Button,
   Grid,
   Chip,
-  Divider,
   Card,
-  useTheme
+  useTheme,
+  Avatar,
+  Divider,
+  Paper,
+  alpha
 } from "@mui/material";
-import { styled, keyframes } from "@mui/material/styles"; // Import keyframes
+import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import Cookies from "js-cookie";
 import Payment from "@/Components/Company/Payment";
-import CheckIcon from "@mui/icons-material/Check"
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import BusinessIcon from '@mui/icons-material/Business';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import { useGetCompanyQuery } from "@/Api/services";
+ // Import the new hook
 
+// --- Styled Components ---
 
+const ContentCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  borderRadius: "16px",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.paper,
+}));
+
+const PricingCard = styled(Card)(({ theme }) => ({
+  textAlign: "center",
+  padding: "32px 24px",
+  borderRadius: "24px",
+  border: `1px solid ${theme.palette.divider}`,
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  position: 'relative',
+  overflow: 'visible',
+  "&:hover": {
+    transform: "translateY(-10px)",
+    boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.1)}`,
+  },
+  "&.featured": {
+    borderColor: theme.palette.primary.main,
+    borderWidth: '2px',
+    backgroundColor: alpha(theme.palette.primary.main, 0.02),
+    "&::before": {
+      content: '"CURRENT PLAN"',
+      position: 'absolute',
+      top: -12,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      padding: '2px 12px',
+      borderRadius: '12px',
+      fontSize: '0.7rem',
+      fontWeight: 800,
+      letterSpacing: '1px'
+    }
+  }
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  marginRight: theme.spacing(1),
+  minHeight: '48px',
+  borderRadius: '8px',
+  color: theme.palette.text.secondary,
+  '&.Mui-selected': {
+    color: theme.palette.primary.main,
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+  },
+}));
 
 function ProfilePage() {
   const theme = useTheme();
-  const secondaryColor = "#3f51b5"; // A complementary blue
-  const lightGray = "#f8f8f8";
-  const darkText = "#333";
-  const lightText = "#666";
-
-  const PricingCard:any = styled(Card)({
-        textAlign: "center",
-        padding: "40px 30px",
-        borderRadius: "20px",
-        boxShadow: "0 8px 25px rgba(0,0,0,0.07)",
-        border: `1px solid ${lightGray}`,
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        transition: "transform 0.4s ease, box-shadow 0.4s ease",
-        "&:hover": {
-          transform: "translateY(-8px) scale(1.01)",
-          boxShadow: "0 12px 35px rgba(0,0,0,0.12)",
-        },
-      });
-
-      const AccentButton = styled(Button)(({ theme }) => ({
-        backgroundColor: theme.palette.primary.main,
-        color: "#fff",
-        textTransform: "capitalize",
-        padding: "16px 40px",
-        borderRadius: "30px", // More rounded for a softer feel
-        fontWeight: 600,
-        fontSize: "1.15rem",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.3)", // Stronger shadow
-        transition: "all 0.4s ease",
-        "&:hover": {
-          backgroundColor: theme.palette.primary.dark,
-          transform: "translateY(-3px) scale(1.02)", // Enhanced hover effect
-          boxShadow: "0 12px 25px rgba(0,0,0,0.4)",
-        },
-      }));
-      
-  const router = useRouter();
-  const [userDetails, setUserDetails] = useState<any>(
-    JSON.parse(Cookies.get("user")) || {}
+  const [userDetails, setUserDetails] = useState(
+    JSON.parse(Cookies.get("user") || "{}")
   );
   const [tab, setTab] = useState(0);
   const [editMode, setEditMode] = useState(false);
-  const [companyTab, setCompanyTab] = useState(0);
+  const router = useRouter();
+  const token = Cookies.get("access");
+  console.log(token, "token in profile page");
+  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyQuery(token, {
+      skip: !token,
+    });
+  console.log(companyData, "company data in profile page");
 
-  const handleTabChange = (event, newValue) => {
-    setTab(newValue);
-  };
+  const handleTabChange = (event, newValue) => setTab(newValue);
 
-  const handleCompanyTabChange = (event, newValue) => {
-    setCompanyTab(newValue);
-  };
+  const renderField = (label, value, key, disabled = false) => (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
+        {label}
+      </Typography>
+      {editMode && !disabled ? (
+        <TextField
+          fullWidth
+          variant="outlined"
+          size="small"
+          defaultValue={value}
+          onChange={(e) => setUserDetails({ ...userDetails, [key]: e.target.value })}
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+        />
+      ) : (
+        <Typography variant="body1" sx={{ fontWeight: 500, color: value ? 'text.primary' : 'text.disabled' }}>
+          {value || "Not provided"}
+        </Typography>
+      )}
+    </Box>
+  );
 
-  const renderField = (
-    label: string,
-    value: any,
-    object: any,
-    key: string,
-    updateObject: (newObj: any) => void,
-    disabled: boolean = false
-  ) => {
-    const isDate =
-      typeof value === "string" &&
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
-
-    const formattedValue = isDate
-      ? new Date(value).toLocaleString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric",
-      })
-      : value;
-
-      
-
-    return (
-      <Grid container spacing={2} sx={{ mb: 2 }} key={key}>
-        <Grid item xs={4}>
-          <Typography sx={{ fontWeight: "bold" }}>{label}:</Typography>
-        </Grid>
-        <Grid item xs={8}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              size="small"
-              defaultValue={formattedValue}
-              disabled={disabled}
-              onChange={(e) =>
-                !disabled && updateObject({ ...object, [key]: e.target.value })
-              }
-            />
-          ) : (
-            <Typography>{formattedValue || "-"}</Typography>
-          )}
-        </Grid>
-      </Grid>
-    );
-  };
+  const renderCompanyField = (label, value) => (
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
+        {label}
+      </Typography>
+      <Typography variant="body1" sx={{ fontWeight: 500, color: value ? 'text.primary' : 'text.disabled' }}>
+        {value || "Not provided"}
+      </Typography>
+    </Box>
+  );
 
   return (
-    <Box sx={{ maxWidth: "900px", margin: "30px auto", p: 3 }}>
-      <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-        My Profile
-      </Typography>
+    <Box sx={{ maxWidth: "1100px", margin: "40px auto", p: { xs: 2, md: 4 } }}>
+      
+      {/* Profile Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 5, gap: 3 }}>
+        <Avatar 
+          sx={{ 
+            width: 80, 
+            height: 80, 
+            bgcolor: theme.palette.primary.main,
+            fontSize: '2rem',
+            boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.2)}`
+          }}
+        >
+          {userDetails.first_name?.[0] || userDetails.username?.[0] || "U"}
+        </Avatar>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.5px' }}>
+            {userDetails.first_name} {userDetails.last_name}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {userDetails.email}
+          </Typography>
+        </Box>
+      </Box>
 
-      <Tabs
-        value={tab}
-        onChange={handleTabChange}
-        textColor="inherit"
-        indicatorColor="secondary"
-        sx={{
-          mb: 3,
-          "& .MuiTabs-indicator": { backgroundColor: theme.palette.primary.main },
-          "& .MuiTab-root": { color: "#000" },
-          "& .Mui-selected": { color: theme.palette.primary.main },
-        }}
-      >
-        <Tab label="Personal Info" />
-        <Tab label="Company Info" />
-        <Tab label="Groups & Permissions" />
-        <Tab label="Payments" />
-      </Tabs>
+      <Grid container spacing={4}>
+        {/* Navigation Sidebar */}
+        <Grid item xs={12} md={3}>
+          <Tabs
+            orientation="vertical"
+            value={tab}
+            onChange={handleTabChange}
+            sx={{
+              borderRight: { md: 1 },
+              borderColor: 'divider',
+              '& .MuiTabs-indicator': { display: 'none' },
+            }}
+          >
+            <StyledTab icon={<PersonOutlineIcon sx={{ fontSize: 20 }} />} iconPosition="start" label="Personal Info" />
+            <StyledTab icon={<BusinessIcon sx={{ fontSize: 20 }} />} iconPosition="start" label="Company" />
+            <StyledTab icon={<VerifiedUserIcon sx={{ fontSize: 20 }} />} iconPosition="start" label="Permissions" />
+            <StyledTab icon={<AccountBalanceWalletIcon sx={{ fontSize: 20 }} />} iconPosition="start" label="Billing" />
+          </Tabs>
+        </Grid>
 
-      {/* Personal Info */}
-      {tab === 0 && (
-        <>
-          {renderField("Username", userDetails.username, userDetails, "username", setUserDetails)}
-          {renderField("Email", userDetails.email, userDetails, "email", setUserDetails)}
-          {renderField("First Name", userDetails.first_name, userDetails, "first_name", setUserDetails)}
-          {renderField("Last Name", userDetails.last_name, userDetails, "last_name", setUserDetails)}
-          {renderField("Last Login", userDetails.last_login, userDetails, "last_login", setUserDetails, true)}
-          {renderField("Date Joined", userDetails.date_joined, userDetails, "date_joined", setUserDetails, true)}
-          {renderField("Is Active", userDetails.is_active ? "Yes" : "No", userDetails, "is_active", setUserDetails, true)}
-          {renderField("Is Staff", userDetails.is_staff ? "Yes" : "No", userDetails, "is_staff", setUserDetails, true)}
-          {renderField("Is Superuser", userDetails.is_superuser ? "Yes" : "No", userDetails, "is_superuser", setUserDetails, true)}
-        </>
-      )}
+        {/* Main Content Area */}
+        <Grid item xs={12} md={9}>
+          <ContentCard elevation={0}>
+            {tab === 0 && (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>Profile Details</Typography>
+                  <Button 
+                    variant={editMode ? "contained" : "outlined"} 
+                    onClick={() => setEditMode(!editMode)}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    {editMode ? "Save Changes" : "Edit Profile"}
+                  </Button>
+                </Box>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>{renderField("Username", userDetails.username, "username")}</Grid>
+                  <Grid item xs={12} sm={6}>{renderField("Email", userDetails.email, "email")}</Grid>
+                  <Grid item xs={12} sm={6}>{renderField("First Name", userDetails.first_name, "first_name")}</Grid>
+                  <Grid item xs={12} sm={6}>{renderField("Last Name", userDetails.last_name, "last_name")}</Grid>
+                </Grid>
+                <Divider sx={{ my: 3 }} />
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>{renderField("Last Login", new Date(userDetails.last_login).toLocaleDateString(), "last_login", true)}</Grid>
+                  <Grid item xs={12} sm={6}>{renderField("Member Since", new Date(userDetails.date_joined).toLocaleDateString(), "date_joined", true)}</Grid>
+                </Grid>
+              </Box>
+            )}
 
-      {/* Company Info */}
-      {tab === 1 && (
-        <>
-          {userDetails.companies && userDetails.companies.length > 0 ? (
-            userDetails.companies.map((company, index) => (
-              <Box
-                key={company.id}
-                sx={{ mb: 3, p: 2, border: "1px solid #ddd", borderRadius: "4px" }}
-              >
-                <Typography variant="h6" sx={{ mb: 2, color: theme.palette.primary.main }}>
-                  Company {index + 1}
-                </Typography>
-
-                <Tabs
-                  value={companyTab}
-                  onChange={handleCompanyTabChange}
-                  textColor="inherit"
-                  indicatorColor="secondary"
-                  sx={{
-                    mb: 2,
-                    "& .MuiTabs-indicator": { backgroundColor: theme.palette.primary.main },
-                    "& .MuiTab-root": { color: "#000" },
-                    "& .Mui-selected": { color: theme.palette.primary.main },
-                  }}
-                >
-                  <Tab label="General Info" />
-                  <Tab label="Address Info" />
-                  <Tab label="Branding" />
-                </Tabs>
-
-                {companyTab === 0 && (
-                  <>
-                    {renderField("Name", company.name, company, "name", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Description", company.description, company, "description", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Website", company.website, company, "website", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Business Reg. Number", company.business_registration_number, company, "business_registration_number", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Tax PIN", company.tax_pin_number, company, "tax_pin_number", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                  </>
-                )}
-
-                {companyTab === 1 && (
-                  <>
-                    {renderField("Country", company.country, company, "country", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("City", company.city, company, "city", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Physical Address", company.physical_address, company, "physical_address", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Postal Address", company.postal_address, company, "postal_address", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Postal Code", company.postal_code, company, "postal_code", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                  </>
-                )}
-
-                {companyTab === 2 && (
-                  <>
-                    {renderField("Primary Color", company.primary_color, company, "primary_color", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Secondary Color", company.secondary_color, company, "secondary_color", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                    {renderField("Accent Color", company.accent_color, company, "accent_color", (updated) => {
-                      const newCompanies = [...userDetails.companies];
-                      newCompanies[index] = updated;
-                      setUserDetails({ ...userDetails, companies: newCompanies });
-                    })}
-                  </>
+            {tab === 1 && (
+              <Box>
+                {companyLoading && <Typography>Loading company information...</Typography>}
+                {companyError && <Typography color="error">Error loading company information.</Typography>}
+                {companyData ? (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Company Details</Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Name", companyData.name)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Website", companyData.website)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Business Reg. Number", companyData.business_registration_number)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Tax PIN", companyData.tax_pin_number)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Country", companyData.country)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("City", companyData.city)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Physical Address", companyData.physical_address)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Postal Address", companyData.postal_address)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Postal Code", companyData.postal_code)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Primary Color", companyData.primary_color)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Secondary Color", companyData.secondary_color)}</Grid>
+                      <Grid item xs={12} sm={6}>{renderCompanyField("Accent Color", companyData.accent_color)}</Grid>
+                    </Grid>
+                  </Box>
+                ) : (
+                  !companyLoading && !companyError && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <BusinessIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                      <Typography color="text.secondary">No company information available at this time.</Typography>
+                    </Box>
+                  )
                 )}
               </Box>
-            ))
-          ) : (
-            <Typography>No company information available.</Typography>
-          )}
-        </>
-      )}
+            )}
 
-      {/* Groups & Permissions */}
-      {tab === 2 && (
-        <>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Groups
-          </Typography>
-          {userDetails.groups && userDetails.groups.length > 0 ? (
-            userDetails.groups.map((group, idx) => (
-              <Chip key={idx} label={`Group ${group}`} sx={{ mr: 1, mb: 1 }} />
-            ))
-          ) : (
-            <Typography>No groups assigned.</Typography>
-          )}
-
-          <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-            User Permissions
-          </Typography>
-          {userDetails.user_permissions && userDetails.user_permissions.length > 0 ? (
-            userDetails.user_permissions.map((perm, idx) => (
-              <Chip key={idx} label={`Permission ${perm}`} sx={{ mr: 1, mb: 1 }} />
-            ))
-          ) : (
-            <Typography>No permissions assigned.</Typography>
-          )}
-        </>
-      )}
-
-      {/* Payments Tab */}
-      {tab === 3 && (
-        <Box>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Your Current Plan
-          </Typography>
-
-          <Grid container spacing={6} justifyContent="center">
-            {/* Starter Plan */}
-            <Grid item xs={12} md={4}>
-              <PricingCard sx={{
-                border: userDetails.selected_plan === "Starter" ? `2px solid ${theme.palette.primary.main}` : "1px solid #ddd",
-                boxShadow: userDetails.selected_plan === "Starter" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
-              }}>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
-                    Starter
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
-                    $15<Typography component="span" variant="h6" color="text.secondary">/mo</Typography>
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ mb: 3 }}>
-                    Ideal for getting your first store online.
-                  </Typography>
-                  <ul style={{ listStyle: "none", padding: 0, textAlign: "left", margin: "0 auto 20px auto", maxWidth: "200px" }}>
-                    <li><CheckIcon color="success" fontSize="small" /> Basic Store Setup</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Product Listings (up to 50)</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Standard Support</li>
-                  </ul>
-                </Box>
-                {userDetails.selected_plan === "Starter" ? (
-                  <Payment />
+            {tab === 2 && (
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Groups & Access</Typography>
+                {userDetails.groups?.length > 0 ? (
+                  userDetails.groups.map((group, idx) => (
+                    <Chip 
+                      key={idx} 
+                      label={group} 
+                      onDelete={() => {}} // Visual only for now
+                      sx={{ mr: 1, mb: 1, borderRadius: '8px', fontWeight: 600 }} 
+                      color="primary" 
+                    />
+                  ))
                 ) : (
-                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, "&:hover": { bgcolor: theme.palette.primary.main, color: "#fff" } }} onClick={() => {userDetails.selected_plan = 'Starter'}}>
-                    Choose Plan
-                    {userDetails.selected_plan}
-                  </Button>
+                  <Typography color="text.secondary">No administrative groups assigned.</Typography>
                 )}
-              </PricingCard>
-            </Grid>
+              </Box>
+            )}
 
-            {/* Growth Plan */}
-            <Grid item xs={12} md={4}>
-              <PricingCard sx={{
-                border: userDetails.selected_plan === "Growth" ? `2px solid ${theme.palette.primary.main}` : "1px solid #ddd",
-                boxShadow: userDetails.selected_plan === "Growth" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
-              }}>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
-                    Growth
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
-                    $39<Typography component="span" variant="h6" color="text.secondary">/mo</Typography>
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ mb: 3 }}>
-                    For growing SMEs with inventory and marketing tools.
-                  </Typography>
-                  <ul style={{ listStyle: "none", padding: 0, textAlign: "left", margin: "0 auto 20px auto", maxWidth: "200px" }}>
-                    <li><CheckIcon color="success" fontSize="small" /> All Starter Features</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Unlimited Products</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Inventory Management</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Email Marketing Tools</li>
-                  </ul>
-                </Box>
-                {userDetails.selected_plan === "Growth" ? (
-                  <AccentButton sx={{ mt: 3 }} onClick={() => {/* trigger payment logic */ }}>
-                    Pay Now
-                  </AccentButton>
-                ) : (
-                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, "&:hover": { bgcolor: theme.palette.primary.main, color: "#fff" } }}>
-                    Choose Plan
-                  </Button>
-                )}
-              </PricingCard>
-            </Grid>
+            {tab === 3 && (
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 4, textAlign: 'center' }}>Subscription Plans</Typography>
+                <Grid container spacing={3}>
+                  {/* Starter Plan */}
+                  <Grid item xs={12} lg={4}>
+                    <PricingCard className={userDetails.selected_plan === 'Starter' ? 'featured' : ''}>
+                      <Typography variant="h6" sx={{ fontWeight: 800 }}>Starter</Typography>
+                      <Typography variant="h4" sx={{ my: 2, fontWeight: 800 }}>0 Kes</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, flexGrow: 1 }}>
+                        For individuals exploring the platform.
+                      </Typography>
+                      {userDetails.selected_plan === 'Starter' ? <Payment /> : (
+                        <Button fullWidth variant="outlined" sx={{ borderRadius: '12px' }} onClick={() => router.push('/payment/Starter')}>Switch Plan</Button>
+                      )}
+                    </PricingCard>
+                  </Grid>
 
-            {/* Pro Plan */}
-            <Grid item xs={12} md={4}>
-              <PricingCard sx={{
-                border: userDetails.selected_plan === "Pro" ? `2px solid ${theme.palette.primary.main}` : "1px solid #ddd",
-                boxShadow: userDetails.selected_plan === "Pro" ? `0 15px 40px rgba(190, 31, 47, 0.2)` : "none"
-              }}>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: theme.palette.primary.main }}>
-                    Pro
-                  </Typography>
-                  <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
-                    $79<Typography component="span" variant="h6" color="text.secondary">/mo</Typography>
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ mb: 3 }}>
-                    For established sellers with advanced needs and priority support.
-                  </Typography>
-                  <ul style={{ listStyle: "none", padding: 0, textAlign: "left", margin: "0 auto 20px auto", maxWidth: "200px" }}>
-                    <li><CheckIcon color="success" fontSize="small" /> All Growth Features</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Advanced Analytics</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Multi-User Access</li>
-                    <li><CheckIcon color="success" fontSize="small" /> Priority Support</li>
-                  </ul>
-                </Box>
-                {userDetails.selected_plan === "Pro" ? (
-                  <AccentButton sx={{ mt: 3 }} onClick={() => {/* trigger payment logic */ }}>
-                    Pay Now
-                  </AccentButton>
-                ) : (
-                  <Button variant="outlined" sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, mt: 3, "&:hover": { bgcolor: theme.palette.primary.main, color: "#fff" } }}>
-                    Choose Plan
-                  </Button>
-                )}
-              </PricingCard>
-            </Grid>
-          </Grid>
-        </Box>
+                  {/* Growth Plan */}
+                  <Grid item xs={12} lg={4}>
+                    <PricingCard className={userDetails.selected_plan === 'Growth' ? 'featured' : ''}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: 'primary.main' }}>Growth</Typography>
+                      <Typography variant="h4" sx={{ my: 2, fontWeight: 800 }}>550 Kes</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, flexGrow: 1 }}>
+                        Perfect for growing teams and SMEs.
+                      </Typography>
+                      {userDetails.selected_plan === 'Growth' ? <Payment /> : (
+                        <Button fullWidth variant="contained" sx={{ borderRadius: '12px', boxShadow: 'none' }} onClick={() => router.push('/payment/Growth')}>Upgrade Now</Button>
+                      )}
+                    </PricingCard>
+                  </Grid>
 
-      )}
-
-      {/* Edit Button */}
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: theme.palette.primary.main,
-          mt: 3,
-          textTransform: "capitalize",
-          "&:hover": { backgroundColor: theme.palette.primary.dark },
-        }}
-        onClick={() => setEditMode(!editMode)}
-      >
-        {editMode ? "Save Changes" : "Edit Profile"}
-      </Button>
+                  {/* Pro Plan */}
+                  <Grid item xs={12} lg={4}>
+                    <PricingCard className={userDetails.selected_plan === 'Pro' ? 'featured' : ''}>
+                      <Typography variant="h6" sx={{ fontWeight: 800 }}>Pro</Typography>
+                      <Typography variant="h4" sx={{ my: 2, fontWeight: 800 }}>1050 Kes</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, flexGrow: 1 }}>
+                        Full enterprise capabilities and support.
+                      </Typography>
+                      {userDetails.selected_plan === 'Pro' ? <Payment /> : (
+                        <Button fullWidth variant="outlined" sx={{ borderRadius: '12px' }} onClick={() => router.push('/payment/Pro')}>Contact Sales</Button>
+                      )}
+                    </PricingCard>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+          </ContentCard>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

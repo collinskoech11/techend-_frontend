@@ -212,7 +212,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     }
   }, []);
 
-  
+
 
   useEffect(() => {
     const { pathname, query } = router;
@@ -314,7 +314,27 @@ const Shop = forwardRef((props: any, ref: any) => {
       }
     }
   }, [router.isReady]);
-
+  const BouncingDots = () => (
+    <Box sx={{ display: "inline-flex", gap: 0.4, ml: 0.5 }}>
+      {[0, 1, 2].map((i) => (
+        <Box
+          key={i}
+          sx={{
+            width: 4,
+            height: 4,
+            borderRadius: "50%",
+            backgroundColor: "currentColor",
+            animation: "bounce 1.2s infinite",
+            animationDelay: `${i * 0.2}s`,
+            "@keyframes bounce": {
+              "0%, 80%, 100%": { transform: "scale(0)" },
+              "40%": { transform: "scale(1)" },
+            },
+          }}
+        />
+      ))}
+    </Box>
+  );
 
   return (
     <>
@@ -365,15 +385,21 @@ const Shop = forwardRef((props: any, ref: any) => {
               {/* Social Icons */}
               <Box sx={{ display: "flex", gap: 2, mt: 2, justifyContent: { xs: "center", sm: "flex-start" } }}>
                 <Chip
-                  label={`${products_data?.count} Products`}
+                  label={
+                    products_data?.count !== undefined ? (
+                      `${products_data.count} Items`
+                    ) : (
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <BouncingDots />
+                      </Box>
+                    )
+                  }
                   sx={{
                     px: 2,
                     py: 1,
                     fontSize: "0.9rem",
                     fontWeight: 600,
                     borderRadius: "12px",
-                    // backgroundColor: theme.palette.primary.light,
-                    // color: theme.palette.primary.contrastText,
                     boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
                   }}
                 />

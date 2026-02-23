@@ -47,8 +47,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
   const GA_ID = GA_IDS[hostname] || "G-F23L8C9HPP";
 
   const LoadingEllipsis = () => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, fontSize: 14, opacity: 0.7 }}>
-      Loading Navbar
+    <Box sx={{ height:"75px", display: "flex", alignItems: "center", gap: 1, fontSize: 14, opacity: 0.7 }}>
       <Box sx={{ display: "flex", gap: 0.5 }}>
         {[0, 1, 2].map((i) => (
           <Box
