@@ -88,6 +88,7 @@ const GlassBox = styled(Box)(({ theme }) => ({
 
 const DEFAULT_BRAND_URLS = [
   "/shops",
+  "/payment/Growth",
   "/",
   "/about",
   "/contact",
@@ -295,12 +296,13 @@ export default function Footer() {
       <Box
         sx={{
           textAlign: "center",
+          // "/"
           mt: 3,
           opacity: 0.75,
           fontSize: "0.85rem",
         }}
       >
-        © {new Date().getFullYear()}Powered by SokoJunction. All Rights Reserved.
+        © {new Date().getFullYear()} Powered by SokoJunction. All Rights Reserved.
       </Box>
     </Box>
   );
