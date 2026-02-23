@@ -300,7 +300,7 @@ export default function Footer() {
           fontSize: "0.85rem",
         }}
       >
-        © {new Date().getFullYear()} SokoJunction. All Rights Reserved.
+        © {new Date().getFullYear()}Powered by SokoJunction. All Rights Reserved.
       </Box>
     </Box>
   );

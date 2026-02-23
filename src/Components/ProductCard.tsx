@@ -21,7 +21,7 @@ import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import VisibilityIcon from '@mui/icons-material/Visibility'; // Icon for quick view/details
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // Import WhatsApp icon
 import { IconActionsContainer } from "@/StyledComponents/Products";
-import { Box, Typography, CircularProgress, IconButton } from "@mui/material";
+import { Box, Typography, CircularProgress, IconButton, useTheme } from "@mui/material";
 import { useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
@@ -38,6 +38,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading, ref }) => {
   const router = useRouter();
+  const theme = useTheme();
   const [addToCart, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
   const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
   const { sessionId, refetch: cart_refetch } = useCart();
@@ -232,14 +233,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, 
             </Typography>
           </RatingContainer>
           <IconActionsContainer>
-            <IconButton onClick={AddItemToCart} disabled={currentProduct.stock === 0 || AddToCartLoading}>
-              {AddToCartLoading ? <CircularProgress size={24} /> : <ShoppingBasketIcon />}
+            <IconButton
+              onClick={AddItemToCart}
+              disabled={currentProduct.stock === 0 || AddToCartLoading}
+            >
+              {AddToCartLoading ? (
+                <CircularProgress size={24} sx={{ color: theme.palette.primary.main }} />
+              ) : (
+                <ShoppingBasketIcon sx={{ color: theme.palette.primary.main }} />
+              )}
             </IconButton>
+
             <IconButton onClick={() => router.push(`/product/${currentProduct?.slug}`)}>
-              <VisibilityIcon />
+              <VisibilityIcon sx={{ color: theme.palette.primary.main }} />
             </IconButton>
-            <IconButton onClick={handleWhatsAppClick} disabled={currentProduct.stock === 0}>
-              <WhatsAppIcon />
+
+            <IconButton
+              onClick={handleWhatsAppClick}
+              disabled={currentProduct.stock === 0}
+            >
+              <WhatsAppIcon sx={{ color: theme.palette.primary.main }} />
             </IconButton>
           </IconActionsContainer>
         </ProductInfoContainer>
