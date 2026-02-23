@@ -369,25 +369,30 @@ const Shop = forwardRef((props: any, ref: any) => {
               width: { md: "fit-content", xs: "100%" }
             }}
           >
-            <ShopLogo
-              src={
-                companyData?.logo_image
-                  ? `https://res.cloudinary.com/dqokryv6u/${companyData.logo_image}`
-                  : "https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg"
-              }
-              style={{
-                width: 110,
-                height: 110,
-                borderRadius: "50%",
-                objectFit: "cover",
-                boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-              }}
-            />
+            {companyLoading ? (
+              <CircularProgress size={110} sx={{ color: theme.palette.primary.main }} />
+            ) : (
+              <ShopLogo
+                src={
+                  companyData?.logo_image
+                    ? `https://res.cloudinary.com/dqokryv6u/${companyData.logo_image}`
+                    : "https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg"
+                }
+                style={{
+                  width: 110,
+                  height: 110,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+                }}
+              />
+            )}
 
             <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
               <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: theme.palette.primary.main }}>
-                {companyData?.name}
+                {companyLoading ? <BouncingDots /> : companyData?.name}
               </Typography>
+
               {/* <Typography variant="body1" sx={{ maxWidth: "700px", color: lightText, mb: 1 }}>
                 {companyData?.description}
               </Typography> */}
