@@ -147,7 +147,7 @@ function PaymentPage() {
           sx={{ mb: 3 }}
         />
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          By clicking "Make Payment", you agree to our <a href="#" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>Terms and Conditions</a> and <a href="#" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>Privacy Policy</a>.
+          By clicking &apos;Make Payment&apos;, you agree to our <a href="#" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>Terms and Conditions</a> and <a href="#" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>Privacy Policy</a>.
         </Typography>
         <Button
           variant="contained"

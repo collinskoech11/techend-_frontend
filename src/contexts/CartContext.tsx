@@ -25,6 +25,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: isAuthCartLoading,
     refetch: refetchAuthCart,
     error: authCartError,
+    isUninitialized: isAuthCartUninitialized,
+    isFetching: isAuthCartFetching,
   } = useGetCartQuery(
     { token, company_name },
     { skip: !token || !company_name }
@@ -35,19 +37,21 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: isGuestCartLoading,
     refetch: refetchGuestCart,
     error: guestCartError,
+    isUninitialized: isGuestCartUninitialized,
+    isFetching: isGuestCartFetching,
   } = useGetCartGuestQuery({session_id: sessionId!, company_name: company_name || "techend"}, { skip: !!token || !sessionId });
 
   const triggerCartRefetch = useCallback(() => {
     if (token) {
-      if (refetchAuthCart) {
+      if (refetchAuthCart && !isAuthCartUninitialized && !isAuthCartFetching) {
         refetchAuthCart();
-      }
+      } 
     } else {
-      if (refetchGuestCart) {
+      if (refetchGuestCart && !isGuestCartUninitialized && !isGuestCartFetching) {
         refetchGuestCart();
       }
     }
-  }, [token, refetchAuthCart, refetchGuestCart]);
+  }, [token, company_name, refetchAuthCart, refetchGuestCart, isAuthCartUninitialized, isAuthCartFetching, isGuestCartUninitialized, isGuestCartFetching]);
 
   const data = token ? authCartData : guestCartData;
   const isLoading = token ? isAuthCartLoading : isGuestCartLoading;
