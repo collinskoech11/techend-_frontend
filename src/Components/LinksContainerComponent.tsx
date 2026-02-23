@@ -16,7 +16,9 @@ import {
   Badge,
   CircularProgress,
   Avatar, // Keeping Avatar for potential future use or custom user display
+  styled,
 } from "@mui/material";
+import { keyframes } from "@mui/system";
 import MenuIcon from "@mui/icons-material/Menu";
 import { PersonOutline, HistoryOutlined, NotificationsNoneOutlined, LogoutOutlined, AccountCircleOutlined } from "@mui/icons-material"; // Modernized icons
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; // Modernized Shop icon
@@ -38,6 +40,28 @@ const DEFAULT_BRAND_URLS = [
   "/company-onboarding",
   "/profile",
 ];
+const bounce = keyframes`
+  0%, 80%, 100% { transform: scale(0); } 
+  40% { transform: scale(1); }
+`;
+
+const BouncingEllipsis = styled('span')(({ theme }) => ({
+  display: 'inline-block',
+  width: '24px',
+  textAlign: 'left',
+  '& > span': {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    margin: '0 2px',
+    backgroundColor: theme.palette.common.white,
+    borderRadius: '50%',
+    animation: `${bounce} 1.4s infinite ease-in-out both`,
+  },
+  '& > span:nth-of-type(1)': { animationDelay: '0s' },
+  '& > span:nth-of-type(2)': { animationDelay: '0.2s' },
+  '& > span:nth-of-type(3)': { animationDelay: '0.4s' },
+}));
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {
 
@@ -58,15 +82,36 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   const [username, setUsername] = useState<any>(null);
   const [user, setUser] = useState(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "Sokojunction");
+
   const { data: companyData, isLoading: companyLoading } =
     useGetCompanyBySlugQuery(displayShopName, {
       skip: isDefaultBrandPage || !cookieShop,
     });
-    console.log(displayShopName, companyData);
-    const brandLabel =
-  !isDefaultBrandPage && companyData?.name
-    ? companyData.name
-    : displayShopName || "SokoJunction";
+  const brandLabel =
+    !isDefaultBrandPage && companyData?.name
+      ? companyData.name
+      : displayShopName || "SokoJunction";
+  const [displayedBrand, setDisplayedBrand] = useState(
+    !isDefaultBrandPage && companyData?.name
+      ? companyData.name
+      : displayShopName || "SokoJunction"
+  );
+
+  const [isUpdatingBrand, setIsUpdatingBrand] = useState(companyLoading);
+  useEffect(() => {
+    setIsUpdatingBrand(companyLoading); // true while loading, false when done
+
+    if (!companyLoading) {
+      const newBrand =
+        !isDefaultBrandPage && companyData?.name
+          ? companyData.name
+          : displayShopName || "SokoJunction";
+
+      if (newBrand !== displayedBrand) {
+        setDisplayedBrand(newBrand);
+      }
+    }
+  }, [companyLoading, companyData, isDefaultBrandPage, displayShopName, displayedBrand]);
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -266,41 +311,33 @@ const LinksContainerComponent = forwardRef((props, ref) => {
         }}
       >
         {/* Logo/Title Section */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {router.pathname.startsWith('/shop/') && companyData?.logo ? (
-            <Box
-              sx={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 1 }}
-              onClick={() => router.push(`/`)}
-            >
-              <Image
-                src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'}
-                alt={displayShopName}
-                width={32} // Slightly smaller for a cleaner look
-                height={32}
-                style={{ borderRadius: '4px' }} // Subtle rounded corners for the logo
-              />
-              {!companyLoading && ( // Only show text if data is loaded
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: theme.palette.text.primary,
-                    display: { xs: 'none', md: 'block' }, // Hide on small screens
-                  }}
-                >
-                  {brandLabel} {/* Display company name if available */}
-                </Typography>
-              )}
-            </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            cursor: "pointer",
+          }}
+          onClick={() => router.push(`/`)}
+        >
+          {isUpdatingBrand ? (
+            <BouncingEllipsis>
+              <span></span>
+              <span></span>
+              <span></span>
+            </BouncingEllipsis>
           ) : (
             <Typography
               variant="h6"
               component="div"
-              sx={{ cursor: "pointer", textTransform: "capitalize", fontWeight: 'bold' }}
-              onClick={() => router.push(`/`)}
+              sx={{
+                textTransform: "capitalize",
+                fontWeight: "bold",
+                color: theme.palette.primary.main,
+                transition: "opacity 0.25s ease",
+              }}
             >
-              {brandLabel} 
+              {displayedBrand}
             </Typography>
           )}
         </Box>
@@ -308,7 +345,13 @@ const LinksContainerComponent = forwardRef((props, ref) => {
         {/* Desktop Navigation & User Actions */}
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
           <Tooltip title="Mall">
-            <IconButton onClick={() => router.push(`/shops`)} color="inherit">
+            <IconButton onClick={() => router.push(`/shops`)} sx={{
+              color: theme.palette.primary.main,
+              "&:hover": {
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+            >
               <StoreOutlinedIcon />
             </IconButton>
           </Tooltip>
@@ -316,24 +359,48 @@ const LinksContainerComponent = forwardRef((props, ref) => {
           {user && (
             <>
               <Tooltip title="Home">
-                <IconButton onClick={() => router.push(`/`)} color="inherit">
+                <IconButton onClick={() => router.push(`/`)} sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <HomeOutlinedIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Shop">
-                <IconButton onClick={() => router.push(`/shop/${shopname}`)} color="inherit">
+                <IconButton onClick={() => router.push(`/shop/${shopname}`)} sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <ShoppingBagOutlinedIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Order History">
-                <IconButton onClick={() => router.push("/orderhistory")} color="inherit">
+                <IconButton onClick={() => router.push("/orderhistory")} sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
                     <HistoryOutlined />
                   </Badge>
                 </IconButton>
               </Tooltip>
               <Tooltip title="Notifications">
-                <IconButton color="inherit">
+                <IconButton sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
                     <NotificationsNoneOutlined />
                   </Badge>
@@ -348,11 +415,14 @@ const LinksContainerComponent = forwardRef((props, ref) => {
             <Box>
               <Tooltip title={username || "User Account"}>
                 <IconButton
-                  color="inherit"
                   onClick={handleUserMenuOpen}
                   aria-controls={open ? "user-menu" : undefined}
                   aria-haspopup="true"
-                  sx={{ p: 0 }} // Remove default padding for Avatar
+                  sx={{
+                    p: 0, color: theme.palette.primary.main, "&:hover": {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    },
+                  }} // Remove default padding for Avatar
                 >
                   <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main, fontSize: '0.9rem' }}>
                     {username ? username[0].toUpperCase() : <PersonOutline fontSize="small" />}
