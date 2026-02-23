@@ -34,6 +34,7 @@ import { alpha } from '@mui/material/styles'; // For better alpha color manipula
 import CartMenu from "./CartMin";
 const DEFAULT_BRAND_URLS = [
   "/shops",
+  "/payment",
   "/",
   "/about",
   "/contact",
