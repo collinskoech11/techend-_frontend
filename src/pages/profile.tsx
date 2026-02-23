@@ -23,7 +23,8 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessIcon from '@mui/icons-material/Business';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import { useGetCompanyQuery } from "@/Api/services"; // Import the new hook
+import { useGetCompanyQuery } from "@/Api/services";
+ // Import the new hook
 
 // --- Styled Components ---
 
@@ -92,7 +93,7 @@ function ProfilePage() {
   );
   const [tab, setTab] = useState(0);
   const [editMode, setEditMode] = useState(false);
-
+  const router = useRouter();
   const token = Cookies.get("access");
   console.log(token, "token in profile page");
   const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyQuery(token, {
@@ -275,7 +276,7 @@ function ProfilePage() {
                         For individuals exploring the platform.
                       </Typography>
                       {userDetails.selected_plan === 'Starter' ? <Payment /> : (
-                        <Button fullWidth variant="outlined" sx={{ borderRadius: '12px' }} onClick={() => setUserDetails({...userDetails, selected_plan: 'Starter'})}>Switch Plan</Button>
+                        <Button fullWidth variant="outlined" sx={{ borderRadius: '12px' }} onClick={() => router.push('/payment/Starter')}>Switch Plan</Button>
                       )}
                     </PricingCard>
                   </Grid>
@@ -289,7 +290,7 @@ function ProfilePage() {
                         Perfect for growing teams and SMEs.
                       </Typography>
                       {userDetails.selected_plan === 'Growth' ? <Payment /> : (
-                        <Button fullWidth variant="contained" sx={{ borderRadius: '12px', boxShadow: 'none' }} onClick={() => setUserDetails({...userDetails, selected_plan: 'Growth'})}>Upgrade Now</Button>
+                        <Button fullWidth variant="contained" sx={{ borderRadius: '12px', boxShadow: 'none' }} onClick={() => router.push('/payment/Growth')}>Upgrade Now</Button>
                       )}
                     </PricingCard>
                   </Grid>
@@ -303,7 +304,7 @@ function ProfilePage() {
                         Full enterprise capabilities and support.
                       </Typography>
                       {userDetails.selected_plan === 'Pro' ? <Payment /> : (
-                        <Button fullWidth variant="outlined" sx={{ borderRadius: '12px' }} onClick={() => setUserDetails({...userDetails, selected_plan: 'Pro'})}>Contact Sales</Button>
+                        <Button fullWidth variant="outlined" sx={{ borderRadius: '12px' }} onClick={() => router.push('/payment/Pro')}>Contact Sales</Button>
                       )}
                     </PricingCard>
                   </Grid>
