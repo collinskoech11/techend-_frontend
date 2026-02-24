@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext"; // ✅ adjust this path i
 import Script from "next/script";
 
 import { ThemeProvider } from '../contexts/ThemeContext';
+import DynamicTitle from "@/Components/DynamicTitle"; // New import
 const Navbar = lazy(() => import("@/Components/Navbar"));
 const Footer = lazy(() => import("@/Components/Footer"));
 import { useRouter } from "next/router";
@@ -76,6 +77,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
       <Provider store={store}>
         <ThemeProvider>
           <CartProvider>
+            <DynamicTitle />
             {isClient && GA_ID && (
               <>
                 <Script

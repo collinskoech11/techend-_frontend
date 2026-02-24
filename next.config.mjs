@@ -7,9 +7,17 @@ const bundleAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  modularizeImports: {
+    '@mui/material': {
+      transform: '@mui/material/{{member}}',
+    },
+    '@mui/icons-material': {
+      transform: '@mui/icons-material/{{member}}',
+    },
+  },
 
   // ⚠️ This increases bundle size — keep only if required
-  transpilePackages: ['@mui/material'],
+  // transpilePackages: ['@mui/material'],
 
   images: {
     remotePatterns: [

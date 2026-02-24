@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, lazy, Suspense } from "react";
 import { useRouter } from "next/router";
 import { useGetCompaniesQuery } from "@/Api/services";
