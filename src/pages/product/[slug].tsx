@@ -1,6 +1,5 @@
 
-'use client';
-
+// 'use client';
 import React, { useState } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";

@@ -1,5 +1,5 @@
 import { YourChildProps } from "@/Types";
-import { PhotoCamera } from "@mui/icons-material";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { useCreateCompanyMutation, useUpdateCompanyMutation } from "@/Api/services";
 import {
     TextField,

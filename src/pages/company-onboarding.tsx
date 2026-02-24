@@ -16,7 +16,8 @@ import {
     useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import { PhotoCamera, Visibility, VisibilityOff } from "@mui/icons-material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import React, { lazy, Suspense } from "react";
 const SketchPicker = lazy(() => import("react-color").then(module => ({ default: module.SketchPicker })));
 import Cookies from "js-cookie";
@@ -64,9 +65,9 @@ export default function CompanyOnboarding() {
     const theme = useTheme();
 
     const triggerRerender = () => {
-        console.log("trying to rerender parent")
+        // console.log("trying to rerender parent")
         setRefresh((prev) => prev + 1); // Changing state forces re-render
-        console.log("rerendered parent")
+        // console.log("rerendered parent")
     };
 
     const { data: companyDetails, refetch: refetch_company_details, isLoading: loading_get_my_company, error: error_company_data } = useGetCompanyQuery(token, { skip: !token });

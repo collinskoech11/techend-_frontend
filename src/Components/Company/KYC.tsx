@@ -1,6 +1,5 @@
 import { YourChildProps } from "@/Types";
-import { PhotoCamera } from "@mui/icons-material";
-import Payment from "@/Components/Company/Payment"
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import {
     TextField,
     Button,

@@ -1,5 +1,5 @@
 
-'use client';
+// 'use client';
 
 import React, {
   useEffect,
@@ -10,7 +10,6 @@ import React, {
   use,
 } from "react";
 import { alpha } from "@mui/material/styles";
-import MuiLink from "@mui/material/Link"; // Renamed to avoid conflict
 import Skeleton from "@mui/material/Skeleton";
 import {
   MainProductsContainer,
@@ -184,7 +183,7 @@ const Shop = forwardRef((props: any, ref: any) => {
   // Wait for company data to be fetched before setting shopDetails
   useEffect(() => {
     if (!companyLoading && companyData) {
-      console.log("Fetched company data:", companyData);
+      // console.log("Fetched company data:", companyData);
       Cookies.set("shopDetails", JSON.stringify(companyData), {
         expires: 7,
         secure: process.env.NODE_ENV === 'production',

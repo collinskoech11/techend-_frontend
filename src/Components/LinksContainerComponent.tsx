@@ -20,7 +20,11 @@ import {
 } from "@mui/material";
 import { keyframes } from "@mui/system";
 import MenuIcon from "@mui/icons-material/Menu";
-import { PersonOutline, HistoryOutlined, NotificationsNoneOutlined, LogoutOutlined, AccountCircleOutlined } from "@mui/icons-material"; // Modernized icons
+import PersonOutline from "@mui/icons-material/PersonOutline";
+import HistoryOutlined from "@mui/icons-material/HistoryOutlined";
+import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
+import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; // Modernized Shop icon
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined"; // Modernized Home icon
 import StoreOutlinedIcon from '@mui/icons-material/StoreOutlined'; // Modernized Mall icon

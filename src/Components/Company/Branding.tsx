@@ -1,5 +1,4 @@
 import { YourChildProps } from "@/Types";
-import { PhotoCamera } from "@mui/icons-material";
 import { Box, Button, Grid, Typography, CircularProgress, useTheme } from "@mui/material";
 import { SketchPicker } from "react-color";
 import { useUpdateCompanyMutation } from "@/Api/services";
@@ -21,9 +20,9 @@ const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompa
                 formData.append(key, value as any);
             }
         });
-        console.log(activeStep, "&*&*^*")
+        // console.log(activeStep, "&*&*^*")
         formData.append("company_onboarding_step", (activeStep + 1).toString());
-        console.log((activeStep + 1).toString(), "&*^&^&")
+        // console.log((activeStep + 1).toString(), "&*^&^&")
         try {
             await updateCompany({ token, body: formData }).unwrap();
             refetchCompany();

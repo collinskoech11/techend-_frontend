@@ -22,7 +22,7 @@ import {
   CardContent,
   IconButton,
 } from "@mui/material";
-import { CloseOutlined } from "@mui/icons-material";
+import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
 import {

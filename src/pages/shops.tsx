@@ -120,7 +120,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
 const HeroBanner: React.FC = () => {
   const handleAuthTrigger = () => {
     // Optional: Replace with your real auth modal or route
-    console.log("Auth trigger clicked");
+    // console.log("Auth trigger clicked");
   };
 
   return (
