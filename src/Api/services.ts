@@ -308,3 +308,39 @@ export const {
   useGetCartGuestQuery,
   usePlaceOrderGuestMutation,
 }: any = AuthApi;
+
+export const getProducts = async (args: { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }) => {
+  const params = new URLSearchParams();
+  if (args.company) {
+    params.append('company', args.company);
+  }
+  if (args.category) {
+    params.append('category', args.category);
+  }
+  if (args.page) {
+    params.append('page', args.page.toString());
+  }
+  if (args.page_size) {
+    params.append('page_size', args.page_size.toString());
+  }
+  if (args.search) {
+    params.append('search', args.search);
+  }
+  if (args.on_sale) {
+    params.append('on_sale', 'true');
+  }
+  const queryString = params.toString();
+  const response = await fetch(`${baseUrl}products/all/${queryString ? `?${queryString}` : ''}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch products');
+  }
+  return response.json();
+};
+
+export const getCompanyBySlug = async (slug: string) => {
+  const response = await fetch(`${baseUrl}companies/slug/${slug}/`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch company by slug');
+  }
+  return response.json();
+};

@@ -15,7 +15,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useGetCheckoutHistoryQuery, useUpdatePaymentStatusMutation, useGetCompanyBySlugQuery, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
 import { CheckoutResponse, PickupLocation } from "@/Types";
 import toast, { Toaster } from "react-hot-toast";

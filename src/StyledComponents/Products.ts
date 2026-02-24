@@ -1,4 +1,4 @@
-import { styled, Box, Grid, Card } from "@mui/material";
+import { styled, Box, Grid, Card, Avatar } from "@mui/material";
 import Image, { ImageProps } from "next/image";
 
 export const MainProductsContainer = styled(Box)({
@@ -146,3 +146,73 @@ export const IconActionsContainer = styled(Box)(({ theme }) => ({
     },
   },
 }));
+
+
+export const HeroSection = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'bannerImage',
+})<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
+  position: 'relative',
+  height: '40vh',
+  minHeight: 500,
+  maxHeight: 600,
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#fff',
+  marginTop: '-80px',
+  textAlign: 'center',
+  overflow: 'hidden',
+
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: `url(${bannerImage})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',   // default
+    zIndex: 1,
+  },
+
+  [theme.breakpoints.up('md')]: {
+    '&::before': {
+      backgroundPosition: 'center center',
+    },
+  },
+
+  '& > *': {
+    position: 'relative',
+    zIndex: 2,
+  },
+}));
+
+export const ShopHeader = styled(Box)(({ theme }) => ({
+  // display: 'flex',
+  // flexDirection: 'column',
+  // alignItems: 'left',
+  // textAlign: 'left',
+  // marginBottom: theme.spacing(2),
+  marginTop: theme.spacing(-8),
+}));
+
+export const ShopLogo = styled(Avatar)(({ theme }) => ({
+  width: 120,
+  height: 120,
+  borderRadius: theme.shape.borderRadius * 2,
+  border: `4px solid ${theme.palette.background.paper}`,
+  marginBottom: theme.spacing(1),
+  boxShadow: '0 0 10px rgba(0,0,0,0.9)',
+}));
+
+// interface ShopProps {
+//   companyData: any;
+//   productsData: any;
+//   shopname: string;
+//   error?: string;
+
+// <ProductCard product={p} triggerCartRefetch={() => { }} />
+
+            // <Button variant="contained" color="primary" disabled={productsLoading} onClick={() => setPage(page + 1)}>
+            //   {productsLoading ? <CircularProgress size={20} /> : 'Load More'}
+            // </Button>

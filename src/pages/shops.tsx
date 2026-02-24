@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, lazy, Suspense } from "react";
 import { useRouter } from "next/router";
 import { useGetCompaniesQuery } from "@/Api/services";
@@ -73,7 +75,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
   return (
     <CompanyCardStyled>
       <ProductImageWrapper>
-        <ProductImage src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
+        <ProductImage loading="lazy" src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
         <Box className="overlay" sx={{
           position: 'absolute',
           top: 0,
@@ -120,7 +122,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
 const HeroBanner: React.FC = () => {
   const handleAuthTrigger = () => {
     // Optional: Replace with your real auth modal or route
-    console.log("Auth trigger clicked");
+    // console.log("Auth trigger clicked");
   };
 
   return (

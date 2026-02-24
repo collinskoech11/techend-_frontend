@@ -188,9 +188,7 @@ export default function MobileAppPage() {
                 {/* Android Download Button */}
                 <DownloadButton
                   variant="contained"
-                  // Link to your APK in the public folder
-                  href="/downloads/sokojunction.apk"
-                  // download="SokoJunction_Manager_v1.apk"
+                  href="/downloads/sokojunction.apk.zip"
                   sx={{
                     bgcolor: "#ffffff",
                     color: theme.palette.primary.main,

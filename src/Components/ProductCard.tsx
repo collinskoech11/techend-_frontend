@@ -1,5 +1,17 @@
-
 'use client';
+
+import React, { memo } from "react";
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+
+import { Box, Typography, CircularProgress, IconButton, useTheme } from "@mui/material";
+import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import StarIcon from "@mui/icons-material/Star";
+import StarHalfIcon from "@mui/icons-material/StarHalf";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 import {
   ProductItemStyled,
@@ -7,274 +19,159 @@ import {
   ProductImageWrapper,
   ProductInfoContainer,
   RatingContainer,
-} from "@/StyledComponents/Products"; // Updated imports
-import {
-  ProductPrice,
-  ProductTitle,
-  ProductDescription, // Added for potential description
-} from "@/StyledComponents/Typos"; // Updated imports
-import React from "react";
-import StarIcon from '@mui/icons-material/Star';
-import StarHalfIcon from '@mui/icons-material/StarHalf';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
-import VisibilityIcon from '@mui/icons-material/Visibility'; // Icon for quick view/details
-import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // Import WhatsApp icon
-import { IconActionsContainer } from "@/StyledComponents/Products";
-import { Box, Typography, CircularProgress, IconButton, useTheme } from "@mui/material";
+  IconActionsContainer,
+} from "@/StyledComponents/Products";
+import { ProductPrice, ProductTitle, ProductDescription } from "@/StyledComponents/Typos";
 import { useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
-import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/router";
 import { useCart } from "@/contexts/CartContext";
 import { Product } from "@/Types";
 
 interface ProductCardProps {
   product: Product;
   triggerCartRefetch: () => void;
-  isLoading?: boolean;
-  ref?: React.Ref<any>;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch, isLoading, ref }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }) => {
   const router = useRouter();
   const theme = useTheme();
-  const [addToCart, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
-  const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
   const { sessionId, refetch: cart_refetch } = useCart();
 
-  const AddItemToCart = async (event: React.MouseEvent) => {
+  const [addToCart, { isLoading: isAddingAuth }] = useAddToCartMutation();
+  const [addToCartGuest, { isLoading: isAddingGuest }] = useAddToCartGuestMutation();
+  const isLoading = isAddingAuth || isAddingGuest;
+
+  // Add to cart handler
+  const handleAddToCart = async (event: React.MouseEvent) => {
     event.stopPropagation();
     const access = Cookies.get("access");
+    const shopname = Cookies.get("shopname") || "techend";
 
-    const handleMutation = async (mutation: any, args: any) => {
-      try {
-        await mutation(args).unwrap();
-        cart_refetch();
-        toast.success("Product added to cart!");
-        triggerCartRefetch();
-      } catch (error: any) {
-        console.error("Error adding to cart: *********", error);
-        const error_message = error.data?.error || "An error occurred";
-        toast.error(<Typography>{error_message}</Typography>);
-      }
-    };
+    const mutation = access ? addToCart : addToCartGuest;
+    const args = access
+      ? { product: product.id, token: access, shopname }
+      : { productId: product.id.toString(), quantity: 1, sessionId, companyName: shopname };
 
-    if (access) {
-      handleMutation(addToCart, { product: product.id, token: access, shopname: Cookies.get("shopname") });
-    } else if (sessionId) {
-      const shopname = Cookies.get("shopname") || "techend";
-      handleMutation(addToCartGuest, { productId: product.id.toString(), quantity: 1, sessionId, companyName: shopname });
-    } else {
-      toast.error("Could not add item to cart. Please refresh the page.");
+    try {
+      await mutation(args).unwrap();
+      cart_refetch();
+      toast.success("Product added to cart!");
+      triggerCartRefetch();
+    } catch (err: any) {
+      const msg = err.data?.error || "An error occurred";
+      toast.error(msg);
     }
   };
 
+  // WhatsApp handler
+  const handleWhatsApp = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const shopDetails = Cookies.get("shopDetails");
+    if (!shopDetails) return toast.error("Shop details not found.");
+
+    try {
+      const company = JSON.parse(shopDetails);
+      const raw = company.contact_phone.replace(/\D/g, "");
+      const phone = raw.startsWith("0") ? `254${raw.slice(1)}` : raw;
+      if (!phone) return toast.error("Shop owner's phone not available.");
+
+      const price = product.on_sale ? product.discounted_price : product.price;
+      const msg = `Hello, I'm interested in ${product.title} for Ksh ${price}.`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Could not retrieve shop details.");
+    }
+  };
+
+  // Render stars
   const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const halfStar = Math.ceil(rating) > fullStars ? 1 : 0;
-    const emptyStars = 5 - fullStars - halfStar;
+    const full = Math.floor(rating);
+    const half = rating - full >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
 
     return (
       <>
-        {Array.from({ length: fullStars }).map((_, idx) => (
-          <StarIcon key={`full-${idx}`} />
-        ))}
-        {halfStar === 1 && <StarHalfIcon />}
-        {Array.from({ length: emptyStars }).map((_, idx) => (
-          <StarBorderIcon key={`empty-${idx}`} />
-        ))}
+        {Array.from({ length: full }).map((_, i) => <StarIcon key={`full-${i}`} />)}
+        {half === 1 && <StarHalfIcon />}
+        {Array.from({ length: empty }).map((_, i) => <StarBorderIcon key={`empty-${i}`} />)}
       </>
     );
   };
 
-  const currentProduct = product;
-  const AddToCartLoading = isAddingToCartAuth || isAddingToCartGuest;
-
-  const handleWhatsAppClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    const shopDetailsCookie = Cookies.get("shopDetails");
-    if (shopDetailsCookie) {
-      try {
-        const companyData = JSON.parse(shopDetailsCookie);
-        const rawPhoneNumber = companyData.contact_phone.replace(/\D/g, "");
-
-        const phoneNumber = rawPhoneNumber.startsWith("0")
-          ? `254${rawPhoneNumber.slice(1)}`
-          : rawPhoneNumber;
-
-        if (phoneNumber) {
-          const productName = currentProduct?.title || "Product";
-          const productPrice = currentProduct?.on_sale
-            ? currentProduct?.discounted_price
-            : currentProduct?.price;
-          const message = `Hello, I'm interested in ordering the product: ${productName} for Ksh ${productPrice}. Could you please provide more details?`;
-          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-          if (typeof window !== "undefined") {
-            window.open(whatsappUrl, "_blank");
-          }
-        } else {
-          toast.error("Shop owner's phone number not available.");
-        }
-      } catch (error) {
-        console.error("Failed to parse shopDetails cookie:", error);
-        toast.error("Could not retrieve shop details.");
-      }
-    } else {
-      toast.error("Shop details not found.");
-    }
-  };
-
   return (
-    <>
-      <ProductItemStyled
-        onClick={() => router.push(`/product/${currentProduct?.slug}`)}
-        sx={{
-          pointerEvents: AddToCartLoading ? 'none' : 'auto',
-          opacity: AddToCartLoading ? 0.6 : 1,
-          position: 'relative',
-        }}
-      >
-        <ProductImageWrapper>
-          {currentProduct?.on_sale && (
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 8,
-                left: 8,
-                bgcolor: 'red',
-                color: 'white',
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                zIndex: 1,
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-              }}
-            >
-              Sale
-            </Box>
-          )}
-          {currentProduct?.stock === 0 && (
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                bgcolor: 'gray',
-                color: 'white',
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                zIndex: 1,
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-              }}
-            >
-              Out of Stock
-            </Box>
-          )}
-          {currentProduct?.main_image && (
-            <ProductImage
-              src={`https://res.cloudinary.com/dqokryv6u/${currentProduct.main_image}`}
-              alt={currentProduct.title || 'Product Image'}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          )}
-        </ProductImageWrapper>
-
-        <ProductInfoContainer>
-          {currentProduct?.on_sale ? (
-            <Box>
-              <ProductPrice sx={{ color: 'red', fontWeight: 'bold' }}>
-                Ksh {currentProduct?.discounted_price}
-              </ProductPrice>
-              <Typography
-                variant="body2"
-                sx={{
-                  textDecoration: 'line-through',
-                  color: 'text.secondary',
-                  ml: 1,
-                }}
-              >
-                Ksh {currentProduct?.price}
-              </Typography>
-            </Box>
-          ) : (
-            <ProductPrice>Ksh {currentProduct?.price}</ProductPrice>
-          )}
-          <ProductTitle>{currentProduct?.title}</ProductTitle>
-          {currentProduct?.description && (
-            <Box
-              sx={{
-                height: '40px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: '2',
-                WebkitBoxOrient: 'vertical',
-                '&:hover': {
-                  overflow: 'visible',
-                  display: 'block',
-                  height: 'auto',
-                }
-              }}
-            >
-              <ProductDescription>
-                {currentProduct.description}
-              </ProductDescription>
-            </Box>
-          )}
-          <RatingContainer>
-            {renderStars(currentProduct?.rating || 0)}
-            <Typography variant="body2" color="textSecondary" sx={{ ml: 0.5 }}>
-              ({currentProduct?.reviews_count || 0})
-            </Typography>
-          </RatingContainer>
-          <IconActionsContainer>
-            <IconButton
-              onClick={AddItemToCart}
-              disabled={currentProduct.stock === 0 || AddToCartLoading}
-            >
-              {AddToCartLoading ? (
-                <CircularProgress size={24} sx={{ color: theme.palette.primary.main }} />
-              ) : (
-                <ShoppingBasketIcon sx={{ color: theme.palette.primary.main }} />
-              )}
-            </IconButton>
-
-            <IconButton onClick={() => router.push(`/product/${currentProduct?.slug}`)}>
-              <VisibilityIcon sx={{ color: theme.palette.primary.main }} />
-            </IconButton>
-
-            <IconButton
-              onClick={handleWhatsAppClick}
-              disabled={currentProduct.stock === 0}
-            >
-              <WhatsAppIcon sx={{ color: theme.palette.primary.main }} />
-            </IconButton>
-          </IconActionsContainer>
-        </ProductInfoContainer>
-
-        {AddToCartLoading && (
-          <Typography
-            variant="caption"
-            sx={{
-              position: 'absolute',
-              bottom: 8,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'text.secondary',
-              fontStyle: 'italic',
-            }}
-          >
-            Adding to cart...
-          </Typography>
+    <ProductItemStyled
+      onClick={() => router.push(`/product/${product.slug}`)}
+      sx={{ pointerEvents: isLoading ? "none" : "auto", opacity: isLoading ? 0.6 : 1, position: "relative" }}
+    >
+      <ProductImageWrapper>
+        {product.on_sale && (
+          <Box sx={{ position: "absolute", top: 8, left: 8, bgcolor: "red", color: "white", px: 1, py: 0.5, borderRadius: 1, zIndex: 1, fontSize: "0.75rem", fontWeight: "bold" }}>
+            Sale
+          </Box>
         )}
-      </ProductItemStyled>
-    </>
+        {product.stock === 0 && (
+          <Box sx={{ position: "absolute", top: 8, right: 8, bgcolor: "gray", color: "white", px: 1, py: 0.5, borderRadius: 1, zIndex: 1, fontSize: "0.75rem", fontWeight: "bold" }}>
+            Out of Stock
+          </Box>
+        )}
+        {product.main_image && (
+          <ProductImage
+            src={`https://res.cloudinary.com/dqokryv6u/image/upload/w_500,f_auto/${product.main_image}`}
+            alt={product.title || "Product Image"}
+            width={400}      // fixed width for layout stability
+            height={400}     // fixed height
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            loading="lazy"   // only load when near viewport
+            placeholder="blur" // optional: can use a small blurred version for UX
+          />
+        )}
+      </ProductImageWrapper>
+
+      <ProductInfoContainer>
+        <Box display="flex" alignItems="center" mb={1}>
+          <ProductPrice sx={{ color: product.on_sale ? "red" : "inherit", fontWeight: "bold" }}>
+            Ksh {product.on_sale ? product.discounted_price : product.price}
+          </ProductPrice>
+          {product.on_sale && <Typography variant="body2" sx={{ textDecoration: "line-through", color: "text.secondary", ml: 1 }}>{product.price}</Typography>}
+        </Box>
+
+        <ProductTitle>{product.title}</ProductTitle>
+        {product.description && (
+          <Box sx={{ height: "40px", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", "&:hover": { overflow: "visible", display: "block", height: "auto" } }}>
+            <ProductDescription>{product.description}</ProductDescription>
+          </Box>
+        )}
+
+        <RatingContainer>
+          {renderStars(product.rating || 0)}
+          <Typography variant="body2" color="textSecondary" sx={{ ml: 0.5 }}>
+            ({product.reviews_count || 0})
+          </Typography>
+        </RatingContainer>
+
+        <IconActionsContainer>
+          <IconButton onClick={handleAddToCart} disabled={product.stock === 0 || isLoading} aria-label="Add to cart">
+            {isLoading ? <CircularProgress size={24} sx={{ color: theme.palette.primary.main }} /> : <ShoppingBasketIcon sx={{ color: theme.palette.primary.main }} />}
+          </IconButton>
+
+          <IconButton onClick={() => router.push(`/product/${product.slug}`)} aria-label="View product details">
+            <VisibilityIcon sx={{ color: theme.palette.primary.main }} />
+          </IconButton>
+
+          <IconButton onClick={handleWhatsApp} disabled={product.stock === 0} aria-label="Contact via WhatsApp">
+            <WhatsAppIcon sx={{ color: theme.palette.primary.main }} />
+          </IconButton>
+        </IconActionsContainer>
+      </ProductInfoContainer>
+
+      {isLoading && (
+        <Typography variant="caption" sx={{ position: "absolute", bottom: 8, left: "50%", transform: "translateX(-50%)", color: "text.secondary", fontStyle: "italic" }}>
+          Adding to cart...
+        </Typography>
+      )}
+    </ProductItemStyled>
   );
 };
 
-export default ProductCard;
+// Memo to avoid unnecessary re-renders
+export default memo(ProductCard);

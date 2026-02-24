@@ -18,7 +18,9 @@ import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { z } from "zod";
-import { Visibility, VisibilityOff, AccountCircleOutlined } from "@mui/icons-material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import { GoogleLogin } from '@react-oauth/google';
 
 const loginSchema = z.object({

@@ -5,8 +5,8 @@ import Cookies from "js-cookie";
 import toast, { Toaster } from "react-hot-toast";
 import Link from "next/link";
 import { z } from "zod";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 // Zod schema for form validation
 const registerSchema = z.object({
   username: z.string().min(1, "Username is required"),

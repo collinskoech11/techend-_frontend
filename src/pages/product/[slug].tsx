@@ -1,7 +1,6 @@
 
-'use client';
-
-import React, { useState } from "react";
+// 'use client';
+import React, { Suspense, useState } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
@@ -9,7 +8,9 @@ import { useRouter } from "next/router";
 import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation, useGetCompanyBySlugQuery } from "@/Api/services";
 import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
 import { styled, useMediaQuery, useTheme } from "@mui/system";
-import { Swiper, SwiperSlide } from "swiper/react";
+import dynamic from "next/dynamic"; // New import
+const Swiper = dynamic(() => import("swiper/react").then((mod) => mod.Swiper), { ssr: false });
+const SwiperSlide = dynamic(() => import("swiper/react").then((mod) => mod.SwiperSlide), { ssr: false });
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
@@ -85,6 +86,7 @@ const MainCarouselImage = (props: React.ComponentProps<typeof Image>) => (
     fill
     priority
     alt={props.alt || ""}
+    loading="lazy"
   />
 );
 
@@ -105,6 +107,8 @@ const ThumbnailImage = styled((props: React.ComponentProps<typeof Image> & { act
     width={80}
     height={80}
     alt={props.alt || ""}
+    loading="lazy"
+
   />
 ))<{ active?: boolean }>(({ theme, active }) => ({
   width: "100%",
@@ -406,7 +410,7 @@ function ProductDetailView() {
               </Box>
             </>
           ) : (
-            <>
+            <Suspense fallback={<div>Loading images...</div>}>
               <Swiper
               style={{ width:"400px", maxWidth:"90vw" }}
                 spaceBetween={10}
@@ -455,7 +459,7 @@ function ProductDetailView() {
                   </Swiper>
                 </Box>
               )}
-            </>
+            </Suspense>
           )}
         </ProductImageGallery>
 

@@ -1,4 +1,4 @@
-import { CheckBox } from "@mui/icons-material";
+import CheckBox from "@mui/icons-material/CheckBox";
 import { Box, FormControlLabel, Input, Typography, styled } from "@mui/material";
 
 export const MainCheckoutBody = styled(Box)({

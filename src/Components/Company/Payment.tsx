@@ -311,6 +311,7 @@ export default function PaymentDialog() {
                                                                         width={80}
                                                                         height={50}
                                                                         style={{ objectFit: "contain" }}
+                                                                        loading="lazy"
                                                                     />
                                                                 </InputAdornment>
                                                             ),

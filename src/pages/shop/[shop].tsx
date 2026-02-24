@@ -1,7 +1,7 @@
 
-'use client';
+// 'use client';
 
-import React, {
+import {
   useEffect,
   useState,
   useRef,
@@ -10,7 +10,6 @@ import React, {
   use,
 } from "react";
 import { alpha } from "@mui/material/styles";
-import MuiLink from "@mui/material/Link"; // Renamed to avoid conflict
 import Skeleton from "@mui/material/Skeleton";
 import {
   MainProductsContainer,
@@ -20,7 +19,8 @@ import {
 import ProductCard from "@/Components/ProductCard";
 import { useRouter } from "next/router";
 import Chip from "@mui/material/Chip";
-import { useGetProductsQuery, useGetCompanyBySlugQuery } from "@/Api/services";
+import { getProducts, getCompanyBySlug } from "@/Api/services"; // Modified import
+import { GetServerSidePropsContext } from "next"; // New import
 import {
   Box,
   Grid,
@@ -44,6 +44,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import Cookies from "js-cookie";
 import { styled, useTheme } from "@mui/system"; // Import styled
+
 
 // --- Color Palette (Consistent with your project) ---
 const darkText = "#212121"; // For main text
@@ -113,12 +114,44 @@ const ShopLogo = styled(Avatar)(({ theme }) => ({
 
 
 
-const Shop = forwardRef((props: any, ref: any) => {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const { shop } = context.query;
+
+  if (!shop || typeof shop !== 'string') {
+    return {
+      notFound: true,
+    };
+  }
+
+  try {
+    const companyData = await getCompanyBySlug(shop);
+    const productsData = await getProducts({ company: shop, page: 1, page_size: 10 });
+
+    return {
+      props: {
+        companyData: companyData || null,
+        productsData: productsData || null,
+        shopname: shop,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching data in getServerSideProps:", error);
+    return {
+      props: {
+        companyData: null,
+        productsData: null,
+        shopname: shop,
+        error: "Failed to load shop data.",
+      },
+    };
+  }
+}
+
+const Shop = forwardRef(({ companyData, productsData, shopname, error }: any, ref: any) => {
   Shop.displayName = "Shop";
   const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
-  const [shopname, setShopName] = useState<string | null>(null); // Initialize as null
   const primaryRed = theme.palette.primary.main; // Your main red accent
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -163,62 +196,54 @@ const Shop = forwardRef((props: any, ref: any) => {
     }, 300);
   };
 
-
-
-  const [products, setProducts] = useState<any[]>([]);
-
-  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname, { skip: !shopname });
+  const [products, setProducts] = useState<any[]>(productsData?.results || []);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (router.isReady && router.query.shop) {
-      const urlShopName = router.query.shop as string;
-      setShopName(urlShopName);
-      Cookies.set("shopname", urlShopName, {
+    if (shopname) {
+      Cookies.set("shopname", shopname, {
         expires: 7,
         secure: process.env.NODE_ENV === 'production',
         sameSite: "Lax",
       });
     }
-  }, [router.isReady, router.query.shop]);
+  }, [shopname]);
 
-  // Wait for company data to be fetched before setting shopDetails
   useEffect(() => {
-    if (!companyLoading && companyData) {
-      console.log("Fetched company data:", companyData);
+    if (companyData) {
       Cookies.set("shopDetails", JSON.stringify(companyData), {
         expires: 7,
         secure: process.env.NODE_ENV === 'production',
         sameSite: "Lax",
       });
-
-      // ✅ Proceed to any next steps here (e.g., navigation, state updates, etc.)
     }
-  }, [companyLoading, companyData]);
-
-
-  // Adjust useGetProductsQuery to use `category` and `searchTerm`
-  // You might need to update your API service to handle `search` parameter
-  const {
-    data: products_data,
-    error: products_error,
-    isLoading: products_loading,
-  } = useGetProductsQuery({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale, page_size: pageSize }, { skip: !shopname });
+  }, [companyData]);
 
   useEffect(() => {
-    if (products_data) {
-      if (page === 1) {
-        setProducts(products_data.results);
-      } else {
-        setProducts(prev => [...prev, ...products_data.results]);
+    const fetchProducts = async () => {
+      setProductsLoading(true);
+      try {
+        const response = await getProducts({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale, page_size: pageSize });
+        if (page === 1) {
+          setProducts(response.results);
+        } else {
+          setProducts(prev => [...prev, ...response.results]);
+        }
+        setProductsError(null);
+      } catch (err: any) {
+        setProductsError(err);
+        setProducts([]);
+      } finally {
+        setProductsLoading(false);
+        setIsSearching(false);
       }
-    }
-  }, [products_data, page]);
+    };
 
-  useEffect(() => {
-    if (products_data || products_error) {
-      setIsSearching(false);
+    if (shopname) {
+      fetchProducts();
     }
-  }, []);
+  }, [shopname, category, searchTerm, page, onSale, pageSize]);
 
 
 
@@ -272,7 +297,7 @@ const Shop = forwardRef((props: any, ref: any) => {
     if (router.isReady && router.query.shop) {
       router.push({ pathname, query: newQuery }, undefined, { shallow: true });
     }
-  }, [searchTerm, category, onSale, page, pageSize]);
+  }, [searchTerm, category, onSale, page, pageSize, router, router.query]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
@@ -376,9 +401,7 @@ const Shop = forwardRef((props: any, ref: any) => {
               width: { md: "fit-content", xs: "100%" }
             }}
           >
-            {companyLoading ? (
-              <CircularProgress size={110} sx={{ color: theme.palette.primary.main }} />
-            ) : (
+            {companyData ? (
               <ShopLogo
                 src={
                   companyData?.logo_image
@@ -392,12 +415,15 @@ const Shop = forwardRef((props: any, ref: any) => {
                   objectFit: "cover",
                   boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
                 }}
+                alt="shop logo"
               />
+            ) : (
+              <CircularProgress size={110} sx={{ color: theme.palette.primary.main }} />
             )}
 
             <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
               <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: theme.palette.primary.main }}>
-                {companyLoading ? <BouncingDots /> : companyData?.name}
+                {companyData ? companyData?.name : <BouncingDots />}
               </Typography>
 
               {/* <Typography variant="body1" sx={{ maxWidth: "700px", color: lightText, mb: 1 }}>
@@ -410,8 +436,8 @@ const Shop = forwardRef((props: any, ref: any) => {
               <Box sx={{ display: "flex", gap: 2, mt: 2, justifyContent: { xs: "center", sm: "flex-start" } }}>
                 <Chip
                   label={
-                    products_data?.count !== undefined ? (
-                      `${products_data.count} Items`
+                    productsData?.count !== undefined ? (
+                      `${productsData.count} Items`
                     ) : (
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <BouncingDots />
@@ -604,6 +630,7 @@ const Shop = forwardRef((props: any, ref: any) => {
               <Grid item xs={6} sm={2} textAlign="right">
                 <IconButton
                   onClick={handleFilterClick}
+                  aria-label="filter products"
                   sx={(theme) => ({
                     borderRadius: "50%",
                     border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
@@ -677,7 +704,7 @@ const Shop = forwardRef((props: any, ref: any) => {
 
           {/* Products Display */}
           <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
-            {products_loading && page === 1 ? (
+            {productsLoading && page === 1 ? (
               [...Array(8)].map((_, index) => (
                 <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid */}
                   <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: '12px' }} />
@@ -690,18 +717,18 @@ const Shop = forwardRef((props: any, ref: any) => {
                   </Box>
                 </ProductItem>
               ))
-            ) : products_error ? (
+            ) : productsError ? (
               <Grid item xs={12}>
                 <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                   <Typography variant="h6" color="error">
                     Failed to load products. Please try again.
                   </Typography>
                   <Typography variant="body2" color={lightText} mt={1}>
-                    {products_error.message || "An unknown error occurred."}
+                    {productsError.message || "An unknown error occurred."}
                   </Typography>
                 </Box>
               </Grid>
-            ) : products.length === 0 ? ( // Use products_data directly, as API now filters
+            ) : products.length === 0 ? ( // Use products directly
               <Grid item xs={12}>
                 <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                   <Typography variant="h6" color={darkText}>
@@ -717,7 +744,7 @@ const Shop = forwardRef((props: any, ref: any) => {
                 <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid for ProductCard */}
                   <ProductCard
                     product={product}
-                    isLoading={false} // ProductCard itself handles its loading state if data is ready
+                    // isLoading={false} // ProductCard itself handles its loading state if data is ready
                     triggerCartRefetch={triggerCartRefetch}
                   />
                 </ProductItem>
@@ -728,11 +755,11 @@ const Shop = forwardRef((props: any, ref: any) => {
             <Button
               variant="contained"
               color="primary"
-              disabled={!products_data?.next || products_loading}
+              disabled={!productsData?.next || productsLoading}
               onClick={() => setPage(page + 1)}
-              startIcon={products_loading && <CircularProgress size={20} />}
+              startIcon={productsLoading && <CircularProgress size={20} />}
             >
-              {products_loading ? 'Loading...' : 'Load More'}
+              {productsLoading ? 'Loading...' : 'Load More'}
             </Button>
           </Box>
         </MainProductsContainer>
