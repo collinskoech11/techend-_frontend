@@ -325,6 +325,7 @@ export default function LandingPage() {
                   height={600} // replace with actual height
                   layout="responsive" // makes the image responsive within its container
                   priority={false} // set to true if it's above the fold
+                  loading="lazy"
                 />
                 </ImageCard>
                 <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
@@ -340,6 +341,7 @@ export default function LandingPage() {
                       height={600} // Replace with actual image height
                       layout="responsive"
                       priority={false} // Set to true if this image should load immediately
+                      loading="lazy"
                     />
                 </ImageCard>
                 <Typography variant="subtitle1" sx={{ mt: 2, textAlign: "center", color: lightText, fontWeight: 600 }}>
@@ -355,6 +357,7 @@ export default function LandingPage() {
                     height={600} // adjust based on actual image dimensions
                     layout="responsive"
                     priority={false} // set to true if this image should load immediately
+                    loading="lazy"
                   />
 
                 </ImageCard>

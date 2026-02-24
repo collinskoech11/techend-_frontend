@@ -45,6 +45,7 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import Cookies from "js-cookie";
 import { styled, useTheme } from "@mui/system"; // Import styled
 
+
 // --- Color Palette (Consistent with your project) ---
 const darkText = "#212121"; // For main text
 const lightText = "#555555"; // For secondary text/labels

@@ -86,6 +86,7 @@ const MainCarouselImage = (props: React.ComponentProps<typeof Image>) => (
     fill
     priority
     alt={props.alt || ""}
+    loading="lazy"
   />
 );
 
@@ -106,6 +107,8 @@ const ThumbnailImage = styled((props: React.ComponentProps<typeof Image> & { act
     width={80}
     height={80}
     alt={props.alt || ""}
+    loading="lazy"
+
   />
 ))<{ active?: boolean }>(({ theme, active }) => ({
   width: "100%",

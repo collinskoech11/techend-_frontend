@@ -75,7 +75,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
   return (
     <CompanyCardStyled>
       <ProductImageWrapper>
-        <ProductImage src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
+        <ProductImage loading="lazy" src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
         <Box className="overlay" sx={{
           position: 'absolute',
           top: 0,

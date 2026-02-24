@@ -126,6 +126,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                   height={600}
                   layout="responsive"
                   priority={false}
+                  loading="lazy"
                 />
               </ImageCard>
             </Fade>
@@ -175,6 +176,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                   height={600}
                   layout="responsive"
                   priority={false}
+                  loading="lazy"
                 />
               </ImageCard>
             </Fade>
@@ -198,6 +200,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                   height={600}
                   layout="responsive"
                   priority={false}
+                  loading="lazy"
                 />
               </ImageCard>
             </Fade>

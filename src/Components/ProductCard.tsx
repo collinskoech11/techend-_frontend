@@ -116,10 +116,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
         )}
         {product.main_image && (
           <ProductImage
-            src={`https://res.cloudinary.com/dqokryv6u/${product.main_image}`}
+            src={`https://res.cloudinary.com/dqokryv6u/image/upload/w_500,f_auto/${product.main_image}`}
             alt={product.title || "Product Image"}
-            fill
+            width={400}      // fixed width for layout stability
+            height={400}     // fixed height
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            loading="lazy"   // only load when near viewport
+            placeholder="blur" // optional: can use a small blurred version for UX
           />
         )}
       </ProductImageWrapper>

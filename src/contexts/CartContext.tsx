@@ -18,7 +18,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("session_id", storedSessionId);
     }
     setSessionId(storedSessionId);
-  }, [company_name]);
+  });
 
   const {
     data: authCartData,
