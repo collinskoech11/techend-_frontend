@@ -58,28 +58,35 @@ const HeroSection = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'bannerImage',
 })<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
   position: 'relative',
-  maxHeight: '40vh',
-  height: '600px',
+  height: '40vh',
+  minHeight: 500,
+  maxHeight: 600,
   width: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   color: '#fff',
-  marginTop: "-80px",
+  marginTop: '-80px',
   textAlign: 'center',
+  overflow: 'hidden',
+
   '&::before': {
     content: '""',
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    inset: 0,
     backgroundImage: `url(${bannerImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    filter: 'brightness(0.6)',
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',   // default
     zIndex: 1,
   },
+
+  [theme.breakpoints.up('md')]: {
+    '&::before': {
+      backgroundPosition: 'center center',
+    },
+  },
+
   '& > *': {
     position: 'relative',
     zIndex: 2,
