@@ -134,6 +134,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           </ProductPrice>
           {product.on_sale && <Typography variant="body2" sx={{ textDecoration: "line-through", color: "text.secondary", ml: 1 }}>{product.price}</Typography>}
         </Box>
+{/* JECyZG7th */}
 
         <ProductTitle>{product.title}</ProductTitle>
         {product.description && (

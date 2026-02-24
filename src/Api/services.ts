@@ -344,3 +344,19 @@ export const getCompanyBySlug = async (slug: string) => {
   }
   return response.json();
 };
+
+export const getCompanies = async (args: { page?: number; page_size?: number } = {}) => {
+  const params = new URLSearchParams();
+  if (args.page) {
+    params.append('page', args.page.toString());
+  }
+  if (args.page_size) {
+    params.append('page_size', args.page_size.toString());
+  }
+  const queryString = params.toString();
+  const response = await fetch(`${baseUrl}companies/all/${queryString ? `?${queryString}` : ''}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch companies');
+  }
+  return response.json();
+};
