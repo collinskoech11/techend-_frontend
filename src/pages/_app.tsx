@@ -5,15 +5,15 @@ import { Provider } from "react-redux";
 import NoSSR from "react-no-ssr";
 import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef, lazy, Suspense } from "react";
 import { Box } from "@mui/material";
-import { CartProvider } from "@/contexts/CartContext"; // ✅ adjust this path if different
+import { CartProvider } from "@/contexts/CartContext";
 import Script from "next/script";
-
-import { ThemeProvider } from '../contexts/ThemeContext';
-import DynamicTitle from "@/Components/DynamicTitle"; // New import
-const Navbar = lazy(() => import("@/Components/Navbar"));
-const Footer = lazy(() => import("@/Components/Footer"));
+import { ThemeProvider } from "../contexts/ThemeContext";
+import DynamicTitle from "@/Components/DynamicTitle";
 import { useRouter } from "next/router";
 import { Toaster } from "react-hot-toast";
+
+const Navbar = lazy(() => import("@/Components/Navbar"));
+const Footer = lazy(() => import("@/Components/Footer"));
 
 const GA_IDS: Record<string, string> = {
   "sokojunction.com": "G-F23L8C9HPP",
@@ -21,18 +21,11 @@ const GA_IDS: Record<string, string> = {
 };
 
 const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
-  App.displayName = "App";
   const router = useRouter();
   const cartRef = useRef<any>(null);
-  const triggerCartRefetch = () => {
-    if (cartRef.current) {
-      cartRef.current.triggerCartRefetch();
-    }
-  };
+
   useImperativeHandle(ref, () => ({
-    triggerCartRefetch() {
-      triggerCartRefetch();
-    },
+    triggerCartRefetch: () => cartRef.current?.triggerCartRefetch?.(),
   }));
 
   const [hostname, setHostname] = useState("");
@@ -41,14 +34,18 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setHostname(window.location.hostname);
+      setIsClient(true);
     }
-    setIsClient(true);
   }, []);
 
   const GA_ID = GA_IDS[hostname] || "G-F23L8C9HPP";
 
-  const LoadingEllipsis = () => (
-    <Box sx={{ height:"75px", display: "flex", alignItems: "center", gap: 1, fontSize: 14, opacity: 0.7 }}>
+  const triggerCartRefetch = () => {
+    cartRef.current?.triggerCartRefetch?.();
+  };
+
+  const LoadingEllipsis = React.useMemo(() => (
+    <Box sx={{ height: "75px", display: "flex", alignItems: "center", gap: 1, fontSize: 14, opacity: 0.7 }}>
       <Box sx={{ display: "flex", gap: 0.5 }}>
         {[0, 1, 2].map((i) => (
           <Box
@@ -69,8 +66,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
         ))}
       </Box>
     </Box>
-  );
-
+  ), []);
 
   return (
     <NoSSR>
@@ -86,30 +82,25 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
                 />
                 <Script id="ga-script" strategy="afterInteractive">
                   {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}');
-          `}
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${GA_ID}');
+                  `}
                 </Script>
               </>
             )}
-            {router.pathname !== "/" && (
-              <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
-                <Suspense fallback={<LoadingEllipsis />}>
-                  <Navbar ref={cartRef} />
-                </Suspense>
-              </Box>
-            )}
-            {router.pathname === "/" && (
-              <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
-                <Suspense fallback={<LoadingEllipsis />}>
-                  <Navbar ref={cartRef} />
-                </Suspense>
-              </Box>
-            )}
+
+            <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
+              <Suspense fallback={LoadingEllipsis}>
+                <Navbar ref={cartRef} />
+              </Suspense>
+            </Box>
+
             <Toaster position="bottom-right" reverseOrder={false} />
+
             <Component {...pageProps} triggerCartRefetch={triggerCartRefetch} />
+
             <Suspense fallback={<div>Loading Footer...</div>}>
               <Footer />
             </Suspense>
@@ -118,6 +109,8 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
       </Provider>
     </NoSSR>
   );
-}
-)
-export default App
+});
+
+App.displayName = "App";
+
+export default React.memo(App);

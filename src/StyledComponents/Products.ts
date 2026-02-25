@@ -94,7 +94,7 @@ export const ProductItemStyled = styled(Card)(({ theme }) => ({
 
 export const ProductImageWrapper = styled(Box)(({ }) => ({
   width: "100%",
-  height: "220px", // Increased height for better product visibility
+  height: "300px", // Increased height for better product visibility
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

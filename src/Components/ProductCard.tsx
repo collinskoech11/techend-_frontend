@@ -118,9 +118,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           <ProductImage
             src={`${product.main_image}`}
             alt={product.title || "Product Image"}
-            width={400}      // fixed width for layout stability
-            height={400}     // fixed height
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            width={600}      // fixed width for layout stability
+            height={600}     // fixed height
+            sizes="(max-width: 908px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"   // only load when near viewport
           />
         )}

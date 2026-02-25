@@ -33,7 +33,7 @@ const AuthDialog = lazy(() => import("./AuthDialog"));
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import { alpha } from '@mui/material/styles'; // For better alpha color manipulation
-import CartMenu from "./CartMin";
+import { CartMenu } from "./CartMin";
 const DEFAULT_BRAND_URLS = [
   "/shops",
   "/payment",
@@ -71,7 +71,7 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   const router = useRouter();
   const theme = useTheme();
   const cookieShop = Cookies.get("shopname");
-  LinksContainerComponent.displayName = "LinksContainerComponent";
+  
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
   const displayShopName = isDefaultBrandPage
     ? "SokoJunction"
@@ -97,20 +97,18 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   );
 
   const [isUpdatingBrand, setIsUpdatingBrand] = useState(companyLoading);
-  useEffect(() => {
-    setIsUpdatingBrand(companyLoading); // true while loading, false when done
+useEffect(() => {
+  setIsUpdatingBrand(companyLoading);
 
-    if (!companyLoading) {
-      const newBrand =
-        !isDefaultBrandPage && companyData?.name
-          ? companyData.name
-          : displayShopName || "SokoJunction";
+  if (!companyLoading) {
+    const newBrand =
+      !isDefaultBrandPage && companyData?.name
+        ? companyData.name
+        : displayShopName || "SokoJunction";
 
-      if (newBrand !== displayedBrand) {
-        setDisplayedBrand(newBrand);
-      }
-    }
-  }, [companyLoading, companyData, isDefaultBrandPage, displayShopName, displayedBrand]);
+    setDisplayedBrand((prev) => (prev !== newBrand ? newBrand : prev));
+  }
+}, [companyLoading, companyData, isDefaultBrandPage, displayShopName]);
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -499,5 +497,5 @@ const LinksContainerComponent = forwardRef((props, ref) => {
     </AppBar>
   );
 });
-
+LinksContainerComponent.displayName = "LinksContainerComponent";
 export default LinksContainerComponent;
