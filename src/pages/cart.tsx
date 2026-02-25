@@ -1,6 +1,5 @@
 "use client";
 
-import { CouponButton } from "@/StyledComponents/Buttons";
 import {
   CartBanner,
   CartSummary,
@@ -48,7 +47,7 @@ function Cart() {
   const theme = useTheme();
 
   const [updateItemQty, { isLoading: isLoadingUpdate }] = useAddProductQtyToCartMutation();
-  const [deleteItemQty, { isLoading: isLoadingDelete }] = useRemoveProductFromCartMutation();
+  const [deleteItemQty] = useRemoveProductFromCartMutation();
 
   const updateItemCart = async (prod_id: any, direction: "incr" | "decr") => {
     const token = Cookies.get("access");

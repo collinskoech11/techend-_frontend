@@ -7,7 +7,6 @@ import {
   useRef,
   useImperativeHandle,
   forwardRef,
-  use,
 } from "react";
 import { alpha } from "@mui/material/styles";
 import Skeleton from "@mui/material/Skeleton";
@@ -32,7 +31,6 @@ import {
   IconButton,
   Menu,
   FormControlLabel,
-  Checkbox,
   Switch,
   CircularProgress,
   Avatar,
@@ -49,9 +47,9 @@ import { styled, useTheme } from "@mui/system"; // Import styled
 // --- Color Palette (Consistent with your project) ---
 const darkText = "#212121"; // For main text
 const lightText = "#555555"; // For secondary text/labels
-const lightGrayBackground = "#f8f8f8"; // Background for the page
+// const lightGrayBackground = "#f8f8f8"; // Background for the page
 const whiteBackground = "#ffffff"; // Background for cards/sections
-const mediumGrayBorder = "#e0e0e0"; // For borders and dividers
+// const mediumGrayBorder = "#e0e0e0"; // For borders and dividers
 
 // --- Styled Components for UI Improvements ---
 
@@ -147,12 +145,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 }
 
-const Shop = forwardRef(({ companyData, productsData, shopname, error }: any, ref: any) => {
+const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any) => {
   Shop.displayName = "Shop";
   const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
-  const primaryRed = theme.palette.primary.main; // Your main red accent
+  // const primaryRed = theme.palette.primary.main; // Your main red accent
   const [category, setCategory] = useState<any>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [inputValue, setInputValue] = useState(""); // New state for immediate input value

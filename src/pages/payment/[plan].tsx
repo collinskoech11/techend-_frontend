@@ -14,8 +14,7 @@ import {
   alpha,
   Grid,
   Divider,
-  InputAdornment,
-  IconButton
+  InputAdornment
 } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
@@ -51,7 +50,7 @@ function PaymentPage() {
   const theme = useTheme();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userDetails, setUserDetails] = useState<any>(null);
-
+  console.log("Selected plan from query:", userDetails);
   useEffect(() => {
     const userCookie = Cookies.get("user");
     if (userCookie) {
