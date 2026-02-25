@@ -11,19 +11,18 @@ import {
     CircularProgress,
     Tabs,
     Tab,
-    Grid,
     Skeleton,
     useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import React, { lazy, Suspense } from "react";
-const SketchPicker = lazy(() => import("react-color").then(module => ({ default: module.SketchPicker })));
+import React, { Suspense } from "react";
+// const SketchPicker = lazy(() => import("react-color").then(module => ({ default: module.SketchPicker })));
 import Cookies from "js-cookie";
-import { useUserLoginMutation, useUserRegistrationMutation, useGetCompanyQuery, useCreateCompanyMutation, useUpdateCompanyMutation } from "@/Api/services";
+import { useUserLoginMutation, useUserRegistrationMutation, useGetCompanyQuery } from "@/Api/services";
 import { z } from "zod";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import BasicInfo from "@/Components/Company/BasicInfo";
 import KYC from "@/Components/Company/KYC";
 import BusinessKYC from "@/Components/Company/BusinessKYC";
@@ -56,12 +55,14 @@ export default function CompanyOnboarding() {
         }
         return null;
     }); const [authToken, setAuthToken] = useState<string | undefined>(Cookies.get("access"))
+    setAuthToken(Cookies.get("access"));
     const [companyExists, setCompanyExists] = useState<boolean>(false)
     const [tabIndex, setTabIndex] = useState(0);
     const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
     const [register, { isLoading: isRegistering }] = useUserRegistrationMutation();
     const token = Cookies.get("access");
     const [refresh, setRefresh] = useState(0);
+    console.log(refresh)
     const theme = useTheme();
 
     const triggerRerender = () => {
@@ -71,8 +72,8 @@ export default function CompanyOnboarding() {
     };
 
     const { data: companyDetails, refetch: refetch_company_details, isLoading: loading_get_my_company, error: error_company_data } = useGetCompanyQuery(token, { skip: !token });
-    const [createCompany, { isLoading: isCreating }] = useCreateCompanyMutation();
-    const [updateCompany, { isLoading: isUpdating }] = useUpdateCompanyMutation();
+    // const [createCompany] = useCreateCompanyMutation();
+    // const [updateCompany] = useUpdateCompanyMutation();
 
     const [loginData, setLoginData] = useState({ username: "", password: "" });
     const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" });
@@ -228,42 +229,42 @@ export default function CompanyOnboarding() {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCompanyData({ ...companyData, [e.target.name]: e.target.value });
-    };
+    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     setCompanyData({ ...companyData, [e.target.name]: e.target.value });
+    // };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-        if (e.target.files) {
-            setCompanyData({ ...companyData, [field]: e.target.files[0] });
-        }
-    };
+    // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    //     if (e.target.files) {
+    //         setCompanyData({ ...companyData, [field]: e.target.files[0] });
+    //     }
+    // };
 
 
 
     const nextStep = () => setActiveStep((prev) => prev + 1);
     const prevStep = () => companyData.company_onboarding_step - 1;
 
-    const submitOnboarding = async () => {
-        const formData = new FormData();
-        Object.entries(companyData).forEach(([key, value]) => {
-            if (value instanceof File || typeof value === "string" || typeof value === "boolean") {
-                formData.append(key, value as any);
-            }
-        });
+    // const submitOnboarding = async () => {
+    //     const formData = new FormData();
+    //     Object.entries(companyData).forEach(([key, value]) => {
+    //         if (value instanceof File || typeof value === "string" || typeof value === "boolean") {
+    //             formData.append(key, value as any);
+    //         }
+    //     });
 
-        try {
-            if (!companyDetails) {
-                await createCompany({ token, body: formData }).unwrap();
-                toast.success("Company created successfully");
-            } else {
-                await updateCompany({ token, body: formData }).unwrap();
-                toast.success("Company details updated successfully");
-            }
-            refetch_company_details();
-        } catch (error) {
-            toast.error("Submission failed. Check your details.");
-        }
-    };
+    //     try {
+    //         if (!companyDetails) {
+    //             await createCompany({ token, body: formData }).unwrap();
+    //             toast.success("Company created successfully");
+    //         } else {
+    //             await updateCompany({ token, body: formData }).unwrap();
+    //             toast.success("Company details updated successfully");
+    //         }
+    //         refetch_company_details();
+    //     } catch (error) {
+    //         toast.error("Submission failed. Check your details.");
+    //     }
+    // };
 
 
     return (

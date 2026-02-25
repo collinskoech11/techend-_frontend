@@ -6,7 +6,7 @@ import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
 import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation, useGetCompanyBySlugQuery } from "@/Api/services";
-import { Box, Typography, Button, Grid, Chip, IconButton, CircularProgress } from "@mui/material";
+import { Box, Typography, Button, Chip, IconButton, CircularProgress } from "@mui/material";
 import { styled, useMediaQuery, useTheme } from "@mui/system";
 import dynamic from "next/dynamic"; // New import
 const Swiper = dynamic(() => import("swiper/react").then((mod) => mod.Swiper), { ssr: false });
@@ -25,7 +25,7 @@ import StarIcon from '@mui/icons-material/Star';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
 import { darken } from '@mui/material/styles';
 import Image from "next/image";
@@ -267,7 +267,7 @@ function ProductDetailView() {
     }
   };
   
-  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname);
+  const { data: companyData } = useGetCompanyBySlugQuery(shopname);
   const handleWhatsAppClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     const shopDetailsCookie = Cookies.get("shopDetails");
