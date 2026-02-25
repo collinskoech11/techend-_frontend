@@ -2,7 +2,7 @@ import { Box, CircularProgress, Typography, IconButton, InputAdornment, TextFiel
 import React, { useState } from "react";
 import { useUserRegistrationMutation } from "@/Api/services";
 import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { z } from "zod";
 import Visibility from "@mui/icons-material/Visibility";
@@ -18,7 +18,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useRouter } from "next/router";
 
 function Register() {
-  const [register, { isLoading, error }] = useUserRegistrationMutation();
+  const [register, { isLoading }] = useUserRegistrationMutation();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -27,7 +27,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
     const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-
+  setShopName(Cookies.get("shopname") || "techend");
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

@@ -10,34 +10,16 @@ function generateSiteMap() { // No companies argument
        <loc>${URL}/about</loc>
      </url>
      <url>
-       <loc>${URL}/cart</loc>
-     </url>
-     <url>
-       <loc>${URL}/checkout</loc>
-     </url>
-     <url>
-       <loc>${URL}/company-onboarding</loc>
-     </url>
-     <url>
-       <loc>${URL}/forgot-password</loc>
-     </url>
-     <url>
-       <loc>${URL}/iMall</loc>
-     </url>
-     <url>
        <loc>${URL}/login</loc>
+      </url>
+     <url>
+        <loc>${URL}/register</loc>
      </url>
      <url>
-       <loc>${URL}/mobile-app</loc>
+        <loc>${URL}/mobile-app</loc>
      </url>
      <url>
        <loc>${URL}/orderhistory</loc>
-     </url>
-     <url>
-       <loc>${URL}/profile</loc>
-     </url>
-     <url>
-       <loc>${URL}/register</loc>
      </url>
      <url>
        <loc>${URL}/shops</loc>

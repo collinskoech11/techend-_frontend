@@ -14,7 +14,7 @@ import {
   Button,
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 const Typewriter = lazy(() => import("typewriter-effect"));
 const Zoom = lazy(() => import('react-reveal/Zoom'));
 
@@ -33,7 +33,6 @@ import {
 import {
   HeroSection,
   HeroGraphic,
-  AccentButton,
 } from "@/StyledComponents/Hero"; // Make sure these exist and are styled
 
 // --- Skeletons ---

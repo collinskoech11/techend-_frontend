@@ -12,18 +12,9 @@ import {
   alpha,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import dynamic from "next/dynamic";
 
 const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
-
-// --- Animations ---
-
-const float = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-`;
 
 const fadeUp = keyframes`
   0% { opacity: 0; transform: translateY(20px); }
@@ -134,37 +125,13 @@ const GlowButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const GlassButton = styled(Button)(({ theme }) => ({
-  padding: "14px 32px",
-  borderRadius: "50px",
-  fontWeight: 600,
-  fontSize: "1rem",
-  textTransform: "none",
-  color: theme.palette.text.primary,
-  background: alpha(theme.palette.background.paper, 0.5),
-  border: `1px solid ${theme.palette.divider}`,
-  backdropFilter: "blur(10px)",
-  "&:hover": {
-    background: alpha(theme.palette.background.paper, 0.8),
-    borderColor: theme.palette.text.primary,
-  },
-}));
-
-// const StyledChip = styled(Chip)(({ theme }) => ({
-//   backgroundColor: alpha(theme.palette.primary.main, 0.1),
-//   color: theme.palette.primary.main,
-//   fontWeight: 600,
-//   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-//   marginBottom: theme.spacing(3),
-//   animation: `${float} 6s ease-in-out infinite`,
-// }));
 
 interface HeroProps {
   handleNavigate: () => void;
   handleAuthTrigger: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
+const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
   const theme = useTheme();
 
   return (

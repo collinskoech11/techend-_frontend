@@ -418,7 +418,7 @@ export default function CompanyOnboarding() {
                     )}
                     {companyData.company_onboarding_step === 7 && (
                         <>
-                            <VerificationStatus nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <VerificationStatus />
                         </>
                     )}
                 </>)}

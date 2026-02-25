@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Typography, Button, useTheme, useMediaQuery, Link, Card, Grid, alpha } from "@mui/material";
+import { Box, Container, Typography, Button, useTheme, useMediaQuery, Card, Grid, alpha } from "@mui/material";
 import { styled } from "@mui/system";
 import Head from "next/head";
 import {
@@ -8,7 +8,6 @@ import {
   TrendingUp,
   BarChart3,
   Store,
-  UserCog,
   ShieldCheck
 } from "lucide-react";
 
@@ -54,18 +53,6 @@ const IconBox = styled(Box, {
   color: iconColor, // Vibrant icon
 }));
 
-const IconWrapper = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.light,
-  color: theme.palette.primary.main,
-  width: "50px",
-  height: "50px",
-  borderRadius: "12px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  marginBottom: theme.spacing(2),
-  opacity: 0.9
-}));
 
 const DownloadButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(1),

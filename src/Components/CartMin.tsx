@@ -8,6 +8,7 @@ import { alpha } from '@mui/material/styles'; // For better alpha color manipula
 import { useTheme } from "@mui/material";
 
 const CartMenu = forwardRef((props: any, ref) => {
+  console.log("CartMenu rendered", props);
   const theme = useTheme();
   CartMenu.displayName = "CartMenu";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

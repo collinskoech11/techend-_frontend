@@ -1,4 +1,3 @@
-import Navbar from "@/Components/Navbar";
 import {
   Box,
   CircularProgress,
@@ -11,7 +10,7 @@ import {
 import React, { useState } from "react";
 import { useUserLoginMutation } from "@/Api/services";
 import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { z } from "zod";
 import Visibility from "@mui/icons-material/Visibility";
@@ -36,7 +35,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-
+  setShopName(Cookies.get("shopname") || "techend");
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

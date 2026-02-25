@@ -8,11 +8,10 @@ import {
     CircularProgress,
     useTheme,
 } from "@mui/material";
-import { useState } from "react";
 import toast from "react-hot-toast";
 import { alpha } from "@mui/material/styles";
 
-const BasicInfo = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, companyExists, refetchCompany, triggerRerender }: YourChildProps) => {
+const BasicInfo = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, companyExists, refetchCompany, triggerRerender }: YourChildProps) => {
     const [createCompany, { isLoadingCreate: isLoadingCreate }] = useCreateCompanyMutation();
     const [updateCompany, { isLoading: isLoadingUpdate }] = useUpdateCompanyMutation();
     const theme = useTheme();

@@ -5,7 +5,7 @@ export const OfferNavTypo = styled(Typography)({
   fontSize: "15px",
   color:"#fff"
 });
-export const HeaderTypo = styled(Typography)(({ theme }) => ({
+export const HeaderTypo = styled(Typography)(({ }) => ({
   fontWeight: "700",
   fontSize: "32px",
   color: "rgb(125, 125, 125)",
