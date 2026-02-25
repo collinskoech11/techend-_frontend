@@ -116,13 +116,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
         )}
         {product.main_image && (
           <ProductImage
-            src={`https://res.cloudinary.com/dqokryv6u/image/upload/${product.main_image}`}
+            src={`${product.main_image}`}
             alt={product.title || "Product Image"}
             width={400}      // fixed width for layout stability
             height={400}     // fixed height
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"   // only load when near viewport
-            placeholder="blur" // optional: can use a small blurred version for UX
+            placeholder="blur"
+            blurDataURL={`${product.main_image.replace(
+              "/upload/",
+              "/upload/w_20,e_blur:2000,q_10/"
+            )}`} // optional: can use a small blurred version for UX
           />
         )}
       </ProductImageWrapper>
@@ -134,7 +138,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           </ProductPrice>
           {product.on_sale && <Typography variant="body2" sx={{ textDecoration: "line-through", color: "text.secondary", ml: 1 }}>{product.price}</Typography>}
         </Box>
-{/* JECyZG7th */}
+        {/* JECyZG7th */}
 
         <ProductTitle>{product.title}</ProductTitle>
         {product.description && (
