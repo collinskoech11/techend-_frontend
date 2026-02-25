@@ -9,7 +9,6 @@ import {
   keyframes,
   styled,
   useTheme,
-  Chip,
   alpha,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
