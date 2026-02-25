@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { alpha } from "@mui/material/styles";
 
 
-const ProofAddress = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
+const ProofAddress = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
     
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
     const theme = useTheme();

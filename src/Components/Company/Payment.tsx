@@ -13,7 +13,6 @@ import {
     Card,
     CircularProgress,
     IconButton,
-    useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -61,7 +60,7 @@ interface SelectableCardProps {
 // but still includes the `selected` prop for dialog logic.
 const PricingCardStyled = styled(Card, {
     shouldForwardProp: (prop) => prop !== 'selected',
-})<SelectableCardProps>(({ theme, selected }) => ({
+})<SelectableCardProps>(({ selected }) => ({
     textAlign: "center",
     padding: "40px 25px", // Matches landing page PricingCard padding
     borderRadius: "20px", // Matches landing page PricingCard borderRadius

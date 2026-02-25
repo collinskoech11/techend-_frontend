@@ -15,7 +15,7 @@ import {
   IconButton,
 } from "@mui/material";
 import Cookies from "js-cookie";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { darken, styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
@@ -170,12 +170,13 @@ export default function Footer() {
       {/* Main Footer Content */}
       <Grid
         container
-        spacing={6}
+        spacing={2}
         sx={{
           maxWidth: "1300px",
           width: "90%",
           mx: "auto",
           alignItems: "flex-start",
+          // border: `1px solid #fff`,
         }}
       >
         {/* Brand + Newsletter */}

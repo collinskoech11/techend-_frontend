@@ -8,7 +8,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Divider,
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material";

@@ -1,12 +1,5 @@
 import React from 'react';
 import { Button, styled } from '@mui/material';
-import { keyframes } from '@mui/system';
-
-const glowAnimation = keyframes`
-  0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
-  100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
-`;
 
 const StyledFuturisticButton = styled(Button)(({ theme }) => ({
   background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.dark} 90%)`,

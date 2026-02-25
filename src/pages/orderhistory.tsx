@@ -1,4 +1,3 @@
-import Navbar from "@/Components/Navbar";
 import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { ProductImage } from "@/StyledComponents/Products";
@@ -8,9 +7,6 @@ import {
   Box,
   Button,
   Typography,
-  Grid,
-  Card,
-  CardContent,
   Divider,
   Skeleton,
   Dialog,
@@ -23,9 +19,7 @@ import {
   TableRow,
   IconButton,
 } from "@mui/material";
-import { format } from "date-fns";
 import OrderDetailsCard from "@/Components/OrderDetailsCard";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CloseIcon from '@mui/icons-material/Close';
 import { DeliveryLocation, PickupLocation } from "@/Types";
 
@@ -70,14 +64,6 @@ function OrderHistory() {
   const handleViewMap = (location: PickupLocation) => {
     setSelectedLocationForMap(location);
     setMapOpen(true);
-  };
-
-  const formatDate = (dateString) => {
-    try {
-      return format(new Date(dateString), "dd MMM yyyy, HH:mm");
-    } catch {
-      return dateString;
-    }
   };
 
   const SkeletonItem = () => (

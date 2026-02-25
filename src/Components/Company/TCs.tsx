@@ -3,7 +3,7 @@ import { Box, Button, Typography, CircularProgress, useTheme } from "@mui/materi
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
 
-const TCs = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
+const TCs = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
 
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
     const theme = useTheme();

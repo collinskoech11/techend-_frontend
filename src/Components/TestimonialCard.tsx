@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Card, Avatar } from "@mui/material";
+import { Typography, Card, Avatar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 interface TestimonialCardProps {

@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
-import { PickupLocation, CheckoutResponse, DeliveryLocation, GuestOrderResponse } from "@/Types";
+import { PickupLocation, DeliveryLocation, GuestOrderResponse } from "@/Types";
 import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -77,6 +77,7 @@ const AuthenticatedCheckout = () => {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation(); // Initialize mutation
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
+  setShopName(Cookies.get("shopname") || "techend");
   const theme = useTheme();
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
   const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
@@ -94,6 +95,7 @@ const AuthenticatedCheckout = () => {
   const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+  console.log(pollCount)
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
@@ -131,7 +133,7 @@ const AuthenticatedCheckout = () => {
     }
   }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch, trigger } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
+  const { register, handleSubmit, formState: { errors }, setValue, trigger } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
 
   const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
@@ -448,10 +450,10 @@ const AuthenticatedCheckout = () => {
           </>
         );
       default:
-        const handleConfirmPayment = () => {
-          toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
-          router.push(`/shop/${shopname}`);
-        };
+        // const handleConfirmPayment = () => {
+        //   toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
+        //   router.push(`/shop/${shopname}`);
+        // };
 
         return (
           <>
@@ -662,6 +664,7 @@ const GuestCheckout = () => {
   const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+  console.log(pollCount)
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
@@ -708,7 +711,7 @@ const GuestCheckout = () => {
 
   const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, getValues, watch } = useForm<GuestCheckoutFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
     defaultValues: { payment_method: "card" },
   });
@@ -1343,7 +1346,7 @@ function Checkout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const theme = useTheme();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-
+  setShopName(Cookies.get("shopname") || "techend");
   useEffect(() => {
     const token = Cookies.get("access");
     if (token) {

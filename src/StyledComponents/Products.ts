@@ -92,7 +92,7 @@ export const ProductItemStyled = styled(Card)(({ theme }) => ({
   paddingBottom: theme.spacing(2), // Padding at the bottom for content
 }));
 
-export const ProductImageWrapper = styled(Box)(({ theme }) => ({
+export const ProductImageWrapper = styled(Box)(({ }) => ({
   width: "100%",
   height: "220px", // Increased height for better product visibility
   display: "flex",

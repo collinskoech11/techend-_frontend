@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Fade } from "react-awesome-reveal";
 import dynamic from "next/dynamic"; // New import
 import TestimonialCard from "@/Components/TestimonialCard";

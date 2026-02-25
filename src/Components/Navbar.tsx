@@ -4,6 +4,7 @@ import LinksContainerComponent from "./LinksContainerComponent";
 
 const Navbar = forwardRef((props: any, ref: any) => {
   Navbar.displayName = "Navbar";
+  console.log("Navbar rendered", props);
     const cartRef = useRef<any>(null);
   const triggerCartRefetch = () => {
     if (cartRef.current) {

@@ -14,7 +14,6 @@ import {
   ListItemIcon,
   Tooltip,
   Badge,
-  CircularProgress,
   Avatar, // Keeping Avatar for potential future use or custom user display
   styled,
 } from "@mui/material";
@@ -29,7 +28,6 @@ import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; /
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined"; // Modernized Home icon
 import StoreOutlinedIcon from '@mui/icons-material/StoreOutlined'; // Modernized Mall icon
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'; // Modernized Cart icon
-import Image from "next/image";
 import Cookies from "js-cookie";
 const AuthDialog = lazy(() => import("./AuthDialog"));
 import { useGetCompanyBySlugQuery } from "@/Api/services";
@@ -69,7 +67,7 @@ const BouncingEllipsis = styled('span')(({ theme }) => ({
 }));
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {
-
+  console.log(props)
   const router = useRouter();
   const theme = useTheme();
   const cookieShop = Cookies.get("shopname");
@@ -92,10 +90,6 @@ const LinksContainerComponent = forwardRef((props, ref) => {
     useGetCompanyBySlugQuery(displayShopName, {
       skip: isDefaultBrandPage || !cookieShop,
     });
-  const brandLabel =
-    !isDefaultBrandPage && companyData?.name
-      ? companyData.name
-      : displayShopName || "SokoJunction";
   const [displayedBrand, setDisplayedBrand] = useState(
     !isDefaultBrandPage && companyData?.name
       ? companyData.name
@@ -500,7 +494,6 @@ const LinksContainerComponent = forwardRef((props, ref) => {
             setIsAuthDialogOpen(false);
           }}
           onClose={() => setIsAuthDialogOpen(false)}
-          showButton={false}
         />
       </Suspense>
     </AppBar>

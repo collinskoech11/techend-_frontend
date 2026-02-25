@@ -1,12 +1,4 @@
-import { Box, Button, Input, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, keyframes, styled } from "@mui/material";
-
-// Define a consistent color palette
-const secondaryColor = "#3f51b5"; // A complementary blue
-const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
-const mediumGray = "#e0e0e0"; // For borders and subtle dividers
-const darkText = "#212121"; // Very dark gray for main headings and strong text
-const lightText = "#555555"; // Softer dark gray for body text
-
+import { Box, Button, keyframes, styled } from "@mui/material";
 
 const animatedGradient = keyframes`
   0% { background-position: 0% 50%; }

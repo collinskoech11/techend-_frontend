@@ -4,7 +4,7 @@ import { SketchPicker } from "react-color";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
 
-const Branding = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
+const Branding = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
 
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
     const theme = useTheme();

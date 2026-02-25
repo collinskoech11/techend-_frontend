@@ -125,12 +125,14 @@ function ProfilePage() {
   const [editMode, setEditMode] = useState(false);
 
   const token = Cookies.get("access");
-  const { data: companyData, error: companyError, isLoading: companyLoading } = useGetCompanyQuery(token, {
+  const { data: companyData, isLoading: companyLoading } = useGetCompanyQuery(token, {
     skip: !token,
   });
 
-  const handleTabChange = (event, newValue) => setTab(newValue);
-
+  const handleTabChange = (event, newValue) => {
+    console.log("Tab changed to:", event);
+    setTab(newValue);
+  }
   const renderField = (label, value, key, disabled = false) => (
     <Box sx={{ mb: 2 }}>
       <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, mb: 0.5, display: 'block' }}>

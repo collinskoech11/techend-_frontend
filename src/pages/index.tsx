@@ -5,8 +5,6 @@ import { Box, Container, useTheme, useMediaQuery } from "@mui/material";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import { useGetCompaniesQuery } from "@/Api/services";
-import toast from "react-hot-toast";
-
 import Hero from "@/Components/MainLanding/Hero";
 import Features from "@/Components/MainLanding/Features";
 import Showcase from "@/Components/MainLanding/Showcase";
@@ -63,7 +61,6 @@ export default function LandingPage() {
         <AuthDialog
           onTrigger={handleAuthSuccess}
           forceOpen={true}
-          showButton={false}
           onClose={() => setShowAuthDialog(false)}
         />
       )}
