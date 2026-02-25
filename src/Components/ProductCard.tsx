@@ -122,11 +122,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
             height={400}     // fixed height
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             loading="lazy"   // only load when near viewport
-            placeholder="blur"
-            blurDataURL={`${product.main_image.replace(
-              "/upload/",
-              "/upload/w_20,e_blur:2000,q_10/"
-            )}`} // optional: can use a small blurred version for UX
           />
         )}
       </ProductImageWrapper>
