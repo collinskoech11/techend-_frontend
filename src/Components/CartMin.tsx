@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { alpha, useTheme } from "@mui/material";
 
 const CartMenuComponent = forwardRef((props: any, ref) => {
+  console.log("CartMenuComponent rendered", props);
   const theme = useTheme();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
