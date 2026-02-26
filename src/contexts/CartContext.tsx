@@ -18,15 +18,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("session_id", storedSessionId);
     }
     setSessionId(storedSessionId);
-  });
+  }, []);
 
   const {
     data: authCartData,
     isLoading: isAuthCartLoading,
     refetch: refetchAuthCart,
     error: authCartError,
-    isUninitialized: isAuthCartUninitialized,
-    isFetching: isAuthCartFetching,
+    // isUninitialized: isAuthCartUninitialized,
+    // isFetching: isAuthCartFetching,
   } = useGetCartQuery(
     { token, company_name },
     { skip: !token || !company_name }
@@ -37,31 +37,30 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: isGuestCartLoading,
     refetch: refetchGuestCart,
     error: guestCartError,
-    isUninitialized: isGuestCartUninitialized,
-    isFetching: isGuestCartFetching,
-  } = useGetCartGuestQuery({session_id: sessionId!, company_name: company_name || "techend"}, { skip: !!token || !sessionId });
+    // isUninitialized: isGuestCartUninitialized,
+    // isFetching: isGuestCartFetching,
+  } = useGetCartGuestQuery({ session_id: sessionId!, company_name: company_name || "techend" }, { skip:  !sessionId || !!token  });
 
   const triggerCartRefetch = useCallback(() => {
     if (token) {
-      if (refetchAuthCart && !isAuthCartUninitialized && !isAuthCartFetching) {
-        refetchAuthCart();
-      } 
+      refetchAuthCart?.();
     } else {
-      if (refetchGuestCart && !isGuestCartUninitialized && !isGuestCartFetching) {
-        refetchGuestCart();
-      }
+      refetchGuestCart?.();
     }
-  }, [token, company_name, refetchAuthCart, refetchGuestCart, isAuthCartUninitialized, isAuthCartFetching, isGuestCartUninitialized, isGuestCartFetching]);
-
+  }, [token, refetchAuthCart, refetchGuestCart]);
   const data = token ? authCartData : guestCartData;
   const isLoading = token ? isAuthCartLoading : isGuestCartLoading;
   const error = token ? authCartError : guestCartError;
 
-  return (
-    <CartContext.Provider value={{ data, isLoading, error, refetch: triggerCartRefetch, sessionId }}>
-      {children}
-    </CartContext.Provider>
-  );
+  const value = React.useMemo(() => ({
+  data,
+  isLoading,
+  error,
+  refetch: triggerCartRefetch,
+  sessionId,
+}), [data, isLoading, error, triggerCartRefetch, sessionId]);
+
+return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => useContext(CartContext);

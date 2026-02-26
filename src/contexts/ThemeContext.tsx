@@ -8,7 +8,6 @@ import { useGetCompanyBySlugQuery } from '@/Api/services';
 export const ThemeContext = createContext({
   setPrimaryColor: (_color: string) => {},
 });
-// console.log("ThemeContext initialized with default value",color)
 
 const DEFAULT_BRAND_URLS = ["/shops", "/", "/about", "/contact","/company-onboarding","/profile"];
 const DEFAULT_PRIMARY_COLOR = "#1976d2";
@@ -24,7 +23,6 @@ export const ThemeProvider = ({ children }) => {
   const { data: companyData } = useGetCompanyBySlugQuery(displayShopName, {
     skip: isDefaultBrandPage || !cookieShop,
   });
-  // console.log(companyData.primary_color, "company data in theme provider");
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR);
 
   // Update primary color once company data is loaded

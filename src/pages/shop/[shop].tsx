@@ -146,7 +146,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any) => {
-  Shop.displayName = "Shop";
   const theme = useTheme(); // Assuming theme is passed as a prop
   const router = useRouter();
   const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
@@ -245,57 +244,30 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
 
 
-  useEffect(() => {
-    const { pathname, query } = router;
-    const newQuery: Record<string, string | string[]> = {};
+useEffect(() => {
+  if (!router.isReady || !router.query.shop) return;
 
-    // Ensure the 'shop' slug is always present in the query for dynamic routes
-    if (router.query.shop) {
-      newQuery.shop = router.query.shop as string;
-    }
+  const newQuery: Record<string, string> = {};
 
-    // Copy existing query parameters, excluding undefined values, but prioritize newQuery.shop
-    for (const key in query) {
-      if (query[key] !== undefined && key !== 'shop') { // Exclude 'shop' from general copy to avoid overwriting
-        newQuery[key] = query[key] as string | string[];
-      }
-    }
+  newQuery.shop = router.query.shop as string;
 
-    if (searchTerm) {
-      newQuery.search = searchTerm;
-    } else {
-      delete newQuery.search;
-    }
+  if (searchTerm) newQuery.search = searchTerm;
+  if (category) newQuery.category = category;
+  if (onSale) newQuery.on_sale = "true";
+  if (page !== 1) newQuery.page = page.toString();
+  if (pageSize !== 10) newQuery.page_size = pageSize.toString();
 
-    if (category) {
-      newQuery.category = category;
-    } else {
-      delete newQuery.category;
-    }
+  const current = JSON.stringify(router.query);
+  const next = JSON.stringify(newQuery);
 
-    if (onSale) {
-      newQuery.on_sale = 'true';
-    } else {
-      delete newQuery.on_sale;
-    }
-
-    if (page && page !== 1) { // Only add page to URL if it's not the first page
-      newQuery.page = page.toString();
-    } else {
-      delete newQuery.page;
-    }
-
-    if (pageSize && pageSize !== 10) { // Only add page_size to URL if it's not the default
-      newQuery.page_size = pageSize.toString();
-    } else {
-      delete newQuery.page_size;
-    }
-
-    // Only push if router is ready and shopname is available
-    if (router.isReady && router.query.shop) {
-      router.push({ pathname, query: newQuery }, undefined, { shallow: true });
-    }
-  }, [searchTerm, category, onSale, page, pageSize, router, router.query]);
+  if (current !== next) {
+    router.replace(
+      { pathname: router.pathname, query: newQuery },
+      undefined,
+      { shallow: true }
+    );
+  }
+}, [searchTerm, category, onSale, page, pageSize, router.isReady]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
@@ -335,27 +307,19 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
   ];
 
 
-  useEffect(() => {
-    if (router.isReady) {
-      const { category: queryCategory, search: querySearch, on_sale: queryOnSale, page: queryPage, page_size: queryPageSize } = router.query;
-      if (queryCategory) {
-        setCategory(queryCategory as string);
-      }
-      if (querySearch) {
-        setSearchTerm(querySearch as string);
-        setInputValue(querySearch as string); // Initialize inputValue as well
-      }
-      if (queryOnSale) {
-        setOnSale(queryOnSale === 'true');
-      }
-      if (queryPage) {
-        setPage(Number(queryPage));
-      }
-      if (queryPageSize) {
-        setPageSize(Number(queryPageSize));
-      }
-    }
-  }, [router.isReady]);
+useEffect(() => {
+  if (!router.isReady) return;
+
+  const { category, search, on_sale, page, page_size } = router.query;
+
+  setCategory(category as string || "");
+  setSearchTerm(search as string || "");
+  setInputValue(search as string || "");
+  setOnSale(on_sale === "true");
+  setPage(Number(page) || 1);
+  setPageSize(Number(page_size) || 10);
+}, [router.query, router.isReady]);
+
   const BouncingDots = () => (
     <Box sx={{ display: "inline-flex", gap: 0.4, ml: 0.5 }}>
       {[0, 1, 2].map((i) => (
@@ -765,5 +729,6 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     </>
   );
 });
+  Shop.displayName = "Shop";
 
 export default Shop;

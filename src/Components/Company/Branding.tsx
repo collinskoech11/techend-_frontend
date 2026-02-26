@@ -20,9 +20,7 @@ const Branding = ({ nextStep, prevStep, activeStep, companyData, setCompanyData,
                 formData.append(key, value as any);
             }
         });
-        // console.log(activeStep, "&*&*^*")
         formData.append("company_onboarding_step", (activeStep + 1).toString());
-        // console.log((activeStep + 1).toString(), "&*^&^&")
         try {
             await updateCompany({ token, body: formData }).unwrap();
             refetchCompany();
