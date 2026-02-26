@@ -67,7 +67,7 @@ const BouncingEllipsis = styled('span')(({ theme }) => ({
 }));
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {
-  console.log(props)
+  console.log("LinksContainer rendered", props);
   const router = useRouter();
   const theme = useTheme();
   const cookieShop = Cookies.get("shopname");
@@ -187,7 +187,7 @@ useEffect(() => {
     return () => {
       router.events.off("routeChangeComplete", syncShopFromCookies);
     };
-  }, [router.events]);
+  }, []);
 
   // Unified menu item styling for better consistency
   const menuSx = {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useImperativeHandle, forwardRef, useEffect } from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Menu, MenuItem, IconButton, Typography, Badge, Divider } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { useCart } from "@/contexts/CartContext";

@@ -4,21 +4,21 @@ import LinksContainerComponent from "./LinksContainerComponent";
 
 const Navbar = forwardRef((props: any, ref: any) => {
   console.log("Navbar rendered", props);
-    const cartRef = useRef<any>(null);
+  const cartRef = useRef<any>(null);
   const triggerCartRefetch = () => {
     if (cartRef.current) {
- 
-     cartRef.current.triggerCartRefetch();
+
+      cartRef.current.triggerCartRefetch();
     }
   };
   useImperativeHandle(ref, () => ({
-      triggerCartRefetch() {
-        triggerCartRefetch();
-      },
-    }));
-  return(
+    triggerCartRefetch() {
+      triggerCartRefetch();
+    },
+  }));
+  return (
     <>
-      <LinksContainerComponent ref={cartRef}/>
+      <LinksContainerComponent ref={cartRef} />
     </>
   );
 }

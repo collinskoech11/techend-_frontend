@@ -9,7 +9,6 @@ import { CartProvider } from "@/contexts/CartContext";
 import Script from "next/script";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import DynamicTitle from "@/Components/DynamicTitle";
-import { useRouter } from "next/router";
 import { Toaster } from "react-hot-toast";
 
 const Navbar = lazy(() => import("@/Components/Navbar"));
@@ -21,9 +20,7 @@ const GA_IDS: Record<string, string> = {
 };
 
 const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
-  const router = useRouter();
   const cartRef = useRef<any>(null);
-
   useImperativeHandle(ref, () => ({
     triggerCartRefetch: () => cartRef.current?.triggerCartRefetch?.(),
   }));

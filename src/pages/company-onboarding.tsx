@@ -66,9 +66,7 @@ export default function CompanyOnboarding() {
     const theme = useTheme();
 
     const triggerRerender = () => {
-        // console.log("trying to rerender parent")
         setRefresh((prev) => prev + 1); // Changing state forces re-render
-        // console.log("rerendered parent")
     };
 
     const { data: companyDetails, refetch: refetch_company_details, isLoading: loading_get_my_company, error: error_company_data } = useGetCompanyQuery(token, { skip: !token });
@@ -165,7 +163,6 @@ export default function CompanyOnboarding() {
             });
             setActiveStep(1);
         } else {
-            console.log(loading_get_my_company, "&*&*&*&", companyDetails);
             setCompanyData((prev: any) => ({
                 ...prev,
                 ...companyDetails,
