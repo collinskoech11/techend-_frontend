@@ -84,7 +84,6 @@ const MainCarouselImage = (props: React.ComponentProps<typeof Image>) => (
     }}
     sizes="(max-width: 600px) 90vw, 400px"
     fill
-    priority
     alt={props.alt || ""}
     loading="lazy"
   />
