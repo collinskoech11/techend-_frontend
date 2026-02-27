@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Box, Typography, useTheme, alpha, styled, Button, Theme } from "@mui/material";
-import { Zoom } from "react-awesome-reveal";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 // Assuming AccentButton is the GlowButton/PrimaryButton defined earlier
 
@@ -64,7 +63,6 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ handleAuthTrigger }) => {
 
   return (
     <Box sx={{ py: 12 }}>
-      <Zoom triggerOnce>
         <CTAWrap>
             <Typography 
                 variant="h3" 
@@ -109,7 +107,6 @@ const FinalCTA: React.FC<FinalCTAProps> = ({ handleAuthTrigger }) => {
                 Start Your Free Trial Now
             </AccentButton>
         </CTAWrap>
-      </Zoom>
     </Box>
   );
 };

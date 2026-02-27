@@ -15,7 +15,6 @@ import {
   alpha
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Fade } from "react-awesome-reveal";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 // Ensure AccentButton is the GlowButton from the Hero component
 // Re-defining AccentButton here for self-contained functionality
@@ -116,7 +115,6 @@ const Pricing: React.FC<PricingProps> = ({ handleAuthTrigger }) => {
 
   return (
     <Box sx={{ py: 12, px: { md: 5, xs: 2 }, background: theme.palette.background.default }} id="pricing">
-      <Fade cascade triggerOnce>
         <Typography 
           variant="h3" 
           sx={{ 
@@ -354,7 +352,6 @@ const Pricing: React.FC<PricingProps> = ({ handleAuthTrigger }) => {
             </PricingCard>
           </Grid>
         </Grid>
-      </Fade>
     </Box>
   );
 };
