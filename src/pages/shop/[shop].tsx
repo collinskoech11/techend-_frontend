@@ -413,7 +413,6 @@ useEffect(() => {
                     fontWeight: 600,
                     borderRadius: "12px",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-
                     // ✨ dynamic company color styling
                     backgroundColor: alpha(theme.palette.primary.main, 0.12),
                     color: theme.palette.primary.main,

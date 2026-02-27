@@ -15,10 +15,8 @@ const nextConfig = {
       transform: '@mui/icons-material/{{member}}',
     },
   },
-
-  // ⚠️ This increases bundle size — keep only if required
-  // transpilePackages: ['@mui/material'],
-
+  productionBrowserSourceMaps: true,
+  swcMinify: true,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
