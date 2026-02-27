@@ -10,8 +10,8 @@ import {
   Box,
   Grid,
   List,
-  CircularProgress,
-  Alert
+  Alert,
+  Skeleton // Added Skeleton
 } from "@mui/material";
 import router from "next/router";
 import React, { useEffect, useState } from "react";
@@ -89,10 +89,40 @@ function MyPlan() {
     <Box>
       <Typography variant="h5" fontWeight={700} mb={4}>My Subscription Plan</Typography>
 
-      {isLoading && <CircularProgress />}
-      {isError && <Alert severity="error">Failed to load subscription details.</Alert>}
-
-      {activeSubscription ? (
+      {isLoading ? (
+        <Grid container spacing={3} alignItems="flex-end">
+          <Grid item xs={12}>
+            <PricingCard
+              sx={{
+                pt: 6,
+                height: 400, // Fixed height for skeleton
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Skeleton variant="rectangular" width="80%" height={20} sx={{ mb: 2 }} />
+              <Skeleton variant="text" width="60%" height={40} sx={{ mb: 2 }} />
+              <Skeleton variant="text" width="70%" height={20} sx={{ mb: 3 }} />
+              <Skeleton variant="rectangular" width="40%" height={4} sx={{ mb: 3 }} />
+              <List sx={{ width: '80%', mb: 4 }}>
+                {[...Array(4)].map((_, index) => (
+                  <ListItem key={index} sx={{ py: 0.5, px: 0, justifyContent: "center" }}>
+                    <ListItemIcon sx={{ minWidth: 28 }}>
+                      <Skeleton variant="circular" width={18} height={18} />
+                    </ListItemIcon>
+                    <ListItemText primary={<Skeleton variant="text" width="70%" />} />
+                  </ListItem>
+                ))}
+              </List>
+              <Skeleton variant="rectangular" width="90%" height={50} />
+            </PricingCard>
+          </Grid>
+        </Grid>
+      ) : isError ? (
+        <Alert severity="error">Failed to load subscription details.</Alert>
+      ) : activeSubscription ? (
         <Grid container spacing={3} alignItems="flex-end">
           <Grid item xs={12}>
             <PricingCard

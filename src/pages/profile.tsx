@@ -207,7 +207,7 @@ function ProfilePage() {
             )}
 
             {tab === 3 && (
-              <MyPlan userDetails={userDetails} />
+              <MyPlan/>
             )}
           </ContentCard>
         </Grid>
