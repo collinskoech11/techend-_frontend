@@ -93,7 +93,8 @@ const DEFAULT_BRAND_URLS = [
   "/about",
   "/contact",
   "/company-onboarding",
-  "/profile"
+  "/profile",
+  "/login",
 ];
 
 export default function Footer() {

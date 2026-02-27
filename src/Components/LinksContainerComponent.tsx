@@ -42,6 +42,7 @@ const DEFAULT_BRAND_URLS = [
   "/contact",
   "/company-onboarding",
   "/profile",
+  "/login",
 ];
 const bounce = keyframes`
   0%, 80%, 100% { transform: scale(0); } 

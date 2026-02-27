@@ -65,7 +65,7 @@ const ProductImageGallery = styled(Box)(({ theme }) => ({
 const StyledMainSwiperSlide = styled(SwiperSlide)({
   height: "clamp(300px, 50vh, 500px)",
   borderRadius: "12px",
-  overflow: "hidden",
+  // overflow: "hidden",
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -84,8 +84,9 @@ const MainCarouselImage = (props: React.ComponentProps<typeof Image>) => (
     }}
     sizes="(max-width: 600px) 90vw, 400px"
     fill
+    priority
     alt={props.alt || ""}
-    loading="lazy"
+    // loading="lazy"
   />
 );
 
@@ -411,17 +412,17 @@ function ProductDetailView() {
           ) : (
             <Suspense fallback={<div>Loading images...</div>}>
               <Swiper
-              style={{ width:"400px", maxWidth:"90vw" }}
+              style={{ width:"400px", maxWidth:"90vw", border:"1px solid blue"  }}
                 spaceBetween={10}
                 navigation={imagesToDisplay.length > 1}
                 thumbs={{ swiper: thumbsSwiper }}
                 modules={[FreeMode, Navigation, Thumbs, Pagination, Autoplay]}
                 className="mySwiper2"
                 pagination={{ clickable: true }}
-                autoplay={{ delay: 3000, disableOnInteraction: false }}
+                autoplay={{ delay: 3000, disableOnInteraction: false}}
               >
                 {imagesToDisplay.map((image, index) => (
-                  <StyledMainSwiperSlide key={index} style={{ width:"400px", maxWidth:"90vw" }}>
+                  <StyledMainSwiperSlide key={index} style={{ width:"400px", maxWidth:"90vw", border:"1px solid red" }}>
                     <MainCarouselImage
                       src={`https://res.cloudinary.com/dqokryv6u/${image}`}
                       alt={`${product?.title} - Image ${index + 1}`}
