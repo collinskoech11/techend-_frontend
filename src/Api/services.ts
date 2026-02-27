@@ -276,14 +276,14 @@ export const AuthApi = createApi({
         },
       }),
     }),
-    createSubscription: builder.mutation<UserSubscription, { plan_id: number; token: string }>({
-      query: ({ plan_id, token }) => ({
+    createSubscription: builder.mutation<UserSubscription, { plan_id: number; token: string; plan: { name: string; price: string; duration_days: number } }>({
+      query: ({ plan_id, token, plan }) => ({
         url: `subscriptions/my-subscriptions/`,
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: { plan_id },
+        body: { plan_id, plan },
       }),
     }),
     initiateMpesaStkPushSubscription: builder.mutation<InitiateMpesaStkPushSubscriptionResponse, { phone_number: string; user_subscription_id: number; duration_months: number; token: string }>({

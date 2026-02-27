@@ -192,6 +192,11 @@ export interface UserSubscription {
 
 export interface CreateSubscriptionRequest {
   plan_id: number;
+  plan: {
+    name: string;
+    price: string;
+    duration_days: number;
+  };
 }
 
 export interface InitiateMpesaStkPushSubscriptionRequest {

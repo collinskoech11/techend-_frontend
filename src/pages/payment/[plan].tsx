@@ -70,6 +70,7 @@ function PaymentPage() {
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userToken, setUserToken] = useState<string | null>(null);
+  const [selectedMonths, setSelectedMonths] = useState(1); // New state for duration
   
   const [createSubscription, { isLoading: creatingSubscription }] = useCreateSubscriptionMutation();
   const [initiateMpesaStkPushSubscription, { isLoading: initiatingMpesa }] = useInitiateMpesaStkPushSubscriptionMutation();
@@ -91,12 +92,21 @@ function PaymentPage() {
     if (!userToken) return toast.error("Please log in to continue.");
     if (!selectedPlan) return toast.error("Plan not found.");
     if (!phoneNumber || phoneNumber.length < 10) return toast.error("Enter a valid M-Pesa number.");
+    if (selectedMonths < 1) return toast.error("Subscription duration must be at least 1 month.");
 
     try {
       const loadingToast = toast.loading("Preparing secure checkout...");
+
+      const planDetails = {
+        name: selectedPlan.name,
+        price: selectedPlan.price.toString(),
+        duration_days: selectedMonths * 30, // 30 days per month
+      };
+
       const subscriptionResult = await createSubscription({
         plan_id: selectedPlan.id,
         token: userToken,
+        plan: planDetails, // Pass the full plan object
       }).unwrap();
 
       toast.loading("Sending M-Pesa Prompt...", { id: loadingToast });
@@ -104,7 +114,7 @@ function PaymentPage() {
       await initiateMpesaStkPushSubscription({
         phone_number: phoneNumber,
         user_subscription_id: subscriptionResult.id,
-        duration_months: 1,
+        duration_months: selectedMonths, // Use selectedMonths for duration
         token: userToken,
       }).unwrap();
 
@@ -146,6 +156,21 @@ function PaymentPage() {
                    </Box>
                 </Box>
 
+                <Typography variant="body2" fontWeight={600} sx={{ mb: 1, ml: 0.5 }}>Subscription Duration (Months)</Typography>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  type="number"
+                  value={selectedMonths}
+                  onChange={(e) => setSelectedMonths(Math.max(1, parseInt(e.target.value) || 1))}
+                  inputProps={{ min: 1 }}
+                  helperText="Select the number of months for your subscription"
+                  sx={{ mb: 3 }}
+                  InputProps={{
+                    sx: { borderRadius: 3, bgcolor: alpha(theme.palette.common.white, 0.5) },
+                  }}
+                />
+
                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1, ml: 0.5 }}>Phone Number</Typography>
                 <TextField
                   fullWidth
@@ -181,7 +206,7 @@ function PaymentPage() {
                     '&:hover': { boxShadow: `0 12px 25px ${alpha(theme.palette.primary.main, 0.4)}` }
                   }}
                 >
-                  {isProcessing ? <CircularProgress size={24} color="inherit" /> : `Pay ${selectedPlan.priceDisplay}`}
+                  {isProcessing ? <CircularProgress size={24} color="inherit" /> : `Pay ${selectedPlan.priceDisplay} for ${selectedMonths} Month${selectedMonths > 1 ? 's' : ''}`}
                 </Button>
 
                 <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" sx={{ mt: 3, opacity: 0.7 }}>
@@ -223,7 +248,7 @@ function PaymentPage() {
 
                 <Divider sx={{ mb: 3, borderStyle: 'dashed' }} />
 
-                <List spacing={2}>
+                <List>
                   {selectedPlan.features.map((feature, index) => (
                     <ListItem key={index} disableGutters sx={{ py: 0.5 }}>
                       <ListItemIcon sx={{ minWidth: 32 }}>
