@@ -296,6 +296,15 @@ export const AuthApi = createApi({
         body: { phone_number, user_subscription_id, duration_months },
       }),
     }),
+    getActiveSubscription: builder.query<UserSubscription, { token: string }>({
+      query: ({ token }) => ({
+        url: `subscriptions/my-subscriptions/active/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   })
 });
 export const {
@@ -329,6 +338,7 @@ export const {
   useAddToCartGuestMutation,
   useGetCartGuestQuery,
   usePlaceOrderGuestMutation,
+  useGetActiveSubscriptionQuery, // New hook
 }: any = AuthApi;
 
 export const getProducts = async (args: { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }) => {

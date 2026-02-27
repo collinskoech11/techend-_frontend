@@ -88,6 +88,27 @@ function PaymentPage() {
   const selectedPlan = plans[plan as keyof typeof plans];
   const isProcessing = creatingSubscription || initiatingMpesa;
 
+  const normalizePhoneNumber = (input: string): string => {
+    let digits = input.replace(/\D/g, ''); // Remove all non-digit characters
+
+    if (digits.startsWith('0')) {
+      digits = '254' + digits.substring(1);
+    } else if (digits.startsWith('7') && digits.length === 9) {
+      digits = '254' + digits;
+    } else if (digits.startsWith('1') && digits.length === 9) {
+      digits = '254' + digits;
+    } else if (digits.length === 9 && !digits.startsWith('254')) {
+      digits = '254' + digits;
+    }
+
+    // Ensure it doesn't exceed 12 digits (2547xxxxxxxx)
+    if (digits.length > 12) {
+      digits = digits.substring(0, 12);
+    }
+    console.log("Normalized Phone Number:", digits);
+    return digits;
+  };
+
   const handleCompletePurchase = async () => {
     if (!userToken) return toast.error("Please log in to continue.");
     if (!selectedPlan) return toast.error("Plan not found.");
@@ -177,7 +198,7 @@ function PaymentPage() {
                   variant="outlined"
                   placeholder="0712345678"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(e) => setPhoneNumber(normalizePhoneNumber(e.target.value))}
                   helperText="Ensure your phone is unlocked and nearby"
                   InputProps={{
                     sx: { borderRadius: 3, bgcolor: alpha(theme.palette.common.white, 0.5) },
