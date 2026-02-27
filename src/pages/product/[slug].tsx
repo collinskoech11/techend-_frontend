@@ -1,16 +1,13 @@
 
-// 'use client';
-import React, { Suspense, useState } from "react";
+import React, { useState } from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
-import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation, useGetCompanyBySlugQuery } from "@/Api/services";
+import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
 import { Box, Typography, Button, Chip, IconButton, CircularProgress } from "@mui/material";
-import { styled, useMediaQuery, useTheme } from "@mui/system";
-import dynamic from "next/dynamic"; // New import
-const Swiper = dynamic(() => import("swiper/react").then((mod) => mod.Swiper), { ssr: false });
-const SwiperSlide = dynamic(() => import("swiper/react").then((mod) => mod.SwiperSlide), { ssr: false });
+import { styled } from "@mui/system";
+import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
@@ -25,12 +22,10 @@ import StarIcon from '@mui/icons-material/Star';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useCart } from "@/contexts/CartContext";
 import { darken } from '@mui/material/styles';
 import Image from "next/image";
-
-import Head from "next/head";
 
 const mediumGray = "#e0e0e0";
 const darkText = "#212121";
@@ -65,7 +60,7 @@ const ProductImageGallery = styled(Box)(({ theme }) => ({
 const StyledMainSwiperSlide = styled(SwiperSlide)({
   height: "clamp(300px, 50vh, 500px)",
   borderRadius: "12px",
-  // overflow: "hidden",
+  overflow: "hidden",
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -86,7 +81,6 @@ const MainCarouselImage = (props: React.ComponentProps<typeof Image>) => (
     fill
     priority
     alt={props.alt || ""}
-    // loading="lazy"
   />
 );
 
@@ -107,8 +101,6 @@ const ThumbnailImage = styled((props: React.ComponentProps<typeof Image> & { act
     width={80}
     height={80}
     alt={props.alt || ""}
-    loading="lazy"
-
   />
 ))<{ active?: boolean }>(({ theme, active }) => ({
   width: "100%",
@@ -224,8 +216,6 @@ const SkeletonThumbnail = styled(Skeleton)({
 });
 
 function ProductDetailView() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { sessionId, refetch: cart_refetch } = useCart();
   const router = useRouter();
   const slug = router.query.slug;
@@ -266,19 +256,14 @@ function ProductDetailView() {
       toast.error("Could not add item to cart. Please refresh the page.");
     }
   };
-  
-  const { data: companyData } = useGetCompanyBySlugQuery(shopname);
+
   const handleWhatsAppClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     const shopDetailsCookie = Cookies.get("shopDetails");
     if (shopDetailsCookie) {
       try {
-        const rawPhoneNumber = companyData.contact_phone.replace(/\D/g, "");
-
-        const phoneNumber = rawPhoneNumber.startsWith("0")
-          ? `254${rawPhoneNumber.slice(1)}`
-          : rawPhoneNumber;
-
+        const companyData = JSON.parse(shopDetailsCookie);
+        const phoneNumber = companyData.contact_phone;
 
         if (phoneNumber) {
           const productName = product?.title || "Product";
@@ -287,9 +272,7 @@ function ProductDetailView() {
             : product?.price;
           const message = `Hello, I'm interested in ordering the product: ${productName} for Ksh ${productPrice}. Could you please provide more details?`;
           const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-          if (typeof window !== "undefined") {
-            window.open(whatsappUrl, "_blank");
-          }
+          window.open(whatsappUrl, "_blank");
         } else {
           toast.error("Shop owner's phone number not available.");
         }
@@ -337,15 +320,7 @@ function ProductDetailView() {
 
   return (
     <>
-      <Head>
-        <title>{product?.title || "Product Details"}</title>
-        <meta name="description" content={product?.description || "Check out this amazing product!"} />
-        <meta property="og:title" content={product?.title || "Product Details"} />
-        <meta property="og:description" content={product?.description || "Check out this amazing product!"} />
-        <meta property="og:image" content={`https://res.cloudinary.com/dqokryv6u/${product?.main_image}`} />
-        <meta property="og:url" content={`https://sokojunction.com/product/${slug}`} />
-        <meta property="og:type" content="website" />
-      </Head>
+      <Toaster position="top-right" />
       <Box sx={{ pt: 3, pb: 2, px: 3, maxWidth: "1200px", mx: "auto" }}>
         <Breadcrumbs aria-label="breadcrumb">
           <MuiLink underline="hover" color="inherit" href="/">
@@ -410,19 +385,19 @@ function ProductDetailView() {
               </Box>
             </>
           ) : (
-            <Suspense fallback={<div>Loading images...</div>}>
+            <>
               <Swiper
-              style={{ width:"400px", maxWidth:"90vw", border:"1px solid blue"  }}
+              style={{ width:"400px", maxWidth:"90vw" }}
                 spaceBetween={10}
                 navigation={imagesToDisplay.length > 1}
                 thumbs={{ swiper: thumbsSwiper }}
                 modules={[FreeMode, Navigation, Thumbs, Pagination, Autoplay]}
                 className="mySwiper2"
                 pagination={{ clickable: true }}
-                autoplay={{ delay: 3000, disableOnInteraction: false}}
+                autoplay={{ delay: 3000, disableOnInteraction: false }}
               >
                 {imagesToDisplay.map((image, index) => (
-                  <StyledMainSwiperSlide key={index} style={{ width:"400px", maxWidth:"90vw", border:"1px solid red" }}>
+                  <StyledMainSwiperSlide key={index} style={{ width:"400px", maxWidth:"90vw" }}>
                     <MainCarouselImage
                       src={`https://res.cloudinary.com/dqokryv6u/${image}`}
                       alt={`${product?.title} - Image ${index + 1}`}
@@ -459,7 +434,7 @@ function ProductDetailView() {
                   </Swiper>
                 </Box>
               )}
-            </Suspense>
+            </>
           )}
         </ProductImageGallery>
 
@@ -513,64 +488,24 @@ function ProductDetailView() {
 
               <ProductDescription>{product?.description || "No detailed description available."}</ProductDescription>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mt: 2,
-                  flexDirection: { xs: "column", sm: "row" }, // stack on mobile
-                  width: "100%",
-                }}
-              >
-                {/* Quantity Selector */}
-                <QuantitySelector sx={{ width: { xs: "100%", sm: "auto" } }}>
-                  <IconButton
-                    onClick={() => handleQuantityChange("remove")}
-                    disabled={quantity <= 1 || isAddingToCart || product?.stock === 0}
-                  >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                <QuantitySelector>
+                  <IconButton onClick={() => handleQuantityChange('remove')} disabled={quantity <= 1 || isAddingToCart || product?.stock === 0}>
                     <RemoveIcon />
                   </IconButton>
-                  <Typography
-                    variant="h6"
-                    sx={{ minWidth: "30px", textAlign: "center" }}
-                  >
-                    {quantity}
-                  </Typography>
-                  <IconButton
-                    onClick={() => handleQuantityChange("add")}
-                    disabled={isAddingToCart || product?.stock === 0}
-                  >
+                  <Typography variant="h6" sx={{ minWidth: '30px', textAlign: 'center' }}>{quantity}</Typography>
+                  <IconButton onClick={() => handleQuantityChange('add')} disabled={isAddingToCart || product?.stock === 0}>
                     <AddIcon />
                   </IconButton>
                 </QuantitySelector>
-
-                {/* Add to Cart */}
-                <AddToCartButton
-                  onClick={handleAddToCart}
-                  disabled={isAddingToCart || product?.stock === 0}
-                  fullWidth={isMobile} // only fullWidth on mobile
-                  sx={{ flexGrow: { xs: 1, sm: 0 } }}
-                >
-                  {isAddingToCart ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
+                <AddToCartButton onClick={handleAddToCart} disabled={isAddingToCart || product?.stock === 0} fullWidth>
+                  {isAddingToCart ? <CircularProgress size={24} color="inherit" /> : (
                     <>
-                      <ShoppingCartIcon sx={{ mr: 1 }} />{" "}
-                      {product?.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                      <ShoppingCartIcon sx={{ mr: 1 }} /> {product?.stock === 0 ? "Out of Stock" : "Add to Cart"}
                     </>
                   )}
                 </AddToCartButton>
-
-                {/* WhatsApp */}
-                <IconButton
-                  onClick={handleWhatsAppClick}
-                  disabled={product?.stock === 0}
-                  sx={{
-                    color: "#25D366",
-                    width: { xs: "100%", sm: "auto" }, // full width on mobile
-                  }}
-                >
+                <IconButton onClick={handleWhatsAppClick} disabled={product?.stock === 0} sx={{ color: '#25D366' }}>
                   <WhatsAppIcon />
                 </IconButton>
               </Box>
