@@ -1,105 +1,31 @@
-import { useRouter } from "next/router";
 import {
   Box,
   Typography,
   Tabs,
-  Tab,
   TextField,
   Button,
   Grid,
   Chip,
-  Card,
   useTheme,
   Avatar,
-  Divider,
   Paper,
   alpha,
   Skeleton,
   Stack,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText
 } from "@mui/material";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import Cookies from "js-cookie";
-import Payment from "@/Components/Company/Payment";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessIcon from '@mui/icons-material/Business';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useGetCompanyQuery } from "@/Api/services";
+import { ContentCard, StyledTab } from "@/StyledComponents/Hero";
+import MyPlan from "@/Components/Subscriptions/MyPlan";
 
 // --- Styled Components ---
 
-const ContentCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  borderRadius: "20px",
-  boxShadow: "0 10px 40px rgba(0,0,0,0.03)",
-  border: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.paper,
-}));
 
-const PricingCard = styled(Card)(({ theme }) => ({
-  textAlign: "center",
-  padding: "32px 24px",
-  borderRadius: "24px",
-  border: `1px solid ${theme.palette.divider}`,
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-  position: 'relative',
-  overflow: 'visible',
-  "&:hover": {
-    transform: "translateY(-12px)",
-    boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.08)}`,
-  },
-  "&.featured": {
-    borderColor: theme.palette.primary.main,
-    borderWidth: '2px',
-    backgroundColor: alpha(theme.palette.primary.main, 0.01),
-    "&::before": {
-      content: '"CURRENT PLAN"',
-      position: 'absolute',
-      top: -12,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-      padding: '4px 14px',
-      borderRadius: '20px',
-      fontSize: '0.65rem',
-      fontWeight: 900,
-      letterSpacing: '1.2px'
-    }
-  }
-}));
-
-const StyledTab = styled(Tab)(({ theme }) => ({
-  textTransform: 'none',
-  fontWeight: 600,
-  fontSize: '0.95rem',
-  marginRight: theme.spacing(1),
-  minHeight: '48px',
-  borderRadius: '12px',
-  justifyContent: 'flex-start',
-  padding: '12px 20px',
-  color: theme.palette.text.secondary,
-  transition: 'all 0.2s ease',
-  '&.Mui-selected': {
-    color: theme.palette.primary.main,
-    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    '& .MuiSvgIcon-root': {
-      color: theme.palette.primary.main
-    }
-  },
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.05),
-  }
-}));
 
 const SectionHeader = ({ title }) => (
   <Typography
@@ -119,7 +45,6 @@ const SectionHeader = ({ title }) => (
 
 function ProfilePage() {
   const theme = useTheme();
-  const router = useRouter();
   const [userDetails, setUserDetails] = useState(JSON.parse(Cookies.get("user") || "{}"));
   const [tab, setTab] = useState(0);
   const [editMode, setEditMode] = useState(false);
@@ -156,7 +81,7 @@ function ProfilePage() {
   );
 
   return (
-    <Box sx={{ maxWidth: "1200px", margin: "40px auto", p: { xs: 2, md: 4 } }}>
+    <Box sx={{ maxWidth: "1800px", margin: "40px auto", p: { xs: 2, md: 4 } }}>
 
       {/* Header Section */}
       <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', mb: 4, bgcolor: alpha(theme.palette.primary.main, 0.03), border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}` }}>
@@ -176,9 +101,9 @@ function ProfilePage() {
             <Typography variant="h4" sx={{ fontWeight: 900, color: 'text.primary', textTransform: 'capitalize' }}>
               {userDetails.first_name || userDetails.username} {userDetails.last_name}
             </Typography>
-            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+            <Stack direction="row" spacing={1} sx={{ mt: 1, mb:1 }}>
               <Chip label="Verified Member" size="small" color="success" sx={{ fontWeight: 700 }} />
-            </Stack><br/>
+            </Stack>
             <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
               {userDetails.email}
             </Typography>
@@ -282,122 +207,7 @@ function ProfilePage() {
             )}
 
             {tab === 3 && (
-              <Box>
-                <Grid container spacing={3} alignItems="flex-end">
-                  {[
-                    {
-                      title: 'Starter',
-                      price: '0',
-                      desc: 'Essentials for new setups',
-                      features: ['50 Products', 'Standard Analytics', 'Email Support']
-                    },
-                    {
-                      title: 'Growth',
-                      price: '550',
-                      desc: 'Advanced tools for scaling',
-                      features: ['Unlimited Products', 'SMS Notifications', 'Priority Listing', 'M-Pesa Automation'],
-                      popular: true
-                    },
-                    {
-                      title: 'Pro',
-                      price: '1,050',
-                      desc: 'Enterprise grade control',
-                      features: ['AI Marketing', 'Custom Domain', 'Dedicated Dev Support', 'Multi-user Roles']
-                    }
-                  ].map((plan) => {
-                    const isCurrent = userDetails.selected_plan === plan.title;
-                    const isGrowth = plan.title === 'Growth';
-
-                    return (
-                      <Grid item xs={12} lg={4} key={plan.title}>
-                        <PricingCard
-                          className={isCurrent ? 'featured' : ''}
-                          sx={{
-                            position: 'relative',
-                            pt: plan.popular ? 6 : 4,
-                            borderColor: isGrowth ? theme.palette.secondary.main : 'divider',
-                            background: isGrowth ? `linear-gradient(to bottom, ${alpha(theme.palette.secondary.main, 0.03)}, #fff)` : '#fff'
-                          }}
-                        >
-                          {plan.popular && !isCurrent && (
-                            <Box sx={{
-                              position: 'absolute',
-                              top: 0, left: 0, right: 0,
-                              bgcolor: theme.palette.secondary.main,
-                              color: '#white',
-                              py: 0.5,
-                              borderTopLeftRadius: '22px',
-                              borderTopRightRadius: '22px',
-                              fontSize: '0.75rem',
-                              fontWeight: 800,
-                              letterSpacing: 1
-                            }}>
-                              MOST POPULAR
-                            </Box>
-                          )}
-
-                          <Typography variant="subtitle1" fontWeight={800} color={isGrowth ? 'secondary.main' : 'text.primary'}>
-                            {plan.title}
-                          </Typography>
-
-                          <Box sx={{ my: 2 }}>
-                            <Typography variant="h3" sx={{ fontWeight: 900, display: 'inline-flex', alignItems: 'baseline' }}>
-                              <Typography component="span" variant="h6" sx={{ mr: 0.5, fontWeight: 700, opacity: 0.7 }}>Kes</Typography>
-                              {plan.price}
-                            </Typography>
-                            <Typography variant="caption" display="block" color="text.secondary" sx={{ fontWeight: 600 }}>
-                              per month
-                            </Typography>
-                          </Box>
-
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, px: 1 }}>
-                            {plan.desc}
-                          </Typography>
-
-                          <Divider sx={{ mb: 3, width: '40px', mx: 'auto', borderWidth: 2, borderColor: isGrowth ? 'secondary.main' : 'divider' }} />
-
-                          <List sx={{ mb: 4, flexGrow: 1 }}>
-                            {plan.features.map((feat) => (
-                              <ListItem key={feat} sx={{ py: 0.5, px: 0, justifyContent: 'center' }}>
-                                <ListItemIcon sx={{ minWidth: 28 }}>
-                                  <CheckCircleOutlineIcon sx={{ fontSize: 18, color: isGrowth ? 'secondary.main' : 'primary.main' }} />
-                                </ListItemIcon>
-                                <ListItemText
-                                  primary={feat}
-                                  primaryTypographyProps={{ variant: 'body2', fontWeight: 600, textAlign: 'left' }}
-                                />
-                              </ListItem>
-                            ))}
-                          </List>
-
-                          {isCurrent ? (
-                            <Box sx={{ mt: 'auto' }}>
-                              <Payment />
-                            </Box>
-                          ) : (
-                            <Button
-                              fullWidth
-                              variant={isGrowth ? "contained" : "outlined"}
-                              color={isGrowth ? "secondary" : "primary"}
-                              onClick={() => router.push(`/payment/${plan.title}`)}
-                              sx={{
-                                mt: 'auto',
-                                borderRadius: '14px',
-                                py: 1.5,
-                                fontWeight: 800,
-                                textTransform: 'none',
-                                boxShadow: isGrowth ? `0 8px 20px ${alpha(theme.palette.secondary.main, 0.3)}` : 'none'
-                              }}
-                            >
-                              {plan.title === 'Pro' ? 'Contact Sales' : 'Upgrade Plan'}
-                            </Button>
-                          )}
-                        </PricingCard>
-                      </Grid>
-                    );
-                  })}
-                </Grid>
-              </Box>
+              <MyPlan userDetails={userDetails} />
             )}
           </ContentCard>
         </Grid>

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse, UserSubscription, InitiateMpesaStkPushSubscriptionResponse } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -276,6 +276,26 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    createSubscription: builder.mutation<UserSubscription, { plan_id: number; token: string }>({
+      query: ({ plan_id, token }) => ({
+        url: `subscriptions/my-subscriptions/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { plan_id },
+      }),
+    }),
+    initiateMpesaStkPushSubscription: builder.mutation<InitiateMpesaStkPushSubscriptionResponse, { phone_number: string; user_subscription_id: number; duration_months: number; token: string }>({
+      query: ({ phone_number, user_subscription_id, duration_months, token }) => ({
+        url: `subscriptions/lipa-na-mpesa/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { phone_number, user_subscription_id, duration_months },
+      }),
+    }),
   })
 });
 export const {
@@ -304,6 +324,8 @@ export const {
   useCreatePickupLocationMutation,
   useCreateContactMessageMutation,
   useUpdatePaymentStatusMutation,
+  useCreateSubscriptionMutation,
+  useInitiateMpesaStkPushSubscriptionMutation,
   useAddToCartGuestMutation,
   useGetCartGuestQuery,
   usePlaceOrderGuestMutation,

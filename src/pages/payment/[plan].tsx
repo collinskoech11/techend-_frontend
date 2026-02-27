@@ -14,33 +14,52 @@ import {
   alpha,
   Grid,
   Divider,
-  InputAdornment
+  InputAdornment,
+  CircularProgress,
+  IconButton,
+  Card,
+  Stack
 } from "@mui/material";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import LockIcon from '@mui/icons-material/Lock';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SecurityIcon from '@mui/icons-material/Security';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+import {
+  useCreateSubscriptionMutation,
+  useInitiateMpesaStkPushSubscriptionMutation
+} from "@/Api/services";
+
+// Define the colors for M-Pesa branding
+const MPESA_GREEN = "#49b24b";
 
 const plans = {
   Starter: {
+    id: 1,
     name: "Starter",
-    price: "0 Kes",
+    price: 0,
+    priceDisplay: "Free",
     description: "Perfect for new businesses taking their first steps online.",
-    features: ["Quick Store Setup", "Showcase up to **50 products**", "Reliable Standard Support", "Basic Analytics", "Custom Theme Selection"],
+    features: ["Quick Store Setup", "Showcase up to 50 products", "Standard Support", "Basic Analytics"]
   },
   Growth: {
+    id: 2,
     name: "Growth",
-    price: "550 Kes",
-    description: "Ideal for expanding SMEs ready to scale their operations.",
-    features: ["**All Starter Features**", "Unlimited Products", "Enhanced Notifications", "Integrated Marketing", "Advanced Sales Reports", "Priority Shop Listing", "Payments Automation"],
+    price: 550,
+    priceDisplay: "550 Kes",
+    description: "Ideal for expanding SMEs ready to scale.",
+    features: ["Unlimited Products", "Enhanced Notifications", "Integrated Marketing", "Priority Shop Listing", "Payments Automation"]
   },
   Pro: {
+    id: 3,
     name: "Pro",
-    price: "1050 Kes",
-    description: "Designed for established enterprises seeking advanced control.",
-    features: ["**All Growth Features**", "AI targeted marketing", "Multi-User Access", "Dedicated Support", "Custom Integrations", "Full time dev support", "Custom Landing Page"],
+    price: 1050,
+    priceDisplay: "1,050 Kes",
+    description: "Designed for established enterprises.",
+    features: ["AI targeted marketing", "Multi-User Access", "Dedicated Support", "Full time dev support", "Custom Landing Page"]
   },
 };
 
@@ -48,113 +67,140 @@ function PaymentPage() {
   const router = useRouter();
   const { plan } = router.query;
   const theme = useTheme();
+
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [userDetails, setUserDetails] = useState<any>(null);
-  console.log("Selected plan from query:", userDetails);
+  const [userToken, setUserToken] = useState<string | null>(null);
+  
+  const [createSubscription, { isLoading: creatingSubscription }] = useCreateSubscriptionMutation();
+  const [initiateMpesaStkPushSubscription, { isLoading: initiatingMpesa }] = useInitiateMpesaStkPushSubscriptionMutation();
+
   useEffect(() => {
     const userCookie = Cookies.get("user");
+    const token = Cookies.get("access");
     if (userCookie) {
       const parsedUser = JSON.parse(userCookie);
-      setUserDetails(parsedUser);
       if (parsedUser.phone_number) setPhoneNumber(parsedUser.phone_number);
     }
+    if (token) setUserToken(token);
   }, []);
 
   const selectedPlan = plans[plan as keyof typeof plans];
+  const isProcessing = creatingSubscription || initiatingMpesa;
 
-  if (!selectedPlan) {
-    return (
-      <Container maxWidth="sm" sx={{ mt: 10, textAlign: "center" }}>
-        <Paper elevation={0} sx={{ p: 5, border: `1px solid ${theme.palette.divider}`, borderRadius: 4 }}>
-          <Typography variant="h5" fontWeight={700} gutterBottom>Plan not found</Typography>
-          <Button variant="outlined" onClick={() => router.push("/profile")} sx={{ mt: 2, borderRadius: 2 }}>
-            Return to Profile
-          </Button>
-        </Paper>
-      </Container>
-    );
-  }
+  const handleCompletePurchase = async () => {
+    if (!userToken) return toast.error("Please log in to continue.");
+    if (!selectedPlan) return toast.error("Plan not found.");
+    if (!phoneNumber || phoneNumber.length < 10) return toast.error("Enter a valid M-Pesa number.");
+
+    try {
+      const loadingToast = toast.loading("Preparing secure checkout...");
+      const subscriptionResult = await createSubscription({
+        plan_id: selectedPlan.id,
+        token: userToken,
+      }).unwrap();
+
+      toast.loading("Sending M-Pesa Prompt...", { id: loadingToast });
+
+      await initiateMpesaStkPushSubscription({
+        phone_number: phoneNumber,
+        user_subscription_id: subscriptionResult.id,
+        duration_months: 1,
+        token: userToken,
+      }).unwrap();
+
+      toast.success("Check your phone for the M-Pesa PIN prompt!", { id: loadingToast });
+    } catch (err: any) {
+      toast.error(err?.data?.detail || "Payment failed", { id: "payment" });
+    }
+  };
+
+  if (!selectedPlan) return null; // Or a loading spinner
 
   return (
-    <Box sx={{ bgcolor: alpha(theme.palette.primary.main, 0.02), minHeight: "100vh", py: 6 }}>
+    <Box sx={{ 
+      minHeight: "100vh", 
+      background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, #fff 100%)`,
+      py: { xs: 4, md: 8 } 
+    }}>
       <Container maxWidth="lg">
-        {/* Top Navigation */}
-        <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Button 
-            startIcon={<ArrowBackIosNewIcon sx={{ fontSize: 14 }} />} 
-            onClick={() => router.back()}
-            sx={{ color: 'text.secondary', fontWeight: 600 }}
-          >
-            Back
-          </Button>
-          <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.disabled' }}>
-            <LockIcon sx={{ fontSize: 16, mr: 0.5 }} />
-            <Typography variant="caption" fontWeight={700}>SECURE ENCRYPTED CHECKOUT</Typography>
-          </Box>
+        {/* Header Navigation */}
+        <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
+          <IconButton onClick={() => router.back()} sx={{ mr: 2, bgcolor: '#fff', boxShadow: 1 }}>
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="h5" fontWeight={800}>Checkout</Typography>
         </Box>
 
-        <Grid container spacing={4}>
-          {/* Left: Checkout Details */}
+        <Grid container spacing={5}>
+          {/* Left Column: Payment Details */}
           <Grid item xs={12} md={7}>
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>Checkout</Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              Almost there! Enter your payment details to upgrade your experience.
-            </Typography>
+            <Stack spacing={3}>
+              <Card variant="outlined" sx={{ p: { xs: 3, md: 4 }, borderRadius: 4, border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.04)' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                   <Box sx={{ bgcolor: alpha(MPESA_GREEN, 0.1), p: 1, borderRadius: 2, mr: 2, display: 'flex' }}>
+                      <PhoneIphoneIcon sx={{ color: MPESA_GREEN }} />
+                   </Box>
+                   <Box>
+                    <Typography variant="h6" fontWeight={700}>M-Pesa Payment</Typography>
+                    <Typography variant="body2" color="text.secondary">Enter your Safaricom number to receive the STK push</Typography>
+                   </Box>
+                </Box>
 
-            <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: `1px solid ${theme.palette.divider}` }}>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>
-                M-Pesa Mobile Payment
-              </Typography>
-              
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>M-Pesa Registered Number</Typography>
+                <Typography variant="body2" fontWeight={600} sx={{ mb: 1, ml: 0.5 }}>Phone Number</Typography>
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="e.g. 0712345678"
+                  placeholder="0712345678"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
+                  helperText="Ensure your phone is unlocked and nearby"
                   InputProps={{
+                    sx: { borderRadius: 3, bgcolor: alpha(theme.palette.common.white, 0.5) },
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PhoneIphoneIcon color="action" />
+                        <Typography variant="body2" fontWeight={700} color="text.secondary" sx={{ mr: 1 }}>+254</Typography>
                       </InputAdornment>
                     ),
                   }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
                 />
-              </Box>
 
-              <Box sx={{ p: 2, bgcolor: alpha(theme.palette.info.main, 0.08), borderRadius: 3, mb: 4 }}>
-                <Typography variant="body2" sx={{ color: theme.palette.info.dark, fontWeight: 500 }}>
-                  <strong>Instructions:</strong> Click the button below. You will receive an M-Pesa prompt on your phone. Enter your PIN to authorize the transaction.
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  onClick={handleCompletePurchase}
+                  disabled={isProcessing}
+                  sx={{ 
+                    mt: 4, 
+                    py: 2, 
+                    borderRadius: 3, 
+                    textTransform: 'none', 
+                    fontSize: '1.1rem', 
+                    fontWeight: 700,
+                    boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                    '&:hover': { boxShadow: `0 12px 25px ${alpha(theme.palette.primary.main, 0.4)}` }
+                  }}
+                >
+                  {isProcessing ? <CircularProgress size={24} color="inherit" /> : `Pay ${selectedPlan.priceDisplay}`}
+                </Button>
+
+                <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" sx={{ mt: 3, opacity: 0.7 }}>
+                  <SecurityIcon sx={{ fontSize: 16, color: MPESA_GREEN }} />
+                  <Typography variant="caption" fontWeight={600}>Secure 256-bit encrypted payment</Typography>
+                </Stack>
+              </Card>
+
+              {/* Help Section */}
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', bgcolor: alpha(theme.palette.info.main, 0.02), borderColor: alpha(theme.palette.info.main, 0.1) }}>
+                <HelpOutlineIcon sx={{ color: 'info.main', mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Having trouble? Ensure you have sufficient balance in your M-Pesa account before initiating.
                 </Typography>
-              </Box>
-
-              <Button
-                variant="contained"
-                fullWidth
-                size="large"
-                sx={{
-                  py: 2,
-                  borderRadius: 3,
-                  fontWeight: 800,
-                  fontSize: "1.1rem",
-                  boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
-                  textTransform: "none"
-                }}
-                onClick={() => alert(`Initiating M-Pesa push to ${phoneNumber}`)}
-              >
-                Complete Purchase
-              </Button>
-
-              <Typography variant="caption" display="block" textAlign="center" sx={{ mt: 3, color: 'text.disabled' }}>
-                By subscribing, you agree to our Terms of Service and Privacy Policy.
-              </Typography>
-            </Paper>
+              </Paper>
+            </Stack>
           </Grid>
 
-          {/* Right: Plan Summary */}
+          {/* Right Column: Order Summary */}
           <Grid item xs={12} md={5}>
             <Box sx={{ position: 'sticky', top: 24 }}>
               <Paper 
@@ -162,42 +208,42 @@ function PaymentPage() {
                 sx={{ 
                   p: 4, 
                   borderRadius: 4, 
-                  border: `2px solid ${theme.palette.primary.main}`,
-                  background: theme.palette.background.paper 
+                  bgcolor: theme.palette.common.white,
+                  border: `1px solid ${theme.palette.divider}`,
+                  backgroundImage: `linear-gradient(to bottom right, #fff, ${alpha(theme.palette.primary.main, 0.02)})`
                 }}
               >
-                <Typography variant="overline" color="primary" fontWeight={800} letterSpacing={1}>
-                  Selected Plan
+                <Typography variant="overline" color="primary" fontWeight={800} letterSpacing={1.2}>
+                  Order Summary
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mt: 1 }}>
-                  <Typography variant="h5" fontWeight={800}>{selectedPlan.name}</Typography>
-                  <Typography variant="h5" color="primary" fontWeight={800}>{selectedPlan.price}</Typography>
-                </Box>
+                <Typography variant="h4" fontWeight={800} sx={{ mt: 1 }}>{selectedPlan.name}</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Monthly billing
+                  {selectedPlan.description}
                 </Typography>
 
                 <Divider sx={{ mb: 3, borderStyle: 'dashed' }} />
 
-                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 2 }}>Included features:</Typography>
-                <List dense>
+                <List spacing={2}>
                   {selectedPlan.features.map((feature, index) => (
                     <ListItem key={index} disableGutters sx={{ py: 0.5 }}>
-                      <ListItemIcon sx={{ minWidth: '32px' }}>
-                        <CheckCircleOutlineIcon sx={{ color: theme.palette.secondary.main, fontSize: '1.2rem' }} />
+                      <ListItemIcon sx={{ minWidth: 32 }}>
+                        <CheckCircleIcon sx={{ color: MPESA_GREEN, fontSize: 20 }} />
                       </ListItemIcon>
                       <ListItemText 
-                        primary={<Typography variant="body2" sx={{ fontWeight: 500 }} dangerouslySetInnerHTML={{ __html: feature }} />} 
+                        primary={feature} 
+                        primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }} 
                       />
                     </ListItem>
                   ))}
                 </List>
 
-                <Box sx={{ mt: 4, p: 2, bgcolor: alpha(theme.palette.secondary.main, 0.05), borderRadius: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="subtitle1" fontWeight={700}>Total Due:</Typography>
-                    <Typography variant="subtitle1" fontWeight={800}>{selectedPlan.price}</Typography>
-                  </Box>
+                <Box sx={{ mt: 4, p: 2, borderRadius: 3, bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography fontWeight={700}>Total to Pay</Typography>
+                    <Typography variant="h5" fontWeight={900} color="primary">
+                      {selectedPlan.priceDisplay}
+                    </Typography>
+                  </Stack>
                 </Box>
               </Paper>
             </Box>
