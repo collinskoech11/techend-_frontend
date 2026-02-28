@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
-import { Fade } from "react-awesome-reveal";
 import dynamic from "next/dynamic"; // New import
 import TestimonialCard from "@/Components/TestimonialCard";
 import { Suspense } from "react"; // New import
@@ -21,7 +20,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) 
   const theme = useTheme();
   return (
     <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
-      <Fade cascade triggerOnce>
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
           What Our <span style={{ color: theme.palette.primary.main }}>Clients</span> Say
         </Typography>
@@ -36,6 +34,7 @@ const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) 
             sx={{
               width: '100%',
               maxWidth: '1200px',
+              minHeight: '350px',
               mx: 'auto',
               '.MuiIconButton-root': {
                 color: theme.palette.primary.main,
@@ -89,7 +88,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) 
               ))}
           </Carousel>
         </Suspense>
-      </Fade>
     </Box>
   );
 };

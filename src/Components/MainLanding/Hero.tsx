@@ -203,7 +203,7 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
               onClick={handleNavigate}
               size="large"
             >
-              Start Free Trial
+              Start Selling Now
             </GlowButton>
 {/* 
             <GlassButton 

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse, UserSubscription, InitiateMpesaStkPushSubscriptionResponse } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -276,6 +276,35 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    createSubscription: builder.mutation<UserSubscription, { plan_id: number; token: string; plan: { name: string; price: string; duration_days: number } }>({
+      query: ({ plan_id, token, plan }) => ({
+        url: `subscriptions/my-subscriptions/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { plan_id, plan },
+      }),
+    }),
+    initiateMpesaStkPushSubscription: builder.mutation<InitiateMpesaStkPushSubscriptionResponse, { phone_number: string; user_subscription_id: number; duration_months: number; token: string }>({
+      query: ({ phone_number, user_subscription_id, duration_months, token }) => ({
+        url: `subscriptions/lipa-na-mpesa/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { phone_number, user_subscription_id, duration_months },
+      }),
+    }),
+    getActiveSubscription: builder.query<UserSubscription, { token: string }>({
+      query: ({ token }) => ({
+        url: `subscriptions/my-subscriptions/active/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   })
 });
 export const {
@@ -304,9 +333,12 @@ export const {
   useCreatePickupLocationMutation,
   useCreateContactMessageMutation,
   useUpdatePaymentStatusMutation,
+  useCreateSubscriptionMutation,
+  useInitiateMpesaStkPushSubscriptionMutation,
   useAddToCartGuestMutation,
   useGetCartGuestQuery,
   usePlaceOrderGuestMutation,
+  useGetActiveSubscriptionQuery, // New hook
 }: any = AuthApi;
 
 export const getProducts = async (args: { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }) => {

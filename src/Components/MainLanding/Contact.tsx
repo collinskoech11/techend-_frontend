@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Box, Typography, Grid, TextField, Button, CircularProgress } from "@mui/material";
-import { Fade } from "react-awesome-reveal";
 import { useCreateContactMessageMutation } from "@/Api/services";
 import toast from "react-hot-toast";
 
@@ -30,7 +29,6 @@ const Contact = () => {
 
   return (
     <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="contact">
-      <Fade cascade triggerOnce>
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
           Contact Us
         </Typography>
@@ -59,7 +57,6 @@ const Contact = () => {
             </form>
           </Grid>
         </Grid>
-      </Fade>
     </Box>
   );
 };
