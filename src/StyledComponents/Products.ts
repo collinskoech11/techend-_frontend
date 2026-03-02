@@ -76,20 +76,21 @@ export const IconWrapper = styled(Box)({
 
 export const ProductItemStyled = styled(Card)(({ theme }) => ({
   width: "100%",
+  height: 500, // ⭐ standard fixed height (adjust to your design)
   margin: "auto",
-  // maxWidth: "350px", // Set a max-width for better responsiveness and grid alignment
-  borderRadius: "12px", // Softer rounded corners
-  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08)", // Softer initial shadow
+  borderRadius: "12px",
+  boxShadow: `0 4px 15px rgba(0, 0, 0, 0.2)`,
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   display: "flex",
   flexDirection: "column",
-  overflow: "hidden", // Ensures image border-radius applies
-  position: "relative", // For image overlay
+  overflow: "hidden",
+  position: "relative",
+  paddingBottom: theme.spacing(2),
+
   "&:hover": {
-    transform: "translateY(-5px)", // Slight lift on hover
-    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)", // Enhanced shadow on hover
+    transform: "translateY(-5px)",
+    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)",
   },
-  paddingBottom: theme.spacing(2), // Padding at the bottom for content
 }));
 
 export const ProductImageWrapper = styled(Box)(({ }) => ({

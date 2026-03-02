@@ -41,7 +41,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import Cookies from "js-cookie";
-import { styled, useTheme } from "@mui/system"; // Import styled
+import { styled, useTheme } from "@mui/material"; // Import styled
 
 
 // --- Color Palette (Consistent with your project) ---
@@ -53,44 +53,44 @@ const whiteBackground = "#ffffff"; // Background for cards/sections
 
 // --- Styled Components for UI Improvements ---
 
-const HeroSection = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'bannerImage',
-})<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
-  position: 'relative',
-  height: '40vh',
-  minHeight: 500,
-  maxHeight: 600,
-  width: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: '#fff',
-  marginTop: '-80px',
-  textAlign: 'center',
-  overflow: 'hidden',
+// const HeroSection = styled(Box, {
+//   shouldForwardProp: (prop) => prop !== 'bannerImage',
+// })<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
+//   position: 'relative',
+//   height: '40vh',
+//   minHeight: 500,
+//   maxHeight: 600,
+//   width: '100%',
+//   display: 'flex',
+//   alignItems: 'center',
+//   justifyContent: 'center',
+//   color: '#fff',
+//   marginTop: '-80px',
+//   textAlign: 'center',
+//   overflow: 'hidden',
 
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    inset: 0,
-    backgroundImage: `url(${bannerImage})`,
-    backgroundSize: 'contain',
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center',   // default
-    zIndex: 1,
-  },
+//   '&::before': {
+//     content: '""',
+//     position: 'absolute',
+//     inset: 0,
+//     backgroundImage: `url(${bannerImage})`,
+//     backgroundSize: 'contain',
+//     backgroundRepeat: 'no-repeat',
+//     backgroundPosition: 'center',   // default
+//     zIndex: 1,
+//   },
 
-  [theme.breakpoints.up('md')]: {
-    '&::before': {
-      backgroundPosition: 'center center',
-    },
-  },
+//   [theme.breakpoints.up('md')]: {
+//     '&::before': {
+//       backgroundPosition: 'center center',
+//     },
+//   },
 
-  '& > *': {
-    position: 'relative',
-    zIndex: 2,
-  },
-}));
+//   '& > *': {
+//     position: 'relative',
+//     zIndex: 2,
+//   },
+// }));
 
 const ShopHeader = styled(Box)(({ theme }) => ({
   // display: 'flex',
@@ -344,9 +344,9 @@ useEffect(() => {
 
   return (
     <>
-      <HeroSection bannerImage={`${companyData?.banner_image}`} />
+      {/* <HeroSection bannerImage={`${companyData?.banner_image}`} /> */}
       <Box sx={{ minHeight: "calc(100dvh - 64px)", background: "#fff", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", pt: 4, mt: -2, zIndex: 10, position: "relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
-        <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6 }}>
+        <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6, mt:10 }}>
           {/* SHOP HEADER */}
           <ShopHeader
             sx={{
