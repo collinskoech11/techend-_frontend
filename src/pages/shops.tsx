@@ -124,51 +124,52 @@ const HeroBanner: React.FC = () => {
   };
 
   return (
-    <HeroSection onClick={handleAuthTrigger}>
-      {/* Floating Graphics */}
-      <HeroGraphic sx={{ width: 100, height: 100, top: '10%', left: '10%', animationDelay: '0s' }} />
-      <HeroGraphic sx={{ width: 150, height: 150, bottom: '15%', right: '10%', animationDelay: '1s' }} />
-      <HeroGraphic sx={{ width: 70, height: 70, top: '20%', right: '5%', animationDelay: '0.5s' }} />
-      <HeroGraphic sx={{ width: 120, height: 120, bottom: '5%', left: '5%', animationDelay: '1.5s' }} />
-
-      <Suspense fallback={<div>Loading...</div>}>
-        <Zoom duration={1200}>
-          <Box sx={{
-            position: 'relative',
-            zIndex: 2,
-            px: { xs: 2, sm: 4, md: 3 },
-            py: { xs: 8, sm: 10, md: 4 },
-            maxWidth: '1000px',
-            mx: 'auto',
-          }}>
-            <Typography
-              variant="h2"
-              sx={{
-                fontWeight: 900,
-                mb: { xs: 2, md: 3 },
-                color: "#fff",
-                fontSize: {
-                  xs: '2.4rem',
-                  sm: '2.8rem',
-                },
-                lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
-                letterSpacing: { xs: '-0.02em', md: '-0.03em' },
-              }}
-            >
-              <Suspense fallback={<div>Loading...</div>}>
-                <Typewriter
-                  options={{
-                    strings: ["Explore Shops"],
-                    autoStart: true,
-                    loop: true,
-                  }}
-                />
-              </Suspense>
-            </Typography>
-          </Box>
-        </Zoom>
-      </Suspense>
-    </HeroSection>
+    // <HeroSection onClick={handleAuthTrigger}>
+      // {/* Floating Graphics */}
+      //{/* <HeroGraphic sx={{ width: 100, height: 100, top: '10%', left: '10%', animationDelay: '0s' }} />
+      // <HeroGraphic sx={{ width: 150, height: 150, bottom: '15%', right: '10%', animationDelay: '1s' }} />
+      // <HeroGraphic sx={{ width: 70, height: 70, top: '20%', right: '5%', animationDelay: '0.5s' }} />
+      // <HeroGraphic sx={{ width: 120, height: 120, bottom: '5%', left: '5%', animationDelay: '1.5s' }} />
+// 
+      // <Suspense fallback={<div>Loading...</div>}>
+//        <Zoom duration={1200}>
+//          <Box sx={{
+//            position: 'relative',
+//            zIndex: 2,
+//            px: { xs: 2, sm: 4, md: 3 },
+//            py: { xs: 8, sm: 10, md: 4 },
+//            maxWidth: '1000px',
+//            mx: 'auto',
+//          }}>
+//            <Typography
+//              variant="h2"
+//              sx={{
+//                fontWeight: 900,
+//                mb: { xs: 2, md: 3 },
+//                color: "#fff",
+//                fontSize: {
+//                  xs: '2.4rem',
+//                  sm: '2.8rem',
+//                },
+//                lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
+//                letterSpacing: { xs: '-0.02em', md: '-0.03em' },
+//              }}
+//            >
+//              <Suspense fallback={<div>Loading...</div>}>
+//                <Typewriter
+//                  options={{
+//                    strings: ["Explore Shops"],
+//                    autoStart: true,
+//                    loop: true,
+//                  }}
+//                />
+//              </Suspense>
+//            </Typography>
+//          </Box>
+//        </Zoom>
+      // </Suspense> */}
+    // </HeroSection>
+    <></>
   );
 };
 
