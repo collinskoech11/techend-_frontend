@@ -193,7 +193,7 @@ export default function CompanyOnboarding() {
                 Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
                 Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
                 Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
-                Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
+                // Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
                 setAuthToken(access);
                 setUser(user.username);
                 toast.success("Login successful");
