@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useGetCompaniesQuery } from "@/Api/services";
 import { Company, CompanyCardProps } from "@/Types";
@@ -15,8 +15,8 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import toast from "react-hot-toast";
-const Typewriter = lazy(() => import("typewriter-effect"));
-const Zoom = lazy(() => import('react-reveal/Zoom'));
+// const Typewriter = lazy(() => import("typewriter-effect"));
+// const Zoom = lazy(() => import('react-reveal/Zoom'));
 
 import { GreenButton } from "@/StyledComponents/Buttons";
 import {
@@ -30,10 +30,10 @@ import {
   ProductTitle,
   ProductDescription,
 } from "@/StyledComponents/Typos";
-import {
-  HeroSection,
-  HeroGraphic,
-} from "@/StyledComponents/Hero"; // Make sure these exist and are styled
+// import {
+//   HeroSection,
+//   HeroGraphic,
+// } from "@/StyledComponents/Hero"; // Make sure these exist and are styled
 
 // --- Skeletons ---
 const BannerSkeleton: React.FC = () => (
@@ -119,9 +119,9 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
 
 // --- Hero Banner ---
 const HeroBanner: React.FC = () => {
-  const handleAuthTrigger = () => {
+  // const handleAuthTrigger = () => {
     // Optional: Replace with your real auth modal or route
-  };
+  // };
 
   return (
     // <HeroSection onClick={handleAuthTrigger}>
