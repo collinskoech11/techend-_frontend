@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography, IconButton, InputAdornment, TextField } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserRegistrationMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
@@ -25,8 +25,9 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-  setShopName(Cookies.get("shopname") || "techend");
+const [shopname, setShopName] = useState(() => Cookies.get("shopname") || "techend");  useEffect(() => {
+    setShopName(Cookies.get("shopname") || "techend");
+  }, []);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

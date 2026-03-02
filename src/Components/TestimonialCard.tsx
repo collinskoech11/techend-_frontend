@@ -17,6 +17,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+  maxWidth: 500,
   height: "100%",
   transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
   "&:hover": {
