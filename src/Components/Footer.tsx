@@ -26,7 +26,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import EmailIcon from "@mui/icons-material/Email";
-import { keyframes } from "@mui/system";
+import { keyframes } from '@emotion/react';
 
 // Bounce animation for dots
 const bounce = keyframes`

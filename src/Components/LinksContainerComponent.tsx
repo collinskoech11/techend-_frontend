@@ -17,7 +17,7 @@ import {
   Avatar, // Keeping Avatar for potential future use or custom user display
   styled,
 } from "@mui/material";
-import { keyframes } from "@mui/system";
+import { keyframes } from '@emotion/react';
 import MenuIcon from "@mui/icons-material/Menu";
 import PersonOutline from "@mui/icons-material/PersonOutline";
 import HistoryOutlined from "@mui/icons-material/HistoryOutlined";

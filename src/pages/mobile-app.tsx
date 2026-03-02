@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Container, Typography, Button, useTheme, useMediaQuery, Card, Grid, alpha } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled } from "@mui/material";
 import Head from "next/head";
 import {
   LayoutDashboard,

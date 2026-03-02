@@ -6,7 +6,7 @@ import Skeleton from "@mui/material/Skeleton";
 import { useRouter } from "next/router";
 import { useGetProductQuery, useAddToCartMutation, useAddToCartGuestMutation } from "@/Api/services";
 import { Box, Typography, Button, Chip, IconButton, CircularProgress } from "@mui/material";
-import { styled } from "@mui/system";
+import { styled } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
