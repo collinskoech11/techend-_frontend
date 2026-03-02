@@ -95,7 +95,7 @@ export const ProductItemStyled = styled(Card)(({ theme }) => ({
 
 export const ProductImageWrapper = styled(Box)(({ }) => ({
   width: "100%",
-  height: "300px", // Increased height for better product visibility
+  // height: "450px", // Increased height for better product visibility
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -108,7 +108,8 @@ export const ProductImageWrapper = styled(Box)(({ }) => ({
 export const ProductImage = styled(Image)<ImageProps>(({
   width: "100%",
   height: "100%",
-  objectFit: "cover", // Ensure image covers the area
+  minHeight: "500px", // Ensure image fills the wrapper
+  objectFit: "contain", // Ensure image covers the area
   transition: "transform 0.3s ease",
   "&:hover": {
     transform: "scale(1.05)", // Gentle zoom on image hover

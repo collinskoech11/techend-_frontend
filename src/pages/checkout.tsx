@@ -1345,8 +1345,13 @@ const GuestCheckout = () => {
 function Checkout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const theme = useTheme();
-  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-  setShopName(Cookies.get("shopname") || "techend");
+  const [shopname, setShopName] = useState("techend");
+  useEffect(() => {
+  const cookieShop = Cookies.get("shopname");
+  if (cookieShop) {
+    setShopName(cookieShop);
+  }
+}, []);
   useEffect(() => {
     const token = Cookies.get("access");
     if (token) {

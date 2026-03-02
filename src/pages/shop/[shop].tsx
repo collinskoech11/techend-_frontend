@@ -7,6 +7,8 @@ import {
   useRef,
   useImperativeHandle,
   forwardRef,
+  useMemo,
+  useCallback,
 } from "react";
 import { alpha } from "@mui/material/styles";
 import Skeleton from "@mui/material/Skeleton";
@@ -15,7 +17,7 @@ import {
   ProductsContainer,
   ProductItem, // Keep this for the product cards Grid item
 } from "@/StyledComponents/Products";
-import ProductCard from "@/Components/ProductCard";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import Chip from "@mui/material/Chip";
 import { getProducts, getCompanyBySlug } from "@/Api/services"; // Modified import
@@ -33,7 +35,7 @@ import {
   FormControlLabel,
   Switch,
   CircularProgress,
-  Avatar,
+  // Avatar,
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search'; // Search icon
 import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
@@ -42,6 +44,8 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import Cookies from "js-cookie";
 import { styled, useTheme } from "@mui/material"; // Import styled
+import Image from "next/image";
+import React from "react";
 
 
 // --- Color Palette (Consistent with your project) ---
@@ -91,7 +95,9 @@ const whiteBackground = "#ffffff"; // Background for cards/sections
 //     zIndex: 2,
 //   },
 // }));
-
+const ProductCard = dynamic(() => import("@/Components/ProductCard"), {
+  loading: () => <Skeleton variant="rectangular" width="100%" height={320} />,
+});
 const ShopHeader = styled(Box)(({ theme }) => ({
   // display: 'flex',
   // flexDirection: 'column',
@@ -101,14 +107,25 @@ const ShopHeader = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(-8),
 }));
 
-const ShopLogo = styled(Avatar)(({ theme }) => ({
+export const ShopLogoWrapper = styled("div")(({ theme }) => ({
+  position: "relative",
   width: 120,
   height: 120,
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: "50%",
+  overflow: "hidden",
   border: `4px solid ${theme.palette.background.paper}`,
   marginBottom: theme.spacing(1),
-  boxShadow: '0 0 10px rgba(0,0,0,0.9)',
+  boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
 }));
+
+// const ShopLogo = styled(Image)(({ theme }) => ({
+//   width: 120,
+//   height: 120,
+//   borderRadius: theme.shape.borderRadius * 2,
+//   border: `4px solid ${theme.palette.background.paper}`,
+//   marginBottom: theme.spacing(1),
+//   boxShadow: '0 0 10px rgba(0,0,0,0.9)',
+// }));
 
 
 
@@ -159,7 +176,13 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // Added pageSize state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const getCloudinaryLogo = useCallback((path?: string) => {
+    const base = path
+      ? `https://res.cloudinary.com/dqokryv6u/${path}`
+      : "https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg";
 
+    return base.replace("/upload/", "/upload/f_auto,q_auto,w_240,h_240,c_fill/");
+  }, []);
   const open = Boolean(anchorEl);
   const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -173,47 +196,46 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     handleFilterClose();
   };
 
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  // const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputValue(value); // Update inputValue immediately
-    setIsTyping(true); // User started typing
+  const handleSearchChange = useMemo(() => {
+    let timeout: NodeJS.Timeout;
 
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-    debounceTimeout.current = setTimeout(() => {
-      if (value.length >= 2 || value.length === 0) {
-        setPage(1);
-        setSearchTerm(value);
-        setIsSearching(true); // Search query is about to be triggered
-      }
-      setIsTyping(false); // Debounce finished, user stopped typing
-    }, 300);
-  };
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setInputValue(value);
+      setIsTyping(true);
+
+      clearTimeout(timeout);
+
+      timeout = setTimeout(() => {
+        if (value.length >= 2 || value.length === 0) {
+          setPage(1);
+          setSearchTerm(value);
+          setIsSearching(true);
+        }
+        setIsTyping(false);
+      }, 300);
+    };
+  }, []);
 
   const [products, setProducts] = useState<any[]>(productsData?.results || []);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (shopname) {
-      Cookies.set("shopname", shopname, {
-        expires: 7,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: "Lax",
-      });
+    if (!shopname) return;
+    if (Cookies.get("shopname") !== shopname) {
+      Cookies.set("shopname", shopname, { expires: 7, sameSite: "Lax" });
     }
   }, [shopname]);
 
   useEffect(() => {
-    if (companyData) {
-      Cookies.set("shopDetails", JSON.stringify(companyData), {
-        expires: 7,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: "Lax",
-      });
+    if (!companyData) return;
+    const current = Cookies.get("shopDetails");
+    const next = JSON.stringify(companyData);
+    if (current !== next) {
+      Cookies.set("shopDetails", next, { expires: 7, sameSite: "Lax" });
     }
   }, [companyData]);
 
@@ -244,30 +266,25 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
 
 
-useEffect(() => {
-  if (!router.isReady || !router.query.shop) return;
+  useEffect(() => {
+    if (!router.isReady) return;
 
-  const newQuery: Record<string, string> = {};
+    const newQuery: Record<string, string> = {
+      shop: router.query.shop as string,
+    };
 
-  newQuery.shop = router.query.shop as string;
+    if (searchTerm) newQuery.search = searchTerm;
+    if (category) newQuery.category = category;
+    if (onSale) newQuery.on_sale = "true";
+    if (page !== 1) newQuery.page = String(page);
+    if (pageSize !== 10) newQuery.page_size = String(pageSize);
 
-  if (searchTerm) newQuery.search = searchTerm;
-  if (category) newQuery.category = category;
-  if (onSale) newQuery.on_sale = "true";
-  if (page !== 1) newQuery.page = page.toString();
-  if (pageSize !== 10) newQuery.page_size = pageSize.toString();
-
-  const current = JSON.stringify(router.query);
-  const next = JSON.stringify(newQuery);
-
-  if (current !== next) {
     router.replace(
       { pathname: router.pathname, query: newQuery },
       undefined,
-      { shallow: true }
+      { shallow: true, scroll: false }
     );
-  }
-}, [searchTerm, category, onSale, page, pageSize, router.isReady]);
+  }, [searchTerm, category, onSale, page, pageSize]);
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
@@ -297,30 +314,31 @@ useEffect(() => {
   }));
 
 
-  const categories = [
+  const categories = useMemo(() => [
     { label: "All Categories", value: "" },
     { label: "Electronics", value: "electronics" },
     { label: "Fashion", value: "fashion" },
     { label: "Beauty", value: "beauty" },
     { label: "Home Appliances", value: "home-appliances" },
     { label: "Books", value: "books" },
-  ];
+  ], []);
 
 
-useEffect(() => {
-  if (!router.isReady) return;
+  useEffect(() => {
+    if (!router.isReady) return;
 
-  const { category, search, on_sale, page, page_size } = router.query;
+    const { category, search, on_sale, page, page_size } = router.query;
 
-  setCategory(category as string || "");
-  setSearchTerm(search as string || "");
-  setInputValue(search as string || "");
-  setOnSale(on_sale === "true");
-  setPage(Number(page) || 1);
-  setPageSize(Number(page_size) || 10);
-}, [router.query, router.isReady]);
+    setCategory(category as string || "");
+    setSearchTerm(search as string || "");
+    setInputValue(search as string || "");
+    setOnSale(on_sale === "true");
+    setPage(Number(page) || 1);
+    setPageSize(Number(page_size) || 10);
+  }, [router.query, router.isReady]);
 
-  const BouncingDots = () => (
+const BouncingDots = React.memo(function BouncingDots() {
+  return (
     <Box sx={{ display: "inline-flex", gap: 0.4, ml: 0.5 }}>
       {[0, 1, 2].map((i) => (
         <Box
@@ -341,12 +359,13 @@ useEffect(() => {
       ))}
     </Box>
   );
+});
 
   return (
     <>
       {/* <HeroSection bannerImage={`${companyData?.banner_image}`} /> */}
       <Box sx={{ minHeight: "calc(100dvh - 64px)", background: "#fff", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", pt: 4, mt: -2, zIndex: 10, position: "relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
-        <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6, mt:10 }}>
+        <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6, mt: 10 }}>
           {/* SHOP HEADER */}
           <ShopHeader
             sx={{
@@ -364,21 +383,15 @@ useEffect(() => {
             }}
           >
             {companyData ? (
-              <ShopLogo
-                src={
-                  companyData?.logo_image
-                    ? `https://res.cloudinary.com/dqokryv6u/${companyData.logo_image}`
-                    : "https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg"
-                }
-                style={{
-                  width: 110,
-                  height: 110,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-                }}
-                alt="shop logo"
-              />
+              <ShopLogoWrapper>
+                <Image
+                  src={getCloudinaryLogo(companyData?.logo_image)}
+                  alt="shop logo"
+                  fill
+                  sizes="120px"
+                  priority={false}
+                />
+              </ShopLogoWrapper>
             ) : (
               <CircularProgress size={110} sx={{ color: theme.palette.primary.main }} />
             )}
@@ -728,6 +741,6 @@ useEffect(() => {
     </>
   );
 });
-  Shop.displayName = "Shop";
+Shop.displayName = "Shop";
 
-export default Shop;
+export default React.memo(Shop);

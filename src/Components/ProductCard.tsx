@@ -31,6 +31,21 @@ interface ProductCardProps {
   triggerCartRefetch: () => void;
 }
 
+const getOptimizedCloudinaryUrl = (url: string, width: number, height: number) => {
+  if (!url) return "";
+  const parts = url.split("/upload/");
+  if (parts.length < 2) return url; // Not a standard Cloudinary URL
+
+  // Extract cloud name and public ID with extension
+  const cloudNameMatch = parts[0].match(/res\.cloudinary\.com\/(.*?)\//);
+  const cloudName = cloudNameMatch ? cloudNameMatch[1] : "dqokryv6u"; // Fallback to a default if not found
+
+  // Get everything after /upload/ (including version if present)
+  const publicIdWithExtension = parts[1];
+
+  return `https://res.cloudinary.com/${cloudName}/image/upload/w_${width},h_${height},c_fill,f_auto,q_auto/${publicIdWithExtension}`;
+};
+
 const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }) => {
   const router = useRouter();
   const theme = useTheme();
@@ -116,11 +131,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
         )}
         {product.main_image && (
           <ProductImage
-            src={`${product.main_image}`}
+            src={getOptimizedCloudinaryUrl(product.main_image, 600, 600)}
             alt={product.title || "Product Image"}
             width={600}      // fixed width for layout stability
             height={600}     // fixed height
-            sizes="(max-width: 908px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={80}
+            sizes="(max-width: 700px) 40vw, 400px"
             loading="lazy"   // only load when near viewport
           />
         )}
@@ -175,3 +191,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
 
 // Memo to avoid unnecessary re-renders
 export default memo(ProductCard);
+
+// Memo to avoid unnecessary re-renders
+// export default memo(ProductCard);

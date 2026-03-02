@@ -23,6 +23,10 @@ import OrderDetailsCard from "@/Components/OrderDetailsCard";
 function OrderDetailsPage() {
   const router = useRouter();
   const { orderId } = router.query;
+    // Prevent SSR / initial render crash
+  if (!router.isReady || !orderId) {
+    return <Typography>Loading order...</Typography>;
+  }
   const theme = useTheme();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 setShopName(Cookies.get("shopname") || "techend"); // Ensure shopname is set on component mount and when cookies change 
@@ -46,9 +50,9 @@ setShopName(Cookies.get("shopname") || "techend"); // Ensure shopname is set on 
 
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
-    { order_id: orderId as string, token: Cookies.get("access") || "" },
-    { skip: !isMpesaPaymentInitiated || !orderId }
-  );
+  { order_id: orderId as string, token: Cookies.get("access") || "" },
+  { skip: !isMpesaPaymentInitiated || !orderId }
+);
 
   useEffect(() => {
     if (checkoutHistory && orderId) {
@@ -340,5 +344,5 @@ setShopName(Cookies.get("shopname") || "techend"); // Ensure shopname is set on 
     </>
   );
 }
-
+export const dynamic = "force-dynamic";
 export default OrderDetailsPage;

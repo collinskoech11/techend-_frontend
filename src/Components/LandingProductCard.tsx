@@ -16,6 +16,21 @@ import StarIcon from "@mui/icons-material/Star";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import { Box } from "@mui/material";
 
+const getOptimizedCloudinaryUrl = (url: string, width: number, height: number) => {
+  if (!url) return "";
+  const parts = url.split("/upload/");
+  if (parts.length < 2) return url; // Not a standard Cloudinary URL
+
+  // Extract cloud name and public ID with extension
+  const cloudNameMatch = parts[0].match(/res\.cloudinary\.com\/(.*?)\//);
+  const cloudName = cloudNameMatch ? cloudNameMatch[1] : "dqokryv6u"; // Fallback to a default if not found
+
+  // Get everything after /upload/ (including version if present)
+  const publicIdWithExtension = parts[1];
+
+  return `https://res.cloudinary.com/${cloudName}/image/upload/w_${width},h_${height},c_fill,f_auto,q_auto/${publicIdWithExtension}`;
+};
+
 function LandingProductCard({ image }) {
   const [isHovered, setIsHovered] = React.useState(false);
 
@@ -43,7 +58,15 @@ function LandingProductCard({ image }) {
               overflow: "hidden",
             }}
           >
-            <ProductImage src={image} alt="product image"loading="lazy"/>
+            <ProductImage
+              src={getOptimizedCloudinaryUrl(image, 200, 200)}
+              alt="product image"
+              width={200}
+              height={200}
+              quality={70}
+              sizes="(max-width: 600px) 40vw, 200px"
+              loading="lazy"
+            />
           </Box>
           {isHovered && (
             <IconsContainer>
