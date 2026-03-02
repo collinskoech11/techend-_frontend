@@ -60,7 +60,7 @@ export default function CompanyOnboarding() {
     useEffect(() => {
         setAuthToken(Cookies.get("access"));
     }, []);
-    
+
     const [companyExists, setCompanyExists] = useState<boolean>(false)
     const [tabIndex, setTabIndex] = useState(0);
     const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
@@ -194,7 +194,7 @@ export default function CompanyOnboarding() {
                 Cookies.set("refresh", refresh, { expires: 7, secure: false, sameSite: "Strict" });
                 Cookies.set("username", user.username, { expires: 7, secure: false, sameSite: "Strict" });
                 Cookies.set("user", JSON.stringify(user), { expires: 7, secure: false, sameSite: "Strict" });
-
+                setAuthToken(access);
                 setUser(user.username);
                 toast.success("Login successful");
                 setActiveStep(1);
