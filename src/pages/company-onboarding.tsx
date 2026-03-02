@@ -54,8 +54,13 @@ export default function CompanyOnboarding() {
             }
         }
         return null;
-    }); const [authToken, setAuthToken] = useState<string | undefined>(Cookies.get("access"))
-    setAuthToken(Cookies.get("access"));
+    });
+    const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        setAuthToken(Cookies.get("access"));
+    }, []);
+    
     const [companyExists, setCompanyExists] = useState<boolean>(false)
     const [tabIndex, setTabIndex] = useState(0);
     const [login, { isLoading: isLoggingIn }] = useUserLoginMutation();
