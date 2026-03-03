@@ -23,13 +23,16 @@ import OrderDetailsCard from "@/Components/OrderDetailsCard";
 function OrderDetailsPage() {
   const router = useRouter();
   const { orderId } = router.query;
-    // Prevent SSR / initial render crash
+  // Prevent SSR / initial render crash
   if (!router.isReady || !orderId) {
     return <Typography>Loading order...</Typography>;
   }
   const theme = useTheme();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-setShopName(Cookies.get("shopname") || "techend"); // Ensure shopname is set on component mount and when cookies change 
+  useEffect(() => {
+    const cookieShop = Cookies.get("shopname") || "techend";
+    setShopName(cookieShop);
+  }, []); // Ensure shopname is set on component mount and when cookies change 
   const { data: checkoutHistory, isLoading: historyLoading, refetch } = useGetCheckoutHistoryQuery({
     token: Cookies.get("access"),
   });
@@ -50,9 +53,9 @@ setShopName(Cookies.get("shopname") || "techend"); // Ensure shopname is set on 
 
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
-  { order_id: orderId as string, token: Cookies.get("access") || "" },
-  { skip: !isMpesaPaymentInitiated || !orderId }
-);
+    { order_id: orderId as string, token: Cookies.get("access") || "" },
+    { skip: !isMpesaPaymentInitiated || !orderId }
+  );
 
   useEffect(() => {
     if (checkoutHistory && orderId) {

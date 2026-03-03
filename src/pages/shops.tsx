@@ -15,9 +15,6 @@ import {
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import toast from "react-hot-toast";
-// const Typewriter = lazy(() => import("typewriter-effect"));
-// const Zoom = lazy(() => import('react-reveal/Zoom'));
-
 import { GreenButton } from "@/StyledComponents/Buttons";
 import {
   ProductItemStyled as CompanyCardStyled,
