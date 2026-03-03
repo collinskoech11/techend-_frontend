@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -53,6 +53,15 @@ const StyledAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
 
 const FAQ = () => {
   const theme = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null; // Render nothing on the server and until mounted on the client
+  }
 
   const faqList = [
     {

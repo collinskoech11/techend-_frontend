@@ -145,10 +145,10 @@ function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
   return (
     <>
       <Dialog
-        open={open}
-        onClose={handleClose}
-        keepMounted
-      >
+          open={open}
+          onClose={handleClose}
+          keepMounted
+        >
         <DialogContent>
           <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px",background:"transparent", borderRadius: "5px" }}>
             <Tabs value={tabIndex} onChange={handleTabChange} centered>

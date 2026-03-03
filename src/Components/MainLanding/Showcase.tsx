@@ -37,10 +37,10 @@ const ImageCard = styled(Box)(({ theme }) => ({
   transition: "transform 0.5s ease, box-shadow 0.5s ease",
   backdropFilter: 'blur(5px)', // Subtle glass effect on the card itself
 
-  "&:hover": {
-    transform: "translateY(-5px) scale(1.005)", // Slight lift and scale
-    boxShadow: `0 40px 80px -15px ${alpha(theme.palette.primary.main, 0.3)}`, // Primary color accent glow
-  },
+  // "&:hover": {
+  //   transform: "translateY(-5px) scale(1.005)", // Slight lift and scale
+  //   boxShadow: `0 40px 80px -15px ${alpha(theme.palette.primary.main, 0.3)}`, // Primary color accent glow
+  // },
   
   // Style for the actual image
   "& img": {

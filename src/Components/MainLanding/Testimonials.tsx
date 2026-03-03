@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import dynamic from "next/dynamic"; // New import
 import TestimonialCard from "@/Components/TestimonialCard";
@@ -18,12 +18,18 @@ interface TestimonialsProps {
 
 const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) => {
   const theme = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
           What Our <span style={{ color: theme.palette.primary.main }}>Clients</span> Say
         </Typography>
-        <Suspense fallback={<div>Loading Testimonials...</div>}>
+        {isMounted ? (
           <Carousel
             autoPlay={true}
             animation="slide"
@@ -87,7 +93,9 @@ const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) 
                 </Box>
               ))}
           </Carousel>
-        </Suspense>
+        ) : (
+          <div>Loading Testimonials...</div>
+        )}
     </Box>
   );
 };
