@@ -61,11 +61,11 @@ const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
-  address: z.string().min(5, "Address is required"),
-  city: z.string().min(2, "City is required"),
-  state: z.string().min(2, "State is required"),
-  postal_code: z.string().min(4, "Postal code is required"),
-  country: z.string().min(2, "Country is required"),
+  // address: z.string().min(5, "Address is required"),
+  // city: z.string().min(2, "City is required"),
+  // state: z.string().min(2, "State is required"),
+  // postal_code: z.string().min(4, "Postal code is required"),
+  // country: z.string().min(2, "Country is required"),
   payment_method: z.string().min(2, "Payment method is required"),
   pickup_location: z.number().optional().nullable(),
   delivery_location: z.number().optional().nullable(),
@@ -77,7 +77,6 @@ const AuthenticatedCheckout = () => {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation(); // Initialize mutation
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-  setShopName(Cookies.get("shopname") || "techend");
   const theme = useTheme();
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
   const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
@@ -98,6 +97,13 @@ const AuthenticatedCheckout = () => {
   console.log(pollCount)
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
+
+  useEffect(() => {
+    const cookieShop = Cookies.get("shopname");
+    if (cookieShop) {
+      setShopName(cookieShop);
+    }
+  }, []);
 
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
@@ -416,11 +422,11 @@ const AuthenticatedCheckout = () => {
                   { label: "First Name", name: "firstName" },
                   { label: "Last Name", name: "lastName" },
                   { label: "Phone Number", name: "phoneNumber" },
-                  { label: "Address", name: "address" },
-                  { label: "City", name: "city" },
-                  { label: "State", name: "state" },
-                  { label: "Postal Code", name: "postal_code" },
-                  { label: "Country", name: "country" },
+                  // { label: "Address", name: "address" },
+                  // { label: "City", name: "city" },
+                  // { label: "State", name: "state" },
+                  // { label: "Postal Code", name: "postal_code" },
+                  // { label: "Country", name: "country" },
                 ].map((field, index) => (
                   <Grid item xs={12} md={6} key={index}>
                     <TextField
@@ -438,7 +444,7 @@ const AuthenticatedCheckout = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <Button onClick={handleBack}>Back</Button>
               <Button variant="contained" onClick={async () => {
-                const billingFields: (keyof CheckoutFormData)[] = ["firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"];
+                const billingFields: (keyof CheckoutFormData)[] = ["firstName", "lastName", "phoneNumber"];
                 const isValid = await trigger(billingFields);
                 if (isValid) {
                   handleNext();

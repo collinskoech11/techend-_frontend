@@ -161,8 +161,8 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
             }}
           >
             Build your <br />
-            <Suspense fallback={<span>Online Business</span>}>
-              <GradientText component="span">
+            <GradientText component="span">
+              {isMounted ? (
                 <Typewriter
                   options={{
                     strings: [
@@ -176,8 +176,10 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
                     deleteSpeed: 50,
                   }}
                 />
-              </GradientText>
-            </Suspense>
+              ) : (
+                "Dream Store."
+              )}
+            </GradientText>
           </Typography>
 
           <Typography
