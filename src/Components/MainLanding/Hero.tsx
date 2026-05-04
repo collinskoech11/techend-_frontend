@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -133,6 +133,11 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
   const theme = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <HeroWrapper>
@@ -156,8 +161,8 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
             }}
           >
             Build your <br />
-            <Suspense fallback={<span>Online Business</span>}>
-              <GradientText>
+            <GradientText>
+              {isMounted ? (
                 <Typewriter
                   options={{
                     strings: [
@@ -171,8 +176,10 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
                     deleteSpeed: 50,
                   }}
                 />
-              </GradientText>
-            </Suspense>
+              ) : (
+                "Dream Store."
+              )}
+            </GradientText>
           </Typography>
 
           <Typography

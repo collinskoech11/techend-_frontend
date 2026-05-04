@@ -97,7 +97,7 @@ function Cart() {
 
   useEffect(() => {
     cart_refetch();
-  }, [router, cart_refetch]);
+  }, [cart_refetch]);
 
   const CartItems = cart_data?.items;
   let subTotal = 0;
@@ -184,7 +184,7 @@ function Cart() {
                           {/* Product Image */}
                           <CardMedia
                             component="img"
-                            image={`https://res.cloudinary.com/dqokryv6u/${item.product.main_image}` || "/placeholder.png"}
+                            image={`${item.product.main_image}` || "/placeholder.png"}
                             alt={item.product.title}
                             sx={{
                               width: 100,

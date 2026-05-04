@@ -18,7 +18,6 @@ import { useState, useEffect } from "react";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import React, { Suspense } from "react";
-// const SketchPicker = lazy(() => import("react-color").then(module => ({ default: module.SketchPicker })));
 import Cookies from "js-cookie";
 import { useUserLoginMutation, useUserRegistrationMutation, useGetCompanyQuery } from "@/Api/services";
 import { z } from "zod";

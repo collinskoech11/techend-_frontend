@@ -3,11 +3,17 @@ import { Box, Button, Grid, Typography, CircularProgress, useTheme } from "@mui/
 import { SketchPicker } from "react-color";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
+import { useState, useEffect } from "react";
 
 const Branding = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
 
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
     const theme = useTheme();
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleColorChange = (field: string, color: any) => {
         setCompanyData({ ...companyData, [field]: color?.hex });
@@ -38,14 +44,27 @@ const Branding = ({ nextStep, prevStep, activeStep, companyData, setCompanyData,
             <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Primary Color</Typography>
-                    <SketchPicker color={companyData.primary_color || "#000000"} onChange={(color) => handleColorChange("primary_color", color)} />                </Grid>
+                    {isMounted ? (
+                        <SketchPicker color={companyData.primary_color || "#000000"} onChange={(color) => handleColorChange("primary_color", color)} />
+                    ) : (
+                        <Box sx={{ width: 220, height: 200, border: `1px solid ${theme.palette.divider}`, borderRadius: 1 }} />
+                    )}
+                </Grid>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Secondary Color</Typography>
-                    <SketchPicker color={companyData.secondary_color || "#000000"} onChange={(color) => handleColorChange("secondary_color", color)} />
+                    {isMounted ? (
+                        <SketchPicker color={companyData.secondary_color || "#000000"} onChange={(color) => handleColorChange("secondary_color", color)} />
+                    ) : (
+                        <Box sx={{ width: 220, height: 200, border: `1px solid ${theme.palette.divider}`, borderRadius: 1 }} />
+                    )}
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Typography sx={{ mt: 3, mb: 2 }}>Accent Color</Typography>
-                    <SketchPicker color={companyData.accent_color || "#000000"} onChange={(color) => handleColorChange("accent_color", color)} />
+                    {isMounted ? (
+                        <SketchPicker color={companyData.accent_color || "#000000"} onChange={(color) => handleColorChange("accent_color", color)} />
+                    ) : (
+                        <Box sx={{ width: 220, height: 200, border: `1px solid ${theme.palette.divider}`, borderRadius: 1 }} />
+                    )}
                 </Grid>
             </Grid>
 

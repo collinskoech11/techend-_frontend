@@ -52,6 +52,12 @@ function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
   const router = useRouter();
   console.log("loggedInUser:", loggedInUser);
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     const username = Cookies.get("username");
     if (username) {
@@ -144,11 +150,12 @@ function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        keepMounted
-      >
+      {isMounted && (
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          keepMounted
+        >
         <DialogContent>
           <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px",background:"transparent", borderRadius: "5px" }}>
             <Tabs value={tabIndex} onChange={handleTabChange} centered>
@@ -283,6 +290,7 @@ function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
           </Box>
         </DialogContent>
       </Dialog>
+      )}
     </>
   );
 }
