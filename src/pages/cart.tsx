@@ -97,7 +97,7 @@ function Cart() {
 
   useEffect(() => {
     cart_refetch();
-  }, [router, cart_refetch]);
+  }, [cart_refetch]);
 
   const CartItems = cart_data?.items;
   let subTotal = 0;

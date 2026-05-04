@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import dynamic from "next/dynamic"; // New import
 import TestimonialCard from "@/Components/TestimonialCard";
-import { Suspense } from "react"; // New import
 
 const Carousel = dynamic(() => import('react-material-ui-carousel'), { ssr: false });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -161,7 +161,7 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
             }}
           >
             Build your <br />
-            <GradientText component="span">
+            <GradientText>
               {isMounted ? (
                 <Typewriter
                   options={{
