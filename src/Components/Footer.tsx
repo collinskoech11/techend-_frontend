@@ -264,7 +264,7 @@ export default function Footer() {
         {/* Quick Links */}
         <Grid item xs={6} md={4}>
           <FooterSectionTitle>Quick Links</FooterSectionTitle>
-          {["Home", "Shops", "About Us"].map((item) => (
+          {["Home", "Shops", "About","Mobile-App"].map((item) => (
             <FooterLink
               key={item}
               href={item === "Home" ? "/" : `/${item.toLowerCase().replace(" ", "")}`}

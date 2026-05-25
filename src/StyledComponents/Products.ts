@@ -76,61 +76,66 @@ export const IconWrapper = styled(Box)({
 
 export const ProductItemStyled = styled(Card)(({ theme }) => ({
   width: "100%",
-  height: 500, // ⭐ standard fixed height (adjust to your design)
+  height: 480, // Balanced fixed height to prevent content overflow
   margin: "auto",
-  borderRadius: "12px",
-  boxShadow: `0 4px 15px rgba(0, 0, 0, 0.2)`,
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  borderRadius: "16px", // Softer, more modern corners
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06)", // Soft, premium shadow instead of harsh dark lines
+  transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   display: "flex",
   flexDirection: "column",
+  justifyContent: "space-between", // Ensures info and actions sit perfectly at the bottom
   overflow: "hidden",
   position: "relative",
-  paddingBottom: theme.spacing(2),
+  border: "1px solid rgba(0, 0, 0, 0.04)",
 
   "&:hover": {
-    transform: "translateY(-5px)",
-    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)",
+    transform: "translateY(-6px)",
+    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.12)",
   },
 }));
 
-export const ProductImageWrapper = styled(Box)(({ }) => ({
+export const ProductImageWrapper = styled(Box)({
   width: "100%",
-  // height: "450px", // Increased height for better product visibility
+  height: "260px", // Explicit height allocation for the image zone
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   overflow: "hidden",
-  position: "relative", // For hover overlay
-  borderTopLeftRadius: "12px", // Match card border-radius
-  borderTopRightRadius: "12px",
-}));
+  position: "relative",
+  backgroundColor: "#f9f9f9", // Light fallback background for transparent products
+});
 
-export const ProductImage = styled(Image)<ImageProps>(({
+export const ProductImage = styled(Image)<ImageProps>({
   width: "100%",
   height: "100%",
-  minHeight: "500px", // Ensure image fills the wrapper
-  objectFit: "contain", // Ensure image covers the area
-  transition: "transform 0.3s ease",
-  "&:hover": {
-    transform: "scale(1.05)", // Gentle zoom on image hover
+  objectFit: "contain", // Prevents vertical stretching or awkward clipping
+  padding: "16px", // Generous breathing room for product shots
+  transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+  
+  // Note: Target the parent ProductItemStyled hover state to trigger the scale effect seamlessly
+  [`${ProductItemStyled}:hover &`]: {
+    transform: "scale(1.06)",
   },
-}));
+});
 
 export const ProductInfoContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2), // Consistent padding for text content
+  padding: theme.spacing(2),
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-start", // Align text to left
+  flexGrow: 1, // Dynamically fills the remaining space between the image and actions
+  justifyContent: "flex-start",
 }));
 
 export const RatingContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: "2px", // Closer stars
+  gap: "4px", 
   marginBottom: theme.spacing(1),
+  
   "& .MuiSvgIcon-root": {
-    fontSize: "1rem", // Slightly larger stars
-    color: "#FFD700", // Gold color for stars
+    fontSize: "1.1rem",
+    color: "#FFB400", // Industry standard warm gold hue
   },
 }));
 
@@ -138,13 +143,19 @@ export const IconActionsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-start",
-  gap: theme.spacing(1),
-  marginTop: theme.spacing(1),
+  gap: theme.spacing(1.5),
+  padding: theme.spacing(0, 2, 2, 2), // Keeps actions firmly anchored to the card footer
   width: "100%",
+
   "& .MuiIconButton-root": {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    color: theme.palette.text.secondary,
+    transition: "all 0.2s ease",
+    
     "&:hover": {
-      backgroundColor: "#e0e0e0",
+      backgroundColor: theme.palette.text.primary,
+      color: theme.palette.background.paper,
+      transform: "scale(1.05)",
     },
   },
 }));

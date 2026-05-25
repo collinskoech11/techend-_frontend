@@ -134,7 +134,7 @@ function AboutPage() {
           <Grid item xs={12} md={6}>
             <Subheading>Our Story</Subheading>
             <BodyText>
-              Founded in 2023, sokoJunction emerged from a passion for simplifying the complexities of online retail. We saw a gap in the market for a platform that truly understood the needs of growing businesses – offering robust features without the prohibitive costs or steep learning curves. Our journey began with a commitment to democratize eCommerce, making it accessible and profitable for everyone.
+              Founded in 2023, sokoJunction emerged from a passion for simplifying the complexities of online retail. We saw a gap in the market for a platform that truly understood the needs of growing businesses offering robust features without the prohibitive costs or steep learning curves. Our journey began with a commitment to democratize eCommerce, making it accessible and profitable for everyone.
             </BodyText>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -150,7 +150,7 @@ function AboutPage() {
       <SectionWrapper>
         <SectionTitle><RocketLaunchIcon /> Our Mission</SectionTitle>
         <BodyText sx={{ fontSize: '1.1rem', textAlign: 'center', maxWidth: '800px', mx: 'auto', mb: 4 }}>
-          Our mission at sokoJunction is to **empower businesses of all sizes to achieve their fullest potential in the digital realm.** We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
+          Our mission at sokoJunction is to empower businesses of all sizes to achieve their fullest potential in the digital realm. We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
         </BodyText>
         <Grid container spacing={4} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4} textAlign="center">
@@ -180,7 +180,7 @@ function AboutPage() {
               <EmailIcon />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Email Support</Typography>
-                <Typography variant="body1" color={lightText}>support@sokoJunction.com</Typography>
+                <Typography variant="body1" color={lightText}>sokojunction@gmail.com</Typography>
               </Box>
             </ContactInfoItem>
           </Grid>
@@ -189,7 +189,7 @@ function AboutPage() {
               <PhoneIcon />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Phone</Typography>
-                <Typography variant="body1" color={lightText}>+1 (555) 123-4567</Typography>
+                <Typography variant="body1" color={lightText}>+254 (703) 508-881</Typography>
               </Box>
             </ContactInfoItem>
           </Grid>
@@ -198,7 +198,7 @@ function AboutPage() {
               <LocationOnIcon />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Address</Typography>
-                <Typography variant="body1" color={lightText}>123 eCommerce Blvd, Suite 400, Digital City, TX 78701</Typography>
+                <Typography variant="body1" color={lightText}>Nairobi</Typography>
               </Box>
             </ContactInfoItem>
           </Grid>
@@ -215,7 +215,7 @@ function AboutPage() {
                     fontWeight: 600,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 }}
-                href="mailto:support@sokoJunction.com"
+                href="mailto:sokojunction@gmail.com"
             >
                 Send Us an Email
             </Button>
