@@ -150,7 +150,7 @@ function AboutPage() {
       <SectionWrapper>
         <SectionTitle><RocketLaunchIcon /> Our Mission</SectionTitle>
         <BodyText sx={{ fontSize: '1.1rem', textAlign: 'center', maxWidth: '800px', mx: 'auto', mb: 4 }}>
-          Our mission at sokoJunction is to empower businesses of all sizes to achieve their fullest potential in the digital real. We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
+          Our mission at sokoJunction is to empower businesses of all sizes to achieve their fullest potential in the digital realm. We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
         </BodyText>
         <Grid container spacing={4} sx={{ mt: 4 }}>
           <Grid item xs={12} md={4} textAlign="center">
