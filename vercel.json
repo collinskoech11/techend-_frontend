@@ -1,8 +1,18 @@
 {
-    "routes":[
+    "routes": [
         {
-            "src":"/",
-            "dest":"/"
+            "src": "/",
+            "dest": "/"
         }
-    ]
+    ],
+    "build": {
+        "env": {
+            "NEXT_PUBLIC_BACKEND_URI": "https://techend-backend-j45c.onrender.com/"
+        }
+    },
+    "github": {
+        "enabled": true,
+        "autoJobCancelation": true,
+        "productionBranch": "main"
+    }
 }

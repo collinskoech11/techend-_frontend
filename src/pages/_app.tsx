@@ -1,18 +1,26 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { store } from "../Api/store";
 import { Provider } from "react-redux";
-import NoSSR from "react-no-ssr";
-import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef, lazy, Suspense } from "react";
+import { store } from "../Api/store";
+import dynamic from "next/dynamic";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
 import { Box } from "@mui/material";
-import { CartProvider } from "@/contexts/CartContext"; // ✅ adjust this path if different
+import { CartProvider } from "@/contexts/CartContext";
 import Script from "next/script";
-
-import { ThemeProvider } from '../contexts/ThemeContext';
-const Navbar = lazy(() => import("@/Components/Navbar"));
-const Footer = lazy(() => import("@/Components/Footer"));
-import { useRouter } from "next/router";
+import { ThemeProvider } from "../contexts/ThemeContext";
+import DynamicTitle from "@/Components/DynamicTitle";
 import { Toaster } from "react-hot-toast";
+
+/* ✅ Proper Next.js code splitting (better than React.lazy) */
+const Navbar = dynamic(() => import("@/Components/Navbar"), {
+  ssr: false,
+  loading: () => <div style={{ height: 75 }} />,
+});
+
+const Footer = dynamic(() => import("@/Components/Footer"), {
+  ssr: false,
+  loading: () => <div style={{ height: 60 }} />,
+});
 
 const GA_IDS: Record<string, string> = {
   "sokojunction.com": "G-F23L8C9HPP",
@@ -20,78 +28,64 @@ const GA_IDS: Record<string, string> = {
 };
 
 const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
-  App.displayName = "App";
-  const router = useRouter();
   const cartRef = useRef<any>(null);
-  const triggerCartRefetch = () => {
-    if (cartRef.current) {
-      cartRef.current.triggerCartRefetch();
-    }
-  };
+
   useImperativeHandle(ref, () => ({
-    triggerCartRefetch() {
-      triggerCartRefetch();
-    },
+    triggerCartRefetch: () => cartRef.current?.triggerCartRefetch?.(),
   }));
 
-  const [hostname, setHostname] = useState("");
-  const [isClient, setIsClient] = useState(false);
+  const [GA_ID, setGA_ID] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setHostname(window.location.hostname);
+      const hostname = window.location.hostname;
+      setGA_ID(GA_IDS[hostname] || "G-F23L8C9HPP");
     }
-    setIsClient(true);
   }, []);
 
-  const GA_ID = GA_IDS[hostname] || "G-F23L8C9HPP";
-
+  const triggerCartRefetch = () => {
+    cartRef.current?.triggerCartRefetch?.();
+  };
 
   return (
-    <NoSSR>
-      <Provider store={store}>
+    <Provider store={store}>
       <ThemeProvider>
         <CartProvider>
-        {isClient && GA_ID && (
-        <>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="ga-script" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}');
-          `}
-        </Script>
-        </>
-      )}
-        {router.pathname !== "/" && (
-        <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
-          <Suspense fallback={<div>Loading Navbar...</div>}>
-            <Navbar ref={cartRef}/>
-          </Suspense>
-        </Box>
-        )}
-        {router.pathname === "/" && (
+          <DynamicTitle />
+
+          {/* ✅ Load GA only on client and only when needed */}
+          {GA_ID && (
+            <>
+              <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+                strategy="afterInteractive"
+              />
+              <Script id="ga-script" strategy="afterInteractive">
+                {`
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${GA_ID}');
+                `}
+              </Script>
+            </>
+          )}
+
           <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
-            <Suspense fallback={<div>Loading Navbar...</div>}>
-              <Navbar ref={cartRef}/>
-            </Suspense>
+            <Navbar ref={cartRef} />
           </Box>
-        )}
-        <Toaster position="bottom-right" reverseOrder={false} />
-        <Component {...pageProps} triggerCartRefetch={triggerCartRefetch}/>
-        <Suspense fallback={<div>Loading Footer...</div>}>
+
+          <Toaster position="bottom-right" reverseOrder={false} />
+
+          <Component {...pageProps} triggerCartRefetch={triggerCartRefetch} />
+
           <Footer />
-        </Suspense>
         </CartProvider>
-        </ThemeProvider>
-      </Provider>
-    </NoSSR>
+      </ThemeProvider>
+    </Provider>
   );
-}
-)
-export default App
+});
+
+App.displayName = "App";
+
+export default App;

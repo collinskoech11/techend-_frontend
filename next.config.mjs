@@ -1,11 +1,16 @@
-import withBundleAnalyzer from '@next/bundle-analyzer';
+import withBundleAnalyzer from '@next/bundle-analyzer'
+
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@mui/material', '@mui/icons-material'],
 
   images: {
+    formats: ['image/avif', 'image/webp'],
+
     remotePatterns: [
       {
         protocol: 'https',
@@ -25,8 +30,6 @@ const nextConfig = {
       },
     ],
   },
-};
+}
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(nextConfig);
+export default bundleAnalyzer(nextConfig)

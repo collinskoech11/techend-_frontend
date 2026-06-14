@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -10,7 +10,7 @@ import {
   Paper,
   Grid,
 } from "@mui/material";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useCreatePickupLocationMutation } from "@/Api/services";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
@@ -41,7 +41,7 @@ const addPickupLocationSchema = z.object({
 });
 
 const AddPickupLocation = () => {
-  const [createPickupLocation, { isLoading }] = useCreatePickupLocationMutation();
+  const [createPickupLocation] = useCreatePickupLocationMutation();
   const router = useRouter();
   const shopname = Cookies.get("shopname") || "techend";
   const token = Cookies.get("access");
@@ -73,6 +73,7 @@ const AddPickupLocation = () => {
         token,
         body: data,
       }).unwrap();
+      console.log("Pickup Location created:", response);
       toast.success("Pickup Location added successfully!");
       reset();
       // Optionally redirect after successful creation
@@ -296,7 +297,6 @@ const AddPickupLocation = () => {
             forceOpen={isAuthDialogOpen}
             onTrigger={() => setIsAuthDialogOpen(false)}
             onClose={() => router.push("/")}
-            showButton={false}
           />
         </>
       )}

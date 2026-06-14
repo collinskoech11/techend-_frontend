@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -9,22 +9,12 @@ import {
   keyframes,
   styled,
   useTheme,
-  Chip,
   alpha,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import dynamic from "next/dynamic";
 
 const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
-
-// --- Animations ---
-
-const float = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-`;
 
 const fadeUp = keyframes`
   0% { opacity: 0; transform: translateY(20px); }
@@ -135,38 +125,19 @@ const GlowButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const GlassButton = styled(Button)(({ theme }) => ({
-  padding: "14px 32px",
-  borderRadius: "50px",
-  fontWeight: 600,
-  fontSize: "1rem",
-  textTransform: "none",
-  color: theme.palette.text.primary,
-  background: alpha(theme.palette.background.paper, 0.5),
-  border: `1px solid ${theme.palette.divider}`,
-  backdropFilter: "blur(10px)",
-  "&:hover": {
-    background: alpha(theme.palette.background.paper, 0.8),
-    borderColor: theme.palette.text.primary,
-  },
-}));
-
-const StyledChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-  color: theme.palette.primary.main,
-  fontWeight: 600,
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-  marginBottom: theme.spacing(3),
-  animation: `${float} 6s ease-in-out infinite`,
-}));
 
 interface HeroProps {
   handleNavigate: () => void;
   handleAuthTrigger: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
+const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
   const theme = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <HeroWrapper>
@@ -174,10 +145,10 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
         <ContentCard>
           
           {/* Badge / Announcement */}
-          <StyledChip 
+          {/* <StyledChip 
             icon={<RocketLaunchIcon fontSize="small" />} 
             label="v2.0 is now live: Start selling faster" 
-          />
+          /> */}
 
           <Typography
             variant="h1"
@@ -190,8 +161,8 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
             }}
           >
             Build your <br />
-            <Suspense fallback={<span>Online Business</span>}>
-              <GradientText>
+            <GradientText>
+              {isMounted ? (
                 <Typewriter
                   options={{
                     strings: [
@@ -205,8 +176,10 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
                     deleteSpeed: 50,
                   }}
                 />
-              </GradientText>
-            </Suspense>
+              ) : (
+                "Dream Store."
+              )}
+            </GradientText>
           </Typography>
 
           <Typography
@@ -237,7 +210,7 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate, handleAuthTrigger }) => {
               onClick={handleNavigate}
               size="large"
             >
-              Start Free Trial
+              Start Selling Now
             </GlowButton>
 {/* 
             <GlassButton 

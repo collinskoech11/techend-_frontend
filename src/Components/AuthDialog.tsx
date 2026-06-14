@@ -15,11 +15,12 @@ import {
 import React, { useEffect, useState } from "react";
 import { useUserLoginMutation, useUserRegistrationMutation } from "@/Api/services";
 import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import { z } from "zod";
-import { Visibility, VisibilityOff, AccountCircleOutlined } from "@mui/icons-material";
-import { GoogleLogin } from '@react-oauth/google';
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
 
 const loginSchema = z.object({
   // username: z.string().min(1, "Username is required"),
@@ -33,7 +34,7 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-function AuthDialog({ onTrigger, forceOpen = false, showButton = true, onClose }) {
+function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
   const theme = useTheme();
   const [open, setOpen] = useState(forceOpen);
   const [tabIndex, setTabIndex] = useState(0);
@@ -49,27 +50,13 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true, onClose }
 
   const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
   const router = useRouter();
+  console.log("loggedInUser:", loggedInUser);
 
-  function GoogleAccessTokenLogin() {
-    // useEffect(() => {
-    //   window.google.accounts.oauth2.initTokenClient({
-    //     client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-    //     scope: 'profile email openid',
-    //     callback: (response) => {
-    //       const accessToken = response.access_token;
+  const [isMounted, setIsMounted] = useState(false);
 
-    //       // Send access token to Django backend
-    //       fetch('http://localhost:8000/auth/google/', {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify({ access_token: accessToken }),
-    //       });
-    //     },
-    //   }).requestAccessToken();
-    // }, []);
-
-    // return null;
-  }
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const username = Cookies.get("username");
@@ -163,11 +150,12 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true, onClose }
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        keepMounted
-      >
+      {isMounted && (
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          keepMounted
+        >
         <DialogContent>
           <Box sx={{ width: "100%", maxWidth: "400px", padding: "20px",background:"transparent", borderRadius: "5px" }}>
             <Tabs value={tabIndex} onChange={handleTabChange} centered>
@@ -302,6 +290,7 @@ function AuthDialog({ onTrigger, forceOpen = false, showButton = true, onClose }
           </Box>
         </DialogContent>
       </Dialog>
+      )}
     </>
   );
 }

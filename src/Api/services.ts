@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
-import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse } from "@/Types";
+import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse, UserSubscription, InitiateMpesaStkPushSubscriptionResponse } from "@/Types";
 
 dotenv.config();
 const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
@@ -38,23 +38,30 @@ export const AuthApi = createApi({
         method: "GET",
       }),
     }),
-    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number; search?: string; on_sale?: boolean; }>({
-      query: ({ company, category, page = 1, search, on_sale }) => {
-        let url = `products/all/?company=${company}`;
+    getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }>({
+      query: ({ company, category, page, page_size, search, on_sale }) => {
+        const params = new URLSearchParams();
+        if (company) {
+          params.append('company', company);
+        }
         if (category) {
-          url += `&category=${category}`;
+          params.append('category', category);
         }
         if (page) {
-          url += `&page=${page}`;
+          params.append('page', page.toString());
+        }
+        if (page_size) {
+          params.append('page_size', page_size.toString());
         }
         if (search) {
-          url += `&search=${search}`;
+          params.append('search', search);
         }
         if (on_sale) {
-          url += '&on_sale=true';
+          params.append('on_sale', 'true');
         }
+        const queryString = params.toString();
         return {
-          url,
+          url: `/products/all/${queryString ? `?${queryString}` : ''}`,
           method: "GET"
         };
       },
@@ -269,6 +276,35 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    createSubscription: builder.mutation<UserSubscription, { plan_id: number; token: string; plan: { name: string; price: string; duration_days: number } }>({
+      query: ({ plan_id, token, plan }) => ({
+        url: `subscriptions/my-subscriptions/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { plan_id, plan },
+      }),
+    }),
+    initiateMpesaStkPushSubscription: builder.mutation<InitiateMpesaStkPushSubscriptionResponse, { phone_number: string; user_subscription_id: number; duration_months: number; token: string }>({
+      query: ({ phone_number, user_subscription_id, duration_months, token }) => ({
+        url: `subscriptions/lipa-na-mpesa/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { phone_number, user_subscription_id, duration_months },
+      }),
+    }),
+    getActiveSubscription: builder.query<UserSubscription, { token: string }>({
+      query: ({ token }) => ({
+        url: `subscriptions/my-subscriptions/active/`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   })
 });
 export const {
@@ -297,7 +333,62 @@ export const {
   useCreatePickupLocationMutation,
   useCreateContactMessageMutation,
   useUpdatePaymentStatusMutation,
+  useCreateSubscriptionMutation,
+  useInitiateMpesaStkPushSubscriptionMutation,
   useAddToCartGuestMutation,
   useGetCartGuestQuery,
   usePlaceOrderGuestMutation,
+  useGetActiveSubscriptionQuery, // New hook
 }: any = AuthApi;
+
+export const getProducts = async (args: { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }) => {
+  const params = new URLSearchParams();
+  if (args.company) {
+    params.append('company', args.company);
+  }
+  if (args.category) {
+    params.append('category', args.category);
+  }
+  if (args.page) {
+    params.append('page', args.page.toString());
+  }
+  if (args.page_size) {
+    params.append('page_size', args.page_size.toString());
+  }
+  if (args.search) {
+    params.append('search', args.search);
+  }
+  if (args.on_sale) {
+    params.append('on_sale', 'true');
+  }
+  const queryString = params.toString();
+  const response = await fetch(`${baseUrl}products/all/${queryString ? `?${queryString}` : ''}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch products');
+  }
+  return response.json();
+};
+
+export const getCompanyBySlug = async (slug: string) => {
+  const response = await fetch(`${baseUrl}companies/slug/${slug}/`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch company by slug');
+  }
+  return response.json();
+};
+
+export const getCompanies = async (args: { page?: number; page_size?: number } = {}) => {
+  const params = new URLSearchParams();
+  if (args.page) {
+    params.append('page', args.page.toString());
+  }
+  if (args.page_size) {
+    params.append('page_size', args.page_size.toString());
+  }
+  const queryString = params.toString();
+  const response = await fetch(`${baseUrl}companies/all/${queryString ? `?${queryString}` : ''}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch companies');
+  }
+  return response.json();
+};

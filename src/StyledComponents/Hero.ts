@@ -1,12 +1,4 @@
-import { Box, Button, Input, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, keyframes, styled } from "@mui/material";
-
-// Define a consistent color palette
-const secondaryColor = "#3f51b5"; // A complementary blue
-const lightGray = "#f0f2f5"; // A softer, more modern light gray for backgrounds
-const mediumGray = "#e0e0e0"; // For borders and subtle dividers
-const darkText = "#212121"; // Very dark gray for main headings and strong text
-const lightText = "#555555"; // Softer dark gray for body text
-
+import { alpha, Box, Button, Card, keyframes, Paper, styled, Tab } from "@mui/material";
 
 const animatedGradient = keyframes`
   0% { background-position: 0% 50%; }
@@ -96,5 +88,73 @@ export const AccentButton = styled(Button)(({ theme }) => ({
   },
   "& .MuiButton-endIcon": {
     marginLeft: theme.spacing(1), // Space for icon
+  }
+}));
+
+
+export const ContentCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  borderRadius: "20px",
+  boxShadow: "0 10px 40px rgba(0,0,0,0.03)",
+  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.paper,
+}));
+
+export const PricingCard = styled(Card)(({ theme }) => ({
+  textAlign: "center",
+  padding: "32px 24px",
+  borderRadius: "24px",
+  border: `1px solid ${theme.palette.divider}`,
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+  position: 'relative',
+  overflow: 'visible',
+  "&:hover": {
+    transform: "translateY(-12px)",
+    boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.08)}`,
+  },
+  "&.featured": {
+    borderColor: theme.palette.primary.main,
+    borderWidth: '2px',
+    backgroundColor: alpha(theme.palette.primary.main, 0.01),
+    "&::before": {
+      content: '"CURRENT PLAN"',
+      position: 'absolute',
+      top: -12,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      padding: '4px 14px',
+      borderRadius: '20px',
+      fontSize: '0.65rem',
+      fontWeight: 900,
+      letterSpacing: '1.2px'
+    }
+  }
+}));
+
+export const StyledTab = styled(Tab)(({ theme }) => ({
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  marginRight: theme.spacing(1),
+  minHeight: '48px',
+  borderRadius: '12px',
+  justifyContent: 'flex-start',
+  padding: '12px 20px',
+  color: theme.palette.text.secondary,
+  transition: 'all 0.2s ease',
+  '&.Mui-selected': {
+    color: theme.palette.primary.main,
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    '& .MuiSvgIcon-root': {
+      color: theme.palette.primary.main
+    }
+  },
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
   }
 }));

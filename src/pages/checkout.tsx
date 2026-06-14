@@ -1,9 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+"use client";
+
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
-import { PickupLocation, CheckoutResponse, DeliveryLocation, GuestOrderResponse } from "@/Types";
+import { PickupLocation, DeliveryLocation, GuestOrderResponse } from "@/Types";
 import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,11 +61,6 @@ const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
-  address: z.string().min(5, "Address is required"),
-  city: z.string().min(2, "City is required"),
-  state: z.string().min(2, "State is required"),
-  postal_code: z.string().min(4, "Postal code is required"),
-  country: z.string().min(2, "Country is required"),
   payment_method: z.string().min(2, "Payment method is required"),
   pickup_location: z.number().optional().nullable(),
   delivery_location: z.number().optional().nullable(),
@@ -78,8 +75,6 @@ const AuthenticatedCheckout = () => {
   const theme = useTheme();
   const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
   const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
-  const [shippingCost, setShippingCost] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [mapOpen, setMapOpen] = useState(false);
   const [selectedLocationForMap, setSelectedLocationForMap] = useState<PickupLocation | null>(null);
   const [deliveryOrPickup, setDeliveryOrPickup] = useState<"pickup" | "delivery">("pickup");
@@ -92,8 +87,16 @@ const AuthenticatedCheckout = () => {
   const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+  console.log("pollcount in Checkout:", pollCount);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
+
+  useEffect(() => {
+    const cookieShop = Cookies.get("shopname");
+    if (cookieShop) {
+      setShopName(cookieShop);
+    }
+  }, []);
 
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
@@ -114,22 +117,19 @@ const AuthenticatedCheckout = () => {
 
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
-  const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
-
-  useEffect(() => {
-    if (allDeliveryLocations) {
-      const filtered = allDeliveryLocations.filter(
-        (location) =>
-          location.route.toLowerCase().includes(deliverySearchQuery.toLowerCase()) ||
-          location.location_name.toLowerCase().includes(deliverySearchQuery.toLowerCase())
-      );
-      const startIndex = (deliveryPage - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      setFilteredDeliveryLocations(filtered.slice(startIndex, endIndex));
-    }
+  const filteredDeliveryLocations = useMemo(() => {
+    if (!allDeliveryLocations) return [];
+    const filtered = allDeliveryLocations.filter(
+      (location) =>
+        location.route.toLowerCase().includes(deliverySearchQuery.toLowerCase()) ||
+        location.location_name.toLowerCase().includes(deliverySearchQuery.toLowerCase())
+    );
+    const startIndex = (deliveryPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filtered.slice(startIndex, endIndex);
   }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch, trigger } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
+  const { register, handleSubmit, formState: { errors }, setValue, trigger } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
 
   const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
@@ -194,27 +194,29 @@ const AuthenticatedCheckout = () => {
     };
   }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, handleNext]); // Added router, shopname to dependencies
 
-  useEffect(() => {
-    if (cart_data) {
-      let calculatedShippingCost = 0;
-      if (deliveryOrPickup === "pickup" && selectedPickupLocation && pickupLocationsData) {
-        const selectedLocation = pickupLocationsData.find(loc => loc.id === selectedPickupLocation);
-        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
-      } else if (deliveryOrPickup === "delivery" && selectedDeliveryLocation && allDeliveryLocations) {
-        const selectedLocation = allDeliveryLocations.find(loc => loc.id === selectedDeliveryLocation);
-        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
-      }
-      setShippingCost(calculatedShippingCost);
-
-      let itemsSubtotal = 0;
-      cart_data.items.forEach((item: any) => {
-        itemsSubtotal += item.product.on_sale
-          ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
-          : parseFloat(item.product.price) * parseInt(item.quantity);
-      });
-      setTotalAmount(itemsSubtotal + calculatedShippingCost);
+  const shippingCost = useMemo(() => {
+    if (!cart_data) return 0;
+    let calculatedShippingCost = 0;
+    if (deliveryOrPickup === "pickup" && selectedPickupLocation && pickupLocationsData) {
+      const selectedLocation = pickupLocationsData.find(loc => loc.id === selectedPickupLocation);
+      if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
+    } else if (deliveryOrPickup === "delivery" && selectedDeliveryLocation && allDeliveryLocations) {
+      const selectedLocation = allDeliveryLocations.find(loc => loc.id === selectedDeliveryLocation);
+      if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
     }
+    return calculatedShippingCost;
   }, [cart_data, selectedPickupLocation, pickupLocationsData, selectedDeliveryLocation, allDeliveryLocations, deliveryOrPickup]);
+
+  const totalAmount = useMemo(() => {
+    if (!cart_data) return 0;
+    let itemsSubtotal = 0;
+    cart_data.items.forEach((item: any) => {
+      itemsSubtotal += item.product.on_sale
+        ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
+        : parseFloat(item.product.price) * parseInt(item.quantity);
+    });
+    return itemsSubtotal + shippingCost;
+  }, [cart_data, shippingCost]);
 
   const onSubmit = async (formData: CheckoutFormData) => {
     try {
@@ -236,8 +238,6 @@ const AuthenticatedCheckout = () => {
         toast.success("STK Push sent to your phone. Please complete the payment.");
       } else {
         toast.success("Order Placed Successfully");
-        setShippingCost(parseFloat(response.delivery_fee));
-        setTotalAmount(parseFloat(response.total_amount));
         handleNext(); // Proceed to review order step for other payment methods
       }
     } catch (error: any) {
@@ -412,11 +412,11 @@ const AuthenticatedCheckout = () => {
                   { label: "First Name", name: "firstName" },
                   { label: "Last Name", name: "lastName" },
                   { label: "Phone Number", name: "phoneNumber" },
-                  { label: "Address", name: "address" },
-                  { label: "City", name: "city" },
-                  { label: "State", name: "state" },
-                  { label: "Postal Code", name: "postal_code" },
-                  { label: "Country", name: "country" },
+                  // { label: "Address", name: "address" },
+                  // { label: "City", name: "city" },
+                  // { label: "State", name: "state" },
+                  // { label: "Postal Code", name: "postal_code" },
+                  // { label: "Country", name: "country" },
                 ].map((field, index) => (
                   <Grid item xs={12} md={6} key={index}>
                     <TextField
@@ -434,7 +434,7 @@ const AuthenticatedCheckout = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <Button onClick={handleBack}>Back</Button>
               <Button variant="contained" onClick={async () => {
-                const billingFields: (keyof CheckoutFormData)[] = ["firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"];
+                const billingFields: (keyof CheckoutFormData)[] = ["firstName", "lastName", "phoneNumber"];
                 const isValid = await trigger(billingFields);
                 if (isValid) {
                   handleNext();
@@ -446,10 +446,10 @@ const AuthenticatedCheckout = () => {
           </>
         );
       default:
-        const handleConfirmPayment = () => {
-          toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
-          router.push(`/shop/${shopname}`);
-        };
+        // const handleConfirmPayment = () => {
+        //   toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
+        //   router.push(`/shop/${shopname}`);
+        // };
 
         return (
           <>
@@ -660,6 +660,7 @@ const GuestCheckout = () => {
   const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+  console.log(pollCount)
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
@@ -668,11 +669,11 @@ const GuestCheckout = () => {
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().min(2, "Last name is required"),
     phoneNumber: z.string().min(7, "Phone number is required"),
-    address: z.string().min(5, "Address is required"),
-    city: z.string().min(2, "City is required"),
-    state: z.string().min(2, "State is required"),
-    postal_code: z.string().min(4, "Postal code is required"),
-    country: z.string().min(2, "Country is required"),
+    // address: z.string().min(5, "Address is required"),
+    // city: z.string().min(2, "City is required"),
+    // state: z.string().min(2, "State is required"),
+    // postal_code: z.string().min(4, "Postal code is required"),
+    // country: z.string().min(2, "Country is required"),
     payment_method: z.string().min(2, "Payment method is required"),
     pickup_location: z.number().optional().nullable(),
     delivery_location: z.number().optional().nullable(),
@@ -706,12 +707,12 @@ const GuestCheckout = () => {
 
   const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, getValues, watch } = useForm<GuestCheckoutFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
     defaultValues: { payment_method: "card" },
   });
 
-  const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"]);
+  const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber"]);
 
   // Polling for M-Pesa payment status for Guest Checkout
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
@@ -972,63 +973,13 @@ const GuestCheckout = () => {
                     helperText={errors.phoneNumber?.message}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Address"
-                    variant="outlined"
-                    {...register("address")}
-                    error={!!errors.address}
-                    helperText={errors.address?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="City"
-                    variant="outlined"
-                    {...register("city")}
-                    error={!!errors.city}
-                    helperText={errors.city?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="State"
-                    variant="outlined"
-                    {...register("state")}
-                    error={!!errors.state}
-                    helperText={errors.state?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Postal Code"
-                    variant="outlined"
-                    {...register("postal_code")}
-                    error={!!errors.postal_code}
-                    helperText={errors.postal_code?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Country"
-                    variant="outlined"
-                    {...register("country")}
-                    error={!!errors.country}
-                    helperText={errors.country?.message}
-                  />
-                </Grid>
               </Grid>
             </Paper>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
               <Button variant="contained" onClick={async () => {
-                const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber", "address", "city", "state", "postal_code", "country"]);
+                const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
                 if (isValid) handleNext();
-              }} disabled={yourDetailsFields.some(field => !field) || !!errors.email || !!errors.firstName || !!errors.lastName || !!errors.phoneNumber || !!errors.address || !!errors.city || !!errors.state || !!errors.postal_code || !!errors.country}>
+              }} disabled={yourDetailsFields.some(field => !field) || !!errors.email || !!errors.firstName || !!errors.lastName || !!errors.phoneNumber }>
                 Next
               </Button>
             </Box>
@@ -1390,8 +1341,13 @@ const GuestCheckout = () => {
 function Checkout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const theme = useTheme();
-  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-
+  const [shopname, setShopName] = useState("techend");
+  useEffect(() => {
+  const cookieShop = Cookies.get("shopname");
+  if (cookieShop) {
+    setShopName(cookieShop);
+  }
+}, []);
   useEffect(() => {
     const token = Cookies.get("access");
     if (token) {

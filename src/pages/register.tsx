@@ -1,12 +1,12 @@
 import { Box, CircularProgress, Typography, IconButton, InputAdornment, TextField } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserRegistrationMutation } from "@/Api/services";
 import Cookies from "js-cookie";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { z } from "zod";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 // Zod schema for form validation
 const registerSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -14,11 +14,10 @@ const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useRouter } from "next/router";
 
 function Register() {
-  const [register, { isLoading, error }] = useUserRegistrationMutation();
+  const [register, { isLoading }] = useUserRegistrationMutation();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -26,8 +25,9 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-    const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-
+const [shopname, setShopName] = useState(() => Cookies.get("shopname") || "techend");  useEffect(() => {
+    setShopName(Cookies.get("shopname") || "techend");
+  }, []);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -67,114 +67,112 @@ function Register() {
   };
 
   return (
-    <GoogleOAuthProvider clientId={'233747387248-23lb8510miqkj|2nd0ajc3885ap0023c.apps.googleusercontent.com'}>
-      <Box 
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "calc(100dvh - 64px)",
+        pt: 8,
+      }}
+    >
+      <Box
         sx={{
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
-          minHeight: "calc(100dvh - 64px)", 
-          pt: 8, 
+          width: "100%",
+          maxWidth: "400px",
+          height: "auto",
+          margin: "auto",
+          padding: "20px",
+          background: "#fff",
+          borderRadius: "5px",
+          boxShadow: "0 0 10px rgb(0,0,0,0.1)",
         }}
       >
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: "400px",
-            height: "auto",
-            margin: "auto",
-            padding: "20px",
-            background: "#fff",
-            borderRadius: "5px",
-            boxShadow: "0 0 10px rgb(0,0,0,0.1)",
-          }}
-        >
-          <Box sx={{ textAlign: "center" }}>
-            <h1
-              style={{
-                color: "#000",
-                fontSize: "24px",
-                fontWeight: "600",
-                fontFamily: "sans-serif",
-              }}
+        <Box sx={{ textAlign: "center" }}>
+          <h1
+            style={{
+              color: "#000",
+              fontSize: "24px",
+              fontWeight: "600",
+              fontFamily: "sans-serif",
+            }}
+          >
+            Register
+          </h1>
+          <TextField
+            fullWidth
+            name="username"
+            label="Username"
+            value={formData.username}
+            onChange={handleChange}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            fullWidth
+            name="email"
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            fullWidth
+            name="password"
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleChange}
+            margin="normal"
+            variant="outlined"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <button
+            style={{
+              width: "100%",
+              height: "40px",
+              padding: "5px",
+              marginTop: "20px",
+              border: "1px solid rgb(0,0,0,0.2)",
+              borderRadius: "5px",
+              background: "#BE1E2D",
+              color: "#fff",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+            onClick={registerUser}
+          >
+            {isLoading ? (
+              <CircularProgress style={{ color: "#fff" }} size={24} />
+            ) : (
+              "Register"
+            )}
+          </button>
+          <p style={{ marginTop: "20px" }}>
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              style={{ color: "#BE1E2D", textDecoration: "none" }}
             >
-              Register
-            </h1>
-            <TextField
-              fullWidth
-              name="username"
-              label="Username"
-              value={formData.username}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              fullWidth
-              name="email"
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <button
-              style={{
-                width: "100%",
-                height: "40px",
-                padding: "5px",
-                marginTop: "20px",
-                border: "1px solid rgb(0,0,0,0.2)",
-                borderRadius: "5px",
-                background: "#BE1E2D",
-                color: "#fff",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
-              onClick={registerUser}
-            >
-              {isLoading ? (
-                <CircularProgress style={{ color: "#fff" }} size={24} />
-              ) : (
-                "Register"
-              )}
-            </button>
-            <p style={{ marginTop: "20px" }}>
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                style={{ color: "#BE1E2D", textDecoration: "none" }}
-              >
-                Login
-              </Link>
-            </p>
-          </Box>
+              Login
+            </Link>
+          </p>
         </Box>
       </Box>
-    </GoogleOAuthProvider>
+    </Box>
   );
 }
 

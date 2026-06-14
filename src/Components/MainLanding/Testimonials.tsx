@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
-import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
-import { Fade } from "react-awesome-reveal";
-import Carousel from 'react-material-ui-carousel';
+import React, { useState, useEffect } from "react";
+import { Box, Typography, useTheme } from "@mui/material";
+import dynamic from "next/dynamic"; // New import
 import TestimonialCard from "@/Components/TestimonialCard";
+
+const Carousel = dynamic(() => import('react-material-ui-carousel'), { ssr: false });
 
 const darkText = "#212121";
 const lightGray = "#f0f2f5";
@@ -16,40 +17,47 @@ interface TestimonialsProps {
 
 const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) => {
   const theme = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
-      <Fade cascade triggerOnce>
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
           What Our <span style={{ color: theme.palette.primary.main }}>Clients</span> Say
         </Typography>
-        <Carousel
-          autoPlay={true}
-          animation="slide"
-          indicators={true}
-          navButtonsAlwaysVisible={false}
-          cycleNavigation={true}
-          interval={6000}
-          sx={{
-            width: '100%',
-            maxWidth: '1200px',
-            mx: 'auto',
-            '.MuiIconButton-root': {
-              color: theme.palette.primary.main,
-            },
-            '.MuiButtonBase-root.MuiIconButton-root': {
-              color: theme.palette.primary.main,
-            },
-            '.MuiSvgIcon-root': {
-              color: theme.palette.primary.main,
-            },
-            '.MuiCarousel-indicator': {
-              color: theme.palette.primary.main,
-            },
-            '.MuiCarousel-indicator.Mui-active': {
-              color: theme.palette.primary.dark,
-            },
-          }}
-        >
+        {isMounted ? (
+          <Carousel
+            autoPlay={true}
+            animation="slide"
+            indicators={true}
+            navButtonsAlwaysVisible={false}
+            cycleNavigation={true}
+            interval={6000}
+            sx={{
+              width: '100%',
+              maxWidth: '1200px',
+              minHeight: '350px',
+              mx: 'auto',
+              '.MuiIconButton-root': {
+                color: theme.palette.primary.main,
+              },
+              '.MuiButtonBase-root.MuiIconButton-root': {
+                color: theme.palette.primary.main,
+              },
+              '.MuiSvgIcon-root': {
+                color: theme.palette.primary.main,
+              },
+              '.MuiCarousel-indicator': {
+                color: theme.palette.primary.main,
+              },
+              '.MuiCarousel-indicator.Mui-active': {
+                color: theme.palette.primary.dark,
+              },
+            }}
+          >
           {isMobile
             ? companiesData?.results
               ?.filter((company: any) => company.testimonial && company.testimonial.trim() !== '')
@@ -83,8 +91,10 @@ const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) 
                   ))}
                 </Box>
               ))}
-        </Carousel>
-      </Fade>
+          </Carousel>
+        ) : (
+          <div>Loading Testimonials...</div>
+        )}
     </Box>
   );
 };

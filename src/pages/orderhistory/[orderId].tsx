@@ -15,18 +15,24 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useGetCheckoutHistoryQuery, useUpdatePaymentStatusMutation, useGetCompanyBySlugQuery, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
 import { CheckoutResponse, PickupLocation } from "@/Types";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import OrderDetailsCard from "@/Components/OrderDetailsCard";
 
 function OrderDetailsPage() {
   const router = useRouter();
   const { orderId } = router.query;
+  // Prevent SSR / initial render crash
+  if (!router.isReady || !orderId) {
+    return <Typography>Loading order...</Typography>;
+  }
   const theme = useTheme();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
-
+  useEffect(() => {
+    const cookieShop = Cookies.get("shopname") || "techend";
+    setShopName(cookieShop);
+  }, []); // Ensure shopname is set on component mount and when cookies change 
   const { data: checkoutHistory, isLoading: historyLoading, refetch } = useGetCheckoutHistoryQuery({
     token: Cookies.get("access"),
   });
@@ -42,6 +48,7 @@ function OrderDetailsPage() {
   const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
   const [pollCount, setPollCount] = useState(0);
+  console.log("Order ID from query:", pollCount);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
@@ -340,5 +347,5 @@ function OrderDetailsPage() {
     </>
   );
 }
-
+export const dynamic = "force-dynamic";
 export default OrderDetailsPage;

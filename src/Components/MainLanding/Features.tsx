@@ -10,7 +10,6 @@ import {
   alpha, 
   styled 
 } from "@mui/material";
-import { Fade } from "react-awesome-reveal";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
 import RocketLaunchTwoToneIcon from "@mui/icons-material/RocketLaunchTwoTone";
@@ -114,7 +113,6 @@ const Features = () => {
         
         {/* Section Header */}
         <Box sx={{ mb: 8, textAlign: "center", maxWidth: "700px", mx: "auto" }}>
-          <Fade direction="up" triggerOnce>
             <Typography 
               variant="overline" 
               sx={{ 
@@ -147,14 +145,12 @@ const Features = () => {
             >
               We handle the heavy lifting of e-commerce technology so you can focus on your products and customers.
             </Typography>
-          </Fade>
         </Box>
 
         {/* Features Grid */}
         <Grid container spacing={4}>
           {featuresData.map((feature, index) => (
             <Grid item xs={12} md={4} key={index}>
-              <Fade direction="up" delay={index * 150} triggerOnce>
                 <FeatureCard>
                   <IconBox className="icon-box">
                     {feature.icon}
@@ -179,7 +175,6 @@ const Features = () => {
                     {feature.description}
                   </Typography>
                 </FeatureCard>
-              </Fade>
             </Grid>
           ))}
         </Grid>

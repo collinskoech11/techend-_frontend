@@ -1,42 +1,42 @@
 export interface CompanyData {
-        name: string;
-        description: string;
-        logo_image: File | null;
-        website: string;
-        contact_email: string;
-        contact_phone: string;
-        id_number: string;
-        id_front_image: File | null;
-        id_back_image: File | null;
-        business_registration_number: string;
-        business_permit_image: File | null;
-        tax_pin_number: string;
-        tax_certificate_image: File | null;
-        utility_bill_image: File | null;
-        lease_agreement_image: File | null;
-        postal_address: string;
-        physical_address: string;
-        country: string;
-        city: string;
-        state: string;
-        postal_code: string;
-        primary_color: string;
-        secondary_color: string;
-        accent_color: string;
-        acceptTerms: boolean;
+  name: string;
+  description: string;
+  logo_image: File | null;
+  website: string;
+  contact_email: string;
+  contact_phone: string;
+  id_number: string;
+  id_front_image: File | null;
+  id_back_image: File | null;
+  business_registration_number: string;
+  business_permit_image: File | null;
+  tax_pin_number: string;
+  tax_certificate_image: File | null;
+  utility_bill_image: File | null;
+  lease_agreement_image: File | null;
+  postal_address: string;
+  physical_address: string;
+  country: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  acceptTerms: boolean;
 }
 
 export interface YourChildProps {
-    token: string | undefined;
-    nextStep: () => void;
-    prevStep: () => void;
-    steps: string[];
-    activeStep: number;
-    companyData: CompanyData;
-    setCompanyData: React.Dispatch<React.SetStateAction<CompanyData>>;
-    companyExists?: boolean | undefined;
-    refetchCompany: () => void;
-    triggerRerender: () => void;
+  token: string | undefined;
+  nextStep: () => void;
+  prevStep: () => void;
+  steps: string[];
+  activeStep: number;
+  companyData: CompanyData;
+  setCompanyData: React.Dispatch<React.SetStateAction<CompanyData>>;
+  companyExists?: boolean | undefined;
+  refetchCompany: () => void;
+  triggerRerender: () => void;
 };
 
 export interface Paginated<T> {
@@ -167,4 +167,45 @@ export interface GuestPlaceOrderArgs extends CheckoutFormData {
 export interface LipaNaMpesaResponse {
   message: string;
   // Add any other fields if the backend returns them, e.g., transaction_id
+}
+
+export interface SubscriptionPlan {
+  id: number;
+  name: string;
+  price: string;
+  duration_days: number;
+}
+
+export interface UserSubscription {
+  id: number;
+  plan: SubscriptionPlan;
+  user: number;
+  start_date: string;
+  end_date: string | null;
+  is_active: boolean;
+  payment_status: "pending" | "paid" | "failed";
+  mpesa_checkout_request_id: string | null;
+  mpesa_receipt_code: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSubscriptionRequest {
+  plan_id: number;
+  plan: {
+    name: string;
+    price: string;
+    duration_days: number;
+  };
+}
+
+export interface InitiateMpesaStkPushSubscriptionRequest {
+  phone_number: string;
+  user_subscription_id: number;
+  duration_months: number;
+}
+
+export interface InitiateMpesaStkPushSubscriptionResponse {
+  detail: string;
+  checkout_request_id: string;
 }

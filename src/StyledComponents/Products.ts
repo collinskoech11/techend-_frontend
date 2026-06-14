@@ -1,4 +1,4 @@
-import { styled, Box, Grid, Card } from "@mui/material";
+import { styled, Box, Grid, Card, Avatar } from "@mui/material";
 import Image, { ImageProps } from "next/image";
 
 export const MainProductsContainer = styled(Box)({
@@ -76,59 +76,66 @@ export const IconWrapper = styled(Box)({
 
 export const ProductItemStyled = styled(Card)(({ theme }) => ({
   width: "100%",
+  height: 480, // Balanced fixed height to prevent content overflow
   margin: "auto",
-  // maxWidth: "350px", // Set a max-width for better responsiveness and grid alignment
-  borderRadius: "12px", // Softer rounded corners
-  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.08)", // Softer initial shadow
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  borderRadius: "16px", // Softer, more modern corners
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06)", // Soft, premium shadow instead of harsh dark lines
+  transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   display: "flex",
   flexDirection: "column",
-  overflow: "hidden", // Ensures image border-radius applies
-  position: "relative", // For image overlay
+  justifyContent: "space-between", // Ensures info and actions sit perfectly at the bottom
+  overflow: "hidden",
+  position: "relative",
+  border: "1px solid rgba(0, 0, 0, 0.04)",
+
   "&:hover": {
-    transform: "translateY(-5px)", // Slight lift on hover
-    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)", // Enhanced shadow on hover
+    transform: "translateY(-6px)",
+    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.12)",
   },
-  paddingBottom: theme.spacing(2), // Padding at the bottom for content
 }));
 
-export const ProductImageWrapper = styled(Box)(({ theme }) => ({
+export const ProductImageWrapper = styled(Box)({
   width: "100%",
-  height: "220px", // Increased height for better product visibility
+  height: "260px", // Explicit height allocation for the image zone
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   overflow: "hidden",
-  position: "relative", // For hover overlay
-  borderTopLeftRadius: "12px", // Match card border-radius
-  borderTopRightRadius: "12px",
-}));
+  position: "relative",
+  backgroundColor: "#f9f9f9", // Light fallback background for transparent products
+});
 
-export const ProductImage = styled(Image)<ImageProps>(({
+export const ProductImage = styled(Image)<ImageProps>({
   width: "100%",
   height: "100%",
-  objectFit: "cover", // Ensure image covers the area
-  transition: "transform 0.3s ease",
-  "&:hover": {
-    transform: "scale(1.05)", // Gentle zoom on image hover
+  objectFit: "contain", // Prevents vertical stretching or awkward clipping
+  padding: "16px", // Generous breathing room for product shots
+  transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+  
+  // Note: Target the parent ProductItemStyled hover state to trigger the scale effect seamlessly
+  [`${ProductItemStyled}:hover &`]: {
+    transform: "scale(1.06)",
   },
-}));
+});
 
 export const ProductInfoContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2), // Consistent padding for text content
+  padding: theme.spacing(2),
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-start", // Align text to left
+  flexGrow: 1, // Dynamically fills the remaining space between the image and actions
+  justifyContent: "flex-start",
 }));
 
 export const RatingContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: "2px", // Closer stars
+  gap: "4px", 
   marginBottom: theme.spacing(1),
+  
   "& .MuiSvgIcon-root": {
-    fontSize: "1rem", // Slightly larger stars
-    color: "#FFD700", // Gold color for stars
+    fontSize: "1.1rem",
+    color: "#FFB400", // Industry standard warm gold hue
   },
 }));
 
@@ -136,13 +143,89 @@ export const IconActionsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-start",
-  gap: theme.spacing(1),
-  marginTop: theme.spacing(1),
+  gap: theme.spacing(1.5),
+  padding: theme.spacing(0, 2, 2, 2), // Keeps actions firmly anchored to the card footer
   width: "100%",
+
   "& .MuiIconButton-root": {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    color: theme.palette.text.secondary,
+    transition: "all 0.2s ease",
+    
     "&:hover": {
-      backgroundColor: "#e0e0e0",
+      backgroundColor: theme.palette.text.primary,
+      color: theme.palette.background.paper,
+      transform: "scale(1.05)",
     },
   },
 }));
+
+
+export const HeroSection = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'bannerImage',
+})<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
+  position: 'relative',
+  height: '40vh',
+  minHeight: 500,
+  maxHeight: 600,
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#fff',
+  marginTop: '-80px',
+  textAlign: 'center',
+  overflow: 'hidden',
+
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: `url(${bannerImage})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',   // default
+    zIndex: 1,
+  },
+
+  [theme.breakpoints.up('md')]: {
+    '&::before': {
+      backgroundPosition: 'center center',
+    },
+  },
+
+  '& > *': {
+    position: 'relative',
+    zIndex: 2,
+  },
+}));
+
+export const ShopHeader = styled(Box)(({ theme }) => ({
+  // display: 'flex',
+  // flexDirection: 'column',
+  // alignItems: 'left',
+  // textAlign: 'left',
+  // marginBottom: theme.spacing(2),
+  marginTop: theme.spacing(-8),
+}));
+
+export const ShopLogo = styled(Avatar)(({ theme }) => ({
+  width: 120,
+  height: 120,
+  borderRadius: theme.shape.borderRadius * 2,
+  border: `4px solid ${theme.palette.background.paper}`,
+  marginBottom: theme.spacing(1),
+  boxShadow: '0 0 10px rgba(0,0,0,0.9)',
+}));
+
+// interface ShopProps {
+//   companyData: any;
+//   productsData: any;
+//   shopname: string;
+//   error?: string;
+
+// <ProductCard product={p} triggerCartRefetch={() => { }} />
+
+            // <Button variant="contained" color="primary" disabled={productsLoading} onClick={() => setPage(page + 1)}>
+            //   {productsLoading ? <CircularProgress size={20} /> : 'Load More'}
+            // </Button>

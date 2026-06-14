@@ -1,6 +1,5 @@
 import { YourChildProps } from "@/Types";
-import { PhotoCamera } from "@mui/icons-material";
-import Payment from "@/Components/Company/Payment"
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import {
     TextField,
     Button,
@@ -8,7 +7,6 @@ import {
     CircularProgress,
     useTheme
 } from "@mui/material";
-import { useState } from "react";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import { alpha } from "@mui/material/styles";
 
@@ -17,7 +15,7 @@ interface BasicInfoProps extends YourChildProps {
     setCompanyData: (data: any) => void;
 }
 
-const KYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: BasicInfoProps) => {
+const KYC = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: BasicInfoProps) => {
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
     const theme = useTheme();
 

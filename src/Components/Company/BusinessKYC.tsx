@@ -1,11 +1,11 @@
 import { YourChildProps } from "@/Types";
-import { PhotoCamera } from "@mui/icons-material";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { TextField, Button, Box, CircularProgress, useTheme } from "@mui/material";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import toast from "react-hot-toast";
 import { alpha } from "@mui/material/styles";
 
-const BussinessKYC = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
+const BussinessKYC = ({ nextStep, prevStep, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
     
     const [updateCompany, { isLoading }] = useUpdateCompanyMutation();
     const theme = useTheme();

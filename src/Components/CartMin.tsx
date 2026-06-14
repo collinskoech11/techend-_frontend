@@ -1,37 +1,42 @@
 "use client";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Menu, MenuItem, IconButton, Typography, Badge, Divider } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/router";
+import { alpha, useTheme } from "@mui/material";
 
-const CartMenu = forwardRef((props: any, ref) => {
-  CartMenu.displayName = "CartMenu";
+const CartMenuComponent = forwardRef((props: any, ref) => {
+  console.log("CartMenuComponent rendered", props);
+  const theme = useTheme();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const router = useRouter();
 
   const { data: cart_data, isLoading, refetch: cart_refetch } = useCart();
 
-  // ✅ Log only when cart_data is defined and loading is complete
-  useEffect(() => {
-    if (!isLoading && cart_data) {
-      // console.log(cart_data, "****** from context");
-    }
-  }, [cart_data, isLoading]);
-
   const CartItems = cart_data?.items || [];
-  const itemCount = CartItems.reduce((total: number, item: any) => total + parseInt(item.quantity), 0);
+  const itemCount = CartItems.reduce((total, item) => total + Number(item.quantity), 0);
 
+  // Expose refetch via ref
   useImperativeHandle(ref, () => ({
-    cart_refetch() {
-      cart_refetch();
+    cart_refetch: () => {
+      cart_refetch?.();
     },
   }));
 
   return (
     <>
-      <IconButton color="inherit" onClick={(e) => setAnchorEl(e.currentTarget as HTMLElement)}>
+      <IconButton
+        sx={{
+          p: 0,
+          color: theme.palette.primary.main,
+          "&:hover": {
+            backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          },
+        }}
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+      >
         <Badge badgeContent={itemCount} color="success">
           <ShoppingCartOutlinedIcon />
         </Badge>
@@ -86,4 +91,6 @@ const CartMenu = forwardRef((props: any, ref) => {
   );
 });
 
-export default CartMenu;
+CartMenuComponent.displayName = "CartMenu";
+
+export const CartMenu = React.memo(CartMenuComponent);

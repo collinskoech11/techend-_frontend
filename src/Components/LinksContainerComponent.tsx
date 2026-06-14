@@ -14,30 +14,69 @@ import {
   ListItemIcon,
   Tooltip,
   Badge,
-  CircularProgress,
   Avatar, // Keeping Avatar for potential future use or custom user display
+  styled,
 } from "@mui/material";
+import { keyframes } from '@emotion/react';
 import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close"; // Keeping CloseIcon for mobile menu
-import { PersonOutline, HistoryOutlined, NotificationsNoneOutlined, LogoutOutlined, AccountCircleOutlined, SettingsOutlined } from "@mui/icons-material"; // Modernized icons
+import PersonOutline from "@mui/icons-material/PersonOutline";
+import HistoryOutlined from "@mui/icons-material/HistoryOutlined";
+import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
+import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; // Modernized Shop icon
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined"; // Modernized Home icon
 import StoreOutlinedIcon from '@mui/icons-material/StoreOutlined'; // Modernized Mall icon
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'; // Modernized Cart icon
-import Image from "next/image";
 import Cookies from "js-cookie";
 const AuthDialog = lazy(() => import("./AuthDialog"));
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import { alpha } from '@mui/material/styles'; // For better alpha color manipulation
-import CartMenu from "./CartMin";
+import { CartMenu } from "./CartMin";
+const DEFAULT_BRAND_URLS = [
+  "/shops",
+  "/payment",
+  "/",
+  "/about",
+  "/contact",
+  "/company-onboarding",
+  "/profile",
+  "/login",
+];
+const bounce = keyframes`
+  0%, 80%, 100% { transform: scale(0); } 
+  40% { transform: scale(1); }
+`;
 
+const BouncingEllipsis = styled('span')(({ theme }) => ({
+  display: 'inline-block',
+  width: '24px',
+  textAlign: 'left',
+  '& > span': {
+    display: 'inline-block',
+    width: '6px',
+    height: '6px',
+    margin: '0 2px',
+    backgroundColor: theme.palette.common.white,
+    borderRadius: '50%',
+    animation: `${bounce} 1.4s infinite ease-in-out both`,
+  },
+  '& > span:nth-of-type(1)': { animationDelay: '0s' },
+  '& > span:nth-of-type(2)': { animationDelay: '0.2s' },
+  '& > span:nth-of-type(3)': { animationDelay: '0.4s' },
+}));
 // A modern, functional Navbar component
 const LinksContainerComponent = forwardRef((props, ref) => {
-  LinksContainerComponent.displayName = "LinksContainerComponent";
+  console.log("LinksContainer rendered", props);
   const router = useRouter();
   const theme = useTheme();
-
+  const cookieShop = Cookies.get("shopname");
+  
+  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
+  const displayShopName = isDefaultBrandPage
+    ? "SokoJunction"
+    : cookieShop || "SokoJunction";
   const [anchorEl, setAnchorEl] = useState(null); // Desktop user menu
   const open = Boolean(anchorEl);
 
@@ -47,7 +86,30 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   const [username, setUsername] = useState<any>(null);
   const [user, setUser] = useState(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "Sokojunction");
-  const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(shopname); // Added isLoading
+
+  const { data: companyData, isLoading: companyLoading } =
+    useGetCompanyBySlugQuery(displayShopName, {
+      skip: isDefaultBrandPage || !cookieShop,
+    });
+  const [displayedBrand, setDisplayedBrand] = useState(
+    !isDefaultBrandPage && companyData?.name
+      ? companyData.name
+      : displayShopName || "SokoJunction"
+  );
+
+  const [isUpdatingBrand, setIsUpdatingBrand] = useState(companyLoading);
+useEffect(() => {
+  setIsUpdatingBrand(companyLoading);
+
+  if (!companyLoading) {
+    const newBrand =
+      !isDefaultBrandPage && companyData?.name
+        ? companyData.name
+        : displayShopName || "SokoJunction";
+
+    setDisplayedBrand((prev) => (prev !== newBrand ? newBrand : prev));
+  }
+}, [companyLoading, companyData, isDefaultBrandPage, displayShopName]);
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -105,6 +167,28 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   useEffect(() => {
     if (user) setUsername(user);
   }, [user]);
+
+  // keep shop in sync with cookies on every navigation
+  useEffect(() => {
+    const syncShopFromCookies = () => {
+      const cookieShop = Cookies.get("shopname") || "Sokojunction";
+      setShopName(cookieShop);
+
+      const cookieUser = Cookies.get("username");
+      setUser(cookieUser);
+      setUsername(cookieUser);
+    };
+
+    // run once on mount
+    syncShopFromCookies();
+
+    // run after every route change
+    router.events.on("routeChangeComplete", syncShopFromCookies);
+
+    return () => {
+      router.events.off("routeChangeComplete", syncShopFromCookies);
+    };
+  }, []);
 
   // Unified menu item styling for better consistency
   const menuSx = {
@@ -179,10 +263,6 @@ const LinksContainerComponent = forwardRef((props, ref) => {
             <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
             Profile
           </MenuItem>
-          <MenuItem onClick={() => handleMobileMenuItemClick("/settings")}>
-            <ListItemIcon><SettingsOutlined fontSize="small" /></ListItemIcon>
-            Settings
-          </MenuItem>
           <MenuItem
             onClick={handleLogout}
             sx={{ color: theme.palette.error.main, fontWeight: 'medium' }}
@@ -229,41 +309,33 @@ const LinksContainerComponent = forwardRef((props, ref) => {
         }}
       >
         {/* Logo/Title Section */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {router.pathname.startsWith('/shop/') && companyData?.logo ? (
-            <Box
-              sx={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 1 }}
-              onClick={() => router.push(`/`)}
-            >
-              <Image
-                src={`https://res.cloudinary.com/dqokryv6u/${companyData?.logo_image}` || 'https://res.cloudinary.com/dqokryv6u/image/upload/v1753441959/z77vea2cqud8gra2hvz9.jpg'}
-                alt={shopname}
-                width={32} // Slightly smaller for a cleaner look
-                height={32}
-                style={{ borderRadius: '4px' }} // Subtle rounded corners for the logo
-              />
-              {!companyLoading && ( // Only show text if data is loaded
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: theme.palette.text.primary,
-                    display: { xs: 'none', md: 'block' }, // Hide on small screens
-                  }}
-                >
-                  {shopname} {/* Display company name if available */}
-                </Typography>
-              )}
-            </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            cursor: "pointer",
+          }}
+          onClick={() => router.push(`/`)}
+        >
+          {isUpdatingBrand ? (
+            <BouncingEllipsis>
+              <span></span>
+              <span></span>
+              <span></span>
+            </BouncingEllipsis>
           ) : (
             <Typography
               variant="h6"
               component="div"
-              sx={{ cursor: "pointer", textTransform: "capitalize", fontWeight: 'bold' }}
-              onClick={() => router.push(`/`)}
+              sx={{
+                textTransform: "capitalize",
+                fontWeight: "bold",
+                color: theme.palette.primary.main,
+                transition: "opacity 0.25s ease",
+              }}
             >
-              {shopname || "Sokojunction"}
+              {displayedBrand}
             </Typography>
           )}
         </Box>
@@ -271,7 +343,13 @@ const LinksContainerComponent = forwardRef((props, ref) => {
         {/* Desktop Navigation & User Actions */}
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
           <Tooltip title="Mall">
-            <IconButton onClick={() => router.push(`/shops`)} color="inherit">
+            <IconButton onClick={() => router.push(`/shops`)} sx={{
+              color: theme.palette.primary.main,
+              "&:hover": {
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            }}
+            >
               <StoreOutlinedIcon />
             </IconButton>
           </Tooltip>
@@ -279,24 +357,48 @@ const LinksContainerComponent = forwardRef((props, ref) => {
           {user && (
             <>
               <Tooltip title="Home">
-                <IconButton onClick={() => router.push(`/`)} color="inherit">
+                <IconButton onClick={() => router.push(`/`)} sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <HomeOutlinedIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Shop">
-                <IconButton onClick={() => router.push(`/shop/${shopname}`)} color="inherit">
+                <IconButton onClick={() => router.push(`/shop/${shopname}`)} sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <ShoppingBagOutlinedIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Order History">
-                <IconButton onClick={() => router.push("/orderhistory")} color="inherit">
+                <IconButton onClick={() => router.push("/orderhistory")} sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
                     <HistoryOutlined />
                   </Badge>
                 </IconButton>
               </Tooltip>
               <Tooltip title="Notifications">
-                <IconButton color="inherit">
+                <IconButton sx={{
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+                >
                   <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
                     <NotificationsNoneOutlined />
                   </Badge>
@@ -311,11 +413,14 @@ const LinksContainerComponent = forwardRef((props, ref) => {
             <Box>
               <Tooltip title={username || "User Account"}>
                 <IconButton
-                  color="inherit"
                   onClick={handleUserMenuOpen}
                   aria-controls={open ? "user-menu" : undefined}
                   aria-haspopup="true"
-                  sx={{ p: 0 }} // Remove default padding for Avatar
+                  sx={{
+                    p: 0, color: theme.palette.primary.main, "&:hover": {
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    },
+                  }} // Remove default padding for Avatar
                 >
                   <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main, fontSize: '0.9rem' }}>
                     {username ? username[0].toUpperCase() : <PersonOutline fontSize="small" />}
@@ -346,10 +451,6 @@ const LinksContainerComponent = forwardRef((props, ref) => {
                 <MenuItem onClick={() => handleUserMenuClose("/profile")}>
                   <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
                   Profile
-                </MenuItem>
-                <MenuItem onClick={() => handleUserMenuClose("/settings")}>
-                  <ListItemIcon><SettingsOutlined fontSize="small" /></ListItemIcon>
-                  Settings
                 </MenuItem>
                 <Divider sx={{ my: 1 }} />
                 <MenuItem
@@ -392,11 +493,10 @@ const LinksContainerComponent = forwardRef((props, ref) => {
             setIsAuthDialogOpen(false);
           }}
           onClose={() => setIsAuthDialogOpen(false)}
-          showButton={false}
         />
       </Suspense>
     </AppBar>
   );
 });
-
+LinksContainerComponent.displayName = "LinksContainerComponent";
 export default LinksContainerComponent;

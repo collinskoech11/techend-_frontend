@@ -1,10 +1,9 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, Typography, Box } from "@mui/material";
-import { YourChildProps } from "@/Types";
 import Confetti from "./Confetti";
 
-const VerificationStatus = ({ nextStep, prevStep, steps, activeStep, companyData, setCompanyData, token, refetchCompany, triggerRerender }: YourChildProps) => {
-  const [isVisible, setIsVisible] = useState(false);
+const VerificationStatus = () => {
+  const [] = useState(false);
 
   return (
     <Box

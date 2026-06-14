@@ -1,6 +1,5 @@
 import { Box, Grid, Typography, styled } from "@mui/material";
 import React from "react";
-import Image from "next/image";
 
 function Reasons() {
   const GridIternalItem = styled(Box)({
@@ -9,12 +8,6 @@ function Reasons() {
     background: "#EEEEEC",
     textAlign: "center",
     padding: "40px",
-  });
-  const ImageContain = styled(Image)({
-    width: "100px",
-    height: "100px",
-    objectFit: "cover",
-    borderRadius: "8px",
   });
   const LeadTypo = styled(Typography)({
     fontSize: "20px",

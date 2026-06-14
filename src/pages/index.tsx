@@ -1,12 +1,10 @@
 "use client";
 
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Container, useTheme, useMediaQuery } from "@mui/material";
 import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import { useGetCompaniesQuery } from "@/Api/services";
-import toast from "react-hot-toast";
-
 import Hero from "@/Components/MainLanding/Hero";
 import Features from "@/Components/MainLanding/Features";
 import Showcase from "@/Components/MainLanding/Showcase";
@@ -15,8 +13,12 @@ import Testimonials from "@/Components/MainLanding/Testimonials";
 import Contact from "@/Components/MainLanding/Contact";
 import FinalCTA from "@/Components/MainLanding/FinalCTA";
 
-const FAQ = lazy(() => import("@/Components/FAQ"));
+import dynamic from "next/dynamic";
 
+const FAQ = dynamic(() => import("@/Components/FAQ"), {
+  ssr: false, // 🔥 prevents hydration issues
+  loading: () => <div>Loading FAQs...</div>,
+});
 const lightGray = "#f0f2f5";
 
 /**
@@ -63,7 +65,6 @@ export default function LandingPage() {
         <AuthDialog
           onTrigger={handleAuthSuccess}
           forceOpen={true}
-          showButton={false}
           onClose={() => setShowAuthDialog(false)}
         />
       )}
@@ -74,11 +75,7 @@ export default function LandingPage() {
           <Features />
           <Showcase handleAuthTrigger={handleAuthTrigger} />
           <Pricing handleAuthTrigger={handleAuthTrigger} />
-          <Suspense fallback={<div>Loading FAQs...</div>}>
-            <div id="faq">
-              <FAQ />
-            </div>
-          </Suspense>
+          <FAQ />
           <Testimonials isMobile={isMobile} companiesData={companiesData} />
           <Contact />
           <FinalCTA handleAuthTrigger={handleAuthTrigger} />

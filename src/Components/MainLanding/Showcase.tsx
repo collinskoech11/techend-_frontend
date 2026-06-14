@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Box, Typography, Grid, useTheme, Theme, styled, alpha, Button } from "@mui/material";
-import { Fade, Slide } from "react-awesome-reveal";
 import Image from "next/image";
 // Assuming AccentButton is the GlowButton/PrimaryButton you defined previously
 // If not available, you can use a styled MUI Button here.
@@ -38,10 +37,10 @@ const ImageCard = styled(Box)(({ theme }) => ({
   transition: "transform 0.5s ease, box-shadow 0.5s ease",
   backdropFilter: 'blur(5px)', // Subtle glass effect on the card itself
 
-  "&:hover": {
-    transform: "translateY(-5px) scale(1.005)", // Slight lift and scale
-    boxShadow: `0 40px 80px -15px ${alpha(theme.palette.primary.main, 0.3)}`, // Primary color accent glow
-  },
+  // "&:hover": {
+  //   transform: "translateY(-5px) scale(1.005)", // Slight lift and scale
+  //   boxShadow: `0 40px 80px -15px ${alpha(theme.palette.primary.main, 0.3)}`, // Primary color accent glow
+  // },
   
   // Style for the actual image
   "& img": {
@@ -95,7 +94,6 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
       }} 
       id="showcase"
     >
-      <Slide direction="up" triggerOnce>
         <Typography 
           variant="h3" 
           sx={{ 
@@ -112,7 +110,6 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
         {/* --- Section 1: Sleek Storefronts (Image Left) --- */}
         <Grid container spacing={8} alignItems="center" sx={{ mb: 12 }}>
           <Grid item xs={12} md={6}>
-            <Fade direction="left" triggerOnce>
               <ImageCard 
                 sx={{ 
                   ml: { md: 2 }, // Larger offset for dramatic effect
@@ -126,12 +123,11 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                   height={600}
                   layout="responsive"
                   priority={false}
+                  loading="lazy"
                 />
               </ImageCard>
-            </Fade>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Fade direction="right" triggerOnce delay={200}>
               <Typography variant="h4" sx={{ fontWeight: 700, color: colors.primary, mb: 2 }}>
                 Stunning, Customizable Storefronts 🚀
               </Typography>
@@ -141,14 +137,12 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
               <AccentButton onClick={handleAuthTrigger}>
                 Build Your Store Now
               </AccentButton>
-            </Fade>
           </Grid>
         </Grid>
 
         {/* --- Section 2: Intuitive Admin Dashboard (Image Right) --- */}
         <Grid container spacing={8} alignItems="center" direction={{ xs: 'column-reverse', md: 'row' }} sx={{ mb: 12 }}>
           <Grid item xs={12} md={6}>
-            <Fade direction="left" triggerOnce delay={200}>
               <Typography variant="h4" sx={{ fontWeight: 700, color: colors.primary, mb: 2 }}>
                 Intuitive Admin Dashboard & Control 📊
               </Typography>
@@ -158,10 +152,8 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
               <AccentButton onClick={handleAuthTrigger}>
                 Explore Dashboard Demo
               </AccentButton>
-            </Fade>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Fade direction="right" triggerOnce>
               <ImageCard 
                 sx={{ 
                   mr: { md: 2 }, // Larger offset for dramatic effect
@@ -175,16 +167,15 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                   height={600}
                   layout="responsive"
                   priority={false}
+                  loading="lazy"
                 />
               </ImageCard>
-            </Fade>
           </Grid>
         </Grid>
 
         {/* --- Section 3: AI-Powered Insights (Image Left) --- */}
         <Grid container spacing={8} alignItems="center">
           <Grid item xs={12} md={6}>
-            <Fade direction="left" triggerOnce>
               <ImageCard 
                 sx={{ 
                   ml: { md: 2 },
@@ -198,12 +189,11 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
                   height={600}
                   layout="responsive"
                   priority={false}
+                  loading="lazy"
                 />
               </ImageCard>
-            </Fade>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Fade direction="right" triggerOnce delay={200}>
               <Typography variant="h4" sx={{ fontWeight: 700, color: colors.primary, mb: 2 }}>
                 AI-Powered Insights for Smarter Decisions 💡
               </Typography>
@@ -213,10 +203,8 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
               <AccentButton onClick={handleAuthTrigger}>
                 Unlock Insights
               </AccentButton>
-            </Fade>
           </Grid>
         </Grid>
-      </Slide>
     </Box>
   );
 };

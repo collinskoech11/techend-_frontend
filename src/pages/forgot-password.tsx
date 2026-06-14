@@ -8,7 +8,7 @@ import {
   Paper,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import {
   useRequestPasswordResetMutation,
   useConfirmPasswordResetMutation,
