@@ -11,7 +11,6 @@ import {
   InputAdornment,
   Chip,
   Skeleton,
-  Tooltip,
   Button,
   useTheme,
   alpha,
@@ -24,16 +23,6 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import toast from "react-hot-toast";
-
-// --- ForwardRef Grid wrapper honoring MUI v5 size prop ---
-const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
-  const { size, children, ...rest } = props;
-  if (size && typeof size === "object") {
-    return <Box ref={ref} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }, gap: 3 }} {...rest}>{children}</Box>;
-  }
-  return <Box ref={ref} {...rest}>{children}</Box>;
-});
 
 // --- Styled Glass Card ---
 const ShopCard = styled(Box)(({ theme }) => ({
