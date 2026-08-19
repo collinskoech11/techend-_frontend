@@ -85,6 +85,11 @@ export interface Company {
   description: string;
   logo_image: string;
   kyc_approved: boolean;
+  city?: string;
+  country?: string;
+  physical_address?: string;
+  contact_email?: string;
+  contact_phone?: string;
   payment_method?: string;
   mpesa_till_number?: string;
   mpesa_paybill_number?: string;

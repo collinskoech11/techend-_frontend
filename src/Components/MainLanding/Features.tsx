@@ -88,16 +88,19 @@ const GradientText = styled("span")(({ theme }) => ({
 
 const featuresData = [
   {
+    step: "01",
     icon: <StorefrontTwoToneIcon />,
     title: "Instant Storefront",
     description: "Launch a stunning, fully functional online store in minutes. Choose from premium templates that look great on any device."
   },
   {
+    step: "02",
     icon: <ShoppingCartCheckoutIcon />,
     title: "Seamless Checkout",
     description: "Convert more visitors with a friction-free checkout experience. Integrated global payments ensuring secure transactions."
   },
   {
+    step: "03",
     icon: <RocketLaunchTwoToneIcon />,
     title: "Growth Engine",
     description: "Don't just sell, grow. Access powerful analytics, automated marketing tools, and SEO features built directly into your dashboard."
@@ -113,18 +116,23 @@ const Features = () => {
         
         {/* Section Header */}
         <Box sx={{ mb: 8, textAlign: "center", maxWidth: "700px", mx: "auto" }}>
-            <Typography 
-              variant="overline" 
+            <Box 
               sx={{ 
-                color: theme.palette.text.secondary, 
-                fontWeight: 700, 
-                letterSpacing: 1.2,
-                mb: 1,
-                display: 'block'
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                px: 2, 
+                py: 0.5, 
+                borderRadius: '50px', 
+                bgcolor: alpha(theme.palette.primary.main, 0.1), 
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                mb: 2 
               }}
             >
-              POWERFUL INFRASTRUCTURE
-            </Typography>
+              <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700, letterSpacing: 1.2 }}>
+                ⚡ POWERFUL INFRASTRUCTURE
+              </Typography>
+            </Box>
             
             <Typography 
               variant="h3" 
@@ -152,9 +160,14 @@ const Features = () => {
           {featuresData.map((feature, index) => (
             <Grid item xs={12} md={4} key={index}>
                 <FeatureCard>
-                  <IconBox className="icon-box">
-                    {feature.icon}
-                  </IconBox>
+                  <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <IconBox className="icon-box">
+                      {feature.icon}
+                    </IconBox>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: alpha(theme.palette.primary.main, 0.3) }}>
+                      {feature.step}
+                    </Typography>
+                  </Box>
                   
                   <Typography 
                     variant="h5" 

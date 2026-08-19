@@ -12,6 +12,7 @@ import {
   alpha,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import dynamic from "next/dynamic";
 
 const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
@@ -145,10 +146,12 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
         <ContentCard>
           
           {/* Badge / Announcement */}
-          {/* <StyledChip 
-            icon={<RocketLaunchIcon fontSize="small" />} 
-            label="v2.0 is now live: Start selling faster" 
-          /> */}
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 2.5, py: 0.75, borderRadius: '50px', bgcolor: alpha(theme.palette.primary.main, 0.1), border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`, mb: 3 }}>
+            <RocketLaunchIcon sx={{ fontSize: '1.1rem', color: theme.palette.primary.main }} />
+            <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main, letterSpacing: 0.5 }}>
+              V2.0 IS LIVE • NEXT-GEN E-COMMERCE PLATFORM
+            </Typography>
+          </Box>
 
           <Typography
             variant="h1"
@@ -212,27 +215,45 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
             >
               Start Selling Now
             </GlowButton>
-{/* 
-            <GlassButton 
-              onClick={handleAuthTrigger}
-              size="large"
-            >
-              View Demo
-            </GlassButton> */}
           </Box>
           
-          {/* Optional: Add social proof text below buttons */}
-          <Typography 
-            variant="caption" 
+          {/* Trust Metrics & Statistical Counters */}
+          <Box 
             sx={{ 
-              display: 'block', 
-              mt: 4, 
-              opacity: 0.6, 
-              fontSize: '0.85rem' 
+              mt: 6, 
+              pt: 4, 
+              borderTop: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+              display: 'flex',
+              justifyContent: 'space-around',
+              flexWrap: 'wrap',
+              gap: 3
             }}
           >
-            Trusted by 5,000+ businesses across Africa
-          </Typography>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
+                5,000+
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Active Merchants
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.secondary.main }}>
+                99.9%
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Platform Uptime
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
+                 Kes 50M+
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Monthly Volume
+              </Typography>
+            </Box>
+          </Box>
 
         </ContentCard>
       </Container>

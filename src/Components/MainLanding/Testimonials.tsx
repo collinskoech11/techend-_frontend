@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme, alpha } from "@mui/material";
 import dynamic from "next/dynamic"; // New import
 import TestimonialCard from "@/Components/TestimonialCard";
 
@@ -25,6 +25,24 @@ const Testimonials: React.FC<TestimonialsProps> = ({ isMobile, companiesData }) 
 
   return (
     <Box sx={{ py: 10, bgcolor: lightGray }} id="testimonials">
+        <Box sx={{ textAlign: "center", mb: 2 }}>
+          <Box 
+            sx={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              px: 2, 
+              py: 0.5, 
+              borderRadius: '50px', 
+              bgcolor: alpha(theme.palette.primary.main, 0.1), 
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+            }}
+          >
+            <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700, letterSpacing: 1.2 }}>
+              ⭐ CLIENT REVIEWS
+            </Typography>
+          </Box>
+        </Box>
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 8, textAlign: "center", color: darkText }}>
           What Our <span style={{ color: theme.palette.primary.main }}>Clients</span> Say
         </Typography>

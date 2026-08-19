@@ -1,8 +1,5 @@
-"use client";
-
 import {
   Box,
-  Grid,
   Typography,
   Link as MuiLink,
   useTheme,
@@ -16,7 +13,7 @@ import {
 } from "@mui/material";
 import Cookies from "js-cookie";
 import React, { useState } from "react";
-import { darken, styled } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 
@@ -26,7 +23,19 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import EmailIcon from "@mui/icons-material/Email";
-import { keyframes } from '@emotion/react';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PhoneIcon from "@mui/icons-material/Phone";
+import SendIcon from "@mui/icons-material/Send";
+import { keyframes } from "@emotion/react";
+
+// ForwardRef Grid wrapper honoring MUI v5 size prop
+const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
+  const { size, children, ...rest } = props;
+  if (size && typeof size === "object") {
+    return <Box ref={ref} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "2fr 1fr 1.5fr" }, gap: 4 }} {...rest}>{children}</Box>;
+  }
+  return <Box ref={ref} {...rest}>{children}</Box>;
+});
 
 // Bounce animation for dots
 const bounce = keyframes`
@@ -55,35 +64,37 @@ const BouncingEllipsis = styled('span')(({ theme }) => ({
 
 // Footer Link
 const FooterLink = styled(MuiLink)(({ theme }) => ({
-  display: "block",
-  marginBottom: theme.spacing(1),
-  color: alpha(theme.palette.common.white, 0.75),
-  fontSize: "0.9rem",
-  letterSpacing: 0.2,
-  transition: "0.25s ease",
+  display: "inline-block",
+  marginBottom: theme.spacing(1.2),
+  color: alpha(theme.palette.common.white, 0.7),
+  fontSize: "0.92rem",
+  fontWeight: 500,
+  textDecoration: "none",
+  transition: "all 0.25s ease",
   "&:hover": {
-    color: theme.palette.secondary.main,
-    textDecoration: "underline",
+    color: theme.palette.primary.light,
     transform: "translateX(4px)",
   },
 }));
 
 // Footer Section Title
 const FooterSectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: "1.2rem",
-  fontWeight: 700,
-  marginBottom: theme.spacing(2),
+  fontSize: "1.1rem",
+  fontWeight: 800,
+  letterSpacing: "0.04em",
+  textTransform: "uppercase",
+  marginBottom: theme.spacing(2.5),
   color: theme.palette.common.white,
 }));
 
 // Glass Card
 const GlassBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: theme.shape.borderRadius * 3,
-  background: alpha(theme.palette.common.white, 0.08),
-  border: `1px solid ${alpha(theme.palette.common.white, 0.15)}`,
-  backdropFilter: "blur(10px)",
-  boxShadow: `0 6px 30px ${alpha("#000", 0.18)}`,
+  padding: theme.spacing(3.5),
+  borderRadius: "24px",
+  background: "rgba(255, 255, 255, 0.04)",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  backdropFilter: "blur(16px)",
+  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2)",
 }));
 
 const DEFAULT_BRAND_URLS = [
@@ -102,10 +113,8 @@ export default function Footer() {
   const router = useRouter();
   const cookieShop = Cookies.get("shopname");
 
-
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
 
-  // Only fetch company data if not a default page
   const displayShopName = isDefaultBrandPage
     ? "SokoJunction"
     : cookieShop || "SokoJunction";
@@ -113,198 +122,246 @@ export default function Footer() {
     useGetCompanyBySlugQuery(displayShopName, {
       skip: isDefaultBrandPage || !cookieShop,
     });
-  const primaryColor = darken(theme.palette.primary.main, 0.65);
+
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Subscribed: ${newsletterEmail}`);
+    if (!newsletterEmail) return;
     setNewsletterEmail("");
   };
 
   const renderContactContent = () => {
-    // Use default contact info on default pages
     if (isDefaultBrandPage || !companyData) {
       return (
-        <Stack spacing={1}>
-          <Typography sx={{ color: "#fff" }}>Email: sokojunction@gmail.com</Typography>
-          <Typography sx={{ color: "#fff" }}>Phone: +254 703 508881</Typography>
-          <Typography sx={{ color: "#fff" }}>Location: Nairobi, Kenya</Typography>
+        <Stack spacing={2}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: alpha("#fff", 0.85) }}>
+            <EmailIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.light }} />
+            <Typography variant="body2">sokojunction@gmail.com</Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: alpha("#fff", 0.85) }}>
+            <PhoneIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.light }} />
+            <Typography variant="body2">+254 703 508881</Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: alpha("#fff", 0.85) }}>
+            <LocationOnIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.light }} />
+            <Typography variant="body2">Nairobi, Kenya</Typography>
+          </Box>
         </Stack>
       );
     }
 
     if (companyLoading) return <CircularProgress size={22} color="inherit" />;
 
-    // if (isError) return <Typography>Contact info unavailable.</Typography>;
-
     return (
-      <Stack spacing={1}>
+      <Stack spacing={2}>
         {companyData.contact_email && (
-          <MuiLink href={`mailto:${companyData.contact_email}`} underline="hover" color="inherit">
-            Email: {companyData.contact_email}
-          </MuiLink>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: alpha("#fff", 0.85) }}>
+            <EmailIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.light }} />
+            <MuiLink href={`mailto:${companyData.contact_email}`} underline="hover" color="inherit" variant="body2">
+              {companyData.contact_email}
+            </MuiLink>
+          </Box>
         )}
         {companyData.contact_phone && (
-          <MuiLink href={`tel:${companyData.contact_phone}`} underline="hover" color="inherit">
-            Phone: {companyData.contact_phone}
-          </MuiLink>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: alpha("#fff", 0.85) }}>
+            <PhoneIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.light }} />
+            <MuiLink href={`tel:${companyData.contact_phone}`} underline="hover" color="inherit" variant="body2">
+              {companyData.contact_phone}
+            </MuiLink>
+          </Box>
         )}
-        <Typography>
-          Location: {companyData.physical_address}, {companyData.city}, {companyData.country}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, color: alpha("#fff", 0.85) }}>
+          <LocationOnIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.light, mt: 0.2 }} />
+          <Typography variant="body2">
+            {companyData.physical_address}, {companyData.city}, {companyData.country}
+          </Typography>
+        </Box>
       </Stack>
     );
   };
 
   return (
     <Box
+      component="footer"
       sx={{
         width: "100%",
-        background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${primaryColor})`,
+        backgroundColor: "#09090b",
         color: theme.palette.common.white,
-        pt: { xs: 8, md: 10 },
-        pb: { xs: 4, md: 6 },
+        pt: { xs: 8, md: 12 },
+        pb: { xs: 5, md: 6 },
         mt: { xs: 8, md: 12 },
+        position: "relative",
+        overflow: "hidden",
+        borderTop: "1px solid rgba(255, 255, 255, 0.08)",
       }}
     >
-      {/* Main Footer Content */}
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          maxWidth: "1300px",
-          width: "90%",
-          mx: "auto",
-          alignItems: "flex-start",
-          // border: `1px solid #fff`,
-        }}
-      >
-        {/* Brand + Newsletter */}
-        <Grid item xs={12} md={4}>
-          <Stack spacing={2.5}>
-            <Typography variant="h5" sx={{ fontWeight: 800, textTransform: "capitalize" }}>
-              {isDefaultBrandPage
-                ? "SokoJunction"
-                : companyLoading
-                  ? (
-                    <BouncingEllipsis>
-                      <span></span>
-                      <span></span>
-                      <span></span>
-                    </BouncingEllipsis>
-                  )
-                  : companyData?.name || "SokoJunction"
-              }
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: alpha("#fff", 0.8) }}>
-              {isDefaultBrandPage
-                ? "Your marketplace to discover unique products from local shops."
-                : companyData?.description || "Your marketplace to discover unique products from local shops."
-              }
-            </Typography>
-
-            {/* Newsletter */}
-            <form onSubmit={handleNewsletterSubmit}>
-              <Stack direction="row" spacing={1}>
-                <TextField
-                  type="email"
-                  label="Email for updates"
-                  size="small"
-                  required
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  fullWidth
-                  InputProps={{
-                    startAdornment: <EmailIcon sx={{ mr: 1, opacity: 0.7 }} />,
-                    sx: {
-                      borderRadius: "30px",
-                      color: "#fff",
-                      "& fieldset": { borderColor: alpha("#fff", 0.3) },
-                      "& input": { color: "#fff" },
-                    },
-                  }}
-                  InputLabelProps={{ sx: { color: alpha("#fff", 0.7) } }}
-                />
-
-                <Button
-                  type="submit"
-                  variant="contained"
-                  sx={{
-                    borderRadius: "30px",
-                    px: 3,
-                    fontWeight: 600,
-                    textTransform: "none",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Subscribe
-                </Button>
-              </Stack>
-            </form>
-
-            {/* Social icons */}
-            <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-              {[FacebookIcon, InstagramIcon, TwitterIcon, LinkedInIcon].map((Icon, i) => (
-                <IconButton
-                  key={i}
-                  sx={{
-                    color: alpha("#fff", 0.75),
-                    "&:hover": { color: theme.palette.secondary.main },
-                  }}
-                >
-                  <Icon fontSize="medium" />
-                </IconButton>
-              ))}
-            </Box>
-          </Stack>
-        </Grid>
-
-        {/* Quick Links */}
-        <Grid item xs={6} md={4}>
-          <FooterSectionTitle>Quick Links</FooterSectionTitle>
-          {["Home", "Shops", "About","Mobile-App"].map((item) => (
-            <FooterLink
-              key={item}
-              href={item === "Home" ? "/" : `/${item.toLowerCase().replace(" ", "")}`}
-            >
-              {item}
-            </FooterLink>
-          ))}
-        </Grid>
-
-        {/* Contact */}
-        <Grid item xs={12} md={4}>
-          <GlassBox>
-            <FooterSectionTitle>Contact Info</FooterSectionTitle>
-            {renderContactContent()}
-          </GlassBox>
-        </Grid>
-      </Grid>
-
-      {/* Divider */}
-      <Divider
-        sx={{
-          mt: 6,
-          borderColor: alpha("#fff", 0.2),
-          mx: "auto",
-          maxWidth: "1300px",
-          width: "90%",
-        }}
-      />
-
-      {/* Copyright */}
       <Box
         sx={{
-          textAlign: "center",
-          // "/"
-          mt: 3,
-          opacity: 0.75,
-          fontSize: "0.85rem",
+          maxWidth: "1350px",
+          width: "90%",
+          mx: "auto",
         }}
       >
-        © {new Date().getFullYear()} Powered by SokoJunction. All Rights Reserved.
+        <Grid container spacing={5} size={{ xs: 12, md: 4 }}>
+          {/* Brand + Newsletter */}
+          <Box>
+            <Stack spacing={3}>
+              <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: "-0.02em", color: "#ffffff" }}>
+                {isDefaultBrandPage
+                  ? "SokoJunction"
+                  : companyLoading
+                    ? (
+                      <BouncingEllipsis>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </BouncingEllipsis>
+                    )
+                    : companyData?.name || "SokoJunction"
+                }
+              </Typography>
+
+              <Typography variant="body2" sx={{ color: alpha("#fff", 0.7), lineHeight: 1.7, maxWidth: "420px" }}>
+                {isDefaultBrandPage
+                  ? "SokoJunction powers independent digital storefronts, local artisans, and enterprise merchants across Africa."
+                  : companyData?.description || "Your marketplace to discover unique products from local shops."
+                }
+              </Typography>
+
+              {/* Newsletter */}
+              <form onSubmit={handleNewsletterSubmit}>
+                <Stack direction="row" spacing={1} sx={{ maxWidth: "440px" }}>
+                  <TextField
+                    type="email"
+                    placeholder="Enter email for updates..."
+                    size="small"
+                    required
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: <EmailIcon sx={{ mr: 1, color: alpha("#fff", 0.5) }} />,
+                      sx: {
+                        borderRadius: "30px",
+                        backgroundColor: "rgba(255, 255, 255, 0.06)",
+                        color: "#fff",
+                        fontSize: "0.88rem",
+                        "& fieldset": { borderColor: "rgba(255, 255, 255, 0.12)" },
+                        "&:hover fieldset": { borderColor: theme.palette.primary.main },
+                        "& input": { color: "#fff" },
+                      },
+                    }}
+                  />
+
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    endIcon={<SendIcon sx={{ fontSize: "0.9rem !important" }} />}
+                    sx={{
+                      borderRadius: "30px",
+                      px: 3,
+                      fontWeight: 700,
+                      textTransform: "none",
+                      whiteSpace: "nowrap",
+                      backgroundColor: theme.palette.primary.main,
+                      color: "#ffffff",
+                      "&:hover": {
+                        backgroundColor: theme.palette.primary.dark,
+                      },
+                    }}
+                  >
+                    Subscribe
+                  </Button>
+                </Stack>
+              </form>
+
+              {/* Social icons */}
+              <Box sx={{ display: "flex", gap: 1.5, pt: 1 }}>
+                {[FacebookIcon, InstagramIcon, TwitterIcon, LinkedInIcon].map((Icon, i) => (
+                  <IconButton
+                    key={i}
+                    size="small"
+                    sx={{
+                      color: alpha("#fff", 0.75),
+                      backgroundColor: "rgba(255, 255, 255, 0.05)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      transition: "all 0.25s ease",
+                      "&:hover": {
+                        color: theme.palette.primary.light,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                        borderColor: theme.palette.primary.main,
+                        transform: "translateY(-3px)",
+                      },
+                    }}
+                  >
+                    <Icon fontSize="small" />
+                  </IconButton>
+                ))}
+              </Box>
+            </Stack>
+          </Box>
+
+          {/* Quick Links */}
+          <Box>
+            <FooterSectionTitle>Navigation</FooterSectionTitle>
+            <Stack spacing={0.5}>
+              {[
+                { name: "Home", path: "/" },
+                { name: "Explore Shops", path: "/shops" },
+                { name: "About Platform", path: "/about" },
+                { name: "Mobile App", path: "/mobile-app" },
+                { name: "Merchant Setup", path: "/company-onboarding" },
+              ].map((item) => (
+                <FooterLink key={item.name} href={item.path}>
+                  {item.name}
+                </FooterLink>
+              ))}
+            </Stack>
+          </Box>
+
+          {/* Contact */}
+          <Box>
+            <GlassBox>
+              <FooterSectionTitle sx={{ mb: 2 }}>Store Info</FooterSectionTitle>
+              {renderContactContent()}
+            </GlassBox>
+          </Box>
+        </Grid>
+
+        {/* Divider */}
+        <Divider
+          sx={{
+            mt: 8,
+            mb: 4,
+            borderColor: "rgba(255, 255, 255, 0.08)",
+          }}
+        />
+
+        {/* Bottom Bar */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            opacity: 0.75,
+            fontSize: "0.85rem",
+          }}
+        >
+          <Typography variant="caption" sx={{ color: alpha("#fff", 0.7) }}>
+            © {new Date().getFullYear()} SokoJunction E-Commerce Infrastructure. All Rights Reserved.
+          </Typography>
+          <Box sx={{ display: "flex", gap: 3 }}>
+            <MuiLink href="/" underline="none" sx={{ color: alpha("#fff", 0.7), fontSize: "0.8rem", "&:hover": { color: "#fff" } }}>
+              Privacy Policy
+            </MuiLink>
+            <MuiLink href="/" underline="none" sx={{ color: alpha("#fff", 0.7), fontSize: "0.8rem", "&:hover": { color: "#fff" } }}>
+              Terms of Service
+            </MuiLink>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

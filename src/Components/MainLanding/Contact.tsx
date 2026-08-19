@@ -28,11 +28,43 @@ const Contact = () => {
   };
 
   return (
-    <Box sx={{ py: 10, px: 4, bgcolor: '#ffffff', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }} id="contact">
-        <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: "center", color: darkText }}>
+    <Box 
+      sx={{ 
+        py: 10, 
+        px: { xs: 3, md: 6 }, 
+        bgcolor: 'background.paper', 
+        borderRadius: '32px', 
+        border: '1px solid',
+        borderColor: 'divider',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+        maxWidth: '1000px',
+        mx: 'auto'
+      }} 
+      id="contact"
+    >
+        <Box sx={{ textAlign: "center", mb: 2 }}>
+          <Box 
+            sx={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              px: 2, 
+              py: 0.5, 
+              borderRadius: '50px', 
+              bgcolor: 'primary.light', 
+              opacity: 0.9,
+              mb: 1
+            }}
+          >
+            <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: 1.2 }}>
+              💬 GET IN TOUCH
+            </Typography>
+          </Box>
+        </Box>
+        <Typography variant="h3" sx={{ fontWeight: 800, mb: 2, textAlign: "center", color: darkText }}>
           Contact Us
         </Typography>
-        <Typography variant="h6" sx={{ maxWidth: "800px", mx: "auto", mb: 6, color: lightText, textAlign: "center", fontSize: { xs: '1rem', md: '1.15rem' } }}>
+        <Typography variant="h6" sx={{ maxWidth: "700px", mx: "auto", mb: 6, color: lightText, textAlign: "center", fontSize: { xs: '1rem', md: '1.15rem' } }}>
           Have a question or want to learn more? Send us a message and we&apos;ll get back to you as soon as possible.
         </Typography>
         <Grid container spacing={2} justifyContent="center">

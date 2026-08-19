@@ -68,7 +68,8 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
 
   const currentShopSlug = urlShop || cookieShop || "Sokojunction";
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
-  const displayShopName = isDefaultBrandPage ? "SokoJunction" : currentShopSlug;
+  const rawShopName = isDefaultBrandPage ? "SokoJunction" : currentShopSlug;
+  const displayShopName = /^\d+$/.test(rawShopName) ? "SokoJunction" : rawShopName;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isUserMenuOpen = Boolean(anchorEl);
@@ -76,29 +77,45 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   const [username, setUsername] = useState<string | null>(null);
-  const [user, setUser] = useState<string | undefined>(Cookies.get("username"));
+  const [user, setUser] = useState<string | undefined>(undefined);
   const [shopname, setShopName] = useState(currentShopSlug);
 
-  const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(displayShopName, {
+  useEffect(() => {
+    const cUser = Cookies.get("username");
+    setUser(cUser);
+    setUsername(cUser || null);
+  }, []);
+
+  const { data: companyData } = useGetCompanyBySlugQuery(displayShopName, {
     skip: isDefaultBrandPage || !displayShopName || displayShopName.toLowerCase() === "sokojunction",
   });
 
-  const [displayedBrand, setDisplayedBrand] = useState(
-    !isDefaultBrandPage && companyData?.name
-      ? companyData.name
-      : displayShopName || "SokoJunction"
-  );
+  const [displayedBrand, setDisplayedBrand] = useState("SokoJunction");
 
   useEffect(() => {
-    if (!companyLoading) {
-      const newBrand =
-        !isDefaultBrandPage && companyData?.name
-          ? companyData.name
-          : displayShopName || "SokoJunction";
+    const isDefault = DEFAULT_BRAND_URLS.includes(router.pathname);
+    const activeCookieShop = Cookies.get("shopname");
+    const activeUrlShop =
+      typeof router.query.shop === "string"
+        ? router.query.shop
+        : router.asPath.startsWith("/shop/")
+        ? router.asPath.split("/shop/")[1]?.split("?")[0]
+        : null;
 
-      setDisplayedBrand((prev) => (prev !== newBrand ? newBrand : prev));
+    const rawShop = activeUrlShop || activeCookieShop || "SokoJunction";
+    // Check if rawShop is a numeric ID string
+    const isNumeric = /^\d+$/.test(rawShop);
+
+    if (isDefault) {
+      setDisplayedBrand("SokoJunction");
+    } else if (companyData?.name) {
+      setDisplayedBrand(companyData.name);
+    } else if (!isNumeric && rawShop !== "Sokojunction") {
+      setDisplayedBrand(rawShop);
+    } else {
+      setDisplayedBrand("SokoJunction");
     }
-  }, [companyLoading, companyData, isDefaultBrandPage, displayShopName]);
+  }, [router.pathname, router.query.shop, router.asPath, companyData]);
 
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);

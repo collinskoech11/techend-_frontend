@@ -38,6 +38,12 @@ export const AuthApi = createApi({
         method: "GET",
       }),
     }),
+    getCompanyCategories: builder.query<Array<{ id: number; name: string }>, string>({
+      query: (companySlugOrId) => ({
+        url: `companies/${companySlugOrId}/categories/`,
+        method: "GET",
+      }),
+    }),
     getProducts: builder.query<Paginated<Product>, { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }>({
       query: ({ company, category, page, page_size, search, on_sale }) => {
         const params = new URLSearchParams();
@@ -74,14 +80,17 @@ export const AuthApi = createApi({
     }),
     addToCart: builder.mutation({
       query: (data) => {
-        const shopname = Cookies.get("shopname") || "techend";
-        const token = Cookies.get("access");
+        const shopname = data?.shopname || Cookies.get("shopname") || "techend";
+        const token = data?.token || Cookies.get("access");
 
         return {
           url: `cart/add/${data.product}/${shopname}/`,
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+          },
+          body: {
+            quantity: data.quantity || 1,
           },
         };
       },
@@ -312,6 +321,7 @@ export const {
   useUserRegistrationMutation,
   useUserLoginMutation,
   useGetCompanyBySlugQuery,
+  useGetCompanyCategoriesQuery,
   useGetProductsQuery,
   useGetProductQuery,
   useAddToCartMutation,
