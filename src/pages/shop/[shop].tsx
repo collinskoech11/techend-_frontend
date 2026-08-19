@@ -12,7 +12,7 @@ import { alpha, useTheme } from "@mui/material/styles";
 import Skeleton from "@mui/material/Skeleton";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { getProducts, getCompanyBySlug } from "@/Api/services";
+import { getProducts, getCompanyBySlug, useGetCompanyCategoriesQuery } from "@/Api/services";
 import { GetServerSidePropsContext } from "next";
 import {
   Box,
@@ -274,8 +274,20 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     },
   }));
 
-  // Unique categories derived from loaded products + fallback list
+  // Fetch company categories via dedicated endpoint GET /companies/<company_slug_or_id>/categories/
+  const { data: apiCategories } = useGetCompanyCategoriesQuery(shopname, {
+    skip: !shopname,
+  });
+
+  // Unique categories derived from company API endpoint + fallback from products
   const availableCategories = useMemo(() => {
+    if (apiCategories && Array.isArray(apiCategories) && apiCategories.length > 0) {
+      return [
+        { label: "All Items", value: "" },
+        ...apiCategories.map((c) => ({ label: c.name, value: c.name })),
+      ];
+    }
+
     const set = new Set<string>();
     (productsData?.results || []).forEach((p: any) => {
       if (p.category && typeof p.category === "string" && p.category.trim()) {
@@ -289,19 +301,11 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     });
 
     const categoryList = Array.from(set);
-    if (categoryList.length > 0) {
-      return [{ label: "All Items", value: "" }, ...categoryList.map((c) => ({ label: c, value: c }))];
-    }
-
     return [
       { label: "All Items", value: "" },
-      { label: "FreeSip", value: "freesip" },
-      { label: "Tumblers", value: "tumblers" },
-      { label: "Kids", value: "kids" },
-      { label: "Custom", value: "custom" },
-      { label: "Accessories", value: "accessories" },
+      ...categoryList.map((c) => ({ label: c, value: c })),
     ];
-  }, [products, productsData]);
+  }, [apiCategories, products, productsData]);
 
   useEffect(() => {
     if (!router.isReady) return;
