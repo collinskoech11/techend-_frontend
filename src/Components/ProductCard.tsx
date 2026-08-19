@@ -328,8 +328,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
 
           <ProductTitle
             sx={{
-              fontSize: { xs: "0.98rem", sm: "1.1rem", md: "1.15rem" },
-              minHeight: { xs: "36px", sm: "40px" },
+              fontSize: { xs: "0.98rem", sm: "1.08rem" },
+              mb: product.description ? 0.5 : 0,
+              lineHeight: 1.3,
               "&:hover": {
                 color: theme.palette.primary.main,
               },
@@ -343,6 +344,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
               sx={{
                 fontSize: { xs: "0.75rem", sm: "0.825rem" },
                 display: { xs: "none", sm: "-webkit-box" },
+                mb: 0.5,
               }}
             >
               {product.description}

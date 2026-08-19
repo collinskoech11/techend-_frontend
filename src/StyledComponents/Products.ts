@@ -77,10 +77,6 @@ export const IconWrapper = styled(Box)({
 export const ProductItemStyled = styled(Card)(({ theme }) => ({
   width: "100%",
   height: "100%",
-  minHeight: 460,
-  [theme.breakpoints.down("sm")]: {
-    minHeight: 360,
-  },
   margin: "auto",
   borderRadius: "16px",
   backgroundColor: theme.palette.background.paper,
@@ -103,7 +99,7 @@ export const ProductItemStyled = styled(Card)(({ theme }) => ({
 
 export const ProductImageWrapper = styled(Box)({
   width: "100%",
-  height: 200,
+  aspectRatio: "4 / 3.2",
   position: "relative",
   backgroundColor: "#f4f4f5",
   overflow: "hidden",
@@ -112,7 +108,7 @@ export const ProductImageWrapper = styled(Box)({
   justifyContent: "center",
 });
 
-export const ProductImage = styled(Image)<ImageProps>(({ theme }) => ({
+export const ProductImage = styled(Image)<ImageProps>(() => ({
   width: "100%",
   height: "100%",
   objectFit: "cover",

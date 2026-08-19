@@ -2,7 +2,6 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 import { store } from "../Api/store";
-import dynamic from "next/dynamic";
 import React, { useEffect, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import { CartProvider } from "@/contexts/CartContext";
@@ -12,11 +11,7 @@ import DynamicTitle from "@/Components/DynamicTitle";
 import { Toaster } from "react-hot-toast";
 
 import Navbar from "@/Components/Navbar";
-
-const Footer = dynamic(() => import("@/Components/Footer"), {
-  ssr: false,
-  loading: () => <div style={{ height: 60 }} />,
-});
+import Footer from "@/Components/Footer";
 
 const GA_IDS: Record<string, string> = {
   "sokojunction.com": "G-F23L8C9HPP",
