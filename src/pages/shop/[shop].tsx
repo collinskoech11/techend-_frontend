@@ -1,7 +1,5 @@
 
-// 'use client';
-
-import {
+import React, {
   useEffect,
   useState,
   useRef,
@@ -10,129 +8,77 @@ import {
   useMemo,
   useCallback,
 } from "react";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import Skeleton from "@mui/material/Skeleton";
-import {
-  MainProductsContainer,
-  ProductsContainer,
-  ProductItem, // Keep this for the product cards Grid item
-} from "@/StyledComponents/Products";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import Chip from "@mui/material/Chip";
-import { getProducts, getCompanyBySlug } from "@/Api/services"; // Modified import
-import { GetServerSidePropsContext } from "next"; // New import
+import { getProducts, getCompanyBySlug } from "@/Api/services";
+import { GetServerSidePropsContext } from "next";
 import {
   Box,
-  Grid,
+  Grid as MuiGrid,
   TextField,
   MenuItem,
   Typography,
-  InputAdornment, // For adding icons to TextField
+  InputAdornment,
   Button,
   IconButton,
   Menu,
   FormControlLabel,
   Switch,
   CircularProgress,
-  // Avatar,
+  Chip,
+  Tooltip,
 } from "@mui/material";
-import SearchIcon from '@mui/icons-material/Search'; // Search icon
-import FilterListIcon from '@mui/icons-material/FilterList'; // Filter icon
-import InstagramIcon from '@mui/icons-material/Instagram';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import Cookies from "js-cookie";
-import { styled, useTheme } from "@mui/material"; // Import styled
-import Image from "next/image";
-import React from "react";
 
-
-// --- Color Palette (Consistent with your project) ---
-const darkText = "#212121"; // For main text
-const lightText = "#555555"; // For secondary text/labels
-// const lightGrayBackground = "#f8f8f8"; // Background for the page
-const whiteBackground = "#ffffff"; // Background for cards/sections
-// const mediumGrayBorder = "#e0e0e0"; // For borders and dividers
-
-// --- Styled Components for UI Improvements ---
-
-// const HeroSection = styled(Box, {
-//   shouldForwardProp: (prop) => prop !== 'bannerImage',
-// })<{ bannerImage?: string }>(({ theme, bannerImage }) => ({
-//   position: 'relative',
-//   height: '40vh',
-//   minHeight: 500,
-//   maxHeight: 600,
-//   width: '100%',
-//   display: 'flex',
-//   alignItems: 'center',
-//   justifyContent: 'center',
-//   color: '#fff',
-//   marginTop: '-80px',
-//   textAlign: 'center',
-//   overflow: 'hidden',
-
-//   '&::before': {
-//     content: '""',
-//     position: 'absolute',
-//     inset: 0,
-//     backgroundImage: `url(${bannerImage})`,
-//     backgroundSize: 'contain',
-//     backgroundRepeat: 'no-repeat',
-//     backgroundPosition: 'center',   // default
-//     zIndex: 1,
-//   },
-
-//   [theme.breakpoints.up('md')]: {
-//     '&::before': {
-//       backgroundPosition: 'center center',
-//     },
-//   },
-
-//   '& > *': {
-//     position: 'relative',
-//     zIndex: 2,
-//   },
-// }));
-const ProductCard = dynamic(() => import("@/Components/ProductCard"), {
-  loading: () => <Skeleton variant="rectangular" width="100%" height={320} />,
+// Grid component adhering to size prop standard
+const Grid = forwardRef<HTMLDivElement, any>(({ size, ...props }, ref) => {
+  if (size && typeof size === "object") {
+    return <MuiGrid ref={ref} item {...size} {...props} />;
+  }
+  return <MuiGrid ref={ref} {...props} />;
 });
-const ShopHeader = styled(Box)(({ theme }) => ({
-  // display: 'flex',
-  // flexDirection: 'column',
-  // alignItems: 'left',
-  // textAlign: 'left',
-  // marginBottom: theme.spacing(2),
-  marginTop: theme.spacing(-8),
-}));
+Grid.displayName = "Grid";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import ClearIcon from "@mui/icons-material/Clear";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import TwitterIcon from "@mui/icons-material/Twitter";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import Cookies from "js-cookie";
+import Image from "next/image";
 
-export const ShopLogoWrapper = styled("div")(({ theme }) => ({
-  position: "relative",
-  width: 120,
-  height: 120,
-  borderRadius: "50%",
-  overflow: "hidden",
-  border: `4px solid ${theme.palette.background.paper}`,
-  marginBottom: theme.spacing(1),
-  boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-}));
+import { AccentButton } from "@/StyledComponents/Hero";
+import {
+  ShopLogoWrapper,
+} from "@/StyledComponents/Products";
+import {
+  BoutiqueLabel,
+  ShopSerifHeading,
+} from "@/StyledComponents/Typos";
 
-// const ShopLogo = styled(Image)(({ theme }) => ({
-//   width: 120,
-//   height: 120,
-//   borderRadius: theme.shape.borderRadius * 2,
-//   border: `4px solid ${theme.palette.background.paper}`,
-//   marginBottom: theme.spacing(1),
-//   boxShadow: '0 0 10px rgba(0,0,0,0.9)',
-// }));
-
-
+const ProductCard = dynamic(() => import("@/Components/ProductCard"), {
+  loading: () => (
+    <Box sx={{ width: "100%", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0,0,0,0.06)", backgroundColor: "#ffffff" }}>
+      <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: "4 / 4.5" }} />
+      <Box sx={{ p: 2 }}>
+        <Skeleton width="40%" height={16} sx={{ mb: 1 }} />
+        <Skeleton width="80%" height={24} sx={{ mb: 1 }} />
+        <Skeleton width="50%" height={20} sx={{ mb: 2 }} />
+        <Skeleton width="100%" height={36} sx={{ borderRadius: "10px" }} />
+      </Box>
+    </Box>
+  ),
+});
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { shop } = context.query;
 
-  if (!shop || typeof shop !== 'string') {
+  if (!shop || typeof shop !== "string") {
     return {
       notFound: true,
     };
@@ -140,7 +86,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   try {
     const companyData = await getCompanyBySlug(shop);
-    const productsData = await getProducts({ company: shop, page: 1, page_size: 10 });
+    const productsData = await getProducts({ company: shop, page: 1, page_size: 12 });
 
     return {
       props: {
@@ -163,19 +109,20 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any) => {
-  const theme = useTheme(); // Assuming theme is passed as a prop
+  const theme = useTheme();
   const router = useRouter();
-  const cartRef = useRef<any>(null); // This ref seems intended for something else based on context
-  // const primaryRed = theme.palette.primary.main; // Your main red accent
-  const [category, setCategory] = useState<any>("");
+  const cartRef = useRef<any>(null);
+
+  const [category, setCategory] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [inputValue, setInputValue] = useState(""); // New state for immediate input value
-  const [isTyping, setIsTyping] = useState(false); // New state to track typing activity
-  const [isSearching, setIsSearching] = useState(false); // New state to track active search query
+  const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [onSale, setOnSale] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // Added pageSize state
+  const [pageSize, setPageSize] = useState(12);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const getCloudinaryLogo = useCallback((path?: string) => {
     const base = path
       ? `https://res.cloudinary.com/dqokryv6u/${path}`
@@ -183,6 +130,7 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
     return base.replace("/upload/", "/upload/f_auto,q_auto,w_240,h_240,c_fill/");
   }, []);
+
   const open = Boolean(anchorEl);
   const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -192,11 +140,9 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
   };
   const handleCategorySelect = (value: string) => {
     setCategory(value);
-    setPage(1); // Reset page to 1 when category changes
+    setPage(1);
     handleFilterClose();
   };
-
-  // const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleSearchChange = useMemo(() => {
     let timeout: NodeJS.Timeout;
@@ -215,11 +161,27 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
           setIsSearching(true);
         }
         setIsTyping(false);
-      }, 300);
+      }, 350);
     };
   }, []);
 
+  const handleClearSearch = () => {
+    setInputValue("");
+    setSearchTerm("");
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setInputValue("");
+    setSearchTerm("");
+    setCategory("");
+    setOnSale(false);
+    setPage(1);
+  };
+
   const [products, setProducts] = useState<any[]>(productsData?.results || []);
+  const [totalCount, setTotalCount] = useState<number>(productsData?.count || 0);
+  const [hasNextPage, setHasNextPage] = useState<boolean>(Boolean(productsData?.next));
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<Error | null>(null);
 
@@ -243,16 +205,26 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     const fetchProducts = async () => {
       setProductsLoading(true);
       try {
-        const response = await getProducts({ company: shopname, category: category, search: searchTerm, page, on_sale: onSale, page_size: pageSize });
+        const response = await getProducts({
+          company: shopname,
+          category: category,
+          search: searchTerm,
+          page,
+          on_sale: onSale,
+          page_size: pageSize,
+        });
+
         if (page === 1) {
-          setProducts(response.results);
+          setProducts(response?.results || []);
         } else {
-          setProducts(prev => [...prev, ...response.results]);
+          setProducts((prev) => [...prev, ...(response?.results || [])]);
         }
+        setTotalCount(response?.count ?? 0);
+        setHasNextPage(Boolean(response?.next));
         setProductsError(null);
       } catch (err: any) {
         setProductsError(err);
-        setProducts([]);
+        if (page === 1) setProducts([]);
       } finally {
         setProductsLoading(false);
         setIsSearching(false);
@@ -263,8 +235,6 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
       fetchProducts();
     }
   }, [shopname, category, searchTerm, page, onSale, pageSize]);
-
-
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -277,7 +247,7 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     if (category) newQuery.category = category;
     if (onSale) newQuery.on_sale = "true";
     if (page !== 1) newQuery.page = String(page);
-    if (pageSize !== 10) newQuery.page_size = String(pageSize);
+    if (pageSize !== 12) newQuery.page_size = String(pageSize);
 
     router.replace(
       { pathname: router.pathname, query: newQuery },
@@ -288,9 +258,6 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
-      // Assuming cartRef.current is an instance with a triggerCartRefetch method
-      // This part depends on how you've set up your cart ref in the parent component.
-      // If the cart is part of the Navbar or a global context, this prop might not be necessary here.
       cartRef.current.triggerCartRefetch();
     }
   };
@@ -299,12 +266,6 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     const isChecked = event.target.checked;
     setOnSale(isChecked);
     setPage(1);
-    const { pathname, query } = router;
-    const { on_sale, ...restQuery } = query;
-
-    const newQuery = isChecked ? { ...restQuery, on_sale: 'true' } : restQuery;
-
-    router.push({ pathname, query: newQuery }, undefined, { shallow: true });
   };
 
   useImperativeHandle(ref, () => ({
@@ -313,434 +274,722 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
     },
   }));
 
+  // Unique categories derived from loaded products + fallback list
+  const availableCategories = useMemo(() => {
+    const set = new Set<string>();
+    (productsData?.results || []).forEach((p: any) => {
+      if (p.category && typeof p.category === "string" && p.category.trim()) {
+        set.add(p.category.trim());
+      }
+    });
+    products.forEach((p: any) => {
+      if (p.category && typeof p.category === "string" && p.category.trim()) {
+        set.add(p.category.trim());
+      }
+    });
 
-  const categories = useMemo(() => [
-    { label: "All Categories", value: "" },
-    { label: "Electronics", value: "electronics" },
-    { label: "Fashion", value: "fashion" },
-    { label: "Beauty", value: "beauty" },
-    { label: "Home Appliances", value: "home-appliances" },
-    { label: "Books", value: "books" },
-  ], []);
+    const categoryList = Array.from(set);
+    if (categoryList.length > 0) {
+      return [{ label: "All Items", value: "" }, ...categoryList.map((c) => ({ label: c, value: c }))];
+    }
 
+    return [
+      { label: "All Items", value: "" },
+      { label: "FreeSip", value: "freesip" },
+      { label: "Tumblers", value: "tumblers" },
+      { label: "Kids", value: "kids" },
+      { label: "Custom", value: "custom" },
+      { label: "Accessories", value: "accessories" },
+    ];
+  }, [products, productsData]);
 
   useEffect(() => {
     if (!router.isReady) return;
 
-    const { category, search, on_sale, page, page_size } = router.query;
+    const { category: queryCategory, search, on_sale, page: queryPage, page_size } = router.query;
 
-    setCategory(category as string || "");
-    setSearchTerm(search as string || "");
-    setInputValue(search as string || "");
+    setCategory((queryCategory as string) || "");
+    setSearchTerm((search as string) || "");
+    setInputValue((search as string) || "");
     setOnSale(on_sale === "true");
-    setPage(Number(page) || 1);
-    setPageSize(Number(page_size) || 10);
+    setPage(Number(queryPage) || 1);
+    setPageSize(Number(page_size) || 12);
   }, [router.query, router.isReady]);
 
-const BouncingDots = React.memo(function BouncingDots() {
+  const rawPhone = (companyData?.contact_phone || "").replace(/\D/g, "");
+  const formattedPhone = rawPhone.startsWith("0") ? `254${rawPhone.slice(1)}` : rawPhone;
+
   return (
-    <Box sx={{ display: "inline-flex", gap: 0.4, ml: 0.5 }}>
-      {[0, 1, 2].map((i) => (
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
+      {/* --- CUP COUTURE INSPIRED STOREFRONT HERO --- */}
+      <Box
+        sx={{
+          backgroundColor: "#fbfbfb",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          pt: { xs: 4, md: 6 },
+          pb: { xs: 5, md: 7 },
+        }}
+      >
+        <Box sx={{ maxWidth: "1400px", mx: "auto", px: { xs: 2.5, sm: 4, md: 6 } }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "center", md: "flex-start" },
+              justifyContent: "space-between",
+              gap: { xs: 3, md: 5 },
+            }}
+          >
+            {/* Left: Store Logo & Brand Identity */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "center", sm: "flex-start" },
+                gap: 3,
+                textAlign: { xs: "center", sm: "left" },
+              }}
+            >
+              {companyData ? (
+                <ShopLogoWrapper
+                  sx={{
+                    width: { xs: 110, sm: 125 },
+                    height: { xs: 110, sm: 125 },
+                    border: `3px solid ${theme.palette.primary.main}`,
+                    boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.2)}`,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Image
+                    src={getCloudinaryLogo(companyData?.logo_image)}
+                    alt={companyData?.name || "Shop Logo"}
+                    fill
+                    sizes="130px"
+                    priority
+                    style={{ objectFit: "cover" }}
+                  />
+                </ShopLogoWrapper>
+              ) : (
+                <Skeleton
+                  variant="circular"
+                  width={110}
+                  height={110}
+                  sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}
+                />
+              )}
+
+              <Box sx={{ maxWidth: "680px" }}>
+                <BoutiqueLabel sx={{ mb: 0.5 }}>
+                  Authentic Storefront
+                </BoutiqueLabel>
+
+                <ShopSerifHeading
+                  variant="h1"
+                  sx={{
+                    fontSize: { xs: "2.2rem", sm: "2.8rem", md: "3.4rem" },
+                    color: "#18181b",
+                    mb: 1,
+                  }}
+                >
+                  {companyData?.name || shopname}
+                </ShopSerifHeading>
+
+                {companyData?.description && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#71717a",
+                      fontSize: { xs: "0.9rem", sm: "0.95rem" },
+                      lineHeight: 1.6,
+                      mb: 2,
+                    }}
+                  >
+                    {companyData.description}
+                  </Typography>
+                )}
+
+                {/* Badges & Social Links */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: 1.5,
+                    justifyContent: { xs: "center", sm: "flex-start" },
+                  }}
+                >
+                  <Chip
+                    icon={<ShoppingBagOutlinedIcon sx={{ fontSize: "1rem !important", color: `${theme.palette.primary.main} !important` }} />}
+                    label={`${totalCount || products.length} Available Items`}
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      fontSize: "0.82rem",
+                      fontWeight: 600,
+                      borderRadius: "20px",
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      color: theme.palette.primary.main,
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                    }}
+                  />
+
+                  {companyData?.kyc_approved && (
+                    <Chip
+                      icon={<VerifiedIcon sx={{ fontSize: "1rem !important", color: "#10b981 !important" }} />}
+                      label="Verified Partner"
+                      sx={{
+                        px: 1.5,
+                        py: 0.5,
+                        fontSize: "0.82rem",
+                        fontWeight: 600,
+                        borderRadius: "20px",
+                        backgroundColor: "rgba(16, 185, 129, 0.08)",
+                        color: "#059669",
+                        border: "1px solid rgba(16, 185, 129, 0.2)",
+                      }}
+                    />
+                  )}
+
+                  {/* Social Buttons */}
+                  <Box sx={{ display: "flex", gap: 1, ml: { sm: 1 } }}>
+                    {companyData?.instagram_link && (
+                      <Tooltip title="Follow on Instagram" arrow>
+                        <IconButton
+                          component="a"
+                          href={companyData.instagram_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          size="small"
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: "50%",
+                            border: "1px solid rgba(0,0,0,0.1)",
+                            color: "#18181b",
+                            transition: "all 0.25s ease",
+                            "&:hover": {
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              color: theme.palette.primary.main,
+                              borderColor: theme.palette.primary.main,
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                        >
+                          <InstagramIcon sx={{ fontSize: "1.15rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                    {companyData?.facebook_link && (
+                      <Tooltip title="Visit Facebook" arrow>
+                        <IconButton
+                          component="a"
+                          href={companyData.facebook_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          size="small"
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: "50%",
+                            border: "1px solid rgba(0,0,0,0.1)",
+                            color: "#18181b",
+                            transition: "all 0.25s ease",
+                            "&:hover": {
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              color: theme.palette.primary.main,
+                              borderColor: theme.palette.primary.main,
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                        >
+                          <FacebookIcon sx={{ fontSize: "1.15rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                    {companyData?.twitter_link && (
+                      <Tooltip title="Follow on Twitter / X" arrow>
+                        <IconButton
+                          component="a"
+                          href={companyData.twitter_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          size="small"
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: "50%",
+                            border: "1px solid rgba(0,0,0,0.1)",
+                            color: "#18181b",
+                            transition: "all 0.25s ease",
+                            "&:hover": {
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              color: theme.palette.primary.main,
+                              borderColor: theme.palette.primary.main,
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                        >
+                          <TwitterIcon sx={{ fontSize: "1.15rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                    {formattedPhone && (
+                      <Tooltip title="Inquire on WhatsApp" arrow>
+                        <IconButton
+                          component="a"
+                          href={`https://wa.me/${formattedPhone}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          size="small"
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: "50%",
+                            border: "1px solid rgba(37, 211, 102, 0.3)",
+                            backgroundColor: "rgba(37, 211, 102, 0.08)",
+                            color: "#25D366",
+                            transition: "all 0.25s ease",
+                            "&:hover": {
+                              backgroundColor: "#25D366",
+                              color: "#fff",
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                        >
+                          <WhatsAppIcon sx={{ fontSize: "1.15rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Right: Quick Inquiry Button (Desktop) */}
+            {formattedPhone && (
+              <Box sx={{ display: { xs: "none", md: "block" }, textAlign: "right" }}>
+                <Button
+                  component="a"
+                  href={`https://wa.me/${formattedPhone}?text=${encodeURIComponent(`Hello ${companyData?.name || ""}, I'm browsing your online collection.`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  variant="outlined"
+                  startIcon={<WhatsAppIcon sx={{ color: "#25D366" }} />}
+                  sx={{
+                    borderRadius: "12px",
+                    px: 3,
+                    py: 1.2,
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderColor: "rgba(0,0,0,0.12)",
+                    color: "#18181b",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    "&:hover": {
+                      borderColor: "#25D366",
+                      backgroundColor: "rgba(37, 211, 102, 0.06)",
+                    },
+                  }}
+                >
+                  Direct Inquiry
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* --- PRODUCTS & COLLECTION SECTION --- */}
+      <Box sx={{ maxWidth: "1400px", mx: "auto", px: { xs: 2.5, sm: 4, md: 6 }, py: { xs: 4, md: 6 } }}>
+        {/* Section Heading & Category Tabs */}
+        <Box sx={{ mb: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "flex-start", sm: "flex-end" },
+              justifyContent: "space-between",
+              gap: 2,
+              mb: 3,
+            }}
+          >
+            <Box>
+              <BoutiqueLabel sx={{ mb: 0.5 }}>
+                Curated Selection
+              </BoutiqueLabel>
+              <ShopSerifHeading variant="h2" sx={{ fontSize: { xs: "1.8rem", sm: "2.4rem" } }}>
+                Explore The Collection
+              </ShopSerifHeading>
+            </Box>
+
+            <Typography variant="body2" sx={{ color: "#71717a", fontWeight: 500 }}>
+              Showing {products.length} of {totalCount} items
+            </Typography>
+          </Box>
+
+          {/* Dynamic Category Chips Bar */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.2,
+              overflowX: "auto",
+              pb: 1.5,
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            {availableCategories.map((cat) => {
+              const isSelected = category === cat.value || (cat.value === "" && !category);
+              return (
+                <Button
+                  key={cat.value || "all"}
+                  onClick={() => handleCategorySelect(cat.value)}
+                  size="small"
+                  sx={{
+                    whiteSpace: "nowrap",
+                    px: 2.2,
+                    py: 0.8,
+                    borderRadius: "30px",
+                    fontSize: "0.82rem",
+                    fontWeight: isSelected ? 700 : 500,
+                    textTransform: "none",
+                    letterSpacing: "0.02em",
+                    backgroundColor: isSelected
+                      ? theme.palette.primary.main
+                      : "rgba(0, 0, 0, 0.04)",
+                    color: isSelected ? "#ffffff" : "#3f3f46",
+                    border: `1px solid ${isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)"}`,
+                    boxShadow: isSelected
+                      ? `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`
+                      : "none",
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      backgroundColor: isSelected
+                        ? theme.palette.primary.main
+                        : alpha(theme.palette.primary.main, 0.08),
+                      color: isSelected ? "#ffffff" : theme.palette.primary.main,
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                >
+                  {cat.label}
+                </Button>
+              );
+            })}
+          </Box>
+        </Box>
+
+        {/* --- SEARCH & FILTER CONTROLS BAR --- */}
         <Box
-          key={i}
           sx={{
-            width: 4,
-            height: 4,
-            borderRadius: "50%",
-            backgroundColor: "currentColor",
-            animation: "bounce 1.2s infinite",
-            animationDelay: `${i * 0.2}s`,
-            "@keyframes bounce": {
-              "0%, 80%, 100%": { transform: "scale(0)" },
-              "40%": { transform: "scale(1)" },
-            },
+            p: 2,
+            mb: 4,
+            borderRadius: "16px",
+            backgroundColor: "#f9fafb",
+            border: "1px solid rgba(0, 0, 0, 0.06)",
           }}
-        />
-      ))}
+        >
+          <Grid container spacing={2} alignItems="center">
+            {/* Search Input */}
+            <Grid size={{ xs: 12, sm: 6, md: 7 }}>
+              <TextField
+                fullWidth
+                placeholder="Search products, sizes, colors..."
+                value={inputValue}
+                onChange={handleSearchChange}
+                size="small"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "30px",
+                    backgroundColor: "#ffffff",
+                    border: "1px solid rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      borderColor: theme.palette.primary.main,
+                      boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.12)}`,
+                    },
+                    "&.Mui-focused": {
+                      borderColor: theme.palette.primary.main,
+                      boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`,
+                    },
+                    "& fieldset": { border: "none" },
+                  },
+                  "& .MuiInputBase-input": {
+                    fontSize: "0.9rem",
+                    color: "#18181b",
+                    py: 1.2,
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: theme.palette.primary.main, fontSize: "1.2rem", mr: 0.5 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {(isTyping || isSearching) && (
+                        <CircularProgress size={18} sx={{ color: theme.palette.primary.main, mr: inputValue ? 0.5 : 0 }} />
+                      )}
+                      {inputValue && (
+                        <IconButton size="small" onClick={handleClearSearch} aria-label="Clear search">
+                          <ClearIcon sx={{ fontSize: "1rem", color: "#71717a" }} />
+                        </IconButton>
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+
+            {/* Sale Filter Switch */}
+            <Grid size={{ xs: 7, sm: 3, md: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={onSale}
+                    onChange={handleOnSaleChange}
+                    sx={{
+                      width: 42,
+                      height: 24,
+                      padding: 0,
+                      "& .MuiSwitch-switchBase": {
+                        padding: "2px",
+                        "&.Mui-checked": {
+                          transform: "translateX(18px)",
+                          color: "#fff",
+                          "& + .MuiSwitch-track": {
+                            backgroundColor: theme.palette.primary.main,
+                            opacity: 1,
+                            borderColor: theme.palette.primary.main,
+                          },
+                        },
+                      },
+                      "& .MuiSwitch-thumb": {
+                        width: 20,
+                        height: 20,
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                      },
+                      "& .MuiSwitch-track": {
+                        borderRadius: 20,
+                        backgroundColor: "rgba(0,0,0,0.12)",
+                        opacity: 1,
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{ fontWeight: 600, fontSize: "0.85rem", color: "#18181b", pl: 0.5 }}>
+                    Sale Only
+                  </Typography>
+                }
+                sx={{ m: 0 }}
+              />
+            </Grid>
+
+            {/* Filter Menu Dropdown */}
+            <Grid size={{ xs: 5, sm: 3, md: 2 }} sx={{ textAlign: "right" }}>
+              <Button
+                onClick={handleFilterClick}
+                startIcon={<FilterListIcon sx={{ color: theme.palette.primary.main }} />}
+                variant="outlined"
+                size="small"
+                sx={{
+                  borderRadius: "20px",
+                  borderColor: "rgba(0,0,0,0.12)",
+                  color: "#18181b",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "0.82rem",
+                  backgroundColor: "#ffffff",
+                  "&:hover": {
+                    borderColor: theme.palette.primary.main,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                  },
+                }}
+              >
+                Categories
+              </Button>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleFilterClose}
+                PaperProps={{
+                  elevation: 6,
+                  sx: {
+                    mt: 1.5,
+                    minWidth: 200,
+                    borderRadius: "14px",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    py: 1,
+                  },
+                }}
+              >
+                {availableCategories.map((cat) => (
+                  <MenuItem
+                    key={cat.value || "all"}
+                    onClick={() => handleCategorySelect(cat.value)}
+                    selected={category === cat.value}
+                    sx={{
+                      fontSize: "0.88rem",
+                      fontWeight: category === cat.value ? 700 : 500,
+                      color: category === cat.value ? theme.palette.primary.main : "#18181b",
+                      borderRadius: "8px",
+                      mx: 1,
+                      my: 0.3,
+                      "&.Mui-selected": {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      },
+                    }}
+                  >
+                    {cat.label}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* --- PRODUCTS GRID DISPLAY --- */}
+        <Grid container spacing={{ xs: 1.5, sm: 2.5, md: 3, lg: 3.5 }}>
+          {productsLoading && page === 1 ? (
+            [...Array(8)].map((_, index) => (
+              <Grid size={{ xs: 6, sm: 4, md: 4, lg: 3 }} key={index}>
+                <Box sx={{ width: "100%", borderRadius: "16px", overflow: "hidden", border: "1px solid rgba(0,0,0,0.06)", backgroundColor: "#ffffff" }}>
+                  <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: "4 / 4.5" }} />
+                  <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
+                    <Skeleton width="35%" height={14} sx={{ mb: 1 }} />
+                    <Skeleton width="85%" height={22} sx={{ mb: 1 }} />
+                    <Skeleton width="45%" height={20} sx={{ mb: 2 }} />
+                    <Skeleton width="100%" height={36} sx={{ borderRadius: "10px" }} />
+                  </Box>
+                </Box>
+              </Grid>
+            ))
+          ) : productsError ? (
+            <Grid size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  py: 8,
+                  px: 3,
+                  textAlign: "center",
+                  backgroundColor: "#fafafa",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                }}
+              >
+                <Typography variant="h6" sx={{ color: "#e11d48", fontWeight: 600, mb: 1 }}>
+                  Unable to load products
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#71717a", mb: 3 }}>
+                  {productsError.message || "Please check your network connection and try again."}
+                </Typography>
+                <Button
+                  onClick={handleResetFilters}
+                  variant="outlined"
+                  color="primary"
+                  sx={{ borderRadius: "20px", textTransform: "none", fontWeight: 600 }}
+                >
+                  Reload Products
+                </Button>
+              </Box>
+            </Grid>
+          ) : products.length === 0 ? (
+            <Grid size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  py: 10,
+                  px: 3,
+                  textAlign: "center",
+                  backgroundColor: "#fafafa",
+                  borderRadius: "20px",
+                  border: "1px dashed rgba(0,0,0,0.12)",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: "50%",
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    color: theme.palette.primary.main,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mx: "auto",
+                    mb: 2,
+                  }}
+                >
+                  <ShoppingBagOutlinedIcon sx={{ fontSize: "2rem" }} />
+                </Box>
+                <ShopSerifHeading variant="h4" sx={{ fontSize: "1.8rem", mb: 1 }}>
+                  No Products Found
+                </ShopSerifHeading>
+                <Typography variant="body2" sx={{ color: "#71717a", maxWidth: "450px", mx: "auto", mb: 3 }}>
+                  We couldn&apos;t find any items matching your selected criteria. Try resetting filters or searching with different keywords.
+                </Typography>
+                <Button
+                  onClick={handleResetFilters}
+                  startIcon={<RestartAltIcon />}
+                  variant="contained"
+                  sx={{
+                    borderRadius: "30px",
+                    px: 3,
+                    py: 1,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    backgroundColor: theme.palette.primary.main,
+                    boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  }}
+                >
+                  Reset All Filters
+                </Button>
+              </Box>
+            </Grid>
+          ) : (
+            products.map((product: any) => (
+              <Grid size={{ xs: 6, sm: 4, md: 4, lg: 3 }} key={product.id || product.slug}>
+                <ProductCard
+                  product={product}
+                  triggerCartRefetch={triggerCartRefetch}
+                />
+              </Grid>
+            ))
+          )}
+        </Grid>
+
+        {/* --- LOAD MORE SECTION --- */}
+        {hasNextPage && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 6, mb: 4 }}>
+            <AccentButton
+              disabled={productsLoading}
+              onClick={() => setPage((prev) => prev + 1)}
+              startIcon={productsLoading ? <CircularProgress size={18} sx={{ color: "inherit" }} /> : null}
+              sx={{
+                borderRadius: "30px",
+                px: 5,
+                py: 1.4,
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
+              {productsLoading ? "Loading Collection..." : "Load More Products"}
+            </AccentButton>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 });
 
-  return (
-    <>
-      {/* <HeroSection bannerImage={`${companyData?.banner_image}`} /> */}
-      <Box sx={{ minHeight: "calc(100dvh - 64px)", background: "#fff", borderTopLeftRadius: "20px", borderTopRightRadius: "20px", pt: 4, mt: -2, zIndex: 10, position: "relative", boxShadow: '0 0 10px rgba(0,0,0,0.9)', }}>
-        <MainProductsContainer sx={{ px: 3, maxWidth: "1500px", mx: "auto", pb: 6, mt: 10 }}>
-          {/* SHOP HEADER */}
-          <ShopHeader
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              alignItems: "center",
-              gap: 3,
-              mb: 4,
-              p: 3,
-              borderRadius: 4,
-              background: "rgba(255,255,255,0.75)",
-              backdropFilter: "blur(10px)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-              width: { md: "fit-content", xs: "100%" }
-            }}
-          >
-            {companyData ? (
-              <ShopLogoWrapper>
-                <Image
-                  src={getCloudinaryLogo(companyData?.logo_image)}
-                  alt="shop logo"
-                  fill
-                  sizes="120px"
-                  priority={false}
-                />
-              </ShopLogoWrapper>
-            ) : (
-              <CircularProgress size={110} sx={{ color: theme.palette.primary.main }} />
-            )}
-
-            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, color: theme.palette.primary.main }}>
-                {companyData ? companyData?.name : <BouncingDots />}
-              </Typography>
-
-              {/* <Typography variant="body1" sx={{ maxWidth: "700px", color: lightText, mb: 1 }}>
-                {companyData?.description}
-              </Typography> */}
-
-
-
-              {/* Social Icons */}
-              <Box sx={{ display: "flex", gap: 2, mt: 2, justifyContent: { xs: "center", sm: "flex-start" } }}>
-                <Chip
-                  label={
-                    productsData?.count !== undefined ? (
-                      `${productsData.count} Items`
-                    ) : (
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <BouncingDots />
-                      </Box>
-                    )
-                  }
-                  sx={(theme) => ({
-                    px: 2,
-                    py: 1,
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                    borderRadius: "12px",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                    // ✨ dynamic company color styling
-                    backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                    color: theme.palette.primary.main,
-
-                    // optional subtle hover polish
-                    "&:hover": {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.18),
-                    },
-                  })}
-                />
-                {companyData?.facebook_link && (
-                  <a href={companyData.facebook_link} target="_blank" rel="noreferrer">
-                    <FacebookIcon
-                      sx={{
-                        color: "#000",
-                        fontSize: "2rem",
-                        transition: "0.25s",
-                        "&:hover": { transform: "scale(1.15)" },
-                      }}
-                    />
-                  </a>
-                )}
-                {companyData?.twitter_link && (
-                  <a href={companyData.twitter_link} target="_blank" rel="noreferrer">
-                    <TwitterIcon
-                      sx={{
-                        color: "#000",
-                        fontSize: "2rem",
-                        transition: "0.25s",
-                        "&:hover": { transform: "scale(1.15)" },
-                      }}
-                    />
-                  </a>
-                )}
-                {companyData?.instagram_link && (
-                  <a href={companyData.instagram_link} target="_blank" rel="noreferrer">
-                    <InstagramIcon
-                      sx={{
-                        color: "#000",
-                        fontSize: "2rem",
-                        transition: "0.25s",
-                        "&:hover": { transform: "scale(1.15)" },
-                      }}
-                    />
-                  </a>
-                )}
-              </Box>
-
-            </Box>
-          </ShopHeader>
-
-
-
-          {/* FILTERS */}
-          <Box sx={{ mb: 4 }}>
-            <Grid container spacing={2} alignItems="center">
-              {/* SEARCH */}
-              <Grid item xs={12} sm={7}>
-                <TextField
-                  fullWidth
-                  placeholder="Search products…"
-                  value={inputValue}
-                  onChange={handleSearchChange}
-                  size="medium"
-                  sx={(theme) => ({
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "40px",
-                      background: alpha(theme.palette.primary.main, 0.04), // soft brand tint
-                      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`,
-                      transition: "all 0.2s ease",
-
-                      "&:hover": {
-                        boxShadow: `0 6px 18px ${alpha(theme.palette.primary.main, 0.22)}`,
-                      },
-
-                      "&.Mui-focused": {
-                        background: alpha(theme.palette.primary.main, 0.06),
-                        boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.25)}`,
-                      },
-
-                      "& fieldset": { border: "none" },
-                    },
-
-                    "& .MuiInputBase-input": {
-                      padding: "12px 16px",
-                      color: theme.palette.primary.main,
-                    },
-                  })}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon
-                          sx={(theme) => ({
-                            color: theme.palette.primary.main,
-                            mr: 1,
-                          })}
-                        />
-                      </InputAdornment>
-                    ),
-
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        {(isTyping || isSearching) && (
-                          <CircularProgress
-                            size={20}
-                            sx={(theme) => ({
-                              color: theme.palette.primary.main,
-                            })}
-                          />
-                        )}
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              {/* SALE SWITCH */}
-              <Grid item xs={6} sm={3}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={onSale}
-                      onChange={handleOnSaleChange}
-                      sx={(theme) => ({
-                        width: 42,
-                        height: 26,
-                        padding: 0,
-
-                        "& .MuiSwitch-switchBase": {
-                          padding: "3px",
-
-                          "&.Mui-checked": {
-                            transform: "translateX(16px)",
-                            color: theme.palette.primary.main,
-
-                            "& + .MuiSwitch-track": {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.25),
-                              opacity: 1,
-                              border: `1px solid ${alpha(theme.palette.primary.main, 0.35)}`,
-                            },
-                          },
-                        },
-
-                        "& .MuiSwitch-thumb": {
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                          width: 20,
-                          height: 20,
-                          backgroundColor: theme.palette.primary.main,
-                        },
-
-                        "& .MuiSwitch-track": {
-                          borderRadius: 20,
-                          backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                          opacity: 1,
-                        },
-                      })}
-                    />
-                  }
-                  label={
-                    <Typography
-                      sx={(theme) => ({
-                        fontWeight: 600,
-                        fontSize: "0.95rem",
-                        color: theme.palette.primary.main,
-                        paddingLeft: 1,
-                      })}
-                    >
-                      Sale
-                    </Typography>
-                  }
-                  sx={{ ml: 0 }}
-                />
-              </Grid>
-              {/* FILTER ICON */}
-              <Grid item xs={6} sm={2} textAlign="right">
-                <IconButton
-                  onClick={handleFilterClick}
-                  aria-label="filter products"
-                  sx={(theme) => ({
-                    borderRadius: "50%",
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
-                    p: 1.25,
-                    background: alpha(theme.palette.primary.main, 0.05),
-                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.18)}`,
-                    transition: "all 0.25s ease",
-
-                    "&:hover": {
-                      background: alpha(theme.palette.primary.main, 0.12),
-                      transform: "scale(1.08)",
-                      boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.28)}`,
-                    },
-                  })}
-                >
-                  <FilterListIcon
-                    sx={(theme) => ({
-                      color: theme.palette.primary.main,
-                    })}
-                  />
-                </IconButton>
-
-                <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleFilterClose}
-                  PaperProps={{
-                    elevation: 8,
-                    sx: (theme) => ({
-                      mt: 1.5,
-                      minWidth: 220,
-                      borderRadius: theme.shape.borderRadius * 2,
-                      backgroundColor: alpha(theme.palette.primary.main, 0.06),
-                      backdropFilter: "blur(12px) saturate(160%)",
-                      WebkitBackdropFilter: "blur(12px) saturate(160%)",
-                      border: `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
-                      boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.18)}`,
-                      py: 1,
-                    }),
-                  }}
-                  sx={{
-                    "& .MuiMenuItem-root": {
-                      borderRadius: 2,
-                      mx: 1,
-                      my: 0.5,
-                      fontWeight: 500,
-                      color: (theme) => theme.palette.primary.main,
-                      transition: "all 0.2s ease",
-
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.primary.main, 0.12),
-                      },
-                    },
-                  }}
-                >
-                  {categories.map((cat) => (
-                    <MenuItem
-                      key={cat.value || "all"}
-                      onClick={() => handleCategorySelect(cat.value)}
-                    >
-                      {cat.label}
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </Grid>
-
-            </Grid>
-          </Box>
-
-
-          {/* Products Display */}
-          <ProductsContainer container spacing={3}> {/* Increased spacing for better card separation */}
-            {productsLoading && page === 1 ? (
-              [...Array(8)].map((_, index) => (
-                <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid */}
-                  <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: '12px' }} />
-                  <Box sx={{ p: 2 }}>
-                    <Skeleton width="80%" height={20} sx={{ mt: 1 }} />
-                    <Skeleton width="60%" height={20} />
-                    <Skeleton width="40%" height={15} />
-                    <Skeleton width="100%" height={40} sx={{ mt: 2, borderRadius: '8px' }} />
-                    <Skeleton width="100%" height={40} sx={{ mt: 1, borderRadius: '8px' }} />
-                  </Box>
-                </ProductItem>
-              ))
-            ) : productsError ? (
-              <Grid item xs={12}>
-                <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                  <Typography variant="h6" color="error">
-                    Failed to load products. Please try again.
-                  </Typography>
-                  <Typography variant="body2" color={lightText} mt={1}>
-                    {productsError.message || "An unknown error occurred."}
-                  </Typography>
-                </Box>
-              </Grid>
-            ) : products.length === 0 ? ( // Use products directly
-              <Grid item xs={12}>
-                <Box sx={{ padding: 4, textAlign: 'center', backgroundColor: whiteBackground, borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                  <Typography variant="h6" color={darkText}>
-                    No products found.
-                  </Typography>
-                  <Typography variant="body1" color={lightText} mt={1}>
-                    Try adjusting your search or filters.
-                  </Typography>
-                </Box>
-              </Grid>
-            ) : (
-              products.map((product: any, index: number) => (
-                <ProductItem item xs={12} sm={6} md={4} lg={3} key={index}> {/* Responsive grid for ProductCard */}
-                  <ProductCard
-                    product={product}
-                    // isLoading={false} // ProductCard itself handles its loading state if data is ready
-                    triggerCartRefetch={triggerCartRefetch}
-                  />
-                </ProductItem>
-              ))
-            )}
-          </ProductsContainer>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={!productsData?.next || productsLoading}
-              onClick={() => setPage(page + 1)}
-              startIcon={productsLoading && <CircularProgress size={20} />}
-            >
-              {productsLoading ? 'Loading...' : 'Load More'}
-            </Button>
-          </Box>
-        </MainProductsContainer>
-      </Box>
-    </>
-  );
-});
 Shop.displayName = "Shop";
 
 export default React.memo(Shop);

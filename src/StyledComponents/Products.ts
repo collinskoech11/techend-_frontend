@@ -1,4 +1,4 @@
-import { styled, Box, Grid, Card, Avatar } from "@mui/material";
+import { styled, Box, Grid, Card, Avatar, alpha } from "@mui/material";
 import Image, { ImageProps } from "next/image";
 
 export const MainProductsContainer = styled(Box)({
@@ -76,89 +76,90 @@ export const IconWrapper = styled(Box)({
 
 export const ProductItemStyled = styled(Card)(({ theme }) => ({
   width: "100%",
-  height: 480, // Balanced fixed height to prevent content overflow
+  height: "100%",
+  minHeight: 460,
+  [theme.breakpoints.down("sm")]: {
+    minHeight: 360,
+  },
   margin: "auto",
-  borderRadius: "16px", // Softer, more modern corners
+  borderRadius: "16px",
   backgroundColor: theme.palette.background.paper,
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.06)", // Soft, premium shadow instead of harsh dark lines
-  transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
+  transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between", // Ensures info and actions sit perfectly at the bottom
+  justifyContent: "space-between",
   overflow: "hidden",
   position: "relative",
-  border: "1px solid rgba(0, 0, 0, 0.04)",
+  border: "1px solid rgba(0, 0, 0, 0.06)",
+  cursor: "pointer",
 
   "&:hover": {
     transform: "translateY(-6px)",
-    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.12)",
+    boxShadow: `0 16px 32px ${alpha(theme.palette.primary.main, 0.12)}, 0 4px 12px rgba(0, 0, 0, 0.05)`,
+    borderColor: alpha(theme.palette.primary.main, 0.3),
   },
 }));
 
 export const ProductImageWrapper = styled(Box)({
   width: "100%",
-  height: "260px", // Explicit height allocation for the image zone
+  aspectRatio: "4 / 4.5",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   overflow: "hidden",
   position: "relative",
-  backgroundColor: "#f9f9f9", // Light fallback background for transparent products
+  backgroundColor: "#f8f9fa",
+  borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
 });
 
-export const ProductImage = styled(Image)<ImageProps>({
+export const ProductImage = styled(Image)<ImageProps>(({ theme }) => ({
   width: "100%",
   height: "100%",
-  objectFit: "contain", // Prevents vertical stretching or awkward clipping
-  padding: "16px", // Generous breathing room for product shots
+  objectFit: "contain",
+  padding: "10px",
+  [theme.breakpoints.up("sm")]: {
+    padding: "16px",
+  },
   transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
-  
-  // Note: Target the parent ProductItemStyled hover state to trigger the scale effect seamlessly
+
   [`${ProductItemStyled}:hover &`]: {
     transform: "scale(1.06)",
   },
-});
+}));
 
 export const ProductInfoContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(1.2),
+  [theme.breakpoints.up("sm")]: {
+    padding: theme.spacing(2),
+  },
   display: "flex",
   flexDirection: "column",
-  flexGrow: 1, // Dynamically fills the remaining space between the image and actions
-  justifyContent: "flex-start",
+  flexGrow: 1,
+  justifyContent: "space-between",
 }));
 
 export const RatingContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  gap: "4px", 
-  marginBottom: theme.spacing(1),
-  
+  gap: "3px",
+  marginBottom: theme.spacing(0.5),
+
   "& .MuiSvgIcon-root": {
-    fontSize: "1.1rem",
-    color: "#FFB400", // Industry standard warm gold hue
+    fontSize: "0.95rem",
+    color: "#f59e0b",
   },
 }));
 
 export const IconActionsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-start",
-  gap: theme.spacing(1.5),
-  padding: theme.spacing(0, 2, 2, 2), // Keeps actions firmly anchored to the card footer
+  justifyContent: "space-between",
+  gap: theme.spacing(1),
+  padding: theme.spacing(0, 2, 2, 2),
   width: "100%",
-
-  "& .MuiIconButton-root": {
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
-    color: theme.palette.text.secondary,
-    transition: "all 0.2s ease",
-    
-    "&:hover": {
-      backgroundColor: theme.palette.text.primary,
-      color: theme.palette.background.paper,
-      transform: "scale(1.05)",
-    },
-  },
 }));
+
 
 
 export const HeroSection = styled(Box, {
@@ -207,6 +208,17 @@ export const ShopHeader = styled(Box)(({ theme }) => ({
   // textAlign: 'left',
   // marginBottom: theme.spacing(2),
   marginTop: theme.spacing(-8),
+}));
+
+export const ShopLogoWrapper = styled(Box)(({ theme }) => ({
+  position: "relative",
+  width: 120,
+  height: 120,
+  borderRadius: "50%",
+  overflow: "hidden",
+  border: `4px solid ${theme.palette.background.paper}`,
+  marginBottom: theme.spacing(1),
+  boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
 }));
 
 export const ShopLogo = styled(Avatar)(({ theme }) => ({

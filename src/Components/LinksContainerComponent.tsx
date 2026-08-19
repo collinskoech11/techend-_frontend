@@ -14,26 +14,35 @@ import {
   ListItemIcon,
   Tooltip,
   Badge,
-  Avatar, // Keeping Avatar for potential future use or custom user display
+  Avatar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  alpha,
   styled,
 } from "@mui/material";
-import { keyframes } from '@emotion/react';
+import { keyframes } from "@emotion/react";
 import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 import PersonOutline from "@mui/icons-material/PersonOutline";
 import HistoryOutlined from "@mui/icons-material/HistoryOutlined";
 import NotificationsNoneOutlined from "@mui/icons-material/NotificationsNoneOutlined";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
-import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined"; // Modernized Shop icon
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined"; // Modernized Home icon
-import StoreOutlinedIcon from '@mui/icons-material/StoreOutlined'; // Modernized Mall icon
-import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'; // Modernized Cart icon
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import StoreOutlinedIcon from "@mui/icons-material/StoreOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Cookies from "js-cookie";
-const AuthDialog = lazy(() => import("./AuthDialog"));
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
-import { alpha } from '@mui/material/styles'; // For better alpha color manipulation
 import { CartMenu } from "./CartMin";
+
+const AuthDialog = lazy(() => import("./AuthDialog"));
+
 const DEFAULT_BRAND_URLS = [
   "/shops",
   "/payment",
@@ -44,53 +53,53 @@ const DEFAULT_BRAND_URLS = [
   "/profile",
   "/login",
 ];
+
 const bounce = keyframes`
   0%, 80%, 100% { transform: scale(0); } 
   40% { transform: scale(1); }
 `;
 
-const BouncingEllipsis = styled('span')(({ theme }) => ({
-  display: 'inline-block',
-  width: '24px',
-  textAlign: 'left',
-  '& > span': {
-    display: 'inline-block',
-    width: '6px',
-    height: '6px',
-    margin: '0 2px',
-    backgroundColor: theme.palette.common.white,
-    borderRadius: '50%',
+const BouncingEllipsis = styled("span")(({ theme }) => ({
+  display: "inline-block",
+  width: "24px",
+  textAlign: "left",
+  "& > span": {
+    display: "inline-block",
+    width: "5px",
+    height: "5px",
+    margin: "0 2px",
+    backgroundColor: theme.palette.primary.main,
+    borderRadius: "50%",
     animation: `${bounce} 1.4s infinite ease-in-out both`,
   },
-  '& > span:nth-of-type(1)': { animationDelay: '0s' },
-  '& > span:nth-of-type(2)': { animationDelay: '0.2s' },
-  '& > span:nth-of-type(3)': { animationDelay: '0.4s' },
+  "& > span:nth-of-type(1)": { animationDelay: "0s" },
+  "& > span:nth-of-type(2)": { animationDelay: "0.2s" },
+  "& > span:nth-of-type(3)": { animationDelay: "0.4s" },
 }));
-// A modern, functional Navbar component
-const LinksContainerComponent = forwardRef((props, ref) => {
-  console.log("LinksContainer rendered", props);
+
+const LinksContainerComponent = forwardRef((_props, ref) => {
   const router = useRouter();
   const theme = useTheme();
   const cookieShop = Cookies.get("shopname");
-  
+
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
   const displayShopName = isDefaultBrandPage
     ? "SokoJunction"
     : cookieShop || "SokoJunction";
-  const [anchorEl, setAnchorEl] = useState(null); // Desktop user menu
-  const open = Boolean(anchorEl);
 
-  const [mobileAnchorEl, setMobileAnchorEl] = useState(null); // Mobile menu
-  const isMobileMenuOpen = Boolean(mobileAnchorEl);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const isUserMenuOpen = Boolean(anchorEl);
 
-  const [username, setUsername] = useState<any>(null);
-  const [user, setUser] = useState(Cookies.get("username"));
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  const [username, setUsername] = useState<string | null>(null);
+  const [user, setUser] = useState<string | undefined>(Cookies.get("username"));
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "Sokojunction");
 
-  const { data: companyData, isLoading: companyLoading } =
-    useGetCompanyBySlugQuery(displayShopName, {
-      skip: isDefaultBrandPage || !cookieShop,
-    });
+  const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(displayShopName, {
+    skip: isDefaultBrandPage || !cookieShop,
+  });
+
   const [displayedBrand, setDisplayedBrand] = useState(
     !isDefaultBrandPage && companyData?.name
       ? companyData.name
@@ -98,29 +107,33 @@ const LinksContainerComponent = forwardRef((props, ref) => {
   );
 
   const [isUpdatingBrand, setIsUpdatingBrand] = useState(companyLoading);
-useEffect(() => {
-  setIsUpdatingBrand(companyLoading);
 
-  if (!companyLoading) {
-    const newBrand =
-      !isDefaultBrandPage && companyData?.name
-        ? companyData.name
-        : displayShopName || "SokoJunction";
+  useEffect(() => {
+    setIsUpdatingBrand(companyLoading);
 
-    setDisplayedBrand((prev) => (prev !== newBrand ? newBrand : prev));
-  }
-}, [companyLoading, companyData, isDefaultBrandPage, displayShopName]);
+    if (!companyLoading) {
+      const newBrand =
+        !isDefaultBrandPage && companyData?.name
+          ? companyData.name
+          : displayShopName || "SokoJunction";
+
+      setDisplayedBrand((prev) => (prev !== newBrand ? newBrand : prev));
+    }
+  }, [companyLoading, companyData, isDefaultBrandPage, displayShopName]);
+
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   const refetchUser = () => {
-    setUser(Cookies.get("username"));
+    const u = Cookies.get("username");
+    setUser(u);
+    setUsername(u || null);
   };
 
   const triggerCartRefetch = () => {
     if (cartRef.current) {
-      cartRef.current.cart_refetch();
+      cartRef.current.cart_refetch?.();
     }
   };
 
@@ -130,28 +143,15 @@ useEffect(() => {
     },
   }));
 
-  const handleUserMenuOpen = (event) => {
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleUserMenuClose = (link) => {
-    if (typeof link === 'string' && link) {
+  const handleUserMenuClose = (link?: string | null) => {
+    if (typeof link === "string" && link) {
       router.push(link);
     }
     setAnchorEl(null);
-  };
-
-  const handleMobileMenuOpen = (event) => {
-    setMobileAnchorEl(event.currentTarget);
-  };
-
-  const handleMobileMenuClose = () => {
-    setMobileAnchorEl(null);
-  };
-
-  const handleMobileMenuItemClick = (path) => {
-    router.push(path);
-    handleMobileMenuClose();
   };
 
   const handleLogout = () => {
@@ -160,7 +160,10 @@ useEffect(() => {
     Cookies.remove("refresh");
     Cookies.remove("shopname");
     Cookies.remove("user");
-    handleMobileMenuClose();
+    setUser(undefined);
+    setUsername(null);
+    setAnchorEl(null);
+    setIsMobileDrawerOpen(false);
     router.push("/login");
   };
 
@@ -168,323 +171,671 @@ useEffect(() => {
     if (user) setUsername(user);
   }, [user]);
 
-  // keep shop in sync with cookies on every navigation
+  // Keep shop in sync with cookies on every navigation
   useEffect(() => {
     const syncShopFromCookies = () => {
-      const cookieShop = Cookies.get("shopname") || "Sokojunction";
-      setShopName(cookieShop);
+      const cShop = Cookies.get("shopname") || "Sokojunction";
+      setShopName(cShop);
 
-      const cookieUser = Cookies.get("username");
-      setUser(cookieUser);
-      setUsername(cookieUser);
+      const cUser = Cookies.get("username");
+      setUser(cUser);
+      setUsername(cUser || null);
     };
 
-    // run once on mount
     syncShopFromCookies();
 
-    // run after every route change
     router.events.on("routeChangeComplete", syncShopFromCookies);
-
     return () => {
       router.events.off("routeChangeComplete", syncShopFromCookies);
     };
-  }, []);
+  }, [router.events]);
 
-  // Unified menu item styling for better consistency
-  const menuSx = {
-    "& .MuiMenuItem-root": {
-      borderRadius: theme.shape.borderRadius, // Rounded corners for menu items
-      mb: 0.5,
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, 0.08), // Subtle hover effect
-      },
-    },
-    "& .MuiListItemIcon-root": {
-      minWidth: 32, // Adjust icon spacing
-      color: 'inherit', // Icons inherit text color
-    }
+  const isNavActive = (path: string) => {
+    if (path === "/" && router.pathname === "/") return true;
+    if (path !== "/" && router.asPath.startsWith(path)) return true;
+    return false;
   };
 
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileAnchorEl}
-      id="mobile-menu"
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-      PaperProps={{
-        elevation: 8, // More prominent shadow for modern feel
-        sx: {
-          mt: 1.5,
-          minWidth: 220,
-          borderRadius: theme.shape.borderRadius * 2, // More rounded
-          backgroundColor: alpha(theme.palette.background.paper, 0.9), // Slightly translucent background
-          backdropFilter: "blur(10px) saturate(150%)",
-          WebkitBackdropFilter: "blur(10px) saturate(150%)",
-          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          py: 1, // Padding inside the menu
-        },
-      }}
-      transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      sx={menuSx}
-    >
-      {user ? (
-        <Box sx={{ p: 1 }}>
-          <MenuItem onClick={() => handleMobileMenuItemClick("/")}>
-            <ListItemIcon><HomeOutlinedIcon fontSize="small" /></ListItemIcon>
-            Home
-          </MenuItem>
-          <MenuItem onClick={() => handleMobileMenuItemClick(`/shop/${shopname}`)}>
-            <ListItemIcon><ShoppingBagOutlinedIcon fontSize="small" /></ListItemIcon>
-            Shop
-          </MenuItem>
-          <MenuItem onClick={() => handleMobileMenuItemClick(`/shops`)}>
-            <ListItemIcon><StoreOutlinedIcon fontSize="small" /></ListItemIcon>
-            Mall
-          </MenuItem>
-          <MenuItem onClick={() => handleMobileMenuItemClick("/cart")}>
-            <ListItemIcon><ShoppingCartOutlinedIcon fontSize="small" /></ListItemIcon>
-            Cart
-          </MenuItem>
-          <MenuItem onClick={() => handleMobileMenuItemClick("/orderhistory")}>
-            <ListItemIcon><HistoryOutlined fontSize="small" /></ListItemIcon>
-            Order History
-          </MenuItem>
-          <MenuItem>
-            <ListItemIcon>
-              <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
-                <NotificationsNoneOutlined fontSize="small" />
-              </Badge>
-            </ListItemIcon>
-            Notifications
-          </MenuItem>
-          <Divider sx={{ my: 1 }} />
-          <MenuItem onClick={() => handleMobileMenuItemClick("/profile")}>
-            <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
-            Profile
-          </MenuItem>
-          <MenuItem
-            onClick={handleLogout}
-            sx={{ color: theme.palette.error.main, fontWeight: 'medium' }}
-          >
-            <ListItemIcon><LogoutOutlined fontSize="small" sx={{ color: theme.palette.error.main }} /></ListItemIcon>
-            Logout
-          </MenuItem>
-        </Box>
-      ) : (
-        <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {sessionId && (
-            <MenuItem onClick={() => handleMobileMenuItemClick("/cart")}>
-              <ListItemIcon><ShoppingCartOutlinedIcon fontSize="small" /></ListItemIcon>
-              Cart
-            </MenuItem>
-          )}
-          <MenuItem onClick={() => { setIsAuthDialogOpen(true); handleMobileMenuClose(); }}>
-            <ListItemIcon><PersonOutline fontSize="small" /></ListItemIcon>
-            Login
-          </MenuItem>
-        </Box>
-      )}
-    </Menu>
-  );
+  const navLinks = [
+    { label: "Home", path: "/" },
+    { label: "Storefront", path: `/shop/${shopname}` },
+    { label: "Explore Shops", path: "/shops" },
+    { label: "About", path: "/about" },
+  ];
 
   return (
-    <AppBar
-      position="fixed" // Ensure it's fixed
-      sx={{
-        zIndex: theme.zIndex.appBar, // Use theme's zIndex for consistency
-        backgroundColor: alpha(theme.palette.background.paper, 0.8), // Smoother translucent bg
-        backdropFilter: "blur(18px) saturate(180%)", // Enhanced frosted glass
-        WebkitBackdropFilter: "blur(18px) saturate(180%)",
-        boxShadow: theme.shadows[3], // Use theme shadows for modern depth
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.12)}`, // Subtle bottom border
-        color: theme.palette.text.primary, // Inherit text color from theme
-      }}
-    >
-      <Toolbar
+    <>
+      <AppBar
+        position="fixed"
+        elevation={0}
         sx={{
-          justifyContent: "space-between",
-          height: 64, // Standard app bar height
-          px: { xs: 2, md: 3 }, // Responsive padding
+          zIndex: theme.zIndex.appBar,
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.07)",
+          color: "#18181b",
+          transition: "all 0.3s ease",
         }}
       >
-        {/* Logo/Title Section */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            cursor: "pointer",
-          }}
-          onClick={() => router.push(`/`)}
-        >
-          {isUpdatingBrand ? (
-            <BouncingEllipsis>
-              <span></span>
-              <span></span>
-              <span></span>
-            </BouncingEllipsis>
-          ) : (
-            <Typography
-              variant="h6"
-              component="div"
+        <Box sx={{ maxWidth: "1400px", width: "100%", mx: "auto", px: { xs: 2, sm: 3, md: 4 } }}>
+          <Toolbar
+            disableGutters
+            sx={{
+              justifyContent: "space-between",
+              height: { xs: 62, md: 70 },
+            }}
+          >
+            {/* --- LEFT: BRAND LOGO --- */}
+            <Box
+              onClick={() => router.push("/")}
               sx={{
-                textTransform: "capitalize",
-                fontWeight: "bold",
-                color: theme.palette.primary.main,
-                transition: "opacity 0.25s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                cursor: "pointer",
+                userSelect: "none",
+                transition: "opacity 0.2s ease",
+                "&:hover": {
+                  opacity: 0.85,
+                },
+              }}
+            >
+              {isUpdatingBrand ? (
+                <BouncingEllipsis>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </BouncingEllipsis>
+              ) : (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      backgroundColor: theme.palette.primary.main,
+                      boxShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.6)}`,
+                    }}
+                  />
+                  <Typography
+                    variant="h5"
+                    component="div"
+                    sx={{
+                      fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+                      fontWeight: 700,
+                      fontSize: { xs: "1.45rem", sm: "1.7rem", md: "1.9rem" },
+                      letterSpacing: "-0.02em",
+                      color: "#18181b",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {displayedBrand}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* --- CENTER: DESKTOP NAVIGATION LINKS --- */}
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              {navLinks.map((link) => {
+                const active = isNavActive(link.path);
+                return (
+                  <Button
+                    key={link.path}
+                    onClick={() => router.push(link.path)}
+                    sx={{
+                      px: 2,
+                      py: 0.8,
+                      borderRadius: "20px",
+                      fontSize: "0.86rem",
+                      fontWeight: active ? 700 : 500,
+                      letterSpacing: "0.02em",
+                      textTransform: "none",
+                      color: active ? theme.palette.primary.main : "#52525b",
+                      backgroundColor: active ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                      transition: "all 0.25s ease",
+                      "&:hover": {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                        color: theme.palette.primary.main,
+                        transform: "translateY(-1px)",
+                      },
+                    }}
+                  >
+                    {link.label}
+                  </Button>
+                );
+              })}
+            </Box>
+
+            {/* --- RIGHT: DESKTOP USER ACTIONS & CART --- */}
+            <Box
+              sx={{
+                display: { xs: "none", sm: "flex" },
+                alignItems: "center",
+                gap: 1.5,
+              }}
+            >
+              {user && (
+                <>
+                  <Tooltip title="Order History" arrow>
+                    <IconButton
+                      onClick={() => router.push("/orderhistory")}
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        color: "#52525b",
+                        transition: "all 0.25s ease",
+                        "&:hover": {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                          color: theme.palette.primary.main,
+                        },
+                      }}
+                    >
+                      <HistoryOutlined sx={{ fontSize: "1.3rem" }} />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title="Notifications" arrow>
+                    <IconButton
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        color: "#52525b",
+                        transition: "all 0.25s ease",
+                        "&:hover": {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                          color: theme.palette.primary.main,
+                        },
+                      }}
+                    >
+                      <Badge
+                        variant="dot"
+                        sx={{
+                          "& .MuiBadge-badge": {
+                            backgroundColor: theme.palette.primary.main,
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                          },
+                        }}
+                      >
+                        <NotificationsNoneOutlined sx={{ fontSize: "1.3rem" }} />
+                      </Badge>
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+
+              {/* Shopping Bag Button */}
+              <CartMenu ref={cartRef} />
+
+              {/* User Account / Sign In */}
+              {user ? (
+                <Box>
+                  <Button
+                    onClick={handleUserMenuOpen}
+                    aria-controls={isUserMenuOpen ? "user-account-menu" : undefined}
+                    aria-haspopup="true"
+                    endIcon={<KeyboardArrowDownIcon sx={{ fontSize: "1.1rem !important", color: "#71717a" }} />}
+                    sx={{
+                      borderRadius: "30px",
+                      px: 1.5,
+                      py: 0.6,
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      backgroundColor: "#fafafa",
+                      textTransform: "none",
+                      color: "#18181b",
+                      transition: "all 0.25s ease",
+                      "&:hover": {
+                        backgroundColor: "#f4f4f5",
+                        borderColor: alpha(theme.palette.primary.main, 0.3),
+                      },
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        mr: 1,
+                        bgcolor: theme.palette.primary.main,
+                        color: "#ffffff",
+                        fontSize: "0.82rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {username ? username[0].toUpperCase() : "U"}
+                    </Avatar>
+                    <Typography sx={{ fontSize: "0.84rem", fontWeight: 600, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {username || "Account"}
+                    </Typography>
+                  </Button>
+
+                  <Menu
+                    id="user-account-menu"
+                    anchorEl={anchorEl}
+                    open={isUserMenuOpen}
+                    onClose={() => handleUserMenuClose(null)}
+                    PaperProps={{
+                      elevation: 0,
+                      sx: {
+                        mt: 1.5,
+                        minWidth: 220,
+                        borderRadius: "16px",
+                        boxShadow: "0 16px 36px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
+                        border: "1px solid rgba(0,0,0,0.08)",
+                        p: 1,
+                      },
+                    }}
+                    transformOrigin={{ horizontal: "right", vertical: "top" }}
+                    anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                  >
+                    <Box sx={{ px: 1.5, py: 1, mb: 0.5 }}>
+                      <Typography sx={{ fontSize: "0.75rem", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>
+                        Signed in as
+                      </Typography>
+                      <Typography sx={{ fontSize: "0.9rem", fontWeight: 700, color: "#18181b" }}>
+                        {username}
+                      </Typography>
+                    </Box>
+
+                    <Divider sx={{ my: 0.8, borderColor: "rgba(0,0,0,0.06)" }} />
+
+                    <MenuItem
+                      onClick={() => handleUserMenuClose("/profile")}
+                      sx={{
+                        borderRadius: "10px",
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                        py: 1,
+                        "&:hover": { backgroundColor: alpha(theme.palette.primary.main, 0.06), color: theme.palette.primary.main },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
+                        <AccountCircleOutlined fontSize="small" />
+                      </ListItemIcon>
+                      My Profile
+                    </MenuItem>
+
+                    <MenuItem
+                      onClick={() => handleUserMenuClose("/orderhistory")}
+                      sx={{
+                        borderRadius: "10px",
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                        py: 1,
+                        "&:hover": { backgroundColor: alpha(theme.palette.primary.main, 0.06), color: theme.palette.primary.main },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
+                        <HistoryOutlined fontSize="small" />
+                      </ListItemIcon>
+                      Order History
+                    </MenuItem>
+
+                    <MenuItem
+                      onClick={() => handleUserMenuClose(`/shop/${shopname}`)}
+                      sx={{
+                        borderRadius: "10px",
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                        py: 1,
+                        "&:hover": { backgroundColor: alpha(theme.palette.primary.main, 0.06), color: theme.palette.primary.main },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
+                        <ShoppingBagOutlinedIcon fontSize="small" />
+                      </ListItemIcon>
+                      Storefront
+                    </MenuItem>
+
+                    <Divider sx={{ my: 0.8, borderColor: "rgba(0,0,0,0.06)" }} />
+
+                    <MenuItem
+                      onClick={handleLogout}
+                      sx={{
+                        borderRadius: "10px",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        py: 1,
+                        color: "#e11d48",
+                        "&:hover": { backgroundColor: "rgba(225, 29, 72, 0.06)" },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 32, color: "#e11d48" }}>
+                        <LogoutOutlined fontSize="small" />
+                      </ListItemIcon>
+                      Sign Out
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  onClick={() => setIsAuthDialogOpen(true)}
+                  startIcon={<PersonOutline sx={{ fontSize: "1.1rem" }} />}
+                  sx={{
+                    borderRadius: "30px",
+                    px: 2.8,
+                    py: 0.8,
+                    fontSize: "0.84rem",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderColor: "rgba(0,0,0,0.18)",
+                    color: "#18181b",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      borderColor: theme.palette.primary.main,
+                      color: theme.palette.primary.main,
+                      backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  Sign In
+                </Button>
+              )}
+            </Box>
+
+            {/* --- MOBILE ACTIONS & HAMBURGER --- */}
+            <Box sx={{ display: { xs: "flex", sm: "none" }, alignItems: "center", gap: 0.5 }}>
+              {(user || sessionId) && <CartMenu ref={cartRef} />}
+              <IconButton
+                aria-label="Open Navigation Menu"
+                onClick={() => setIsMobileDrawerOpen(true)}
+                sx={{
+                  color: "#18181b",
+                  width: 42,
+                  height: 42,
+                  borderRadius: "50%",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.04)",
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </Box>
+      </AppBar>
+
+      {/* --- LUXURY MOBILE NAVIGATION DRAWER --- */}
+      <Drawer
+        anchor="right"
+        open={isMobileDrawerOpen}
+        onClose={() => setIsMobileDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 300,
+            maxWidth: "85vw",
+            backgroundColor: "#ffffff",
+            p: 2.5,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          },
+        }}
+      >
+        <Box>
+          {/* Drawer Header */}
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
+            <Typography
+              sx={{
+                fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                color: "#18181b",
               }}
             >
               {displayedBrand}
             </Typography>
-          )}
-        </Box>
-
-        {/* Desktop Navigation & User Actions */}
-        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 2 }}>
-          <Tooltip title="Mall">
-            <IconButton onClick={() => router.push(`/shops`)} sx={{
-              color: theme.palette.primary.main,
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.primary.main, 0.08),
-              },
-            }}
+            <IconButton
+              size="small"
+              onClick={() => setIsMobileDrawerOpen(false)}
+              sx={{
+                borderRadius: "50%",
+                border: "1px solid rgba(0,0,0,0.08)",
+                color: "#71717a",
+              }}
             >
-              <StoreOutlinedIcon />
+              <CloseIcon fontSize="small" />
             </IconButton>
-          </Tooltip>
+          </Box>
 
-          {user && (
-            <>
-              <Tooltip title="Home">
-                <IconButton onClick={() => router.push(`/`)} sx={{
-                  color: theme.palette.primary.main,
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-                >
-                  <HomeOutlinedIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Shop">
-                <IconButton onClick={() => router.push(`/shop/${shopname}`)} sx={{
-                  color: theme.palette.primary.main,
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-                >
-                  <ShoppingBagOutlinedIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Order History">
-                <IconButton onClick={() => router.push("/orderhistory")} sx={{
-                  color: theme.palette.primary.main,
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-                >
-                  <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
-                    <HistoryOutlined />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Notifications">
-                <IconButton sx={{
-                  color: theme.palette.primary.main,
-                  "&:hover": {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                  },
-                }}
-                >
-                  <Badge badgeContent={1} color="error" overlap="circular" variant="dot">
-                    <NotificationsNoneOutlined />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
-
-          {(user || sessionId) && <CartMenu ref={cartRef} />}
-
+          {/* User Profile Summary Card */}
           {user ? (
-            <Box>
-              <Tooltip title={username || "User Account"}>
-                <IconButton
-                  onClick={handleUserMenuOpen}
-                  aria-controls={open ? "user-menu" : undefined}
-                  aria-haspopup="true"
-                  sx={{
-                    p: 0, color: theme.palette.primary.main, "&:hover": {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                    },
-                  }} // Remove default padding for Avatar
-                >
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main, fontSize: '0.9rem' }}>
-                    {username ? username[0].toUpperCase() : <PersonOutline fontSize="small" />}
-                  </Avatar>
-                </IconButton>
-              </Tooltip>
-              <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={() => handleUserMenuClose(null)}
-                PaperProps={{
-                  elevation: 8,
-                  sx: {
-                    mt: 1.5,
-                    minWidth: 180,
-                    borderRadius: theme.shape.borderRadius * 2,
-                    backgroundColor: alpha(theme.palette.background.paper, 0.9),
-                    backdropFilter: "blur(10px) saturate(150%)",
-                    WebkitBackdropFilter: "blur(10px) saturate(150%)",
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                    py: 1,
-                  },
+            <Box
+              sx={{
+                p: 1.5,
+                mb: 2.5,
+                borderRadius: "14px",
+                backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+              }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: theme.palette.primary.main,
+                  color: "#fff",
+                  fontWeight: 700,
+                  width: 36,
+                  height: 36,
                 }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                sx={menuSx}
               >
-                <MenuItem onClick={() => handleUserMenuClose("/profile")}>
-                  <ListItemIcon><AccountCircleOutlined fontSize="small" /></ListItemIcon>
-                  Profile
-                </MenuItem>
-                <Divider sx={{ my: 1 }} />
-                <MenuItem
-                  onClick={handleLogout}
-                  sx={{ color: theme.palette.error.main, fontWeight: "medium" }}
-                >
-                  <ListItemIcon><LogoutOutlined fontSize="small" sx={{ color: theme.palette.error.main }} /></ListItemIcon>
-                  Logout
-                </MenuItem>
-              </Menu>
+                {username ? username[0].toUpperCase() : "U"}
+              </Avatar>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: "0.88rem", fontWeight: 700, color: "#18181b", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {username}
+                </Typography>
+                <Typography sx={{ fontSize: "0.72rem", color: theme.palette.primary.main, fontWeight: 600 }}>
+                  Active Member
+                </Typography>
+              </Box>
             </Box>
           ) : (
-            <Button color="inherit" onClick={() => setIsAuthDialogOpen(true)}>
-              Login
-            </Button>
+            <Box
+              sx={{
+                p: 2,
+                mb: 2.5,
+                borderRadius: "14px",
+                backgroundColor: "#fafafa",
+                border: "1px solid rgba(0,0,0,0.06)",
+                textAlign: "center",
+              }}
+            >
+              <Typography sx={{ fontSize: "0.85rem", fontWeight: 600, color: "#18181b", mb: 0.5 }}>
+                Welcome to {displayedBrand}
+              </Typography>
+              <Typography sx={{ fontSize: "0.75rem", color: "#71717a", mb: 1.5 }}>
+                Sign in to view orders and manage your account.
+              </Typography>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => {
+                  setIsMobileDrawerOpen(false);
+                  setIsAuthDialogOpen(true);
+                }}
+                sx={{
+                  borderRadius: "20px",
+                  py: 0.8,
+                  fontSize: "0.8rem",
+                  fontWeight: 700,
+                  textTransform: "none",
+                  backgroundColor: theme.palette.primary.main,
+                  color: "#ffffff",
+                }}
+              >
+                Sign In / Register
+              </Button>
+            </Box>
           )}
+
+          {/* Navigation Links */}
+          <List disablePadding>
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => {
+                  router.push("/");
+                  setIsMobileDrawerOpen(false);
+                }}
+                sx={{
+                  borderRadius: "12px",
+                  backgroundColor: router.pathname === "/" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                  color: router.pathname === "/" ? theme.palette.primary.main : "#18181b",
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                  <HomeOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Home" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => {
+                  router.push(`/shop/${shopname}`);
+                  setIsMobileDrawerOpen(false);
+                }}
+                sx={{
+                  borderRadius: "12px",
+                  backgroundColor: router.asPath.startsWith(`/shop/${shopname}`) ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                  color: router.asPath.startsWith(`/shop/${shopname}`) ? theme.palette.primary.main : "#18181b",
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                  <ShoppingBagOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Storefront Collection" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => {
+                  router.push("/shops");
+                  setIsMobileDrawerOpen(false);
+                }}
+                sx={{
+                  borderRadius: "12px",
+                  backgroundColor: router.pathname === "/shops" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                  color: router.pathname === "/shops" ? theme.palette.primary.main : "#18181b",
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                  <StoreOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Explore All Shops" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => {
+                  router.push("/about");
+                  setIsMobileDrawerOpen(false);
+                }}
+                sx={{
+                  borderRadius: "12px",
+                  backgroundColor: router.pathname === "/about" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                  color: router.pathname === "/about" ? theme.palette.primary.main : "#18181b",
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                  <InfoOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="About" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+              </ListItemButton>
+            </ListItem>
+
+            {user && (
+              <>
+                <Divider sx={{ my: 1.5, borderColor: "rgba(0,0,0,0.06)" }} />
+
+                <ListItem disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => {
+                      router.push("/orderhistory");
+                      setIsMobileDrawerOpen(false);
+                    }}
+                    sx={{
+                      borderRadius: "12px",
+                      color: "#18181b",
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                      <HistoryOutlined />
+                    </ListItemIcon>
+                    <ListItemText primary="Order History" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+                  </ListItemButton>
+                </ListItem>
+
+                <ListItem disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => {
+                      router.push("/profile");
+                      setIsMobileDrawerOpen(false);
+                    }}
+                    sx={{
+                      borderRadius: "12px",
+                      color: "#18181b",
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                      <AccountCircleOutlined />
+                    </ListItemIcon>
+                    <ListItemText primary="My Profile" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+                  </ListItemButton>
+                </ListItem>
+              </>
+            )}
+          </List>
         </Box>
 
-        {/* Mobile Navigation & User Actions */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', gap: 1 }}>
-          {(user || sessionId) && <CartMenu ref={cartRef} />}
-          <IconButton
-            size="large"
-            aria-label="show navigation menu"
-            aria-controls="mobile-menu"
-            aria-haspopup="true"
-            onClick={handleMobileMenuOpen}
-            color="inherit"
-          >
-            <MenuIcon />
-          </IconButton>
-        </Box>
-      </Toolbar>
-      {renderMobileMenu}
+        {/* Drawer Bottom Action */}
+        {user && (
+          <Box sx={{ pt: 2, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleLogout}
+              startIcon={<LogoutOutlined />}
+              sx={{
+                borderRadius: "14px",
+                py: 1,
+                color: "#e11d48",
+                borderColor: "rgba(225, 29, 72, 0.2)",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                "&:hover": {
+                  backgroundColor: "rgba(225, 29, 72, 0.05)",
+                  borderColor: "#e11d48",
+                },
+              }}
+            >
+              Sign Out
+            </Button>
+          </Box>
+        )}
+      </Drawer>
+
       <Suspense fallback={<div />}>
         <AuthDialog
           forceOpen={isAuthDialogOpen}
@@ -495,8 +846,10 @@ useEffect(() => {
           onClose={() => setIsAuthDialogOpen(false)}
         />
       </Suspense>
-    </AppBar>
+    </>
   );
 });
+
 LinksContainerComponent.displayName = "LinksContainerComponent";
+
 export default LinksContainerComponent;
