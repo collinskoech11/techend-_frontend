@@ -74,14 +74,17 @@ export const AuthApi = createApi({
     }),
     addToCart: builder.mutation({
       query: (data) => {
-        const shopname = Cookies.get("shopname") || "techend";
-        const token = Cookies.get("access");
+        const shopname = data?.shopname || Cookies.get("shopname") || "techend";
+        const token = data?.token || Cookies.get("access");
 
         return {
           url: `cart/add/${data.product}/${shopname}/`,
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+          },
+          body: {
+            quantity: data.quantity || 1,
           },
         };
       },

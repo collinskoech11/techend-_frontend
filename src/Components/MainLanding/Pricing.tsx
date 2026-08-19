@@ -160,6 +160,25 @@ const Pricing: React.FC<PricingProps> = ({ handleAuthTrigger }) => {
 
   return (
     <Box sx={{ py: 12, px: { md: 5, xs: 2 }, background: theme.palette.background.default }} id="pricing">
+      <Box sx={{ textAlign: "center", mb: 2 }}>
+        <Box 
+          sx={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: 1, 
+            px: 2, 
+            py: 0.5, 
+            borderRadius: '50px', 
+            bgcolor: alpha(theme.palette.primary.main, 0.1), 
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          }}
+        >
+          <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700, letterSpacing: 1.2 }}>
+            💎 FLEXIBLE PRICING
+          </Typography>
+        </Box>
+      </Box>
+
       <Typography
         variant="h3"
         sx={{

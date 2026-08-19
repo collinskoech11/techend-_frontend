@@ -28,21 +28,20 @@ const AccentButton = styled(Button)(({ theme }) => ({
 
 const ImageCard = styled(Box)(({ theme }) => ({
   overflow: "hidden",
-  borderRadius: "16px", // Slightly less round than before for a sharp look
+  borderRadius: "20px",
   position: 'relative',
-  zIndex: 10, // Ensure it sits above the background
-  border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-  // Updated shadow for a premium floating effect
-  boxShadow: `0 30px 60px -15px ${alpha(theme.palette.common.black, 0.3)}`,
-  transition: "transform 0.5s ease, box-shadow 0.5s ease",
-  backdropFilter: 'blur(5px)', // Subtle glass effect on the card itself
+  zIndex: 10,
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+  boxShadow: `0 30px 60px -15px ${alpha(theme.palette.common.black, 0.15)}`,
+  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+  backdropFilter: 'blur(5px)',
 
-  // "&:hover": {
-  //   transform: "translateY(-5px) scale(1.005)", // Slight lift and scale
-  //   boxShadow: `0 40px 80px -15px ${alpha(theme.palette.primary.main, 0.3)}`, // Primary color accent glow
-  // },
+  "&:hover": {
+    transform: "translateY(-6px) scale(1.01)",
+    boxShadow: `0 35px 70px -15px ${alpha(theme.palette.primary.main, 0.3)}`,
+    borderColor: alpha(theme.palette.primary.main, 0.5),
+  },
   
-  // Style for the actual image
   "& img": {
     width: "100%",
     height: "auto",
@@ -50,12 +49,6 @@ const ImageCard = styled(Box)(({ theme }) => ({
     transition: "transform 0.8s ease",
   },
   
-  // No deep hover scale on image to keep it clean, the card lift is enough
-  "&:hover img": {
-    transform: "scale(1.0)",
-  },
-  
-  // Optional: Add a subtle overlay to the image to integrate it better
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -88,12 +81,31 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
     <Box 
       sx={{ 
         py: 12, 
-        px:3,
-        background: theme.palette.background.default, // Use theme background
-        overflow: 'hidden' // Prevents layout shift from card margins
+        px: 3,
+        background: theme.palette.background.default,
+        overflow: 'hidden'
       }} 
       id="showcase"
     >
+        <Box sx={{ textAlign: "center", mb: 2 }}>
+          <Box 
+            sx={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              px: 2, 
+              py: 0.5, 
+              borderRadius: '50px', 
+              bgcolor: alpha(theme.palette.secondary.main, 0.1), 
+              border: `1px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
+            }}
+          >
+            <Typography variant="caption" sx={{ color: theme.palette.secondary.main, fontWeight: 700, letterSpacing: 1.2 }}>
+              ✨ PLATFORM SHOWCASE
+            </Typography>
+          </Box>
+        </Box>
+
         <Typography 
           variant="h3" 
           sx={{ 

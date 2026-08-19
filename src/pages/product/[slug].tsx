@@ -134,6 +134,8 @@ function ProductDetailView() {
   const handleAddToCart = async () => {
     if (!product) return;
     const access = Cookies.get("access");
+    const activeShop = product.company || Cookies.get("shopname") || shopname || "techend";
+    const activeSessionId = sessionId || localStorage.getItem("session_id");
 
     try {
       if (access) {
@@ -141,17 +143,17 @@ function ProductDetailView() {
           product: product.id,
           quantity,
           token: access,
-          shopname: Cookies.get("shopname") || product.company || shopname,
+          shopname: activeShop,
         }).unwrap();
-      } else if (sessionId) {
+      } else if (activeSessionId) {
         await addToCartGuest({
           productId: product.id.toString(),
           quantity,
-          sessionId,
-          companyName: product.company || shopname,
+          sessionId: activeSessionId,
+          companyName: activeShop,
         }).unwrap();
       } else {
-        toast.error("Could not add item to cart. Please refresh the page.");
+        toast.error("Could not initialize cart session. Please refresh the page.");
         return;
       }
 
