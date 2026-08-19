@@ -51,6 +51,8 @@ import {
   useGetProductsQuery,
   useAddToCartMutation,
   useAddToCartGuestMutation,
+  useAddProductQtyToCartMutation,
+  useRemoveProductFromCartMutation,
 } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import ProductCard from "@/Components/ProductCard";
@@ -82,7 +84,7 @@ function ProductDetailView() {
   const initialShop = (typeof router.query.shop === "string" ? router.query.shop : Cookies.get("shopname")) || "techend";
   const [shopname, setShopName] = useState(initialShop);
 
-  const { sessionId, refetch: cart_refetch } = useCart();
+  const { data: cartData, sessionId, refetch: cart_refetch } = useCart();
   const { data: product, isLoading, error } = useGetProductQuery(slug, {
     skip: !slug,
   });
@@ -90,13 +92,14 @@ function ProductDetailView() {
   const targetShop = product?.company || shopname;
 
   useEffect(() => {
-    if (product?.company) {
-      setShopName(product.company);
-      if (Cookies.get("shopname") !== product.company) {
-        Cookies.set("shopname", product.company, { expires: 7, sameSite: "Lax" });
+    const activeCompanySlug = product?.company_slug || (typeof product?.company === "string" && isNaN(Number(product.company)) ? product.company : null);
+    if (activeCompanySlug) {
+      setShopName(activeCompanySlug);
+      if (Cookies.get("shopname") !== activeCompanySlug) {
+        Cookies.set("shopname", activeCompanySlug, { expires: 7, sameSite: "Lax" });
       }
     }
-  }, [product?.company]);
+  }, [product?.company_slug, product?.company]);
 
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -104,7 +107,22 @@ function ProductDetailView() {
 
   const [addToCartAuth, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
   const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
-  const isAddingToCart = isAddingToCartAuth || isAddingToCartGuest;
+  const [updateQty, { isLoading: isUpdatingQty }] = useAddProductQtyToCartMutation();
+  const [deleteItem, { isLoading: isDeletingItem }] = useRemoveProductFromCartMutation();
+
+  const isAddingToCart = isAddingToCartAuth || isAddingToCartGuest || isUpdatingQty || isDeletingItem;
+
+  // Check if current product is already in cart
+  const cartItem = React.useMemo(() => {
+    if (!cartData?.items || !product) return null;
+    return cartData.items.find((item: any) => {
+      const itemId = item?.product?.id ?? item?.product;
+      const itemSlug = item?.product?.slug;
+      return (itemId && itemId === product.id) || (itemSlug && itemSlug === product.slug);
+    });
+  }, [cartData?.items, product]);
+
+  const cartQuantity = cartItem?.quantity || 0;
 
   // Query related products from same shop
   const { data: relatedData } = useGetProductsQuery(
@@ -701,6 +719,26 @@ function ProductDetailView() {
                     >
                       {product.description}
                     </Typography>
+                  )}
+
+                  {/* In-Cart Notification Banner */}
+                  {cartQuantity > 0 && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.2,
+                        p: 1.8,
+                        borderRadius: "14px",
+                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                        border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`,
+                      }}
+                    >
+                      <CheckCircleOutlineIcon sx={{ color: theme.palette.primary.main, fontSize: "1.3rem" }} />
+                      <Typography sx={{ fontSize: "0.88rem", fontWeight: 700, color: theme.palette.primary.main }}>
+                        Already in your bag ({cartQuantity} {cartQuantity === 1 ? "item" : "items"})
+                      </Typography>
+                    </Box>
                   )}
 
                   {/* Purchase Action Section */}

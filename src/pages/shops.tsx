@@ -1,58 +1,86 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/router";
+import Image from "next/image";
 import { useGetCompaniesQuery } from "@/Api/services";
-import { Company, CompanyCardProps } from "@/Types";
+import { Company } from "@/Types";
 import {
   Box,
   Typography,
-  Grid,
+  Container,
+  TextField,
+  InputAdornment,
   Chip,
   Skeleton,
   Tooltip,
   Button,
+  useTheme,
+  alpha,
+  styled,
 } from "@mui/material";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SearchIcon from "@mui/icons-material/Search";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import toast from "react-hot-toast";
-import { GreenButton } from "@/StyledComponents/Buttons";
-import {
-  ProductItemStyled as CompanyCardStyled,
-  ProductImage,
-  ProductImageWrapper,
-  ProductInfoContainer,
-  // ProductOverlay, // Removed because it is not exported
-} from "@/StyledComponents/Products";
-import {
-  ProductTitle,
-  ProductDescription,
-} from "@/StyledComponents/Typos";
-// import {
-//   HeroSection,
-//   HeroGraphic,
-// } from "@/StyledComponents/Hero"; // Make sure these exist and are styled
 
-// --- Skeletons ---
-const BannerSkeleton: React.FC = () => (
-  <Skeleton variant="rectangular" animation="wave" height={200} sx={{ borderRadius: 3, mb: 5 }} />
-);
+// --- ForwardRef Grid wrapper honoring MUI v5 size prop ---
+const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
+  const { size, children, ...rest } = props;
+  if (size && typeof size === "object") {
+    return <Box ref={ref} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }, gap: 3 }} {...rest}>{children}</Box>;
+  }
+  return <Box ref={ref} {...rest}>{children}</Box>;
+});
 
-const CompanyCardSkeleton: React.FC = () => (
-  <CompanyCardStyled>
-    <Skeleton variant="rectangular" animation="wave" height={200} />
-    <ProductInfoContainer>
-      <Skeleton animation="wave" height={30} width="60%" style={{ marginBottom: 6 }} />
-      <Skeleton animation="wave" height={20} width="90%" />
-      <Skeleton animation="wave" height={20} width="80%" />
-    </ProductInfoContainer>
-  </CompanyCardStyled>
-);
+// --- Styled Glass Card ---
+const ShopCard = styled(Box)(({ theme }) => ({
+  borderRadius: "24px",
+  overflow: "hidden",
+  backgroundColor: "#ffffff",
+  border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
+  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+  display: "flex",
+  flexDirection: "column",
+  position: "relative",
+  cursor: "pointer",
 
-// --- Company Card ---
-const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
+  "&:hover": {
+    transform: "translateY(-8px)",
+    boxShadow: `0 24px 48px -12px ${alpha(theme.palette.primary.main, 0.18)}`,
+    borderColor: alpha(theme.palette.primary.main, 0.35),
+
+    "& .shop-logo": {
+      transform: "scale(1.05)",
+    },
+    "& .visit-btn": {
+      backgroundColor: theme.palette.primary.main,
+      color: "#ffffff",
+      transform: "translateX(4px)",
+    },
+  },
+}));
+
+const CardBanner = styled(Box)(({ theme }) => ({
+  position: "relative",
+  width: "100%",
+  height: 180,
+  backgroundColor: alpha(theme.palette.primary.main, 0.06),
+  overflow: "hidden",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+// --- Company Card Component ---
+const CompanyCardItem: React.FC<{ company: Company }> = ({ company }) => {
+  const theme = useTheme();
   const router = useRouter();
-  const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/dqokryv6u/';
-  const FALLBACK_IMAGE_URL = '/assets/techendbanner.png';
+  const CLOUDINARY_BASE_URL = "https://res.cloudinary.com/dqokryv6u/";
+  const FALLBACK_IMAGE_URL = "/assets/techendbanner.png";
 
   const initialLogoUrl = company.logo_image
     ? `${CLOUDINARY_BASE_URL}${company.logo_image}`
@@ -60,177 +88,334 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
 
   const [imgSrc, setImgSrc] = useState(initialLogoUrl);
 
-  const handleImageError = () => {
-    setImgSrc(FALLBACK_IMAGE_URL);
-  };
-
   const handleVisitShop = () => {
-    router.push(`/shop/${company.sluggified_name}`);
+    const slug = company.sluggified_name || company.name?.toLowerCase().replace(/\s+/g, "-");
+    router.push(`/shop/${slug}`);
   };
 
   return (
-    <CompanyCardStyled>
-      <ProductImageWrapper>
-        <ProductImage loading="lazy" src={imgSrc} alt={`${company.name} logo`} onError={handleImageError} width={500} height={300} />
-        <Box className="overlay" sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(0,0,0,0.3)',
-          opacity: 0,
-          transition: 'opacity 0.3s',
-          '&:hover': { opacity: 1 }
-        }}>
-          <GreenButton onClick={handleVisitShop}>Visit Shop</GreenButton>
-        </Box>
-      </ProductImageWrapper>
-      <ProductInfoContainer>
-        <Box sx={{ gap: 1, mb: 1 }}>
-          <ProductTitle sx={{ mb: 0, flexGrow: 1 }}>{company.name}</ProductTitle>
-          {company.kyc_approved && (
-            <Tooltip title="This company has been verified by our team.">
-              <Chip
-                icon={<CheckCircleIcon style={{ color: 'inherit' }} />}
-                label="Verified"
-                color="success"
-                size="small"
-                variant="outlined"
-              />
-            </Tooltip>
+    <ShopCard onClick={handleVisitShop}>
+      <CardBanner>
+        <Image
+          className="shop-logo"
+          src={imgSrc}
+          alt={`${company.name} logo`}
+          onError={() => setImgSrc(FALLBACK_IMAGE_URL)}
+          fill
+          sizes="(max-width: 768px) 100vw, 320px"
+          style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
+        />
+
+        {company.kyc_approved && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              zIndex: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1.2,
+              py: 0.4,
+              borderRadius: "20px",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backdropFilter: "blur(8px)",
+              color: "#10b981",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            }}
+          >
+            <VerifiedIcon sx={{ fontSize: "0.95rem" }} />
+            <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.72rem", color: "#065f46" }}>
+              Verified
+            </Typography>
+          </Box>
+        )}
+      </CardBanner>
+
+      <Box sx={{ p: 3, flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <Box>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              fontSize: "1.25rem",
+              color: "#18181b",
+              mb: 1,
+              lineHeight: 1.2,
+            }}
+          >
+            {company.name}
+          </Typography>
+
+          {company.city && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1.5, color: "#71717a" }}>
+              <LocationOnIcon sx={{ fontSize: "0.9rem", color: theme.palette.primary.main }} />
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                {company.city}{company.country ? `, ${company.country}` : ""}
+              </Typography>
+            </Box>
           )}
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#52525b",
+              lineHeight: 1.6,
+              fontSize: "0.88rem",
+              mb: 2,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {company.description || "Discover premium products and collections directly from this storefront."}
+          </Typography>
         </Box>
-        <ProductDescription>
-          {company.description?.length > 100
-            ? `${company.description.substring(0, 100)}...`
-            : company.description}
-        </ProductDescription>
-      </ProductInfoContainer>
-    </CompanyCardStyled>
+
+        <Box
+          sx={{
+            pt: 2,
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700 }}>
+            Browse Storefront
+          </Typography>
+          <Button
+            className="visit-btn"
+            size="small"
+            endIcon={<ArrowForwardIcon sx={{ fontSize: "0.9rem !important" }} />}
+            sx={{
+              borderRadius: "20px",
+              px: 2,
+              py: 0.6,
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              textTransform: "none",
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              color: theme.palette.primary.main,
+              transition: "all 0.25s ease",
+            }}
+          >
+            Visit
+          </Button>
+        </Box>
+      </Box>
+    </ShopCard>
   );
 };
 
-// --- Hero Banner ---
-const HeroBanner: React.FC = () => {
-  // const handleAuthTrigger = () => {
-    // Optional: Replace with your real auth modal or route
-  // };
-
-  return (
-    // <HeroSection onClick={handleAuthTrigger}>
-      // {/* Floating Graphics */}
-      //{/* <HeroGraphic sx={{ width: 100, height: 100, top: '10%', left: '10%', animationDelay: '0s' }} />
-      // <HeroGraphic sx={{ width: 150, height: 150, bottom: '15%', right: '10%', animationDelay: '1s' }} />
-      // <HeroGraphic sx={{ width: 70, height: 70, top: '20%', right: '5%', animationDelay: '0.5s' }} />
-      // <HeroGraphic sx={{ width: 120, height: 120, bottom: '5%', left: '5%', animationDelay: '1.5s' }} />
-// 
-      // <Suspense fallback={<div>Loading...</div>}>
-//        <Zoom duration={1200}>
-//          <Box sx={{
-//            position: 'relative',
-//            zIndex: 2,
-//            px: { xs: 2, sm: 4, md: 3 },
-//            py: { xs: 8, sm: 10, md: 4 },
-//            maxWidth: '1000px',
-//            mx: 'auto',
-//          }}>
-//            <Typography
-//              variant="h2"
-//              sx={{
-//                fontWeight: 900,
-//                mb: { xs: 2, md: 3 },
-//                color: "#fff",
-//                fontSize: {
-//                  xs: '2.4rem',
-//                  sm: '2.8rem',
-//                },
-//                lineHeight: { xs: 1.1, sm: 1.05, md: 1 },
-//                letterSpacing: { xs: '-0.02em', md: '-0.03em' },
-//              }}
-//            >
-//              <Suspense fallback={<div>Loading...</div>}>
-//                <Typewriter
-//                  options={{
-//                    strings: ["Explore Shops"],
-//                    autoStart: true,
-//                    loop: true,
-//                  }}
-//                />
-//              </Suspense>
-//            </Typography>
-//          </Box>
-//        </Zoom>
-      // </Suspense> */}
-    // </HeroSection>
-    <></>
-  );
-};
-
-// --- Main Component ---
+// --- Main Page Component ---
 const CompaniesList: React.FC = () => {
+  const theme = useTheme();
   const [page, setPage] = useState(1);
-  const { data: companiesData, error, isLoading } = useGetCompaniesQuery({ page });
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: companiesData, error, isLoading } = useGetCompaniesQuery({ page, page_size: 12 });
 
-  if (isLoading) {
-    return (
-      <Box sx={{ p: { xs: 2, md: 3 } }}>
-        <BannerSkeleton />
-        <Grid container spacing={3}>
-          {Array.from(new Array(8)).map((_, index) => (
-            <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
-              <CompanyCardSkeleton />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
+  const filteredCompanies = useMemo(() => {
+    if (!companiesData?.results) return [];
+    if (!searchQuery.trim()) return companiesData.results;
+    return companiesData.results.filter((c: Company) =>
+      c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.city?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }
-
-  if (error) {
-    toast.error("Failed to load company data.");
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <Typography color="error">Could not retrieve companies. Please try again later.</Typography>
-      </Box>
-    );
-  }
+  }, [companiesData?.results, searchQuery]);
 
   return (
-    <Box sx={{ pt: 8 }}>
-      <HeroBanner />
-      <Box sx={{ p: { xs: 2, md: 3 } }}>
-        <Grid container spacing={3}>
-          {companiesData && companiesData.results.length > 0 ? (
-            companiesData.results.map((company: Company) => (
-              <Grid item key={company.id} xs={12} sm={6} md={4} lg={3}>
-                <CompanyCard company={company} />
-              </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <Typography sx={{ p: 3, textAlign: 'center' }}>No companies are available at the moment.</Typography>
-            </Grid>
-          )}
-        </Grid>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <Button
-            disabled={!companiesData?.previous}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </Button>
-          <Button
-            disabled={!companiesData?.next}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </Button>
-        </Box>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
+      {/* --- HERO SECTION --- */}
+      <Box
+        sx={{
+          position: "relative",
+          overflow: "hidden",
+          py: { xs: 8, md: 12 },
+          backgroundColor: "#ffffff",
+          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          backgroundImage: `
+            radial-gradient(circle at 10% 20%, ${alpha(theme.palette.primary.main, 0.04)} 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, ${alpha(theme.palette.secondary.main, 0.04)} 0%, transparent 40%)
+          `,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: "center", maxWidth: "800px", mx: "auto" }}>
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                px: 2.5,
+                py: 0.75,
+                borderRadius: "50px",
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                mb: 3,
+              }}
+            >
+              <StorefrontIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.main }} />
+              <Typography variant="caption" sx={{ fontWeight: 800, color: theme.palette.primary.main, letterSpacing: 1 }}>
+                DISCOVER CERTIFIED MERCHANTS
+              </Typography>
+            </Box>
+
+            <Typography
+              variant="h1"
+              sx={{
+                fontWeight: 900,
+                fontSize: { xs: "2.4rem", sm: "3.2rem", md: "4rem" },
+                color: "#18181b",
+                lineHeight: 1.15,
+                mb: 2.5,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Explore Top <span style={{ color: theme.palette.primary.main }}>Independent Shops</span>
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                fontSize: { xs: "1.05rem", md: "1.2rem" },
+                color: "#71717a",
+                lineHeight: 1.7,
+                mb: 5,
+                maxWidth: "650px",
+                mx: "auto",
+              }}
+            >
+              Connect with vetted brand storefronts, local artisans, and enterprise merchants powered by SokoJunction.
+            </Typography>
+
+            {/* Search Bar */}
+            <Box sx={{ maxWidth: "600px", mx: "auto" }}>
+              <TextField
+                fullWidth
+                placeholder="Search shops by name, category, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: theme.palette.primary.main, fontSize: "1.4rem" }} />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    borderRadius: "50px",
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0 12px 32px rgba(0, 0, 0, 0.06)",
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+                    fontSize: "0.98rem",
+                    py: 0.5,
+                    px: 1,
+                    "& fieldset": { border: "none" },
+                  },
+                }}
+              />
+            </Box>
+          </Box>
+        </Container>
       </Box>
+
+      {/* --- SHOPS GRID CONTAINER --- */}
+      <Container maxWidth="lg" sx={{ mt: { xs: 6, md: 8 } }}>
+        {isLoading ? (
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }, gap: 3 }}>
+            {Array.from(new Array(8)).map((_, idx) => (
+              <Box key={idx} sx={{ borderRadius: "24px", overflow: "hidden", border: "1px solid #e4e4e7", backgroundColor: "#fff", p: 2 }}>
+                <Skeleton variant="rectangular" width="100%" height={160} sx={{ borderRadius: "16px", mb: 2 }} />
+                <Skeleton width="60%" height={28} sx={{ mb: 1 }} />
+                <Skeleton width="40%" height={20} sx={{ mb: 2 }} />
+                <Skeleton width="100%" height={40} />
+              </Box>
+            ))}
+          </Box>
+        ) : error ? (
+          <Box sx={{ textAlignment: "center", py: 8 }}>
+            <Typography variant="h6" color="error">
+              Could not retrieve merchant storefronts. Please try again later.
+            </Typography>
+          </Box>
+        ) : filteredCompanies.length === 0 ? (
+          <Box sx={{ textAlign: "center", py: 10, backgroundColor: "#ffffff", borderRadius: "24px", p: 6, border: "1px solid rgba(0,0,0,0.06)" }}>
+            <StorefrontIcon sx={{ fontSize: "3.5rem", color: "#a1a1aa", mb: 2 }} />
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: "#18181b" }}>
+              No Shops Found
+            </Typography>
+            <Typography color="text.secondary">
+              We couldn't find any merchant matching "{searchQuery}". Try searching another keyword.
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }, gap: 3 }}>
+              {filteredCompanies.map((company: Company) => (
+                <CompanyCardItem key={company.id} company={company} />
+              ))}
+            </Box>
+
+            {/* Pagination controls */}
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, mt: 8 }}>
+              <Button
+                variant="outlined"
+                disabled={!companiesData?.previous}
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                startIcon={<NavigateBeforeIcon />}
+                sx={{
+                  borderRadius: "30px",
+                  px: 3,
+                  py: 1,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+              >
+                Previous Page
+              </Button>
+
+              <Chip
+                label={`Page ${page}`}
+                sx={{
+                  fontWeight: 800,
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  color: theme.palette.primary.main,
+                  px: 1,
+                }}
+              />
+
+              <Button
+                variant="outlined"
+                disabled={!companiesData?.next}
+                onClick={() => setPage((prev) => prev + 1)}
+                endIcon={<NavigateNextIcon />}
+                sx={{
+                  borderRadius: "30px",
+                  px: 3,
+                  py: 1,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+              >
+                Next Page
+              </Button>
+            </Box>
+          </>
+        )}
+      </Container>
     </Box>
   );
 };
