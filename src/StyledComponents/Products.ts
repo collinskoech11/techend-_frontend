@@ -103,28 +103,24 @@ export const ProductItemStyled = styled(Card)(({ theme }) => ({
 
 export const ProductImageWrapper = styled(Box)({
   width: "100%",
-  aspectRatio: "4 / 4.5",
+  height: 200,
+  position: "relative",
+  backgroundColor: "#f4f4f5",
+  overflow: "hidden",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  overflow: "hidden",
-  position: "relative",
-  backgroundColor: "#f8f9fa",
-  borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
 });
 
 export const ProductImage = styled(Image)<ImageProps>(({ theme }) => ({
   width: "100%",
   height: "100%",
-  objectFit: "contain",
-  padding: "10px",
-  [theme.breakpoints.up("sm")]: {
-    padding: "16px",
-  },
+  objectFit: "cover",
+  padding: 0,
   transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
 
   [`${ProductItemStyled}:hover &`]: {
-    transform: "scale(1.06)",
+    transform: "scale(1.05)",
   },
 }));
 

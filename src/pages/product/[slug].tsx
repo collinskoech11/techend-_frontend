@@ -107,8 +107,8 @@ function ProductDetailView() {
 
   const [addToCartAuth, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
   const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
-  const [updateQty, { isLoading: isUpdatingQty }] = useAddProductQtyToCartMutation();
-  const [deleteItem, { isLoading: isDeletingItem }] = useRemoveProductFromCartMutation();
+  const [, { isLoading: isUpdatingQty }] = useAddProductQtyToCartMutation();
+  const [, { isLoading: isDeletingItem }] = useRemoveProductFromCartMutation();
 
   const isAddingToCart = isAddingToCartAuth || isAddingToCartGuest || isUpdatingQty || isDeletingItem;
 
