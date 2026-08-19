@@ -76,8 +76,14 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   const [username, setUsername] = useState<string | null>(null);
-  const [user, setUser] = useState<string | undefined>(Cookies.get("username"));
+  const [user, setUser] = useState<string | undefined>(undefined);
   const [shopname, setShopName] = useState(currentShopSlug);
+
+  useEffect(() => {
+    const cUser = Cookies.get("username");
+    setUser(cUser);
+    setUsername(cUser || null);
+  }, []);
 
   const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(displayShopName, {
     skip: isDefaultBrandPage || !displayShopName || displayShopName.toLowerCase() === "sokojunction",

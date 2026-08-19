@@ -134,7 +134,13 @@ function ProductDetailView() {
   const handleAddToCart = async () => {
     if (!product) return;
     const access = Cookies.get("access");
-    const activeShop = product.company || Cookies.get("shopname") || shopname || "techend";
+    const activeShop =
+      (typeof router.query.shop === "string" ? router.query.shop : null) ||
+      product.company_slug ||
+      Cookies.get("shopname") ||
+      product.company ||
+      shopname ||
+      "techend";
     const activeSessionId = sessionId || localStorage.getItem("session_id");
 
     try {
