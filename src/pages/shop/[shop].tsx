@@ -605,8 +605,8 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
       {/* --- PRODUCTS & COLLECTION SECTION --- */}
       <Box sx={{ maxWidth: "1400px", mx: "auto", px: { xs: 2.5, sm: 4, md: 6 }, py: { xs: 4, md: 6 } }}>
-        {/* Section Heading & Category Tabs */}
-        <Box sx={{ mb: 4 }}>
+        {/* Section Heading */}
+        <Box sx={{ mb: 3 }}>
           <Box
             sx={{
               display: "flex",
@@ -614,7 +614,6 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
               alignItems: { xs: "flex-start", sm: "flex-end" },
               justifyContent: "space-between",
               gap: 2,
-              mb: 3,
             }}
           >
             <Box>
@@ -630,17 +629,37 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
               Showing {products.length} of {totalCount} items
             </Typography>
           </Box>
+        </Box>
 
-          {/* Dynamic Category Chips Bar */}
+        {/* --- STICKY CATEGORIES BAR --- */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: { xs: 62, md: 70 },
+            zIndex: 90,
+            backgroundColor: "rgba(255, 255, 255, 0.94)",
+            backdropFilter: "blur(18px) saturate(180%)",
+            WebkitBackdropFilter: "blur(18px) saturate(180%)",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            py: 1.5,
+            mb: 3,
+            mx: { xs: -2.5, sm: -4, md: -6 },
+            px: { xs: 2.5, sm: 4, md: 6 },
+            transition: "all 0.25s ease",
+          }}
+        >
+          {/* Dynamic Category Chips Scroll Area */}
           <Box
             sx={{
+              maxWidth: "1400px",
+              mx: "auto",
               display: "flex",
               alignItems: "center",
               gap: 1.2,
               overflowX: "auto",
-              pb: 1.5,
               scrollbarWidth: "none",
               "&::-webkit-scrollbar": { display: "none" },
+              py: 0.2,
             }}
           >
             {availableCategories.map((cat) => {
@@ -651,19 +670,22 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
                   onClick={() => handleCategorySelect(cat.value)}
                   size="small"
                   sx={{
+                    width: "auto",
+                    minWidth: "fit-content",
+                    flexShrink: 0,
                     whiteSpace: "nowrap",
-                    px: 2.2,
+                    px: { xs: 2, sm: 2.5 },
                     py: 0.8,
                     borderRadius: "30px",
-                    fontSize: "0.82rem",
+                    fontSize: "0.84rem",
                     fontWeight: isSelected ? 700 : 500,
                     textTransform: "none",
                     letterSpacing: "0.02em",
                     backgroundColor: isSelected
                       ? theme.palette.primary.main
                       : "rgba(0, 0, 0, 0.04)",
-                    color: isSelected ? "#ffffff" : "#3f3f46",
-                    border: `1px solid ${isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)"}`,
+                    color: isSelected ? "#ffffff" : "#27272a",
+                    border: `1px solid ${isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)"}`,
                     boxShadow: isSelected
                       ? `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`
                       : "none",

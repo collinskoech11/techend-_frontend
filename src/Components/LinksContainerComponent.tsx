@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef, lazy, Suspense } from "react";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
   AppBar,
@@ -21,9 +22,7 @@ import {
   ListItemButton,
   ListItemText,
   alpha,
-  styled,
 } from "@mui/material";
-import { keyframes } from "@emotion/react";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonOutline from "@mui/icons-material/PersonOutline";
@@ -41,7 +40,7 @@ import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import { CartMenu } from "./CartMin";
 
-const AuthDialog = lazy(() => import("./AuthDialog"));
+const AuthDialog = dynamic(() => import("./AuthDialog"), { ssr: false });
 
 const DEFAULT_BRAND_URLS = [
   "/shops",
@@ -54,38 +53,22 @@ const DEFAULT_BRAND_URLS = [
   "/login",
 ];
 
-const bounce = keyframes`
-  0%, 80%, 100% { transform: scale(0); } 
-  40% { transform: scale(1); }
-`;
-
-const BouncingEllipsis = styled("span")(({ theme }) => ({
-  display: "inline-block",
-  width: "24px",
-  textAlign: "left",
-  "& > span": {
-    display: "inline-block",
-    width: "5px",
-    height: "5px",
-    margin: "0 2px",
-    backgroundColor: theme.palette.primary.main,
-    borderRadius: "50%",
-    animation: `${bounce} 1.4s infinite ease-in-out both`,
-  },
-  "& > span:nth-of-type(1)": { animationDelay: "0s" },
-  "& > span:nth-of-type(2)": { animationDelay: "0.2s" },
-  "& > span:nth-of-type(3)": { animationDelay: "0.4s" },
-}));
-
 const LinksContainerComponent = forwardRef((_props, ref) => {
   const router = useRouter();
   const theme = useTheme();
   const cookieShop = Cookies.get("shopname");
 
+  // Determine active shop from URL query, asPath, or cookies
+  const urlShop =
+    typeof router.query.shop === "string"
+      ? router.query.shop
+      : router.asPath.startsWith("/shop/")
+      ? router.asPath.split("/shop/")[1]?.split("?")[0]
+      : null;
+
+  const currentShopSlug = urlShop || cookieShop || "Sokojunction";
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
-  const displayShopName = isDefaultBrandPage
-    ? "SokoJunction"
-    : cookieShop || "SokoJunction";
+  const displayShopName = isDefaultBrandPage ? "SokoJunction" : currentShopSlug;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isUserMenuOpen = Boolean(anchorEl);
@@ -94,10 +77,10 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
 
   const [username, setUsername] = useState<string | null>(null);
   const [user, setUser] = useState<string | undefined>(Cookies.get("username"));
-  const [shopname, setShopName] = useState(Cookies.get("shopname") || "Sokojunction");
+  const [shopname, setShopName] = useState(currentShopSlug);
 
   const { data: companyData, isLoading: companyLoading } = useGetCompanyBySlugQuery(displayShopName, {
-    skip: isDefaultBrandPage || !cookieShop,
+    skip: isDefaultBrandPage || !displayShopName || displayShopName.toLowerCase() === "sokojunction",
   });
 
   const [displayedBrand, setDisplayedBrand] = useState(
@@ -106,11 +89,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
       : displayShopName || "SokoJunction"
   );
 
-  const [isUpdatingBrand, setIsUpdatingBrand] = useState(companyLoading);
-
   useEffect(() => {
-    setIsUpdatingBrand(companyLoading);
-
     if (!companyLoading) {
       const newBrand =
         !isDefaultBrandPage && companyData?.name
@@ -171,11 +150,15 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
     if (user) setUsername(user);
   }, [user]);
 
-  // Keep shop in sync with cookies on every navigation
+  // Keep shop in sync with cookies and route changes
   useEffect(() => {
     const syncShopFromCookies = () => {
-      const cShop = Cookies.get("shopname") || "Sokojunction";
-      setShopName(cShop);
+      const activeShop =
+        (typeof router.query.shop === "string" ? router.query.shop : null) ||
+        (router.asPath.startsWith("/shop/") ? router.asPath.split("/shop/")[1]?.split("?")[0] : null) ||
+        Cookies.get("shopname") ||
+        "Sokojunction";
+      setShopName(activeShop);
 
       const cUser = Cookies.get("username");
       setUser(cUser);
@@ -188,7 +171,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
     return () => {
       router.events.off("routeChangeComplete", syncShopFromCookies);
     };
-  }, [router.events]);
+  }, [router.events, router.query, router.asPath]);
 
   const isNavActive = (path: string) => {
     if (path === "/" && router.pathname === "/") return true;
@@ -209,13 +192,17 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
         position="fixed"
         elevation={0}
         sx={{
-          zIndex: theme.zIndex.appBar,
-          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          top: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          zIndex: 1200,
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderBottom: "1px solid rgba(0, 0, 0, 0.07)",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
           color: "#18181b",
-          transition: "all 0.3s ease",
+          transition: "background-color 0.3s ease",
         }}
       >
         <Box sx={{ maxWidth: "1400px", width: "100%", mx: "auto", px: { xs: 2, sm: 3, md: 4 } }}>
@@ -241,39 +228,33 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
                 },
               }}
             >
-              {isUpdatingBrand ? (
-                <BouncingEllipsis>
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </BouncingEllipsis>
-              ) : (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      backgroundColor: theme.palette.primary.main,
-                      boxShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.6)}`,
-                    }}
-                  />
-                  <Typography
-                    variant="h5"
-                    component="div"
-                    sx={{
-                      fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-                      fontWeight: 700,
-                      fontSize: { xs: "1.45rem", sm: "1.7rem", md: "1.9rem" },
-                      letterSpacing: "-0.02em",
-                      color: "#18181b",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {displayedBrand}
-                  </Typography>
-                </Box>
-              )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    backgroundColor: theme.palette.primary.main,
+                    boxShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.6)}`,
+                    transition: "all 0.3s ease",
+                  }}
+                />
+                <Typography
+                  variant="h5"
+                  component="div"
+                  sx={{
+                    fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+                    fontWeight: 700,
+                    fontSize: { xs: "1.45rem", sm: "1.7rem", md: "1.9rem" },
+                    letterSpacing: "-0.02em",
+                    color: "#18181b",
+                    lineHeight: 1,
+                    transition: "color 0.2s ease",
+                  }}
+                >
+                  {displayedBrand}
+                </Typography>
+              </Box>
             </Box>
 
             {/* --- CENTER: DESKTOP NAVIGATION LINKS --- */}
@@ -836,16 +817,14 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
         )}
       </Drawer>
 
-      <Suspense fallback={<div />}>
-        <AuthDialog
-          forceOpen={isAuthDialogOpen}
-          onTrigger={() => {
-            refetchUser();
-            setIsAuthDialogOpen(false);
-          }}
-          onClose={() => setIsAuthDialogOpen(false)}
-        />
-      </Suspense>
+      <AuthDialog
+        forceOpen={isAuthDialogOpen}
+        onTrigger={() => {
+          refetchUser();
+          setIsAuthDialogOpen(false);
+        }}
+        onClose={() => setIsAuthDialogOpen(false)}
+      />
     </>
   );
 });

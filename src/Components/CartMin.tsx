@@ -26,12 +26,13 @@ const CartMenuComponent = forwardRef((_props: any, ref: any) => {
 
   const { data: cart_data, isLoading, refetch: cart_refetch } = useCart();
 
-  const CartItems = cart_data?.items || [];
-  const itemCount = CartItems.reduce((total: number, item: any) => total + Number(item.quantity || 0), 0);
+  const CartItems = Array.isArray(cart_data?.items) ? cart_data.items.filter(Boolean) : [];
+  const itemCount = CartItems.reduce((total: number, item: any) => total + (Number(item?.quantity) || 0), 0);
   
   const subtotal = CartItems.reduce((total: number, item: any) => {
-    const price = item.product?.on_sale ? item.product.discounted_price : item.product?.price;
-    return total + (Number(price) || 0) * (Number(item.quantity) || 1);
+    const product = typeof item?.product === "object" ? item.product : null;
+    const price = product?.on_sale ? product.discounted_price : product?.price;
+    return total + (Number(price) || 0) * (Number(item?.quantity) || 1);
   }, 0);
 
   // Expose refetch via ref

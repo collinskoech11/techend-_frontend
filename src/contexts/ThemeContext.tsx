@@ -17,11 +17,19 @@ export const ThemeProvider = ({ children }) => {
   const cookieShop = Cookies.get("shopname");
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
 
-  // Determine which shop to fetch
-  const displayShopName = isDefaultBrandPage ? "SokoJunction" : cookieShop || "SokoJunction";
+  // Determine which shop to fetch from URL query, asPath, or cookies
+  const urlShop =
+    typeof router.query.shop === "string"
+      ? router.query.shop
+      : router.asPath.startsWith("/shop/")
+      ? router.asPath.split("/shop/")[1]?.split("?")[0]
+      : null;
+
+  const activeShopSlug = urlShop || cookieShop || "SokoJunction";
+  const displayShopName = isDefaultBrandPage ? "SokoJunction" : activeShopSlug;
 
   const { data: companyData } = useGetCompanyBySlugQuery(displayShopName, {
-    skip: isDefaultBrandPage || !cookieShop,
+    skip: isDefaultBrandPage || !displayShopName || displayShopName.toLowerCase() === "sokojunction",
   });
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR);
 

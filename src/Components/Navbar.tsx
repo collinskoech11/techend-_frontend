@@ -2,8 +2,7 @@ import React, { useRef, useImperativeHandle, forwardRef } from "react";
 import LinksContainerComponent from "./LinksContainerComponent";
 
 
-const Navbar = forwardRef((props: any, ref: any) => {
-  console.log("Navbar rendered", props);
+const Navbar = forwardRef((_props: any, ref: any) => {
   const cartRef = useRef<any>(null);
   const triggerCartRefetch = () => {
     if (cartRef.current) {

@@ -32,7 +32,7 @@ import { Product } from "@/Types";
 
 interface ProductCardProps {
   product: Product;
-  triggerCartRefetch: () => void;
+  triggerCartRefetch?: () => void;
 }
 
 const getOptimizedCloudinaryUrl = (url: string, width: number, height: number) => {
@@ -89,7 +89,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
       await mutation(args).unwrap();
       cart_refetch?.();
       toast.success("Product added to cart!");
-      triggerCartRefetch();
+      triggerCartRefetch?.();
     } catch (err: any) {
       const msg = err.data?.error || "An error occurred";
       toast.error(msg);
@@ -121,7 +121,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           toast.error((res.error as any)?.data?.error || "Failed to update quantity");
         } else {
           cart_refetch?.();
-          triggerCartRefetch();
+          triggerCartRefetch?.();
         }
       } else if (sessionId) {
         await addToCartGuest({
@@ -131,7 +131,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           companyName: shopname,
         }).unwrap();
         cart_refetch?.();
-        triggerCartRefetch();
+        triggerCartRefetch?.();
       }
     } catch (err: any) {
       toast.error(err?.data?.error || "Failed to update quantity");
@@ -160,7 +160,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           } else {
             toast.success("Item removed from cart");
             cart_refetch?.();
-            triggerCartRefetch();
+            triggerCartRefetch?.();
           }
         } else {
           const res = await updateQty({
@@ -173,7 +173,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
             toast.error((res.error as any)?.data?.error || "Failed to update quantity");
           } else {
             cart_refetch?.();
-            triggerCartRefetch();
+            triggerCartRefetch?.();
           }
         }
       } else if (sessionId) {
@@ -184,7 +184,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
           companyName: shopname,
         }).unwrap();
         cart_refetch?.();
-        triggerCartRefetch();
+        triggerCartRefetch?.();
       }
     } catch (err: any) {
       toast.error(err?.data?.error || "Failed to update quantity");
@@ -215,9 +215,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, triggerCartRefetch }
   };
 
   // Render stars
-  const renderStars = (rating: number) => {
-    const full = Math.floor(rating);
-    const half = rating - full >= 0.5 ? 1 : 0;
+  const renderStars = (rating: any) => {
+    const num = typeof rating === "number" ? rating : Number(rating) || 0;
+    const valid = isNaN(num) ? 0 : Math.max(0, Math.min(5, num));
+    const full = Math.floor(valid);
+    const half = valid - full >= 0.5 ? 1 : 0;
     const empty = Math.max(0, 5 - full - half);
 
     return (

@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 import { store } from "../Api/store";
 import dynamic from "next/dynamic";
-import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import { CartProvider } from "@/contexts/CartContext";
 import Script from "next/script";
@@ -11,11 +11,7 @@ import { ThemeProvider } from "../contexts/ThemeContext";
 import DynamicTitle from "@/Components/DynamicTitle";
 import { Toaster } from "react-hot-toast";
 
-/* ✅ Proper Next.js code splitting (better than React.lazy) */
-const Navbar = dynamic(() => import("@/Components/Navbar"), {
-  ssr: false,
-  loading: () => <div style={{ height: 75 }} />,
-});
+import Navbar from "@/Components/Navbar";
 
 const Footer = dynamic(() => import("@/Components/Footer"), {
   ssr: false,
@@ -27,12 +23,8 @@ const GA_IDS: Record<string, string> = {
   "cupcoutureshop.com": "G-F2CT49B70X",
 };
 
-const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
+function App({ Component, pageProps }: AppProps) {
   const cartRef = useRef<any>(null);
-
-  useImperativeHandle(ref, () => ({
-    triggerCartRefetch: () => cartRef.current?.triggerCartRefetch?.(),
-  }));
 
   const [GA_ID, setGA_ID] = useState<string | null>(null);
 
@@ -71,7 +63,7 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
             </>
           )}
 
-          <Box sx={{ paddingBottom: { md: "50px", xs: "50px" }, mb: 3 }}>
+          <Box sx={{ minHeight: { xs: "62px", md: "70px" } }}>
             <Navbar ref={cartRef} />
           </Box>
 
@@ -84,8 +76,6 @@ const App = forwardRef(({ Component, pageProps }: AppProps, ref: any) => {
       </ThemeProvider>
     </Provider>
   );
-});
-
-App.displayName = "App";
+}
 
 export default App;
