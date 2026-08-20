@@ -42,25 +42,6 @@ const Contact = () => {
       }} 
       id="contact"
     >
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Box 
-            sx={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: 1, 
-              px: 2, 
-              py: 0.5, 
-              borderRadius: '50px', 
-              bgcolor: 'primary.light', 
-              opacity: 0.9,
-              mb: 1
-            }}
-          >
-            <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: 1.2 }}>
-              💬 GET IN TOUCH
-            </Typography>
-          </Box>
-        </Box>
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 2, textAlign: "center", color: darkText }}>
           Contact Us
         </Typography>
