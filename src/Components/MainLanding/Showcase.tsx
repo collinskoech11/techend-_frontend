@@ -1,29 +1,9 @@
 "use client";
 
 import React from "react";
-import { Box, Typography, Grid, useTheme, Theme, styled, alpha, Button } from "@mui/material";
+import { Box, Typography, Grid, useTheme, Theme, styled, alpha, Container } from "@mui/material";
 import Image from "next/image";
-// Assuming AccentButton is the GlowButton/PrimaryButton you defined previously
-// If not available, you can use a styled MUI Button here.
-// For this example, I'll use a styled Button to ensure it works.
-
-// Assuming the previous GlowButton style for consistency
-const AccentButton = styled(Button)(({ theme }) => ({
-  padding: "14px 32px",
-  borderRadius: "50px",
-  fontWeight: 700,
-  fontSize: "1rem",
-  textTransform: "none",
-  background: theme.palette.primary.main,
-  color: "#fff",
-  boxShadow: `0 0 20px ${alpha(theme.palette.primary.main, 0.5)}`,
-  transition: "all 0.3s ease",
-  "&:hover": {
-    background: theme.palette.primary.dark,
-    transform: "translateY(-3px)",
-    boxShadow: `0 0 30px ${alpha(theme.palette.primary.main, 0.7)}`,
-  },
-}));
+import { AccentButton } from "@/StyledComponents/Hero";
 
 
 const ImageCard = styled(Box)(({ theme }) => ({
@@ -80,34 +60,90 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
   return (
     <Box 
       sx={{ 
-        py: 12, 
+        py: 16, 
         px: 3,
-        background: theme.palette.background.default,
+        background: `radial-gradient(circle at 10% 20%, ${alpha(theme.palette.primary.main, 0.03)} 0%, transparent 40%), 
+                     radial-gradient(circle at 90% 80%, ${alpha(theme.palette.secondary.main, 0.03)} 0%, transparent 40%),
+                     ${theme.palette.background.default}`,
+        position: "relative",
         overflow: 'hidden'
       }} 
       id="showcase"
     >
+      {/* Decorative Blur Orbs */}
+      <Box sx={{
+        position: "absolute",
+        top: "15%",
+        left: "-10%",
+        width: "400px",
+        height: "400px",
+        borderRadius: "50%",
+        background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 70%)`,
+        filter: "blur(40px)",
+        pointerEvents: "none",
+        zIndex: 1,
+      }} />
+      <Box sx={{
+        position: "absolute",
+        bottom: "15%",
+        right: "-10%",
+        width: "400px",
+        height: "400px",
+        borderRadius: "50%",
+        background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.08)} 0%, transparent 70%)`,
+        filter: "blur(40px)",
+        pointerEvents: "none",
+        zIndex: 1,
+      }} />
 
-        <Typography 
-          variant="h3" 
-          sx={{ 
-            fontWeight: 800, 
-            mb: 10, 
-            textAlign: "center", 
-            color: colors.primary,
-            fontSize: { xs: "2rem", md: "2.5rem" } 
-          }}
-        >
-          See <span style={{ color: colors.accent }}>sokoJunction</span> in Action
-        </Typography>
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
+        <Box sx={{ textAlign: "center", mb: 12 }}>
+          <Typography
+            component="span"
+            sx={{
+              fontSize: "0.85rem",
+              fontWeight: 900,
+              textTransform: "uppercase",
+              letterSpacing: "0.15em",
+              color: theme.palette.primary.main,
+              backgroundColor: alpha(theme.palette.primary.main, 0.09),
+              px: 2.5,
+              py: 1,
+              borderRadius: "20px",
+              display: "inline-block",
+              mb: 3,
+            }}
+          >
+            Product Tour
+          </Typography>
+          <Typography 
+            variant="h2" 
+            sx={{ 
+              fontWeight: 900, 
+              color: colors.primary,
+              fontSize: { xs: "2.25rem", md: "3.25rem" },
+              letterSpacing: "-0.03em",
+              lineHeight: 1.2
+            }}
+          >
+            See <span style={{ 
+              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main || theme.palette.primary.dark})`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent"
+            }}>sokoJunction</span> in Action
+          </Typography>
+          <Typography variant="body1" sx={{ color: colors.secondary, mt: 2.5, maxWidth: "600px", mx: "auto", fontSize: "1.1rem" }}>
+            Take a visual tour through our powerful ecosystem built to launch, run, and scale your digital storefront.
+          </Typography>
+        </Box>
 
         {/* --- Section 1: Sleek Storefronts (Image Left) --- */}
-        <Grid container spacing={8} alignItems="center" sx={{ mb: 12 }}>
+        <Grid container spacing={8} alignItems="center" sx={{ mb: 16 }}>
           <Grid item xs={12} md={6}>
               <ImageCard 
                 sx={{ 
-                  ml: { md: 2 }, // Larger offset for dramatic effect
-                  transform: { md: 'rotate(-2deg)' } // Subtle tilt
+                  ml: { md: 2 },
+                  transform: { md: 'rotate(-1.5deg)' }
                 }}
               >
                 <Image
@@ -122,36 +158,40 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
               </ImageCard>
           </Grid>
           <Grid item xs={12} md={6}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: colors.primary, mb: 2 }}>
-                Stunning, Customizable Storefronts 🚀
-              </Typography>
-              <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.7 }}>
-                First impressions matter. sokoJunction provides a suite of elegant, responsive templates that can be easily customized to reflect your brand&apos;s unique identity. No coding required, just pure design freedom.
-              </Typography>
-              <AccentButton onClick={handleAuthTrigger}>
-                Build Your Store Now
-              </AccentButton>
+              <Box sx={{ pl: { md: 4 } }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: colors.primary, mb: 2, letterSpacing: "-0.01em" }}>
+                  Stunning, Customizable Storefronts 🚀
+                </Typography>
+                <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.1rem', lineHeight: 1.7 }}>
+                  First impressions matter. sokoJunction provides a suite of elegant, responsive templates that can be easily customized to reflect your brand&apos;s unique identity. No coding required, just pure design freedom.
+                </Typography>
+                <AccentButton onClick={handleAuthTrigger}>
+                  Build Your Store Now
+                </AccentButton>
+              </Box>
           </Grid>
         </Grid>
 
         {/* --- Section 2: Intuitive Admin Dashboard (Image Right) --- */}
-        <Grid container spacing={8} alignItems="center" direction={{ xs: 'column-reverse', md: 'row' }} sx={{ mb: 12 }}>
+        <Grid container spacing={8} alignItems="center" direction={{ xs: 'column-reverse', md: 'row' }} sx={{ mb: 16 }}>
           <Grid item xs={12} md={6}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: colors.primary, mb: 2 }}>
-                Intuitive Admin Dashboard & Control 📊
-              </Typography>
-              <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.7 }}>
-                Manage products, orders, customers, and analytics from a single, easy-to-use dashboard. sokoJunction simplifies your daily operations, giving you more time to focus on growth.
-              </Typography>
-              <AccentButton onClick={handleAuthTrigger}>
-                Explore Dashboard Demo
-              </AccentButton>
+              <Box sx={{ pr: { md: 4 } }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: colors.primary, mb: 2, letterSpacing: "-0.01em" }}>
+                  Intuitive Admin Dashboard & Control 📊
+                </Typography>
+                <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.1rem', lineHeight: 1.7 }}>
+                  Manage products, orders, customers, and analytics from a single, easy-to-use dashboard. sokoJunction simplifies your daily operations, giving you more time to focus on growth.
+                </Typography>
+                <AccentButton onClick={handleAuthTrigger}>
+                  Explore Dashboard Demo
+                </AccentButton>
+              </Box>
           </Grid>
           <Grid item xs={12} md={6}>
               <ImageCard 
                 sx={{ 
-                  mr: { md: 2 }, // Larger offset for dramatic effect
-                  transform: { md: 'rotate(2deg)' } // Subtle tilt (opposite direction)
+                  mr: { md: 2 },
+                  transform: { md: 'rotate(1.5deg)' }
                 }}
               >
                 <Image
@@ -173,7 +213,7 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
               <ImageCard 
                 sx={{ 
                   ml: { md: 2 },
-                  transform: { md: 'rotate(-2deg)' } 
+                  transform: { md: 'rotate(-1.5deg)' } 
                 }}
               >
                 <Image
@@ -188,17 +228,20 @@ const Showcase: React.FC<ShowcaseProps> = ({ handleAuthTrigger }) => {
               </ImageCard>
           </Grid>
           <Grid item xs={12} md={6}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: colors.primary, mb: 2 }}>
-                AI-Powered Insights for Smarter Decisions 💡
-              </Typography>
-              <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.15rem', lineHeight: 1.7 }}>
-                Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. sokoJunction&apos;s AI insights give you the competitive edge.
-              </Typography>
-              <AccentButton onClick={handleAuthTrigger}>
-                Unlock Insights
-              </AccentButton>
+              <Box sx={{ pl: { md: 4 } }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: colors.primary, mb: 2, letterSpacing: "-0.01em" }}>
+                  AI-Powered Insights for Smarter Decisions 💡
+                </Typography>
+                <Typography variant="body1" color={colors.secondary} sx={{ mb: 4, fontSize: '1.1rem', lineHeight: 1.7 }}>
+                  Leverage artificial intelligence to uncover trends, optimize pricing, and personalize customer experiences. sokoJunction&apos;s AI insights give you the competitive edge.
+                </Typography>
+                <AccentButton onClick={handleAuthTrigger}>
+                  Unlock Insights
+                </AccentButton>
+              </Box>
           </Grid>
         </Grid>
+      </Container>
     </Box>
   );
 };
