@@ -16,7 +16,6 @@ import {
   Breadcrumbs,
   Link,
   Typography,
-  Grid,
   TextField,
   Button,
   FormControlLabel,
@@ -34,10 +33,48 @@ import {
   Step,
   StepLabel,
   CircularProgress,
+  Container,
+  Stack,
+  alpha,
+  styled,
+  Chip,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { BreadCrumbContainer } from "@/StyledComponents/BreadCrumb";
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+
+// ForwardRef Grid wrapper honoring MUI v5 size prop
+const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
+  const { size, children, ...rest } = props;
+  if (size && typeof size === "object") {
+    return <Box ref={ref} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 380px" }, gap: 4 }} {...rest}>{children}</Box>;
+  }
+  return <Box ref={ref} {...rest}>{children}</Box>;
+});
+
+const CheckoutStepCard = styled(Paper)(({ theme }) => ({
+  borderRadius: "24px",
+  backgroundColor: "#ffffff",
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  boxShadow: "0 10px 30px rgba(0,0,0,0.04)",
+  padding: theme.spacing(4),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2.5),
+  },
+}));
+
+const SummarySideCard = styled(Paper)(({ theme }) => ({
+  borderRadius: "24px",
+  backgroundColor: "#ffffff",
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  boxShadow: "0 12px 32px rgba(0,0,0,0.05)",
+  padding: theme.spacing(3.5),
+  position: "sticky",
+  top: 90,
+}));
 
 const formatPhoneNumber = (phoneNumber: string): string => {
   // Remove any non-digit characters
@@ -129,7 +166,10 @@ const AuthenticatedCheckout = () => {
     return filtered.slice(startIndex, endIndex);
   }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger } = useForm<CheckoutFormData>({ resolver: zodResolver(checkoutSchema) });
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch } = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: { payment_method: "mpesa" },
+  });
 
   const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
@@ -251,7 +291,7 @@ const AuthenticatedCheckout = () => {
       case 0:
         return (
           <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f", marginTop: "20px" }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ marginTop: "20px" }}>
               Delivery or Pickup
             </Typography>
             <FormControl component="fieldset" sx={{ mb: 2 }}>
@@ -262,7 +302,7 @@ const AuthenticatedCheckout = () => {
             </FormControl>
 
             {deliveryOrPickup === "pickup" && (
-              <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {pickupLocationsLoading ? (
                   <Typography>Loading pickup locations...</Typography>
                 ) : pickupLocationsData && pickupLocationsData.length > 0 ? (
@@ -277,54 +317,95 @@ const AuthenticatedCheckout = () => {
                         setValue("delivery_location", null);
                       }}
                     >
-                      {pickupLocationsData.map((location) => (
-                        <Box key={location.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1, border: '1px solid #eee', borderRadius: '8px', p: 1 }}>
-                          <FormControlLabel
-                            value={location.id}
-                            control={<Radio />}
-                            label={
-                              <Box>
-                                <Typography variant="body1" fontWeight="bold">{location.name}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                  {location.address}, {location.city}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                  Delivery Fee: Kes {location.delivery_fee}
-                                </Typography>
-                              </Box>
-                            }
-                            sx={{ flexGrow: 1, mr: 1 }}
-                          />
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<LocationOnIcon />}
-                            onClick={() => {
-                              setSelectedLocationForMap(location);
-                              setMapOpen(true);
-                            }}
-                          >
-                            Preview on Map
-                          </Button>
-                        </Box>
-                      ))}
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {pickupLocationsData.map((location) => {
+                          const isSelected = selectedPickupLocation === location.id;
+                          const fee = parseFloat(location.delivery_fee || "0");
+                          return (
+                            <Box
+                              key={location.id}
+                              onClick={() => {
+                                setSelectedPickupLocation(location.id);
+                                setValue("pickup_location", location.id);
+                                setSelectedDeliveryLocation(null);
+                                setValue("delivery_location", null);
+                              }}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "100%",
+                                border: "2px solid",
+                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
+                                borderRadius: "16px",
+                                p: 2.5,
+                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                "&:hover": { borderColor: theme.palette.primary.main },
+                              }}
+                            >
+                              <FormControlLabel
+                                value={location.id}
+                                control={<Radio checked={isSelected} />}
+                                label={
+                                  <Box sx={{ ml: 1 }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
+                                      {location.name}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
+                                      {location.address}, {location.city}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                                      Delivery Fee: Kes {fee.toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                }
+                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
+                              />
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<LocationOnIcon />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedLocationForMap(location);
+                                  setMapOpen(true);
+                                }}
+                                sx={{
+                                  borderRadius: "30px",
+                                  textTransform: "none",
+                                  fontWeight: 700,
+                                  border: "1px solid rgba(0,0,0,0.12)",
+                                  color: "#18181b",
+                                  "&:hover": { borderColor: theme.palette.primary.main, backgroundColor: alpha(theme.palette.primary.main, 0.05) },
+                                }}
+                              >
+                                Preview on Map
+                              </Button>
+                            </Box>
+                          );
+                        })}
+                      </Box>
                     </RadioGroup>
                   </FormControl>
                 ) : (
                   <Typography>No pickup locations available for this shop.</Typography>
                 )}
-              </Paper>
+              </Box>
             )}
 
             {deliveryOrPickup === "delivery" && (
-              <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
                   fullWidth
-                  label="Search Delivery Locations"
+                  placeholder="Search delivery routes, locations..."
                   variant="outlined"
                   value={deliverySearchQuery}
                   onChange={(e) => setDeliverySearchQuery(e.target.value)}
-                  sx={{ mb: 2 }}
+                  InputProps={{
+                    sx: { borderRadius: "12px", backgroundColor: "#ffffff" },
+                  }}
                 />
                 {deliveryLocationsLoading ? (
                   <Typography>Loading delivery locations...</Typography>
@@ -340,23 +421,56 @@ const AuthenticatedCheckout = () => {
                         setValue("pickup_location", null);
                       }}
                     >
-                      {filteredDeliveryLocations.map((location) => (
-                        <Box key={location.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1, border: '1px solid #eee', borderRadius: '8px', p: 1 }}>
-                          <FormControlLabel
-                            value={location.id}
-                            control={<Radio />}
-                            label={
-                              <Box>
-                                <Typography variant="body1" fontWeight="bold">{location.location_name.toUpperCase()}</Typography> <Typography variant="body2" fontWeight="bold" color="textSecondary">{location.route.toLocaleLowerCase()}</Typography>
-                                <Typography variant="body2" >
-                                  Delivery Fee: Kes {location.delivery_fee}
-                                </Typography>
-                              </Box>
-                            }
-                            sx={{ flexGrow: 1, mr: 1 }}
-                          />
-                        </Box>
-                      ))}
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {filteredDeliveryLocations.map((location) => {
+                          const isSelected = selectedDeliveryLocation === location.id;
+                          const fee = parseFloat(String(location.delivery_fee || 0));
+                          return (
+                            <Box
+                              key={location.id}
+                              onClick={() => {
+                                setSelectedDeliveryLocation(location.id);
+                                setValue("delivery_location", location.id);
+                                setSelectedPickupLocation(null);
+                                setValue("pickup_location", null);
+                              }}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "100%",
+                                border: "2px solid",
+                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
+                                borderRadius: "16px",
+                                p: 2.5,
+                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                "&:hover": { borderColor: theme.palette.primary.main },
+                              }}
+                            >
+                              <FormControlLabel
+                                value={location.id}
+                                control={<Radio checked={isSelected} />}
+                                label={
+                                  <Box sx={{ ml: 1 }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
+                                      {location.location_name.toUpperCase()}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
+                                      Route: {location.route.toLowerCase()}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                                      Delivery Fee: Kes {fee.toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                }
+                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
+                              />
+                            </Box>
+                          );
+                        })}
+                      </Box>
                     </RadioGroup>
                   </FormControl>
                 ) : (
@@ -391,7 +505,7 @@ const AuthenticatedCheckout = () => {
                     }}
                   />
                 </Box>
-              </Paper>
+              </Box>
             )}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
               <Button variant="contained" onClick={handleNext} disabled={!selectedPickupLocation && !selectedDeliveryLocation}>
@@ -510,43 +624,113 @@ const AuthenticatedCheckout = () => {
   };
 
   return (
-    <Grid container spacing={4}>
-      <Grid item xs={12} md={7}>
-        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+    <Grid container spacing={4} size={{ xs: 12, md: 7 }}>
+      <Box sx={{ width: "100%" }}>
+        <CheckoutStepCard sx={{ mb: 4, py: 3 }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel
+                  StepIconProps={{
+                    sx: {
+                      "&.Mui-active": { color: theme.palette.primary.main },
+                      "&.Mui-completed": { color: theme.palette.primary.main },
+                    },
+                  }}
+                >
+                  {label}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </CheckoutStepCard>
+
         <form onSubmit={handleSubmit(onSubmit)}>{getStepContent(activeStep)}</form>
-      </Grid>
+      </Box>
 
-      <Grid item xs={12} md={5}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
-          Order Summary
-        </Typography>
-        <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body1">
-              Subtotal: <b>Kes {cart_data?.total || 0}</b>
-            </Typography>
-            <Typography variant="body1">Shipping: <b>Kes {shippingCost}</b></Typography>
-            <Typography variant="h6" sx={{ mt: 1, color: "#BE1E2D" }}>
-              Total: kes {totalAmount}
-            </Typography>
-          </Box>
+      {/* Order Summary Sidebar */}
+      <Box>
+        <SummarySideCard>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b", mb: 3 }}>
+            Order Summary
+          </Typography>
 
-          <Typography variant="h6" gutterBottom>Payment Method</Typography>
-          <FormControl component="fieldset" sx={{ mb: 2 }}>
-            <RadioGroup row name="paymentRadio" onChange={(e) => setValue("payment_method", e.target.value)}>
-              <FormControlLabel value="card" control={<Radio />} label="Card" />
-              <FormControlLabel value="mpesa" control={<Radio />} label="M-Pesa" />
-              <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
+          <Stack spacing={2} sx={{ mb: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Items Subtotal</Typography>
+              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {cart_data?.total || 0}</Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Fulfillment Fee</Typography>
+              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>
+                {shippingCost > 0 ? `Kes ${shippingCost}` : "Select Location"}
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: "#18181b" }}>Total</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: theme.palette.primary.main }}>
+                Kes {totalAmount}
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#18181b", mb: 1.5 }}>
+            Payment Method
+          </Typography>
+          <FormControl component="fieldset" fullWidth sx={{ mb: 1 }}>
+            <RadioGroup
+              row
+              name="paymentRadio"
+              value={watch("payment_method")}
+              onChange={(e) => setValue("payment_method", e.target.value)}
+            >
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, width: "100%" }}>
+                {[
+                  { value: "mpesa", label: "M-Pesa", icon: PhoneIphoneIcon },
+                  { value: "card", label: "Card / Credit", icon: CreditCardIcon },
+                  { value: "paypal", label: "PayPal Wallet", icon: AccountBalanceWalletIcon },
+                ].map((pm) => {
+                  const isSelected = watch("payment_method") === pm.value;
+                  return (
+                    <Box
+                      key={pm.value}
+                      onClick={() => setValue("payment_method", pm.value)}
+                      sx={{
+                        border: "2px solid",
+                        borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                        borderRadius: "14px",
+                        px: 1.5,
+                        py: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        "&:hover": { borderColor: theme.palette.primary.main },
+                      }}
+                    >
+                      <FormControlLabel
+                        value={pm.value}
+                        control={<Radio size="small" />}
+                        label={
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                            <pm.icon sx={{ fontSize: "1.15rem", color: isSelected ? theme.palette.primary.main : "text.secondary" }} />
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: isSelected ? "text.primary" : "text.secondary", whiteSpace: "nowrap" }}>{pm.label}</Typography>
+                          </Box>
+                        }
+                        sx={{ m: 0 }}
+                      />
+                    </Box>
+                  );
+                })}
+              </Box>
             </RadioGroup>
           </FormControl>
-        </Paper>
-      </Grid>
+        </SummarySideCard>
+      </Box>
 
       <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
         <DialogTitle>
@@ -709,7 +893,7 @@ const GuestCheckout = () => {
 
   const { register, handleSubmit, formState: { errors }, setValue, trigger, watch } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
-    defaultValues: { payment_method: "card" },
+    defaultValues: { payment_method: "mpesa" },
   });
 
   const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber"]);
@@ -988,7 +1172,7 @@ const GuestCheckout = () => {
       case 1:
         return (
           <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f", marginTop: "20px" }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ marginTop: "20px" }}>
               Delivery or Pickup
             </Typography>
             <FormControl component="fieldset" sx={{ mb: 2 }}>
@@ -999,7 +1183,7 @@ const GuestCheckout = () => {
             </FormControl>
 
             {deliveryOrPickup === "pickup" && (
-              <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {pickupLocationsLoading ? (
                   <Typography>Loading pickup locations...</Typography>
                 ) : pickupLocationsData && pickupLocationsData.length > 0 ? (
@@ -1014,54 +1198,95 @@ const GuestCheckout = () => {
                         setValue("delivery_location", null);
                       }}
                     >
-                      {pickupLocationsData.map((location) => (
-                        <Box key={location.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1, border: '1px solid #eee', borderRadius: '8px', p: 1 }}>
-                          <FormControlLabel
-                            value={location.id}
-                            control={<Radio />}
-                            label={
-                              <Box>
-                                <Typography variant="body1" fontWeight="bold">{location.name}</Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                  {location.address}, {location.city}
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary">
-                                  Delivery Fee: Kes {location.delivery_fee}
-                                </Typography>
-                              </Box>
-                            }
-                            sx={{ flexGrow: 1, mr: 1 }}
-                          />
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<LocationOnIcon />}
-                            onClick={() => {
-                              setSelectedLocationForMap(location);
-                              setMapOpen(true);
-                            }}
-                          >
-                            Preview on Map
-                          </Button>
-                        </Box>
-                      ))}
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {pickupLocationsData.map((location) => {
+                          const isSelected = selectedPickupLocation === location.id;
+                          const fee = parseFloat(location.delivery_fee || "0");
+                          return (
+                            <Box
+                              key={location.id}
+                              onClick={() => {
+                                setSelectedPickupLocation(location.id);
+                                setValue("pickup_location", location.id);
+                                setSelectedDeliveryLocation(null);
+                                setValue("delivery_location", null);
+                              }}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "100%",
+                                border: "2px solid",
+                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
+                                borderRadius: "16px",
+                                p: 2.5,
+                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                "&:hover": { borderColor: theme.palette.primary.main },
+                              }}
+                            >
+                              <FormControlLabel
+                                value={location.id}
+                                control={<Radio checked={isSelected} />}
+                                label={
+                                  <Box sx={{ ml: 1 }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
+                                      {location.name}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
+                                      {location.address}, {location.city}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                                      Delivery Fee: Kes {fee.toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                }
+                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
+                              />
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                startIcon={<LocationOnIcon />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedLocationForMap(location);
+                                  setMapOpen(true);
+                                }}
+                                sx={{
+                                  borderRadius: "30px",
+                                  textTransform: "none",
+                                  fontWeight: 700,
+                                  border: "1px solid rgba(0,0,0,0.12)",
+                                  color: "#18181b",
+                                  "&:hover": { borderColor: theme.palette.primary.main, backgroundColor: alpha(theme.palette.primary.main, 0.05) },
+                                }}
+                              >
+                                Preview on Map
+                              </Button>
+                            </Box>
+                          );
+                        })}
+                      </Box>
                     </RadioGroup>
                   </FormControl>
                 ) : (
                   <Typography>No pickup locations available for this shop.</Typography>
                 )}
-              </Paper>
+              </Box>
             )}
 
             {deliveryOrPickup === "delivery" && (
-              <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
                   fullWidth
-                  label="Search Delivery Locations"
+                  placeholder="Search delivery routes, locations..."
                   variant="outlined"
                   value={deliverySearchQuery}
                   onChange={(e) => setDeliverySearchQuery(e.target.value)}
-                  sx={{ mb: 2 }}
+                  InputProps={{
+                    sx: { borderRadius: "12px", backgroundColor: "#ffffff" },
+                  }}
                 />
                 {deliveryLocationsLoading ? (
                   <Typography>Loading delivery locations...</Typography>
@@ -1077,23 +1302,56 @@ const GuestCheckout = () => {
                         setValue("pickup_location", null);
                       }}
                     >
-                      {filteredDeliveryLocations.map((location) => (
-                        <Box key={location.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1, border: '1px solid #eee', borderRadius: '8px', p: 1 }}>
-                          <FormControlLabel
-                            value={location.id}
-                            control={<Radio />}
-                            label={
-                              <Box>
-                                <Typography variant="body1" fontWeight="bold">{location.location_name.toUpperCase()}</Typography> <Typography variant="body2" fontWeight="bold" color="textSecondary">{location.route.toLocaleLowerCase()}</Typography>
-                                <Typography variant="body2" >
-                                  Delivery Fee: Kes {location.delivery_fee}
-                                </Typography>
-                              </Box>
-                            }
-                            sx={{ flexGrow: 1, mr: 1 }}
-                          />
-                        </Box>
-                      ))}
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        {filteredDeliveryLocations.map((location) => {
+                          const isSelected = selectedDeliveryLocation === location.id;
+                          const fee = parseFloat(String(location.delivery_fee || 0));
+                          return (
+                            <Box
+                              key={location.id}
+                              onClick={() => {
+                                setSelectedDeliveryLocation(location.id);
+                                setValue("delivery_location", location.id);
+                                setSelectedPickupLocation(null);
+                                setValue("pickup_location", null);
+                              }}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "100%",
+                                border: "2px solid",
+                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
+                                borderRadius: "16px",
+                                p: 2.5,
+                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                "&:hover": { borderColor: theme.palette.primary.main },
+                              }}
+                            >
+                              <FormControlLabel
+                                value={location.id}
+                                control={<Radio checked={isSelected} />}
+                                label={
+                                  <Box sx={{ ml: 1 }}>
+                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
+                                      {location.location_name.toUpperCase()}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
+                                      Route: {location.route.toLowerCase()}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                                      Delivery Fee: Kes {fee.toLocaleString()}
+                                    </Typography>
+                                  </Box>
+                                }
+                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
+                              />
+                            </Box>
+                          );
+                        })}
+                      </Box>
                     </RadioGroup>
                   </FormControl>
                 ) : (
@@ -1130,7 +1388,7 @@ const GuestCheckout = () => {
                     }}
                   />
                 </Box>
-              </Paper>
+              </Box>
             )}
             <FormControl component="fieldset" sx={{ mt: 2 }}>
               <Typography variant="subtitle1" gutterBottom>Payment Method</Typography>
@@ -1212,40 +1470,115 @@ const GuestCheckout = () => {
   };
 
   return (
-    <Paper sx={{ p: 4, my: 4 }}>
-
-
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={7}>
-          <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+    <Grid container spacing={4} size={{ xs: 12, md: 7 }}>
+      <Box sx={{ width: "100%" }}>
+        <CheckoutStepCard sx={{ mb: 4, py: 3 }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
-                <StepLabel>{label}</StepLabel>
+                <StepLabel
+                  StepIconProps={{
+                    sx: {
+                      "&.Mui-active": { color: theme.palette.primary.main },
+                      "&.Mui-completed": { color: theme.palette.primary.main },
+                    },
+                  }}
+                >
+                  {label}
+                </StepLabel>
               </Step>
             ))}
           </Stepper>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            {getStepContent(activeStep)}
-          </form>
-        </Grid>
+        </CheckoutStepCard>
 
-        <Grid item xs={12} md={5}>
-          <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: theme.palette.primary.main }}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {getStepContent(activeStep)}
+        </form>
+      </Box>
+
+      {/* Order Summary Sidebar */}
+      <Box>
+        <SummarySideCard>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b", mb: 3 }}>
             Order Summary
           </Typography>
-          <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body1">
-                Subtotal: <b>Kes {cart_data?.total || 0}</b>
-              </Typography>
-              <Typography variant="body1">Shipping: <b>Kes {shippingCost}</b></Typography>
-              <Typography variant="h6" sx={{ mt: 1, color: "#BE1E2D" }}>
-                Total: kes {totalAmount}
+
+          <Stack spacing={2} sx={{ mb: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Items Subtotal</Typography>
+              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {cart_data?.total || 0}</Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Fulfillment Fee</Typography>
+              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>
+                {shippingCost > 0 ? `Kes ${shippingCost}` : "Select Location"}
               </Typography>
             </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: "#18181b" }}>Total</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: theme.palette.primary.main }}>
+                Kes {totalAmount}
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#18181b", mb: 1.5 }}>
+            Payment Method
+          </Typography>
+          <FormControl component="fieldset" fullWidth sx={{ mb: 1 }}>
+            <RadioGroup
+              row
+              name="guestPaymentRadio"
+              value={watch("payment_method")}
+              onChange={(e) => setValue("payment_method", e.target.value)}
+            >
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, width: "100%" }}>
+                {[
+                  { value: "mpesa", label: "M-Pesa", icon: PhoneIphoneIcon },
+                  { value: "card", label: "Card / Credit", icon: CreditCardIcon },
+                  { value: "paypal", label: "PayPal Wallet", icon: AccountBalanceWalletIcon },
+                ].map((pm) => {
+                  const isSelected = watch("payment_method") === pm.value;
+                  return (
+                    <Box
+                      key={pm.value}
+                      onClick={() => setValue("payment_method", pm.value)}
+                      sx={{
+                        border: "2px solid",
+                        borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                        borderRadius: "14px",
+                        px: 1.5,
+                        py: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        "&:hover": { borderColor: theme.palette.primary.main },
+                      }}
+                    >
+                      <FormControlLabel
+                        value={pm.value}
+                        control={<Radio size="small" />}
+                        label={
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                            <pm.icon sx={{ fontSize: "1.15rem", color: isSelected ? theme.palette.primary.main : "text.secondary" }} />
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: isSelected ? "text.primary" : "text.secondary", whiteSpace: "nowrap" }}>{pm.label}</Typography>
+                          </Box>
+                        }
+                        sx={{ m: 0 }}
+                      />
+                    </Box>
+                  );
+                })}
+              </Box>
+            </RadioGroup>
+          </FormControl>
+        </SummarySideCard>
+      </Box>
 
       <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
         <DialogTitle>
@@ -1324,7 +1657,7 @@ const GuestCheckout = () => {
           </Button>
         </DialogContent>
       </Dialog>
-    </Paper>
+    </Grid>
   );
 };
 
@@ -1356,21 +1689,48 @@ function Checkout() {
   }, []);
 
   return (
-    <>
-      <Box sx={{ m: { xs: 2, md: 4 } }}>
-        <BreadCrumbContainer sx={{ background: "#fff", border: "none", mb: 4, maxWidth: '90vw' }}>
-          <Breadcrumbs sx={{ maxWidth: '90vw' }}>
-            <Link underline="hover" color="inherit" href="/">TechEnd</Link>
-            <Link underline="hover" color="inherit" href={`/shop/${shopname}`}>Shop</Link>
-            <Link underline="hover" color="inherit" href="/cart">Cart</Link>
-            <Typography color={theme.palette.primary.main}>Checkout</Typography>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
+      {/* Header Banner */}
+      <Box
+        sx={{
+          backgroundColor: "#ffffff",
+          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          py: { xs: 3, md: 4 },
+          mb: { xs: 4, md: 5 },
+        }}
+      >
+        <Container maxWidth="lg">
+          <Breadcrumbs sx={{ mb: 1.5, fontSize: "0.85rem" }}>
+            <Link underline="hover" color="text.secondary" href="/">Home</Link>
+            <Link underline="hover" color="text.secondary" href={`/shop/${shopname}`}>Storefront</Link>
+            <Link underline="hover" color="text.secondary" href="/cart">Cart</Link>
+            <Typography color={theme.palette.primary.main} sx={{ fontWeight: 600 }}>Secure Checkout</Typography>
           </Breadcrumbs>
-        </BreadCrumbContainer>
 
-        {isAuthenticated ? <AuthenticatedCheckout /> : <GuestCheckout />}
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+            <Box>
+              <Typography variant="h3" sx={{ fontWeight: 800, color: "#18181b", fontSize: { xs: "1.8rem", md: "2.4rem" }, mb: 0.5 }}>
+                Checkout
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", fontWeight: 500 }}>
+                Complete your order safely with SSL encrypted security
+              </Typography>
+            </Box>
 
+            <Chip
+              icon={<LockOutlinedIcon sx={{ fontSize: "1rem !important", color: `${theme.palette.primary.main} !important` }} />}
+              label="256-Bit SSL Encrypted"
+              variant="outlined"
+              sx={{ borderRadius: "30px", fontWeight: 600, px: 1, py: 2.2, borderColor: alpha(theme.palette.primary.main, 0.3) }}
+            />
+          </Box>
+        </Container>
       </Box>
-    </>
+
+      <Container maxWidth="lg">
+        {isAuthenticated ? <AuthenticatedCheckout /> : <GuestCheckout />}
+      </Container>
+    </Box>
   );
 }
 

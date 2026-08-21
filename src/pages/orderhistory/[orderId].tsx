@@ -348,4 +348,7 @@ function OrderDetailsPage() {
   );
 }
 export const dynamic = "force-dynamic";
+export const getServerSideProps = async () => {
+  return { props: {} };
+};
 export default OrderDetailsPage;

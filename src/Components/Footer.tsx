@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import Cookies from "js-cookie";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
@@ -111,7 +111,14 @@ const DEFAULT_BRAND_URLS = [
 export default function Footer() {
   const theme = useTheme();
   const router = useRouter();
-  const cookieShop = Cookies.get("shopname");
+
+  const [mounted, setMounted] = useState(false);
+  const [cookieShop, setCookieShop] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    setCookieShop(Cookies.get("shopname") || null);
+  }, []);
 
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
 
@@ -208,7 +215,7 @@ export default function Footer() {
           <Box>
             <Stack spacing={3}>
               <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: "-0.02em", color: "#ffffff" }}>
-                {isDefaultBrandPage
+                {!mounted || isDefaultBrandPage
                   ? "SokoJunction"
                   : companyLoading
                     ? (

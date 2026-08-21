@@ -145,13 +145,6 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
       <Container maxWidth="lg">
         <ContentCard>
           
-          {/* Badge / Announcement */}
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, px: 2.5, py: 0.75, borderRadius: '50px', bgcolor: alpha(theme.palette.primary.main, 0.1), border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`, mb: 3 }}>
-            <RocketLaunchIcon sx={{ fontSize: '1.1rem', color: theme.palette.primary.main }} />
-            <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main, letterSpacing: 0.5 }}>
-              V2.0 IS LIVE • NEXT-GEN E-COMMERCE PLATFORM
-            </Typography>
-          </Box>
 
           <Typography
             variant="h1"
