@@ -12,7 +12,6 @@ import {
   alpha,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import dynamic from "next/dynamic";
 
 const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
