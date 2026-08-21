@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse, UserSubscription, InitiateMpesaStkPushSubscriptionResponse } from "@/Types";
 
 dotenv.config();
-const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://techend-backend-j45c.onrender.com/";
+const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://app.sokojunction.com/";
 export const AuthApi = createApi({
   reducerPath: "AuthApi",
   baseQuery: fetchBaseQuery({ baseUrl }),

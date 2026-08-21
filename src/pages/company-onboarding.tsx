@@ -127,10 +127,16 @@ export default function CompanyOnboarding() {
         if (username && token) {
             setUser(username);
             setActiveStep(1);
+        } else {
+            setActiveStep(0);
         }
     }, [token]);
 
     useEffect(() => {
+        if (!token) {
+            setActiveStep(0);
+            return;
+        }
         if (error_company_data?.status == 404) {
             setCompanyData({
                 "name": "techend_test",
@@ -174,7 +180,7 @@ export default function CompanyOnboarding() {
             setCompanyExists(true);
             setActiveStep(companyDetails?.company_onboarding_step + 1 || 1);
         }
-    }, [companyDetails, error_company_data?.status, loading_get_my_company, user?.id]);
+    }, [companyDetails, error_company_data?.status, loading_get_my_company, user?.id, token]);
     const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLoginData({ ...loginData, [e.target.name]: e.target.value });
     };
@@ -271,15 +277,17 @@ export default function CompanyOnboarding() {
     return (
         <Box
             sx={{
-                maxWidth: "700px",
-                margin: "50px auto",
-                p: 3,
-                background: "#fff",
-                borderRadius: "5px",
-                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                maxWidth: "760px",
+                margin: "80px auto",
+                p: { xs: 3, md: 5 },
+                background: "rgba(255, 255, 255, 0.8)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255, 255, 255, 0.5)",
+                borderRadius: "24px",
+                boxShadow: "0 20px 50px rgba(0, 0, 0, 0.05)",
             }}
         >
-            <Typography variant="h5" sx={{ textAlign: "center", mb: 3, fontWeight: 600, color: theme.palette.primary.main }}>
+            <Typography variant="h4" sx={{ textAlign: "center", mb: 5, fontWeight: 800, color: "#18181b", letterSpacing: "-0.02em" }}>
                 Company Onboarding
             </Typography>
 
@@ -297,32 +305,46 @@ export default function CompanyOnboarding() {
                 </>
             ) : (
                 <>
-                    <Stepper activeStep={companyData.company_onboarding_step} alternativeLabel sx={{ mb: 2 }}>
-                        {steps.map((label) => (
-                            <Step key={label}>
-                                <StepLabel
-                                    StepIconProps={{
-                                        sx: { color: `${theme.palette.primary.main} !important` },
-                                    }}
-                                />
-                            </Step>
-                        ))}
+                    <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+                        {steps.map((label, index) => {
+                            const isCompleted = activeStep > index;
+                            const isActive = activeStep === index;
+                            return (
+                                <Step key={label}>
+                                    <StepLabel
+                                        StepIconProps={{
+                                            sx: {
+                                                color: isActive || isCompleted
+                                                    ? `${theme.palette.primary.main} !important`
+                                                    : "rgba(0, 0, 0, 0.15) !important"
+                                            },
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                fontSize: "0.75rem",
+                                                fontWeight: isActive ? 800 : 500,
+                                                color: isActive 
+                                                    ? theme.palette.primary.main 
+                                                    : isCompleted 
+                                                        ? "text.primary" 
+                                                        : "text.secondary",
+                                                display: { xs: "none", sm: "block" }
+                                            }}
+                                        >
+                                            {label}
+                                        </Box>
+                                    </StepLabel>
+                                </Step>
+                            );
+                        })}
                     </Stepper>
 
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
-                        {steps.map((label, index) => (
-                            <Box key={label} sx={{ textAlign: "center", width: "100%" }}>
-                                <Typography
-                                    variant="caption"
-                                    sx={{
-                                        color: index === companyData.company_onboarding_step ? theme.palette.primary.main : "#777",
-                                        fontWeight: index === companyData.company_onboarding_step ? "bold" : "normal",
-                                    }}
-                                >
-                                    {label}
-                                </Typography>
-                            </Box>
-                        ))}
+                    {/* Step Title for Mobile Layouts */}
+                    <Box sx={{ display: { xs: "block", sm: "none" }, textAlign: "center", mb: 3 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
+                            Step {activeStep + 1}: {steps[activeStep]}
+                        </Typography>
                     </Box>
                     {activeStep === 0 && (
                         <>
@@ -387,37 +409,37 @@ export default function CompanyOnboarding() {
                             )}
                         </>
                     )}
-                    {companyData.company_onboarding_step === 1 && (
+                    {activeStep === 1 && (
                         <>
-                            <BasicInfo nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} companyExists={companyExists} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <BasicInfo nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={activeStep} companyData={companyData} setCompanyData={setCompanyData} token={authToken} companyExists={companyExists} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
-                    {companyData.company_onboarding_step === 2 && (
+                    {activeStep === 2 && (
                         <>
-                            <KYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <KYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={activeStep} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
-                    {companyData.company_onboarding_step === 3 && (
+                    {activeStep === 3 && (
                         <>
-                            <BusinessKYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <BusinessKYC nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={activeStep} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
-                    {companyData.company_onboarding_step === 4 && (
+                    {activeStep === 4 && (
                         <>
-                            <ProofAddress nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <ProofAddress nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={activeStep} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
-                    {companyData.company_onboarding_step === 5 && (
+                    {activeStep === 5 && (
                         <Suspense fallback={<CircularProgress />}>
-                            <Branding nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <Branding nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={activeStep} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </Suspense>
                     )}
-                    {companyData.company_onboarding_step === 6 && (
+                    {activeStep === 6 && (
                         <>
-                            <TCs nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={companyData.company_onboarding_step} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
+                            <TCs nextStep={nextStep} prevStep={prevStep} steps={steps} activeStep={activeStep} companyData={companyData} setCompanyData={setCompanyData} token={authToken} refetchCompany={refetch_company_details} triggerRerender={triggerRerender} />
                         </>
                     )}
-                    {companyData.company_onboarding_step === 7 && (
+                    {activeStep === 7 && (
                         <>
                             <VerificationStatus />
                         </>
