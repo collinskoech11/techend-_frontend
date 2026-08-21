@@ -290,13 +290,17 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
     const set = new Set<string>();
     (productsData?.results || []).forEach((p: any) => {
-      if (p.category && typeof p.category === "string" && p.category.trim()) {
-        set.add(p.category.trim());
+      if (p.categories && Array.isArray(p.categories)) {
+        p.categories.forEach((catObj: any) => {
+          if (catObj?.name) set.add(catObj.name.trim());
+        });
       }
     });
     products.forEach((p: any) => {
-      if (p.category && typeof p.category === "string" && p.category.trim()) {
-        set.add(p.category.trim());
+      if (p.categories && Array.isArray(p.categories)) {
+        p.categories.forEach((catObj: any) => {
+          if (catObj?.name) set.add(catObj.name.trim());
+        });
       }
     });
 
