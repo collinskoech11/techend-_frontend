@@ -2,23 +2,27 @@
 
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/router";
-import { useCheckoutCartMutation, useGetCartQuery, useGetPickupLocationsQuery, useGetDeliveryLocationsQuery, useGetCompanyBySlugQuery, usePlaceOrderGuestMutation, useLipaNaMpesaMutation, useGetOrderByIdQuery } from "@/Api/services";
-import { PickupLocation, DeliveryLocation, GuestOrderResponse } from "@/Types";
+import {
+  useCheckoutCartMutation,
+  useGetCartQuery,
+  useGetCompanyBySlugQuery,
+  usePlaceOrderGuestMutation,
+  useLipaNaMpesaMutation,
+  useGetOrderByIdQuery,
+} from "@/Api/services";
+import { GuestOrderResponse } from "@/Types";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart } from "@/contexts/CartContext";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
   Breadcrumbs,
   Link,
   Typography,
   TextField,
   Button,
-  FormControlLabel,
   RadioGroup,
   Radio,
   FormControl,
@@ -38,6 +42,7 @@ import {
   alpha,
   styled,
   Chip,
+  Divider,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -45,6 +50,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
+import MapIcon from '@mui/icons-material/Map';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // ForwardRef Grid wrapper honoring MUI v5 size prop
 const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
@@ -77,54 +85,171 @@ const SummarySideCard = styled(Paper)(({ theme }) => ({
 }));
 
 const formatPhoneNumber = (phoneNumber: string): string => {
-  // Remove any non-digit characters
   const digitsOnly = phoneNumber.replace(/\D/g, '');
-
-  // If it already starts with 254, return as is
   if (digitsOnly.startsWith("254")) {
     return digitsOnly;
   }
-  // If it starts with 0, replace 0 with 254
   if (digitsOnly.startsWith("0")) {
     return "254" + digitsOnly.substring(1);
   }
-  // Otherwise, prepend 254
   return "254" + digitsOnly;
 };
 
-// --- Authenticated Checkout --- //
+// --- Map Pinning Widget --- //
+const MapPinWidget = ({ value, onChange }: { value: string; onChange: (val: string) => void }) => {
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [pinning, setPinning] = useState(false);
 
+  useEffect(() => {
+    if (value) {
+      const match = value.match(/Lat:\s*([-\d.]+),\s*Lng:\s*([-\d.]+)/);
+      if (match) {
+        setCoords({ lat: parseFloat(match[1]), lng: parseFloat(match[2]) });
+      }
+    }
+  }, [value]);
+
+  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Simulate Kenya/Nairobi coordinates based on click
+    const lat = -1.2921 - ((y - rect.height / 2) * 0.0002);
+    const lng = 36.8219 + ((x - rect.width / 2) * 0.0002);
+    
+    setCoords({ lat, lng });
+    onChange(`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`);
+  };
+
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      setPinning(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setCoords({ lat, lng });
+          onChange(`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`);
+          setPinning(false);
+          toast.success("Location pinned from GPS!");
+        },
+        () => {
+          setPinning(false);
+          toast.error("Could not obtain location. Pin manually on the map.");
+        }
+      );
+    } else {
+      toast.error("GPS location is not supported by your browser.");
+    }
+  };
+
+  return (
+    <Box sx={{ mt: 1 }}>
+      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: "text.secondary" }}>
+        Pin Location on Map
+      </Typography>
+      
+      <Box 
+        onClick={handleMapClick}
+        sx={{
+          height: 180,
+          borderRadius: "16px",
+          position: "relative",
+          cursor: "crosshair",
+          overflow: "hidden",
+          border: "2px solid rgba(0,0,0,0.06)",
+          backgroundImage: "linear-gradient(rgba(135, 206, 235, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(135, 206, 235, 0.3) 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+          backgroundColor: "#f4fbf4",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "border-color 0.2s",
+          "&:hover": {
+            borderColor: "primary.main"
+          }
+        }}
+      >
+        <Box sx={{ position: "absolute", width: "100%", height: "100%", opacity: 0.6, pointerEvents: "none" }}>
+          <Box sx={{ position: "absolute", top: "25%", left: "15%", width: "25%", height: "35%", borderRadius: "50%", backgroundColor: "#e2f0d9" }} />
+          <Box sx={{ position: "absolute", top: "60%", left: "65%", width: "20%", height: "25%", borderRadius: "40%", backgroundColor: "#e2f0d9" }} />
+          <Box sx={{ position: "absolute", top: "45%", left: 0, width: "100%", height: "6px", backgroundColor: "#b4c6e7", transform: "skewY(-8deg)" }} />
+        </Box>
+
+        {coords ? (
+          <Box 
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              position: "absolute",
+              transform: "translateY(-16px)",
+              pointerEvents: "none"
+            }}
+          >
+            <LocationOnIcon color="primary" sx={{ fontSize: 36, filter: "drop-shadow(0px 3px 6px rgba(0,0,0,0.2))" }} />
+            <Box sx={{ backgroundColor: "rgba(24, 24, 27, 0.9)", color: "#fff", px: 1, py: 0.5, borderRadius: "6px", fontSize: "9px", mt: 0.5, whiteSpace: "nowrap" }}>
+              Pinned: {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+            </Box>
+          </Box>
+        ) : (
+          <Stack spacing={1} alignItems="center" sx={{ zIndex: 1, px: 2, textAlign: "center" }}>
+            <MapIcon sx={{ color: "text.secondary", fontSize: 28 }} />
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              Click anywhere on map grid to drop a pin marker
+            </Typography>
+          </Stack>
+        )}
+      </Box>
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
+        <Button 
+          variant="outlined" 
+          size="small" 
+          startIcon={pinning ? <CircularProgress size={14} /> : <MyLocationIcon />}
+          onClick={handleGetLocation}
+          sx={{ borderRadius: "20px", textTransform: "none", fontWeight: 700 }}
+        >
+          Use Current GPS
+        </Button>
+        {coords && (
+          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+            Coordinates: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+// --- Authenticated Checkout --- //
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
+  address: z.string().min(5, "Delivery address is required"),
+  city: z.string().min(2, "City is required"),
   payment_method: z.string().min(2, "Payment method is required"),
-  pickup_location: z.number().optional().nullable(),
-  delivery_location: z.number().optional().nullable(),
+  pinnedLocation: z.string().optional(),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 const AuthenticatedCheckout = () => {
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
-  const [lipaNaMpesaFx] = useLipaNaMpesaMutation(); // Initialize mutation
+  const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const theme = useTheme();
-  const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
-  const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
-  const [mapOpen, setMapOpen] = useState(false);
-  const [selectedLocationForMap, setSelectedLocationForMap] = useState<PickupLocation | null>(null);
-  const [deliveryOrPickup, setDeliveryOrPickup] = useState<"pickup" | "delivery">("pickup");
-
+  
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ['Select Location', 'Billing Address', 'Review Order'];
+  const steps = ['Your Details', 'Delivery Address', 'Payment Method', 'Review & Pay'];
 
-  // M-Pesa specific states
+  // M-Pesa states
   const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
   const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
-  console.log("pollcount in Checkout:", pollCount);
+  const pollCountRef = useRef(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
@@ -138,46 +263,19 @@ const AuthenticatedCheckout = () => {
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
 
-  const { data: pickupLocationsData, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery({
-    company_slug: shopname,
-    token: Cookies.get("access"),
-  });
-
-  const [deliveryPage, setDeliveryPage] = useState(1);
-  const [deliverySearchQuery, setDeliverySearchQuery] = useState("");
-  const itemsPerPage = 5;
-
-  const { data: allDeliveryLocations, isLoading: deliveryLocationsLoading } = useGetDeliveryLocationsQuery({
-    company_slug: shopname,
-    token: Cookies.get("access"),
-  });
-
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
-  const filteredDeliveryLocations = useMemo(() => {
-    if (!allDeliveryLocations) return [];
-    const filtered = allDeliveryLocations.filter(
-      (location) =>
-        location.route.toLowerCase().includes(deliverySearchQuery.toLowerCase()) ||
-        location.location_name.toLowerCase().includes(deliverySearchQuery.toLowerCase())
-    );
-    const startIndex = (deliveryPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filtered.slice(startIndex, endIndex);
-  }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
-
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch } = useForm<CheckoutFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { payment_method: "mpesa" },
+    defaultValues: { payment_method: "mpesa", pinnedLocation: "" },
   });
 
   const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
 
-  // Polling for M-Pesa payment status
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
     { order_id: mpesaOrderId!, token: Cookies.get("access") },
-    { skip: !isMpesaPaymentInitiated || !mpesaOrderId } // Removed pollingInterval
+    { skip: !isMpesaPaymentInitiated || !mpesaOrderId }
   );
 
   useEffect(() => {
@@ -186,38 +284,34 @@ const AuthenticatedCheckout = () => {
       setShowMpesaModal(false);
       setIsMpesaPaymentInitiated(false);
       setMpesaOrderId(null);
-      if (pollIntervalRef.current) { // Clear interval here as well
+      if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
+      router.push(`/shop/${shopname}`);
     }
-  }, [mpesaOrderDetails]);
+  }, [mpesaOrderDetails, router, shopname]);
 
   useEffect(() => {
     if (isMpesaPaymentInitiated && mpesaOrderId) {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
       }
-
-      setPollCount(0); // Reset poll count
-
+      pollCountRef.current = 0;
       pollIntervalRef.current = setInterval(() => {
-        setPollCount(prevCount => {
-          if (prevCount >= 4) { // 0-indexed, so 4 means 5 runs
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
-            toast.error("M-Pesa payment timed out. Please try again.");
-            setShowMpesaModal(false);
-            setIsMpesaPaymentInitiated(false);
-            setMpesaOrderId(null);
-            handleNext();
-            return prevCount;
+        if (pollCountRef.current >= 5) {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
           }
-          refetchMpesaOrder();
-          return prevCount + 1;
-        });
+          toast.error("M-Pesa payment timed out. Please try again.");
+          setShowMpesaModal(false);
+          setIsMpesaPaymentInitiated(false);
+          setMpesaOrderId(null);
+          return;
+        }
+        refetchMpesaOrder();
+        pollCountRef.current += 1;
       }, 3000);
     } else {
       if (pollIntervalRef.current) {
@@ -225,27 +319,13 @@ const AuthenticatedCheckout = () => {
         pollIntervalRef.current = null;
       }
     }
-
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
     };
-  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, handleNext]); // Added router, shopname to dependencies
-
-  const shippingCost = useMemo(() => {
-    if (!cart_data) return 0;
-    let calculatedShippingCost = 0;
-    if (deliveryOrPickup === "pickup" && selectedPickupLocation && pickupLocationsData) {
-      const selectedLocation = pickupLocationsData.find(loc => loc.id === selectedPickupLocation);
-      if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
-    } else if (deliveryOrPickup === "delivery" && selectedDeliveryLocation && allDeliveryLocations) {
-      const selectedLocation = allDeliveryLocations.find(loc => loc.id === selectedDeliveryLocation);
-      if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
-    }
-    return calculatedShippingCost;
-  }, [cart_data, selectedPickupLocation, pickupLocationsData, selectedDeliveryLocation, allDeliveryLocations, deliveryOrPickup]);
+  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder]);
 
   const totalAmount = useMemo(() => {
     if (!cart_data) return 0;
@@ -255,15 +335,26 @@ const AuthenticatedCheckout = () => {
         ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
         : parseFloat(item.product.price) * parseInt(item.quantity);
     });
-    return itemsSubtotal + shippingCost;
-  }, [cart_data, shippingCost]);
+    return itemsSubtotal;
+  }, [cart_data]);
 
   const onSubmit = async (formData: CheckoutFormData) => {
     try {
-      const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber); // Format phone number
+      const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber);
+      const combinedAddress = formData.address + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
 
       const response = await checkoutFx({
-        body: { ...formData, phoneNumber: formattedPhoneNumber, pickup_location: selectedPickupLocation, delivery_location: selectedDeliveryLocation },
+        body: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phoneNumber: formattedPhoneNumber,
+          address: combinedAddress,
+          city: formData.city,
+          state: "Kenya",
+          country: "Kenya",
+          postal_code: "00100",
+          payment_method: formData.payment_method,
+        },
         token: Cookies.get("access"),
         company_name: shopname,
       }).unwrap();
@@ -277,12 +368,12 @@ const AuthenticatedCheckout = () => {
         setShowMpesaModal(true);
         toast.success("STK Push sent to your phone. Please complete the payment.");
       } else {
-        toast.success("Order Placed Successfully");
-        handleNext(); // Proceed to review order step for other payment methods
+        toast.success("Order Placed Successfully!");
+        router.push(`/shop/${shopname}`);
       }
     } catch (error: any) {
       setIsProcessingMpesa(false);
-      toast.error(error.data?.non_field_errors?.[0] || "An error occurred");
+      toast.error(error.data?.non_field_errors?.[0] || error.data?.error || "An error occurred");
     }
   };
 
@@ -290,336 +381,294 @@ const AuthenticatedCheckout = () => {
     switch (step) {
       case 0:
         return (
-          <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ marginTop: "20px" }}>
-              Delivery or Pickup
-            </Typography>
-            <FormControl component="fieldset" sx={{ mb: 2 }}>
-              <RadioGroup row name="deliveryOrPickup" value={deliveryOrPickup} onChange={(e) => setDeliveryOrPickup(e.target.value as "delivery" | "pickup")}>
-                <FormControlLabel value="pickup" control={<Radio />} label="Pickup" />
-                <FormControlLabel value="delivery" control={<Radio />} label="Delivery" />
-              </RadioGroup>
-            </FormControl>
-
-            {deliveryOrPickup === "pickup" && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {pickupLocationsLoading ? (
-                  <Typography>Loading pickup locations...</Typography>
-                ) : pickupLocationsData && pickupLocationsData.length > 0 ? (
-                  <FormControl component="fieldset" fullWidth>
-                    <RadioGroup
-                      name="pickupLocation"
-                      value={selectedPickupLocation}
-                      onChange={(e) => {
-                        setSelectedPickupLocation(Number(e.target.value));
-                        setValue("pickup_location", Number(e.target.value));
-                        setSelectedDeliveryLocation(null);
-                        setValue("delivery_location", null);
-                      }}
-                    >
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {pickupLocationsData.map((location) => {
-                          const isSelected = selectedPickupLocation === location.id;
-                          const fee = parseFloat(location.delivery_fee || "0");
-                          return (
-                            <Box
-                              key={location.id}
-                              onClick={() => {
-                                setSelectedPickupLocation(location.id);
-                                setValue("pickup_location", location.id);
-                                setSelectedDeliveryLocation(null);
-                                setValue("delivery_location", null);
-                              }}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                width: "100%",
-                                border: "2px solid",
-                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
-                                borderRadius: "16px",
-                                p: 2.5,
-                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                "&:hover": { borderColor: theme.palette.primary.main },
-                              }}
-                            >
-                              <FormControlLabel
-                                value={location.id}
-                                control={<Radio checked={isSelected} />}
-                                label={
-                                  <Box sx={{ ml: 1 }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
-                                      {location.name}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
-                                      {location.address}, {location.city}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                                      Delivery Fee: Kes {fee.toLocaleString()}
-                                    </Typography>
-                                  </Box>
-                                }
-                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
-                              />
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<LocationOnIcon />}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedLocationForMap(location);
-                                  setMapOpen(true);
-                                }}
-                                sx={{
-                                  borderRadius: "30px",
-                                  textTransform: "none",
-                                  fontWeight: 700,
-                                  border: "1px solid rgba(0,0,0,0.12)",
-                                  color: "#18181b",
-                                  "&:hover": { borderColor: theme.palette.primary.main, backgroundColor: alpha(theme.palette.primary.main, 0.05) },
-                                }}
-                              >
-                                Preview on Map
-                              </Button>
-                            </Box>
-                          );
-                        })}
-                      </Box>
-                    </RadioGroup>
-                  </FormControl>
-                ) : (
-                  <Typography>No pickup locations available for this shop.</Typography>
-                )}
-              </Box>
-            )}
-
-            {deliveryOrPickup === "delivery" && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <TextField
-                  fullWidth
-                  placeholder="Search delivery routes, locations..."
-                  variant="outlined"
-                  value={deliverySearchQuery}
-                  onChange={(e) => setDeliverySearchQuery(e.target.value)}
-                  InputProps={{
-                    sx: { borderRadius: "12px", backgroundColor: "#ffffff" },
-                  }}
-                />
-                {deliveryLocationsLoading ? (
-                  <Typography>Loading delivery locations...</Typography>
-                ) : filteredDeliveryLocations && filteredDeliveryLocations.length > 0 ? (
-                  <FormControl component="fieldset" fullWidth>
-                    <RadioGroup
-                      name="deliveryLocation"
-                      value={selectedDeliveryLocation}
-                      onChange={(e) => {
-                        setSelectedDeliveryLocation(Number(e.target.value));
-                        setValue("delivery_location", Number(e.target.value));
-                        setSelectedPickupLocation(null);
-                        setValue("pickup_location", null);
-                      }}
-                    >
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {filteredDeliveryLocations.map((location) => {
-                          const isSelected = selectedDeliveryLocation === location.id;
-                          const fee = parseFloat(String(location.delivery_fee || 0));
-                          return (
-                            <Box
-                              key={location.id}
-                              onClick={() => {
-                                setSelectedDeliveryLocation(location.id);
-                                setValue("delivery_location", location.id);
-                                setSelectedPickupLocation(null);
-                                setValue("pickup_location", null);
-                              }}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                width: "100%",
-                                border: "2px solid",
-                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
-                                borderRadius: "16px",
-                                p: 2.5,
-                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                "&:hover": { borderColor: theme.palette.primary.main },
-                              }}
-                            >
-                              <FormControlLabel
-                                value={location.id}
-                                control={<Radio checked={isSelected} />}
-                                label={
-                                  <Box sx={{ ml: 1 }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
-                                      {location.location_name.toUpperCase()}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
-                                      Route: {location.route.toLowerCase()}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                                      Delivery Fee: Kes {fee.toLocaleString()}
-                                    </Typography>
-                                  </Box>
-                                }
-                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
-                              />
-                            </Box>
-                          );
-                        })}
-                      </Box>
-                    </RadioGroup>
-                  </FormControl>
-                ) : (
-                  <Typography>No delivery locations available for this shop.</Typography>
-                )}
-                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                  {/* Previous Button */}
-                  <Button
-                    variant="outlined"
-                    disabled={deliveryPage === 1}
-                    onClick={() => setDeliveryPage(prev => prev - 1)}
-                    startIcon={<ArrowBackIosNewIcon />}
-                    sx={{
-                      borderRadius: 2,
-                      minWidth: 48,
-                      px: 2,
-                      py: 1.2,
-                    }}
-                  />
-
-                  {/* Next Button */}
-                  <Button
-                    variant="outlined"
-                    disabled={deliveryPage * itemsPerPage >= (allDeliveryLocations?.length || 0)}
-                    onClick={() => setDeliveryPage(prev => prev + 1)}
-                    endIcon={<ArrowForwardIosIcon />}
-                    sx={{
-                      borderRadius: 2,
-                      minWidth: 48,
-                      px: 2,
-                      py: 1.2,
-                    }}
-                  />
-                </Box>
-              </Box>
-            )}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-              <Button variant="contained" onClick={handleNext} disabled={!selectedPickupLocation && !selectedDeliveryLocation}>
-                Next
+          <Stack spacing={3}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Your Contact Details
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Provide your name and contact phone number for the order.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2.5 }}>
+              <TextField
+                fullWidth
+                label="First Name"
+                variant="outlined"
+                {...register("firstName")}
+                error={!!errors.firstName}
+                helperText={errors.firstName?.message}
+                InputProps={{ sx: { borderRadius: "12px" } }}
+              />
+              <TextField
+                fullWidth
+                label="Last Name"
+                variant="outlined"
+                {...register("lastName")}
+                error={!!errors.lastName}
+                helperText={errors.lastName?.message}
+                InputProps={{ sx: { borderRadius: "12px" } }}
+              />
+            </Box>
+            <TextField
+              fullWidth
+              label="Phone Number"
+              variant="outlined"
+              {...register("phoneNumber")}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber?.message}
+              InputProps={{ sx: { borderRadius: "12px" } }}
+              placeholder="e.g. 0712345678"
+            />
+            
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+              <Button 
+                variant="contained" 
+                size="large"
+                onClick={async () => {
+                  const isValid = await trigger(["firstName", "lastName", "phoneNumber"]);
+                  if (isValid) handleNext();
+                }}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+              >
+                Next Step
               </Button>
             </Box>
-          </>
+          </Stack>
         );
       case 1:
         return (
-          <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
-              Billing Address
-            </Typography>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Grid container spacing={2}>
-                {[
-                  { label: "First Name", name: "firstName" },
-                  { label: "Last Name", name: "lastName" },
-                  { label: "Phone Number", name: "phoneNumber" },
-                  // { label: "Address", name: "address" },
-                  // { label: "City", name: "city" },
-                  // { label: "State", name: "state" },
-                  // { label: "Postal Code", name: "postal_code" },
-                  // { label: "Country", name: "country" },
-                ].map((field, index) => (
-                  <Grid item xs={12} md={6} key={index}>
-                    <TextField
-                      autoFocus={index === 0}
-                      fullWidth
-                      label={field.label}
-                      {...register(field.name as keyof CheckoutFormData)}
-                      error={!!errors[field.name as keyof CheckoutFormData]}
-                      helperText={errors[field.name as keyof CheckoutFormData]?.message}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button onClick={handleBack}>Back</Button>
-              <Button variant="contained" onClick={async () => {
-                const billingFields: (keyof CheckoutFormData)[] = ["firstName", "lastName", "phoneNumber"];
-                const isValid = await trigger(billingFields);
-                if (isValid) {
-                  handleNext();
-                }
-              }}>
-                Next
+          <Stack spacing={3}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Delivery Address
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Enter the physical address where you'd like your items delivered, and drop a pin on the map.
+              </Typography>
+            </Box>
+            
+            <TextField
+              fullWidth
+              label="Street / Apartment / Delivery Address"
+              variant="outlined"
+              {...register("address")}
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              InputProps={{ sx: { borderRadius: "12px" } }}
+              placeholder="e.g. Apartment 4B, Kilimani Road"
+            />
+            
+            <TextField
+              fullWidth
+              label="City"
+              variant="outlined"
+              {...register("city")}
+              error={!!errors.city}
+              helperText={errors.city?.message}
+              InputProps={{ sx: { borderRadius: "12px" } }}
+              placeholder="e.g. Nairobi"
+            />
+
+            <Controller
+              name="pinnedLocation"
+              control={control}
+              render={({ field }) => (
+                <MapPinWidget value={field.value || ""} onChange={field.onChange} />
+              )}
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+                Back
+              </Button>
+              <Button 
+                variant="contained" 
+                size="large"
+                onClick={async () => {
+                  const isValid = await trigger(["address", "city"]);
+                  if (isValid) handleNext();
+                }}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+              >
+                Next Step
               </Button>
             </Box>
-          </>
+          </Stack>
+        );
+      case 2:
+        return (
+          <Stack spacing={3}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Select Payment Method
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Choose how you would like to settle this order securely.
+              </Typography>
+            </Box>
+
+            <FormControl component="fieldset" fullWidth>
+              <RadioGroup
+                row
+                name="payment_method"
+                value={watch("payment_method")}
+                onChange={(e) => setValue("payment_method", e.target.value)}
+              >
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr", gap: 2, width: "100%" }}>
+                  {[
+                    { value: "mpesa", label: "M-Pesa STK Push", desc: "Pay instantly via your Safaricom SIM card push notifications", icon: PhoneIphoneIcon },
+                    { value: "card", label: "Debit or Credit Card", desc: "Visa, Mastercard, or American Express cards", icon: CreditCardIcon },
+                    { value: "paypal", label: "PayPal Express", desc: "Pay with your secure PayPal wallet balance or bank link", icon: AccountBalanceWalletIcon },
+                  ].map((pm) => {
+                    const isSelected = watch("payment_method") === pm.value;
+                    return (
+                      <Box
+                        key={pm.value}
+                        onClick={() => setValue("payment_method", pm.value)}
+                        sx={{
+                          border: "2px solid",
+                          borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                          borderRadius: "16px",
+                          p: 2.5,
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 2,
+                          backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          "&:hover": { borderColor: theme.palette.primary.main },
+                        }}
+                      >
+                        <Radio checked={isSelected} sx={{ p: 0.5 }} />
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <pm.icon sx={{ fontSize: "1.3rem", color: isSelected ? theme.palette.primary.main : "text.secondary" }} />
+                            <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b" }}>{pm.label}</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>{pm.desc}</Typography>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </RadioGroup>
+            </FormControl>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+                Back
+              </Button>
+              <Button 
+                variant="contained" 
+                size="large"
+                onClick={handleNext}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+              >
+                Review & Confirm
+              </Button>
+            </Box>
+          </Stack>
         );
       default:
-        // const handleConfirmPayment = () => {
-        //   toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
-        //   router.push(`/shop/${shopname}`);
-        // };
-
+        // Step 3: Review Order and Pay
         return (
-          <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
-              Review Order and Pay
-            </Typography>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Typography variant="h6" gutterBottom>Your Total: Kes {totalAmount}</Typography>
-              {/* {order} */}
-              {/* <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Company Payment Details:</Typography> */}
-              {companyDataLoading ? (
-                <Typography>Loading payment details...</Typography>
-              ) : companyData ? (
-                <></>
-                // <Box>
-                //   {companyData.payment_method === "mpesa_till" && (
-                //     <Typography variant="body1">M-Pesa Till Number: <b>{companyData.mpesa_till_number}</b></Typography>
-                //   )}
-                //   {companyData.payment_method === "mpesa_paybill" && (
-                //     <>
-                //       <Typography variant="body1">M-Pesa Paybill Number: <b>{companyData.mpesa_paybill_number}</b></Typography>
-                //       <Typography variant="body1">M-Pesa Account Number: <b>{companyData.mpesa_account_number}</b></Typography>
-                //     </>
-                //   )}
-                //   {companyData.payment_method === "mpesa_send_money" && (
-                //     <Typography variant="body1">M-Pesa Phone Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-                //   )}
-                //   {companyData.payment_method === "pochi_la_biashara" && (
-                //     <Typography variant="body1">Pochi la Biashara Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-                //   )}
-                //   {!companyData.payment_method && (
-                //     <Typography>No specific payment method configured for this company.</Typography>
-                //   )}
-                // </Box>
-              ) : (
-                <Typography>Could not load company payment details.</Typography>
-              )}
+          <Stack spacing={4}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Review Order & Place
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Verify your order details below and complete payment.
+              </Typography>
+            </Box>
+
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: "16px", borderColor: "rgba(0,0,0,0.08)" }}>
+              <Stack spacing={2.5} divider={<Divider />}>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                    Customer Details
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                    {watch("firstName")} {watch("lastName")}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Phone: {watch("phoneNumber")}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                    Delivery Location
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                    {watch("address")}, {watch("city")}
+                  </Typography>
+                  {watch("pinnedLocation") && (
+                    <Chip 
+                      icon={<LocationOnIcon sx={{ fontSize: "1rem !important" }} />}
+                      label={`Pinned Location: ${watch("pinnedLocation")}`}
+                      variant="outlined"
+                      size="small"
+                      sx={{ mt: 1, borderRadius: "6px", fontWeight: 600 }}
+                    />
+                  )}
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                    Selected Payment Method
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <CheckCircleIcon color="success" sx={{ fontSize: "1.15rem" }} />
+                    <Typography variant="body1" sx={{ fontWeight: 700, textTransform: "capitalize" }}>
+                      {watch("payment_method")}
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Stack>
             </Paper>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button onClick={handleBack}>Back</Button>
+
+            {companyDataLoading ? (
+              <Typography>Loading shop parameters...</Typography>
+            ) : companyData ? (
+              <Box>
+                {watch("payment_method") === "mpesa" && (
+                  <Paper sx={{ p: 2.5, borderRadius: "12px", borderLeft: "4px solid #4caf50", backgroundColor: "#f8fdf8" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: "#2e7d32" }}>
+                      M-Pesa payment STK push will be sent automatically to {watch("phoneNumber")} once you click below.
+                    </Typography>
+                  </Paper>
+                )}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="error">Could not retrieve shop checkout parameters.</Typography>
+            )}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+                Back to Payment
+              </Button>
               <Button
                 variant="contained"
-                type="submit" // This will trigger the onSubmit function
-                disabled={isLoading || isProcessingMpesa || (!selectedPickupLocation && !selectedDeliveryLocation)}
+                size="large"
+                type="submit"
+                disabled={isLoading || isProcessingMpesa}
                 sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 4,
                   backgroundColor: theme.palette.primary.main,
                   "&:hover": { backgroundColor: theme.palette.primary.dark },
                 }}
               >
-                {(isLoading || isProcessingMpesa) ? <CircularProgress size={24} /> : "Place Order"}
+                {(isLoading || isProcessingMpesa) ? <CircularProgress size={24} color="inherit" /> : "Place Order & Pay"}
               </Button>
             </Box>
-          </>
+          </Stack>
         );
-      // default:
-      //   return (`Unknown step ${step}`);
     }
   };
 
@@ -663,9 +712,7 @@ const AuthenticatedCheckout = () => {
 
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Typography color="text.secondary">Fulfillment Fee</Typography>
-              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>
-                {shippingCost > 0 ? `Kes ${shippingCost}` : "Select Location"}
-              </Typography>
+              <Typography sx={{ fontWeight: 700, color: "#10b981" }}>Free Delivery</Typography>
             </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
@@ -675,124 +722,28 @@ const AuthenticatedCheckout = () => {
               </Typography>
             </Box>
           </Stack>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#18181b", mb: 1.5 }}>
-            Payment Method
-          </Typography>
-          <FormControl component="fieldset" fullWidth sx={{ mb: 1 }}>
-            <RadioGroup
-              row
-              name="paymentRadio"
-              value={watch("payment_method")}
-              onChange={(e) => setValue("payment_method", e.target.value)}
-            >
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, width: "100%" }}>
-                {[
-                  { value: "mpesa", label: "M-Pesa", icon: PhoneIphoneIcon },
-                  { value: "card", label: "Card / Credit", icon: CreditCardIcon },
-                  { value: "paypal", label: "PayPal Wallet", icon: AccountBalanceWalletIcon },
-                ].map((pm) => {
-                  const isSelected = watch("payment_method") === pm.value;
-                  return (
-                    <Box
-                      key={pm.value}
-                      onClick={() => setValue("payment_method", pm.value)}
-                      sx={{
-                        border: "2px solid",
-                        borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
-                        borderRadius: "14px",
-                        px: 1.5,
-                        py: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                        backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        "&:hover": { borderColor: theme.palette.primary.main },
-                      }}
-                    >
-                      <FormControlLabel
-                        value={pm.value}
-                        control={<Radio size="small" />}
-                        label={
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                            <pm.icon sx={{ fontSize: "1.15rem", color: isSelected ? theme.palette.primary.main : "text.secondary" }} />
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: isSelected ? "text.primary" : "text.secondary", whiteSpace: "nowrap" }}>{pm.label}</Typography>
-                          </Box>
-                        }
-                        sx={{ m: 0 }}
-                      />
-                    </Box>
-                  );
-                })}
-              </Box>
-            </RadioGroup>
-          </FormControl>
         </SummarySideCard>
       </Box>
 
-      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
-        <DialogTitle>
-          Map Preview: {selectedLocationForMap?.name}
-          <IconButton
-            aria-label="close"
-            onClick={() => setMapOpen(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {selectedLocationForMap?.gmaps_link ? (
-            <iframe
-              src={selectedLocationForMap.gmaps_link}
-              width="100%"
-              height="400"
-              style={{ border: 0 }}
-              allowFullScreen={true}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          ) : (
-            <Box sx={{ height: 400, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}>
-              <Typography variant="h6" color="textSecondary">
-                No map link available for this location.
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
-
       {/* M-Pesa Payment Modal */}
       <Dialog open={showMpesaModal} onClose={() => setShowMpesaModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800 }}>
           Complete M-Pesa Payment
           <IconButton
             aria-label="close"
             onClick={() => setShowMpesaModal(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
+            sx={{ position: 'absolute', right: 12, top: 12, color: (theme) => theme.palette.grey[500] }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ textAlign: 'center', p: 4 }}>
-          <CircularProgress sx={{ mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
+          <CircularProgress sx={{ mb: 3 }} size={50} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Please check your phone for an M-Pesa STK Push notification.
           </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Complete the payment on your phone to finalize your order.
+          <Typography variant="body2" color="textSecondary" sx={{ maxW: "80%", mx: "auto", mb: 3 }}>
+            Complete the payment prompt by entering your M-Pesa PIN on your phone to finalize your order.
           </Typography>
           <Button
             variant="outlined"
@@ -801,11 +752,11 @@ const AuthenticatedCheckout = () => {
               setShowMpesaModal(false);
               setIsMpesaPaymentInitiated(false);
               setMpesaOrderId(null);
-              router.push(`/shop/${shopname}`); // Redirect if user cancels
+              router.push(`/shop/${shopname}`);
             }}
-            sx={{ mt: 3 }}
+            sx={{ borderRadius: "12px", px: 3, textTransform: "none" }}
           >
-            Cancel Payment
+            Cancel & Return to Shop
           </Button>
         </DialogContent>
       </Dialog>
@@ -814,94 +765,52 @@ const AuthenticatedCheckout = () => {
 };
 
 // --- Guest Checkout --- //
+const guestCheckoutSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  phoneNumber: z.string().min(7, "Phone number is required"),
+  address: z.string().min(5, "Delivery address is required"),
+  city: z.string().min(2, "City is required"),
+  payment_method: z.string().min(2, "Payment method is required"),
+  pinnedLocation: z.string().optional(),
+});
+
+type GuestCheckoutFormData = z.infer<typeof guestCheckoutSchema>;
 
 const GuestCheckout = () => {
   const theme = useTheme();
   const router = useRouter();
   const { sessionId, refetch, data: cart_data } = useCart();
   const [placeOrderGuest, { isLoading }] = usePlaceOrderGuestMutation();
-  const [lipaNaMpesaFx] = useLipaNaMpesaMutation(); // Initialize mutation
+  const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
   const [orderResponse, setOrderResponse] = useState<GuestOrderResponse | null>(null);
   const [shopname] = useState(Cookies.get("shopname") || "techend");
 
-  const [selectedPickupLocation, setSelectedPickupLocation] = useState<number | null>(null);
-  const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState<number | null>(null);
-  const [shippingCost, setShippingCost] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [mapOpen, setMapOpen] = useState(false);
-  const [selectedLocationForMap, setSelectedLocationForMap] = useState<PickupLocation | null>(null);
-  const [deliveryOrPickup, setDeliveryOrPickup] = useState<"pickup" | "delivery">("pickup");
-
-  const [deliveryPage, setDeliveryPage] = useState(1);
-  const [deliverySearchQuery, setDeliverySearchQuery] = useState("");
-  const itemsPerPage = 5;
-
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ['Your Details', 'Delivery/Pickup & Payment', 'Review Order'];
+  const steps = ['Your Details', 'Delivery Address', 'Payment Method', 'Review & Pay'];
 
-  // M-Pesa specific states for Guest Checkout
+  // M-Pesa states
   const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
   const [mpesaOrderId, setMpesaOrderId] = useState<string | null>(null);
   const [showMpesaModal, setShowMpesaModal] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
-  console.log(pollCount)
+  const pollCountRef = useRef(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
-
-  const guestCheckoutSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    firstName: z.string().min(2, "First name is required"),
-    lastName: z.string().min(2, "Last name is required"),
-    phoneNumber: z.string().min(7, "Phone number is required"),
-    // address: z.string().min(5, "Address is required"),
-    // city: z.string().min(2, "City is required"),
-    // state: z.string().min(2, "State is required"),
-    // postal_code: z.string().min(4, "Postal code is required"),
-    // country: z.string().min(2, "Country is required"),
-    payment_method: z.string().min(2, "Payment method is required"),
-    pickup_location: z.number().optional().nullable(),
-    delivery_location: z.number().optional().nullable(),
-  }).superRefine((data, ctx) => {
-    if (activeStep === 1) {
-      if (!data.pickup_location && !data.delivery_location) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please select either a pickup or delivery location.",
-          path: ["deliveryOrPickup"], // A more general path for the error
-        });
-      }
-    }
-  });
-  type GuestCheckoutFormData = z.infer<typeof guestCheckoutSchema>;
 
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
 
-  const { data: pickupLocationsData, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery({
-    company_slug: shopname,
-    token: "", // Guest users don't have a token
-  });
-
-  const { data: allDeliveryLocations, isLoading: deliveryLocationsLoading } = useGetDeliveryLocationsQuery({
-    company_slug: shopname,
-    token: "", // Guest users don't have a token
-  });
-
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
-  const [filteredDeliveryLocations, setFilteredDeliveryLocations] = useState<DeliveryLocation[]>([]);
-
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch } = useForm<GuestCheckoutFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
-    defaultValues: { payment_method: "mpesa" },
+    defaultValues: { payment_method: "mpesa", pinnedLocation: "" },
   });
 
-  const yourDetailsFields = watch(["email", "firstName", "lastName", "phoneNumber"]);
-
-  // Polling for M-Pesa payment status for Guest Checkout
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
-    { order_id: mpesaOrderId!, token: "" }, // Guest users don't have a token for this endpoint either
-    { skip: !isMpesaPaymentInitiated || !mpesaOrderId } // Removed pollingInterval
+    { order_id: mpesaOrderId!, token: "" },
+    { skip: !isMpesaPaymentInitiated || !mpesaOrderId }
   );
 
   useEffect(() => {
@@ -910,7 +819,7 @@ const GuestCheckout = () => {
       setShowMpesaModal(false);
       setIsMpesaPaymentInitiated(false);
       setMpesaOrderId(null);
-      if (pollIntervalRef.current) { // Clear interval here as well
+      if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
@@ -923,26 +832,21 @@ const GuestCheckout = () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
       }
-
-      setPollCount(0); // Reset poll count
-
+      pollCountRef.current = 0;
       pollIntervalRef.current = setInterval(() => {
-        setPollCount(prevCount => {
-          if (prevCount >= 4) { // 0-indexed, so 4 means 5 runs
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
-            toast.error("M-Pesa payment timed out. Please try again.");
-            setShowMpesaModal(false);
-            setIsMpesaPaymentInitiated(false);
-            setMpesaOrderId(null);
-            handleNext();
-            return prevCount;
+        if (pollCountRef.current >= 5) {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
           }
-          refetchMpesaOrder();
-          return prevCount + 1;
-        });
+          toast.error("M-Pesa payment timed out. Please try again.");
+          setShowMpesaModal(false);
+          setIsMpesaPaymentInitiated(false);
+          setMpesaOrderId(null);
+          return;
+        }
+        refetchMpesaOrder();
+        pollCountRef.current += 1;
       }, 3000);
     } else {
       if (pollIntervalRef.current) {
@@ -950,49 +854,24 @@ const GuestCheckout = () => {
         pollIntervalRef.current = null;
       }
     }
-
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
     };
-  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder, handleNext]); // Added router, shopname to dependencies
+  }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder]);
 
-  useEffect(() => {
-    if (allDeliveryLocations) {
-      const filtered = allDeliveryLocations.filter(
-        (location) =>
-          location.route.toLowerCase().includes(deliverySearchQuery.toLowerCase()) ||
-          location.location_name.toLowerCase().includes(deliverySearchQuery.toLowerCase())
-      );
-      const startIndex = (deliveryPage - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      setFilteredDeliveryLocations(filtered.slice(startIndex, endIndex));
-    }
-  }, [allDeliveryLocations, deliverySearchQuery, deliveryPage]);
-
-  useEffect(() => {
-    if (cart_data) {
-      let calculatedShippingCost = 0;
-      if (deliveryOrPickup === "pickup" && selectedPickupLocation && pickupLocationsData) {
-        const selectedLocation = pickupLocationsData.find(loc => loc.id === selectedPickupLocation);
-        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
-      } else if (deliveryOrPickup === "delivery" && selectedDeliveryLocation && allDeliveryLocations) {
-        const selectedLocation = allDeliveryLocations.find(loc => loc.id === selectedDeliveryLocation);
-        if (selectedLocation) calculatedShippingCost = Number(selectedLocation.delivery_fee);
-      }
-      setShippingCost(calculatedShippingCost);
-
-      let itemsSubtotal = 0;
-      cart_data.items.forEach((item: any) => {
-        itemsSubtotal += item.product.on_sale
-          ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
-          : parseFloat(item.product.price) * parseInt(item.quantity);
-      });
-      setTotalAmount(itemsSubtotal + calculatedShippingCost);
-    }
-  }, [cart_data, selectedPickupLocation, pickupLocationsData, selectedDeliveryLocation, allDeliveryLocations, deliveryOrPickup]);
+  const totalAmount = useMemo(() => {
+    if (!cart_data) return 0;
+    let itemsSubtotal = 0;
+    cart_data.items.forEach((item: any) => {
+      itemsSubtotal += item.product.on_sale
+        ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
+        : parseFloat(item.product.price) * parseInt(item.quantity);
+    });
+    return itemsSubtotal;
+  }, [cart_data]);
 
   const onSubmit = async (formData: GuestCheckoutFormData) => {
     if (!sessionId) {
@@ -1001,37 +880,42 @@ const GuestCheckout = () => {
     }
 
     try {
-      const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber); // Format phone number
+      const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber);
+      const combinedAddress = formData.address + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
 
       const response = await placeOrderGuest({
-        ...formData,
-        phoneNumber: formattedPhoneNumber, // Use formatted phone number
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formattedPhoneNumber,
+        address: combinedAddress,
+        city: formData.city,
+        state: "Kenya",
+        country: "Kenya",
+        postal_code: "00100",
+        payment_method: formData.payment_method,
         sessionId,
-        company_name: shopname
+        company_name: shopname,
       }).unwrap();
+
       setOrderResponse(response);
-      toast.success("Your order has been placed successfully!");
+      toast.success("Guest order placed successfully!");
       localStorage.removeItem("session_id");
-      refetch(); // To clear the cart data
+      refetch();
 
       if (formData.payment_method === "mpesa") {
         setIsProcessingMpesa(true);
         setMpesaOrderId(response.order_id);
-        // For guest users, the backend might not require a token for lipa-na-mpesa if the order_id is sufficient
-        // However, if it does, we might need to handle guest authentication differently or ensure the backend allows it.
-        await lipaNaMpesaFx({ order_id: response.order_id, token: "", session_id: sessionId }).unwrap(); // Pass empty token for guest, and session_id
+        await lipaNaMpesaFx({ order_id: response.order_id, token: "", session_id: sessionId }).unwrap();
         setIsProcessingMpesa(false);
         setIsMpesaPaymentInitiated(true);
         setShowMpesaModal(true);
         toast.success("STK Push sent to your phone. Please complete the payment.");
-      } else {
-        // For other payment methods, proceed to the order confirmation screen
-        // The existing orderResponse rendering handles this.
       }
     } catch (error: any) {
       setIsProcessingMpesa(false);
       if (error.data?.error === "Email already exists") {
-        toast.error("An account with this email already exists. Please log in to complete your order.");
+        toast.error("An account with this email already exists. Please log in.");
         router.push("/login");
       } else {
         toast.error(error.data?.error || "An unexpected error occurred.");
@@ -1039,66 +923,30 @@ const GuestCheckout = () => {
     }
   };
 
-  if (orderResponse && !isMpesaPaymentInitiated) { // Only show order response if not in M-Pesa flow
-    const handleConfirmPayment = () => {
-      toast.success(<Typography>Payment Confirmed! Redirecting to shop...</Typography>);
-      router.push(`/shop/${shopname}`);
-    };
-
+  if (orderResponse && !isMpesaPaymentInitiated) {
     return (
-      <Paper sx={{ p: 4, my: 4 }}>
-        <Typography variant="h4" color="primary" gutterBottom>Order Successful!</Typography>
-        <Typography variant="h6">Your account has been created. Please check your email for your credentials.</Typography>
+      <Paper sx={{ p: 4, my: 4, borderRadius: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+        <Typography variant="h4" color="primary" sx={{ fontWeight: 800 }} gutterBottom>Order Successful!</Typography>
+        <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
+          Your temporary account credentials have been created. Please check your email inbox.
+        </Typography>
 
-        <Box sx={{ my: 2, p: 2, border: '1px solid #eee', borderRadius: '8px' }}>
-          <Typography><strong>Order ID:</strong> {orderResponse.order_id}</Typography>
-          <Typography><strong>Email:</strong> {orderResponse.user_email}</Typography>
-          <Typography><strong>Temporary Password:</strong> {orderResponse.generated_password}</Typography>
+        <Box sx={{ my: 3, p: 3, border: '1px solid rgba(0,0,0,0.06)', borderRadius: '16px', backgroundColor: "#fcfcfc" }}>
+          <Stack spacing={1}>
+            <Typography><strong>Order ID:</strong> {orderResponse.order_id}</Typography>
+            <Typography><strong>Registered Email:</strong> {orderResponse.user_email}</Typography>
+            <Typography><strong>Temporary Password:</strong> {orderResponse.generated_password}</Typography>
+          </Stack>
         </Box>
 
-        <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f", marginTop: "20px" }}>
-          Review Order and Pay
-        </Typography>
-        <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-          <Typography variant="h6" gutterBottom>Your Total: Kes {totalAmount}</Typography>
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Company Payment Details:</Typography>
-          {companyDataLoading ? (
-            <Typography>Loading payment details...</Typography>
-          ) : companyData ? (
-            <Box>
-              {companyData.payment_method === "mpesa_till" && (
-                <Typography variant="body1">M-Pesa Till Number: <b>{companyData.mpesa_till_number}</b></Typography>
-              )}
-              {companyData.payment_method === "mpesa_paybill" && (
-                <>
-                  <Typography variant="body1">M-Pesa Paybill Number: <b>{companyData.mpesa_paybill_number}</b></Typography>
-                  <Typography variant="body1">M-Pesa Account Number: <b>{companyData.mpesa_account_number}</b></Typography>
-                </>
-              )}
-              {companyData.payment_method === "mpesa_send_money" && (
-                <Typography variant="body1">M-Pesa Phone Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-              )}
-              {companyData.payment_method === "pochi_la_biashara" && (
-                <Typography variant="body1">Pochi la Biashara Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-              )}
-              {!companyData.payment_method && (
-                <Typography>No specific payment method configured for this company.</Typography>
-              )}
-            </Box>
-          ) : (
-            <Typography>Could not load company payment details.</Typography>
-          )}
-        </Paper>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
           <Button
             variant="contained"
-            sx={{
-              backgroundColor: theme.palette.primary.main,
-              "&:hover": { backgroundColor: theme.palette.primary.dark },
-            }}
-            onClick={handleConfirmPayment}
+            size="large"
+            sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700 }}
+            onClick={() => router.push(`/shop/${shopname}`)}
           >
-            Confirm Payment & Continue Shopping
+            Go Back Shopping
           </Button>
         </Box>
       </Paper>
@@ -1109,363 +957,308 @@ const GuestCheckout = () => {
     switch (step) {
       case 0:
         return (
-          <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
-              Your Details
-            </Typography>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    autoFocus
-                    fullWidth
-                    label="Email Address"
-                    variant="outlined"
-                    {...register("email")}
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                    type="email"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="First Name"
-                    variant="outlined"
-                    {...register("firstName")}
-                    error={!!errors.firstName}
-                    helperText={errors.firstName?.message}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Last Name"
-                    variant="outlined"
-                    {...register("lastName")}
-                    error={!!errors.lastName}
-                    helperText={errors.lastName?.message}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Phone Number"
-                    variant="outlined"
-                    {...register("phoneNumber")}
-                    error={!!errors.phoneNumber}
-                    helperText={errors.phoneNumber?.message}
-                  />
-                </Grid>
-              </Grid>
-            </Paper>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-              <Button variant="contained" onClick={async () => {
-                const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
-                if (isValid) handleNext();
-              }} disabled={yourDetailsFields.some(field => !field) || !!errors.email || !!errors.firstName || !!errors.lastName || !!errors.phoneNumber }>
-                Next
+          <Stack spacing={3}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Your Contact Details
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Enter your details to create a guest order and automatic account.
+              </Typography>
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Email Address"
+              variant="outlined"
+              {...register("email")}
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              type="email"
+              InputProps={{ sx: { borderRadius: "12px" } }}
+            />
+
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2.5 }}>
+              <TextField
+                fullWidth
+                label="First Name"
+                variant="outlined"
+                {...register("firstName")}
+                error={!!errors.firstName}
+                helperText={errors.firstName?.message}
+                InputProps={{ sx: { borderRadius: "12px" } }}
+              />
+              <TextField
+                fullWidth
+                label="Last Name"
+                variant="outlined"
+                {...register("lastName")}
+                error={!!errors.lastName}
+                helperText={errors.lastName?.message}
+                InputProps={{ sx: { borderRadius: "12px" } }}
+              />
+            </Box>
+            <TextField
+              fullWidth
+              label="Phone Number"
+              variant="outlined"
+              {...register("phoneNumber")}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber?.message}
+              InputProps={{ sx: { borderRadius: "12px" } }}
+              placeholder="e.g. 0712345678"
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+              <Button 
+                variant="contained" 
+                size="large"
+                onClick={async () => {
+                  const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
+                  if (isValid) handleNext();
+                }}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+              >
+                Next Step
               </Button>
             </Box>
-          </>
+          </Stack>
         );
       case 1:
         return (
-          <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ marginTop: "20px" }}>
-              Delivery or Pickup
-            </Typography>
-            <FormControl component="fieldset" sx={{ mb: 2 }}>
-              <RadioGroup row name="deliveryOrPickup" value={deliveryOrPickup} onChange={(e) => setDeliveryOrPickup(e.target.value as "delivery" | "pickup")}>
-                <FormControlLabel value="pickup" control={<Radio />} label="Pickup" />
-                <FormControlLabel value="delivery" control={<Radio />} label="Delivery" />
-              </RadioGroup>
-            </FormControl>
+          <Stack spacing={3}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Delivery Address
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Enter the physical address where you'd like your items delivered, and drop a pin on the map.
+              </Typography>
+            </Box>
 
-            {deliveryOrPickup === "pickup" && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {pickupLocationsLoading ? (
-                  <Typography>Loading pickup locations...</Typography>
-                ) : pickupLocationsData && pickupLocationsData.length > 0 ? (
-                  <FormControl component="fieldset" fullWidth>
-                    <RadioGroup
-                      name="pickupLocation"
-                      value={selectedPickupLocation}
-                      onChange={(e) => {
-                        setSelectedPickupLocation(Number(e.target.value));
-                        setValue("pickup_location", Number(e.target.value));
-                        setSelectedDeliveryLocation(null);
-                        setValue("delivery_location", null);
-                      }}
-                    >
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {pickupLocationsData.map((location) => {
-                          const isSelected = selectedPickupLocation === location.id;
-                          const fee = parseFloat(location.delivery_fee || "0");
-                          return (
-                            <Box
-                              key={location.id}
-                              onClick={() => {
-                                setSelectedPickupLocation(location.id);
-                                setValue("pickup_location", location.id);
-                                setSelectedDeliveryLocation(null);
-                                setValue("delivery_location", null);
-                              }}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                width: "100%",
-                                border: "2px solid",
-                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
-                                borderRadius: "16px",
-                                p: 2.5,
-                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                "&:hover": { borderColor: theme.palette.primary.main },
-                              }}
-                            >
-                              <FormControlLabel
-                                value={location.id}
-                                control={<Radio checked={isSelected} />}
-                                label={
-                                  <Box sx={{ ml: 1 }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
-                                      {location.name}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
-                                      {location.address}, {location.city}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                                      Delivery Fee: Kes {fee.toLocaleString()}
-                                    </Typography>
-                                  </Box>
-                                }
-                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
-                              />
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<LocationOnIcon />}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedLocationForMap(location);
-                                  setMapOpen(true);
-                                }}
-                                sx={{
-                                  borderRadius: "30px",
-                                  textTransform: "none",
-                                  fontWeight: 700,
-                                  border: "1px solid rgba(0,0,0,0.12)",
-                                  color: "#18181b",
-                                  "&:hover": { borderColor: theme.palette.primary.main, backgroundColor: alpha(theme.palette.primary.main, 0.05) },
-                                }}
-                              >
-                                Preview on Map
-                              </Button>
-                            </Box>
-                          );
-                        })}
-                      </Box>
-                    </RadioGroup>
-                  </FormControl>
-                ) : (
-                  <Typography>No pickup locations available for this shop.</Typography>
-                )}
-              </Box>
-            )}
+            <TextField
+              fullWidth
+              label="Street / Apartment / Delivery Address"
+              variant="outlined"
+              {...register("address")}
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              InputProps={{ sx: { borderRadius: "12px" } }}
+              placeholder="e.g. Apartment 4B, Kilimani Road"
+            />
 
-            {deliveryOrPickup === "delivery" && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <TextField
-                  fullWidth
-                  placeholder="Search delivery routes, locations..."
-                  variant="outlined"
-                  value={deliverySearchQuery}
-                  onChange={(e) => setDeliverySearchQuery(e.target.value)}
-                  InputProps={{
-                    sx: { borderRadius: "12px", backgroundColor: "#ffffff" },
-                  }}
-                />
-                {deliveryLocationsLoading ? (
-                  <Typography>Loading delivery locations...</Typography>
-                ) : filteredDeliveryLocations && filteredDeliveryLocations.length > 0 ? (
-                  <FormControl component="fieldset" fullWidth>
-                    <RadioGroup
-                      name="deliveryLocation"
-                      value={selectedDeliveryLocation}
-                      onChange={(e) => {
-                        setSelectedDeliveryLocation(Number(e.target.value));
-                        setValue("delivery_location", Number(e.target.value));
-                        setSelectedPickupLocation(null);
-                        setValue("pickup_location", null);
-                      }}
-                    >
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {filteredDeliveryLocations.map((location) => {
-                          const isSelected = selectedDeliveryLocation === location.id;
-                          const fee = parseFloat(String(location.delivery_fee || 0));
-                          return (
-                            <Box
-                              key={location.id}
-                              onClick={() => {
-                                setSelectedDeliveryLocation(location.id);
-                                setValue("delivery_location", location.id);
-                                setSelectedPickupLocation(null);
-                                setValue("pickup_location", null);
-                              }}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                width: "100%",
-                                border: "2px solid",
-                                borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.06)",
-                                borderRadius: "16px",
-                                p: 2.5,
-                                backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                "&:hover": { borderColor: theme.palette.primary.main },
-                              }}
-                            >
-                              <FormControlLabel
-                                value={location.id}
-                                control={<Radio checked={isSelected} />}
-                                label={
-                                  <Box sx={{ ml: 1 }}>
-                                    <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b", mb: 0.5 }}>
-                                      {location.location_name.toUpperCase()}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ color: "#71717a", mb: 0.5 }}>
-                                      Route: {location.route.toLowerCase()}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                                      Delivery Fee: Kes {fee.toLocaleString()}
-                                    </Typography>
-                                  </Box>
-                                }
-                                sx={{ flexGrow: 1, mr: 1, alignItems: "flex-start" }}
-                              />
-                            </Box>
-                          );
-                        })}
-                      </Box>
-                    </RadioGroup>
-                  </FormControl>
-                ) : (
-                  <Typography>No delivery locations available for this shop.</Typography>
-                )}
-                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                  {/* Previous Page Button */}
-                  <Button
-                    variant="outlined"
-                    disabled={deliveryPage === 1}
-                    onClick={() => setDeliveryPage(prev => prev - 1)}
-                    startIcon={<ArrowBackIosNewIcon />}
-                    sx={{
-                      borderRadius: 2,
-                      minWidth: 48,
-                      px: 2,
-                      py: 1.1,
-                      fontSize: 0, // hides text safely if present
-                    }}
-                  />
+            <TextField
+              fullWidth
+              label="City"
+              variant="outlined"
+              {...register("city")}
+              error={!!errors.city}
+              helperText={errors.city?.message}
+              InputProps={{ sx: { borderRadius: "12px" } }}
+              placeholder="e.g. Nairobi"
+            />
 
-                  {/* Next Page Button */}
-                  <Button
-                    variant="outlined"
-                    disabled={deliveryPage * itemsPerPage >= (allDeliveryLocations?.length || 0)}
-                    onClick={() => setDeliveryPage(prev => prev + 1)}
-                    endIcon={<ArrowForwardIosIcon />}
-                    sx={{
-                      borderRadius: 2,
-                      minWidth: 48,
-                      px: 2,
-                      py: 1.1,
-                      fontSize: 0,
-                    }}
-                  />
-                </Box>
-              </Box>
-            )}
-            <FormControl component="fieldset" sx={{ mt: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>Payment Method</Typography>
-              <RadioGroup row onChange={(e) => setValue("payment_method", e.target.value)}>
-                <FormControlLabel value="card" control={<Radio />} label="Card" />
-                <FormControlLabel value="mpesa" control={<Radio />} label="M-Pesa" />
-                <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
-              </RadioGroup>
-              {errors.payment_method && (
-                <Typography color="error" variant="caption">{errors.payment_method.message}</Typography>
+            <Controller
+              name="pinnedLocation"
+              control={control}
+              render={({ field }) => (
+                <MapPinWidget value={field.value || ""} onChange={field.onChange} />
               )}
-            </FormControl>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button onClick={handleBack}>Back</Button>
-              <Button variant="contained" onClick={async () => {
-                const isValid = await trigger();
-                if (isValid) handleNext();
-              }} disabled={!watch('payment_method') || (!selectedPickupLocation && !selectedDeliveryLocation)}>
-                Next
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+                Back
+              </Button>
+              <Button 
+                variant="contained" 
+                size="large"
+                onClick={async () => {
+                  const isValid = await trigger(["address", "city"]);
+                  if (isValid) handleNext();
+                }}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+              >
+                Next Step
               </Button>
             </Box>
-          </>
+          </Stack>
         );
       case 2:
         return (
-          <>
-            <Typography variant="h5" fontWeight="bold" gutterBottom style={{ color: "#be1f2f" }}>
-              Review Order and Pay
-            </Typography>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Typography variant="h6" gutterBottom>Your Total: Kes {totalAmount}</Typography>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Company Payment Details:</Typography>
-              {companyDataLoading ? (
-                <Typography>Loading payment details...</Typography>
-              ) : companyData ? (
+          <Stack spacing={3}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Select Payment Method
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Choose how you would like to settle this order securely.
+              </Typography>
+            </Box>
+
+            <FormControl component="fieldset" fullWidth>
+              <RadioGroup
+                row
+                name="guest_payment_method"
+                value={watch("payment_method")}
+                onChange={(e) => setValue("payment_method", e.target.value)}
+              >
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr", gap: 2, width: "100%" }}>
+                  {[
+                    { value: "mpesa", label: "M-Pesa STK Push", desc: "Pay instantly via your Safaricom SIM card push notifications", icon: PhoneIphoneIcon },
+                    { value: "card", label: "Debit or Credit Card", desc: "Visa, Mastercard, or American Express cards", icon: CreditCardIcon },
+                    { value: "paypal", label: "PayPal Express", desc: "Pay with your secure PayPal wallet balance or bank link", icon: AccountBalanceWalletIcon },
+                  ].map((pm) => {
+                    const isSelected = watch("payment_method") === pm.value;
+                    return (
+                      <Box
+                        key={pm.value}
+                        onClick={() => setValue("payment_method", pm.value)}
+                        sx={{
+                          border: "2px solid",
+                          borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                          borderRadius: "16px",
+                          p: 2.5,
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 2,
+                          backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.03) : "#ffffff",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          "&:hover": { borderColor: theme.palette.primary.main },
+                        }}
+                      >
+                        <Radio checked={isSelected} sx={{ p: 0.5 }} />
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <pm.icon sx={{ fontSize: "1.3rem", color: isSelected ? theme.palette.primary.main : "text.secondary" }} />
+                            <Typography variant="body1" sx={{ fontWeight: 800, color: "#18181b" }}>{pm.label}</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>{pm.desc}</Typography>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </RadioGroup>
+            </FormControl>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+                Back
+              </Button>
+              <Button 
+                variant="contained" 
+                size="large"
+                onClick={handleNext}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+              >
+                Review & Confirm
+              </Button>
+            </Box>
+          </Stack>
+        );
+      default:
+        // Step 3: Review Order and Pay (Guest)
+        return (
+          <Stack spacing={4}>
+            <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
+                Review Order & Place
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
+                Verify your order details below and complete payment.
+              </Typography>
+            </Box>
+
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: "16px", borderColor: "rgba(0,0,0,0.08)" }}>
+              <Stack spacing={2.5} divider={<Divider />}>
                 <Box>
-                  {companyData.payment_method === "mpesa_till" && (
-                    <Typography variant="body1">M-Pesa Till Number: <b>{companyData.mpesa_till_number}</b></Typography>
-                  )}
-                  {companyData.payment_method === "mpesa_paybill" && (
-                    <>
-                      <Typography variant="body1">M-Pesa Paybill Number: <b>{companyData.mpesa_paybill_number}</b></Typography>
-                      <Typography variant="body1">M-Pesa Account Number: <b>{companyData.mpesa_account_number}</b></Typography>
-                    </>
-                  )}
-                  {companyData.payment_method === "mpesa_send_money" && (
-                    <Typography variant="body1">M-Pesa Phone Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-                  )}
-                  {companyData.payment_method === "pochi_la_biashara" && (
-                    <Typography variant="body1">Pochi la Biashara Number: <b>{companyData.mpesa_phone_number}</b></Typography>
-                  )}
-                  {!companyData.payment_method && (
-                    <Typography>No specific payment method configured for this company.</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                    Customer Details
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                    {watch("firstName")} {watch("lastName")}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Email: {watch("email")}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Phone: {watch("phoneNumber")}
+                  </Typography>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                    Delivery Location
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                    {watch("address")}, {watch("city")}
+                  </Typography>
+                  {watch("pinnedLocation") && (
+                    <Chip 
+                      icon={<LocationOnIcon sx={{ fontSize: "1rem !important" }} />}
+                      label={`Pinned Location: ${watch("pinnedLocation")}`}
+                      variant="outlined"
+                      size="small"
+                      sx={{ mt: 1, borderRadius: "6px", fontWeight: 600 }}
+                    />
                   )}
                 </Box>
-              ) : (
-                <Typography>Could not load company payment details.</Typography>
-              )}
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                    Selected Payment Method
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <CheckCircleIcon color="success" sx={{ fontSize: "1.15rem" }} />
+                    <Typography variant="body1" sx={{ fontWeight: 700, textTransform: "capitalize" }}>
+                      {watch("payment_method")}
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Stack>
             </Paper>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button onClick={handleBack}>Back</Button>
+
+            {companyDataLoading ? (
+              <Typography>Loading shop parameters...</Typography>
+            ) : companyData ? (
+              <Box>
+                {watch("payment_method") === "mpesa" && (
+                  <Paper sx={{ p: 2.5, borderRadius: "12px", borderLeft: "4px solid #4caf50", backgroundColor: "#f8fdf8" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: "#2e7d32" }}>
+                      M-Pesa payment STK push will be sent automatically to {watch("phoneNumber")} once you click below.
+                    </Typography>
+                  </Paper>
+                )}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="error">Could not retrieve shop checkout parameters.</Typography>
+            )}
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+                Back to Payment
+              </Button>
               <Button
                 variant="contained"
+                size="large"
                 type="submit"
-                disabled={isLoading || isProcessingMpesa || (!selectedPickupLocation && !selectedDeliveryLocation)}
+                disabled={isLoading || isProcessingMpesa}
                 sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 4,
                   backgroundColor: theme.palette.primary.main,
                   "&:hover": { backgroundColor: theme.palette.primary.dark },
                 }}
               >
-                {(isLoading || isProcessingMpesa) ? <CircularProgress size={24} /> : "Place Order & Create Account"}
+                {(isLoading || isProcessingMpesa) ? <CircularProgress size={24} color="inherit" /> : "Place Order & Pay"}
               </Button>
             </Box>
-          </>
+          </Stack>
         );
-      default:
-        return 'Unknown step';
     }
   };
 
@@ -1491,9 +1284,7 @@ const GuestCheckout = () => {
           </Stepper>
         </CheckoutStepCard>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {getStepContent(activeStep)}
-        </form>
+        <form onSubmit={handleSubmit(onSubmit)}>{getStepContent(activeStep)}</form>
       </Box>
 
       {/* Order Summary Sidebar */}
@@ -1511,9 +1302,7 @@ const GuestCheckout = () => {
 
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Typography color="text.secondary">Fulfillment Fee</Typography>
-              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>
-                {shippingCost > 0 ? `Kes ${shippingCost}` : "Select Location"}
-              </Typography>
+              <Typography sx={{ fontWeight: 700, color: "#10b981" }}>Free Delivery</Typography>
             </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
@@ -1523,124 +1312,28 @@ const GuestCheckout = () => {
               </Typography>
             </Box>
           </Stack>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#18181b", mb: 1.5 }}>
-            Payment Method
-          </Typography>
-          <FormControl component="fieldset" fullWidth sx={{ mb: 1 }}>
-            <RadioGroup
-              row
-              name="guestPaymentRadio"
-              value={watch("payment_method")}
-              onChange={(e) => setValue("payment_method", e.target.value)}
-            >
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, width: "100%" }}>
-                {[
-                  { value: "mpesa", label: "M-Pesa", icon: PhoneIphoneIcon },
-                  { value: "card", label: "Card / Credit", icon: CreditCardIcon },
-                  { value: "paypal", label: "PayPal Wallet", icon: AccountBalanceWalletIcon },
-                ].map((pm) => {
-                  const isSelected = watch("payment_method") === pm.value;
-                  return (
-                    <Box
-                      key={pm.value}
-                      onClick={() => setValue("payment_method", pm.value)}
-                      sx={{
-                        border: "2px solid",
-                        borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
-                        borderRadius: "14px",
-                        px: 1.5,
-                        py: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                        backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        "&:hover": { borderColor: theme.palette.primary.main },
-                      }}
-                    >
-                      <FormControlLabel
-                        value={pm.value}
-                        control={<Radio size="small" />}
-                        label={
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                            <pm.icon sx={{ fontSize: "1.15rem", color: isSelected ? theme.palette.primary.main : "text.secondary" }} />
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: isSelected ? "text.primary" : "text.secondary", whiteSpace: "nowrap" }}>{pm.label}</Typography>
-                          </Box>
-                        }
-                        sx={{ m: 0 }}
-                      />
-                    </Box>
-                  );
-                })}
-              </Box>
-            </RadioGroup>
-          </FormControl>
         </SummarySideCard>
       </Box>
 
-      <Dialog open={mapOpen} onClose={() => setMapOpen(false)} maxWidth="md" fullWidth disablePortal keepMounted>
-        <DialogTitle>
-          Map Preview: {selectedLocationForMap?.name}
-          <IconButton
-            aria-label="close"
-            onClick={() => setMapOpen(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {selectedLocationForMap?.gmaps_link ? (
-            <iframe
-              src={selectedLocationForMap.gmaps_link}
-              width="100%"
-              height="400"
-              style={{ border: 0 }}
-              allowFullScreen={true}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          ) : (
-            <Box sx={{ height: 400, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}>
-              <Typography variant="h6" color="textSecondary">
-                No map link available for this location.
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* M-Pesa Payment Modal for Guest Checkout */}
+      {/* M-Pesa Payment Modal */}
       <Dialog open={showMpesaModal} onClose={() => setShowMpesaModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800 }}>
           Complete M-Pesa Payment
           <IconButton
             aria-label="close"
             onClick={() => setShowMpesaModal(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
+            sx={{ position: 'absolute', right: 12, top: 12, color: (theme) => theme.palette.grey[500] }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ textAlign: 'center', p: 4 }}>
-          <CircularProgress sx={{ mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
+          <CircularProgress sx={{ mb: 3 }} size={50} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Please check your phone for an M-Pesa STK Push notification.
           </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Complete the payment on your phone to finalize your order.
+          <Typography variant="body2" color="textSecondary" sx={{ maxW: "80%", mx: "auto", mb: 3 }}>
+            Complete the payment prompt by entering your M-Pesa PIN on your phone to finalize your order.
           </Typography>
           <Button
             variant="outlined"
@@ -1649,11 +1342,11 @@ const GuestCheckout = () => {
               setShowMpesaModal(false);
               setIsMpesaPaymentInitiated(false);
               setMpesaOrderId(null);
-              router.push(`/shop/${shopname}`); // Redirect if user cancels
+              router.push(`/shop/${shopname}`);
             }}
-            sx={{ mt: 3 }}
+            sx={{ borderRadius: "12px", px: 3, textTransform: "none" }}
           >
-            Cancel Payment
+            Cancel & Return to Shop
           </Button>
         </DialogContent>
       </Dialog>
@@ -1661,26 +1354,18 @@ const GuestCheckout = () => {
   );
 };
 
-
-/**
- * Render the checkout page with breadcrumb navigation and either the authenticated or guest checkout flow.
- *
- * Reads the "access" cookie to determine authentication state and the "shopname" cookie for shop links,
- * then conditionally renders AuthenticatedCheckout (when authenticated) or GuestCheckout (when not).
- *
- * @returns The checkout page JSX element
- */
-
 function Checkout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const theme = useTheme();
   const [shopname, setShopName] = useState("techend");
+
   useEffect(() => {
-  const cookieShop = Cookies.get("shopname");
-  if (cookieShop) {
-    setShopName(cookieShop);
-  }
-}, []);
+    const cookieShop = Cookies.get("shopname");
+    if (cookieShop) {
+      setShopName(cookieShop);
+    }
+  }, []);
+
   useEffect(() => {
     const token = Cookies.get("access");
     if (token) {
