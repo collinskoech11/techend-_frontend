@@ -223,13 +223,245 @@ const MapPinWidget = ({ value, onChange }: { value: string; onChange: (val: stri
   );
 };
 
+// --- Order Successful Component --- //
+const OrderSuccessScreen = ({ 
+  orderId, 
+  guestEmail, 
+  guestPassword, 
+  cartData, 
+  formData, 
+  shopname,
+  paymentStatus
+}: { 
+  orderId: string; 
+  guestEmail?: string; 
+  guestPassword?: string; 
+  cartData: any; 
+  formData: any; 
+  shopname: string; 
+  paymentStatus?: string;
+}) => {
+  const router = useRouter();
+
+  const orderTotal = useMemo(() => {
+    if (!cartData) return 0;
+    if (typeof cartData.total === "number") return cartData.total;
+    const parsed = parseFloat(cartData.total);
+    return isNaN(parsed) ? 0 : parsed;
+  }, [cartData]);
+
+  const isPaid = useMemo(() => {
+    return paymentStatus === "Paid" || formData?.payment_method !== "mpesa";
+  }, [paymentStatus, formData]);
+
+  const amountPaid = isPaid ? orderTotal : 0;
+  const balance = orderTotal - amountPaid;
+
+  const downloadReceipt = () => {
+    const formattedDate = new Date().toLocaleDateString("en-KE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+    
+    const receiptText = `
+==================================================
+                 SOKOJUNCTION RECEIPT             
+==================================================
+Order Reference : #${orderId}
+Shop            : ${shopname.toUpperCase()}
+Date            : ${formattedDate}
+Payment Method  : ${formData?.payment_method?.toUpperCase()}
+Payment Status  : ${isPaid ? "PAID" : "PENDING"}
+--------------------------------------------------
+CUSTOMER DETAILS:
+Name            : ${formData?.firstName} ${formData?.lastName}
+Phone           : ${formData?.phoneNumber}
+Address         : ${formData?.address}, ${formData?.city}
+${formData?.pinnedLocation ? `Coordinates     : ${formData.pinnedLocation}` : ""}
+--------------------------------------------------
+ITEMS PURCHASED:
+${cartData?.items?.map((item: any) => {
+  const price = item.product.on_sale ? parseFloat(item.product.discounted_price) : parseFloat(item.product.price);
+  const nameLine = item.product.title;
+  const qtyLine = `Qty: ${item.quantity}`.padEnd(10);
+  const priceLine = `Kes ${(price * item.quantity).toLocaleString()}`;
+  return `${nameLine.padEnd(30)} ${qtyLine} ${priceLine}`;
+}).join("\n")}
+--------------------------------------------------
+Order Total     : Kes ${orderTotal.toLocaleString()}
+Amount Paid     : Kes ${amountPaid.toLocaleString()}
+Remaining Bal.  : Kes ${balance.toLocaleString()}
+==================================================
+    Thank you for shopping with Sokojunction!     
+==================================================
+`;
+    const blob = new Blob([receiptText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Receipt_Order_${orderId}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", width: "100%", py: 4 }}>
+      <Paper sx={{ p: { xs: 3, md: 5 }, borderRadius: "28px", boxShadow: "0 15px 40px rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.04)", width: "100%", maxWidth: "800px" }}>
+        {/* Success Icon */}
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+          <Box sx={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            backgroundColor: "rgba(16, 185, 129, 0.1)",
+            color: "#10b981",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <CheckCircleIcon sx={{ fontSize: 50 }} />
+          </Box>
+        </Box>
+
+        <Typography variant="h3" align="center" sx={{ fontWeight: 900, color: "#18181b", fontSize: { xs: "1.8rem", md: "2.4rem" }, mb: 1 }}>
+          Order Placed Successfully!
+        </Typography>
+        <Typography variant="body1" align="center" sx={{ color: "#71717a", maxW: 500, mx: "auto", mb: 4 }}>
+          Thank you for your purchase. Your order has been received and is being processed.
+        </Typography>
+
+        {/* Guest credentials card */}
+        {guestEmail && guestPassword && (
+          <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: "16px", borderColor: "rgba(16, 185, 129, 0.3)", backgroundColor: "#f8fdf8" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#2e7d32", mb: 1.5, textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.05em" }}>
+              Account Created Successfully
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#2e7d32", mb: 2 }}>
+              A customer account has been set up for you. Use the credentials below to log in next time and track your order:
+            </Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Username/Email</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>{guestEmail}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Temporary Password</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, fontFamily: "monospace", letterSpacing: "0.05em" }}>{guestPassword}</Typography>
+              </Box>
+            </Box>
+          </Paper>
+        )}
+
+        {/* Order Details Accordion/Summary */}
+        <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: "16px", borderColor: "rgba(0,0,0,0.06)", backgroundColor: "#fafafa" }}>
+          <Stack spacing={2.5} divider={<Divider />}>
+            {/* Financial Details */}
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2, textAlign: "center", py: 1 }}>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order Total</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 800 }}>Kes {orderTotal.toLocaleString()}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Amount Paid</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 800, color: "#10b981" }}>Kes {amountPaid.toLocaleString()}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Remaining Balance</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 800, color: balance > 0 ? "#ef4444" : "text.primary" }}>Kes {balance.toLocaleString()}</Typography>
+              </Box>
+            </Box>
+
+            {/* Reference info */}
+            <Box>
+              <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order Reference</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 800 }}>#{orderId}</Typography>
+            </Box>
+
+            {/* Delivery address */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 0.5, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                Delivery Address
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                {formData?.firstName} {formData?.lastName}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                {formData?.address}, {formData?.city}
+              </Typography>
+              {formData?.pinnedLocation && (
+                <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
+                  Coordinates: {formData.pinnedLocation}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Items list */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1.5, textTransform: "uppercase", fontSize: "0.75rem" }}>
+                Purchased Items
+              </Typography>
+              <Stack spacing={1.5}>
+                {cartData?.items?.map((item: any) => {
+                  const price = item.product.on_sale ? parseFloat(item.product.discounted_price) : parseFloat(item.product.price);
+                  return (
+                    <Box key={item.id} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{item.product.title}</Typography>
+                        <Typography variant="caption" sx={{ color: "text.secondary" }}>Qty: {item.quantity}</Typography>
+                      </Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        Kes {(price * item.quantity).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Stack>
+            </Box>
+          </Stack>
+        </Paper>
+
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="center">
+          <Button
+            variant="contained"
+            size="large"
+            sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 800, px: 4 }}
+            onClick={() => router.push(`/shop/${shopname}`)}
+          >
+            Continue Shopping
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+            onClick={downloadReceipt}
+          >
+            Download Receipt
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
+            onClick={() => router.push("/orderhistory")}
+          >
+            View Order History
+          </Button>
+        </Stack>
+      </Paper>
+    </Box>
+  );
+};
+
 // --- Authenticated Checkout --- //
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
-  address: z.string().min(5, "Delivery address is required"),
-  city: z.string().min(2, "City is required"),
+  address: z.string().optional(),
+  city: z.string().optional(),
   payment_method: z.string().min(2, "Payment method is required"),
   pinnedLocation: z.string().optional(),
 });
@@ -253,6 +485,11 @@ const AuthenticatedCheckout = () => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
+  // Success screen states
+  const [successOrder, setSuccessOrder] = useState<{ orderId: string; formData: any; cartData: any } | null>(null);
+  const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
+  const [lastCartData, setLastCartData] = useState<any>(null);
+
   useEffect(() => {
     const cookieShop = Cookies.get("shopname");
     if (cookieShop) {
@@ -265,7 +502,7 @@ const AuthenticatedCheckout = () => {
 
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control } = useForm<CheckoutFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control, setError, clearErrors } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { payment_method: "mpesa", pinnedLocation: "" },
   });
@@ -283,14 +520,18 @@ const AuthenticatedCheckout = () => {
       toast.success("M-Pesa Payment Confirmed!");
       setShowMpesaModal(false);
       setIsMpesaPaymentInitiated(false);
-      setMpesaOrderId(null);
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      router.push(`/shop/${shopname}`);
+      setSuccessOrder({
+        orderId: mpesaOrderId!,
+        formData: lastSubmittedFormData,
+        cartData: lastCartData,
+      });
+      setMpesaOrderId(null);
     }
-  }, [mpesaOrderDetails, router, shopname]);
+  }, [mpesaOrderDetails, mpesaOrderId, lastSubmittedFormData, lastCartData]);
 
   useEffect(() => {
     if (isMpesaPaymentInitiated && mpesaOrderId) {
@@ -322,7 +563,6 @@ const AuthenticatedCheckout = () => {
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
       }
     };
   }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder]);
@@ -360,6 +600,8 @@ const AuthenticatedCheckout = () => {
       }).unwrap();
 
       if (formData.payment_method === "mpesa") {
+        setLastSubmittedFormData(formData);
+        setLastCartData(cart_data);
         setIsProcessingMpesa(true);
         setMpesaOrderId(response.order_id);
         await lipaNaMpesaFx({ order_id: response.order_id, token: Cookies.get("access") }).unwrap();
@@ -369,13 +611,29 @@ const AuthenticatedCheckout = () => {
         toast.success("STK Push sent to your phone. Please complete the payment.");
       } else {
         toast.success("Order Placed Successfully!");
-        router.push(`/shop/${shopname}`);
+        setSuccessOrder({
+          orderId: response.order_id,
+          formData,
+          cartData: cart_data,
+        });
       }
     } catch (error: any) {
       setIsProcessingMpesa(false);
       toast.error(error.data?.non_field_errors?.[0] || error.data?.error || "An error occurred");
     }
   };
+
+  if (successOrder) {
+    return (
+      <OrderSuccessScreen 
+        orderId={successOrder.orderId}
+        cartData={successOrder.cartData}
+        formData={successOrder.formData}
+        shopname={shopname}
+        paymentStatus={mpesaOrderDetails?.payment_status}
+      />
+    );
+  }
 
   const getStepContent = (step: number) => {
     switch (step) {
@@ -486,9 +744,26 @@ const AuthenticatedCheckout = () => {
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={async () => {
-                  const isValid = await trigger(["address", "city"]);
-                  if (isValid) handleNext();
+                onClick={() => {
+                  const addressVal = watch("address");
+                  const cityVal = watch("city");
+                  let hasError = false;
+                  
+                  if (!addressVal || addressVal.trim().length < 5) {
+                    setError("address", { type: "manual", message: "Delivery address must be at least 5 characters" });
+                    hasError = true;
+                  } else {
+                    clearErrors("address");
+                  }
+                  
+                  if (!cityVal || cityVal.trim().length < 2) {
+                    setError("city", { type: "manual", message: "City is required" });
+                    hasError = true;
+                  } else {
+                    clearErrors("city");
+                  }
+
+                  if (!hasError) handleNext();
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
@@ -710,11 +985,6 @@ const AuthenticatedCheckout = () => {
               <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {cart_data?.total || 0}</Typography>
             </Box>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography color="text.secondary">Fulfillment Fee</Typography>
-              <Typography sx={{ fontWeight: 700, color: "#10b981" }}>Free Delivery</Typography>
-            </Box>
-
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
               <Typography variant="h6" sx={{ fontWeight: 800, color: "#18181b" }}>Total</Typography>
               <Typography variant="h4" sx={{ fontWeight: 900, color: theme.palette.primary.main }}>
@@ -770,8 +1040,8 @@ const guestCheckoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
-  address: z.string().min(5, "Delivery address is required"),
-  city: z.string().min(2, "City is required"),
+  address: z.string().optional(),
+  city: z.string().optional(),
   payment_method: z.string().min(2, "Payment method is required"),
   pinnedLocation: z.string().optional(),
 });
@@ -798,12 +1068,16 @@ const GuestCheckout = () => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isProcessingMpesa, setIsProcessingMpesa] = useState(false);
 
+  // Success screen states
+  const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
+  const [lastCartData, setLastCartData] = useState<any>(null);
+
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
 
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control } = useForm<GuestCheckoutFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control, setError, clearErrors } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
     defaultValues: { payment_method: "mpesa", pinnedLocation: "" },
   });
@@ -818,14 +1092,13 @@ const GuestCheckout = () => {
       toast.success("M-Pesa Payment Confirmed!");
       setShowMpesaModal(false);
       setIsMpesaPaymentInitiated(false);
-      setMpesaOrderId(null);
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      handleNext();
+      setMpesaOrderId(null);
     }
-  }, [mpesaOrderDetails, handleNext]);
+  }, [mpesaOrderDetails]);
 
   useEffect(() => {
     if (isMpesaPaymentInitiated && mpesaOrderId) {
@@ -857,7 +1130,6 @@ const GuestCheckout = () => {
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
       }
     };
   }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder]);
@@ -882,6 +1154,9 @@ const GuestCheckout = () => {
     try {
       const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber);
       const combinedAddress = formData.address + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
+      
+      setLastSubmittedFormData(formData);
+      setLastCartData(cart_data);
 
       const response = await placeOrderGuest({
         email: formData.email,
@@ -925,31 +1200,15 @@ const GuestCheckout = () => {
 
   if (orderResponse && !isMpesaPaymentInitiated) {
     return (
-      <Paper sx={{ p: 4, my: 4, borderRadius: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
-        <Typography variant="h4" color="primary" sx={{ fontWeight: 800 }} gutterBottom>Order Successful!</Typography>
-        <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
-          Your temporary account credentials have been created. Please check your email inbox.
-        </Typography>
-
-        <Box sx={{ my: 3, p: 3, border: '1px solid rgba(0,0,0,0.06)', borderRadius: '16px', backgroundColor: "#fcfcfc" }}>
-          <Stack spacing={1}>
-            <Typography><strong>Order ID:</strong> {orderResponse.order_id}</Typography>
-            <Typography><strong>Registered Email:</strong> {orderResponse.user_email}</Typography>
-            <Typography><strong>Temporary Password:</strong> {orderResponse.generated_password}</Typography>
-          </Stack>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-          <Button
-            variant="contained"
-            size="large"
-            sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700 }}
-            onClick={() => router.push(`/shop/${shopname}`)}
-          >
-            Go Back Shopping
-          </Button>
-        </Box>
-      </Paper>
+      <OrderSuccessScreen 
+        orderId={orderResponse.order_id}
+        guestEmail={orderResponse.user_email || lastSubmittedFormData?.email}
+        guestPassword={orderResponse.generated_password}
+        cartData={lastCartData}
+        formData={lastSubmittedFormData}
+        shopname={shopname}
+        paymentStatus={mpesaOrderDetails?.payment_status}
+      />
     );
   }
 
@@ -1017,7 +1276,6 @@ const GuestCheckout = () => {
                   const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
                   if (isValid) handleNext();
                 }}
-                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
                 Next Step
               </Button>
@@ -1073,9 +1331,26 @@ const GuestCheckout = () => {
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={async () => {
-                  const isValid = await trigger(["address", "city"]);
-                  if (isValid) handleNext();
+                onClick={() => {
+                  const addressVal = watch("address");
+                  const cityVal = watch("city");
+                  let hasError = false;
+                  
+                  if (!addressVal || addressVal.trim().length < 5) {
+                    setError("address", { type: "manual", message: "Delivery address must be at least 5 characters" });
+                    hasError = true;
+                  } else {
+                    clearErrors("address");
+                  }
+                  
+                  if (!cityVal || cityVal.trim().length < 2) {
+                    setError("city", { type: "manual", message: "City is required" });
+                    hasError = true;
+                  } else {
+                    clearErrors("city");
+                  }
+
+                  if (!hasError) handleNext();
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
@@ -1300,10 +1575,6 @@ const GuestCheckout = () => {
               <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {cart_data?.total || 0}</Typography>
             </Box>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography color="text.secondary">Fulfillment Fee</Typography>
-              <Typography sx={{ fontWeight: 700, color: "#10b981" }}>Free Delivery</Typography>
-            </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
               <Typography variant="h6" sx={{ fontWeight: 800, color: "#18181b" }}>Total</Typography>

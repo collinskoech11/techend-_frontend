@@ -4,328 +4,373 @@ import {
   Typography,
   Container,
   Button,
-  Grid,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   useTheme,
+  alpha,
+  Divider,
+  Paper,
+  Chip,
 } from "@mui/material";
 import { styled } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import InfoIcon from "@mui/icons-material/Info"; // Icon for About
-import RocketLaunchIcon from "@mui/icons-material/RocketLaunch"; // Icon for Mission
-import PolicyIcon from "@mui/icons-material/Policy"; // Icon for Policies
-import PeopleIcon from "@mui/icons-material/People"; // Icon for Community
+import InfoIcon from "@mui/icons-material/Info";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import PolicyIcon from "@mui/icons-material/Policy";
+import PeopleIcon from "@mui/icons-material/People";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 
-// --- Color Palette (Consistent with your project) ---
-const lightGray = "#f8f8f8"; // Page background
-const mediumGray = "#e0e0e0"; // Borders/dividers
-const darkText = "#212121"; // Main headings and strong text
-const lightText = "#555555"; // Body text
+
+
+// --- Color Palette ---
+const darkText = "#18181b";
+const lightText = "#71717a";
 
 // --- Styled Components ---
+const HeroWrapper = styled(Box)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.04)} 0%, ${alpha(theme.palette.primary.main, 0.01)} 100%)`,
+  borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+  paddingTop: theme.spacing(10),
+  paddingBottom: theme.spacing(10),
+  textAlign: "center",
+  [theme.breakpoints.down("sm")]: {
+    paddingTop: theme.spacing(6),
+    paddingBottom: theme.spacing(6),
+  },
+}));
 
-const SectionWrapper = styled(Box)(({ theme }) => ({
-  backgroundColor: "#fff",
-  borderRadius: "16px",
-  boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
-  padding: theme.spacing(6), // Increased padding for more breathing room
-  marginBottom: theme.spacing(8), // Space between sections
-  "&:last-child": {
-    marginBottom: 0,
+const SectionWrapper = styled(Paper)(({ theme }) => ({
+  backgroundColor: "#ffffff",
+  borderRadius: "24px",
+  border: `1px solid ${alpha(theme.palette.divider, 0.06)}`,
+  boxShadow: "0 10px 30px rgba(0,0,0,0.02)",
+  padding: theme.spacing(5),
+  marginBottom: theme.spacing(6),
+  transition: "transform 0.2s, box-shadow 0.2s",
+  "&:hover": {
+    boxShadow: "0 12px 36px rgba(0,0,0,0.04)",
   },
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(3),
-    marginBottom: theme.spacing(5),
+    borderRadius: "16px",
+    marginBottom: theme.spacing(4),
   },
 }));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontSize: "clamp(2.2rem, 4vw, 3.2rem)", // Responsive title size
+  fontSize: "1.8rem",
   fontWeight: 800,
   color: darkText,
-  textAlign: "center",
-  marginBottom: theme.spacing(6), // More space below title
-  position: "relative",
-  "&::after": { // Underline effect for titles
-    content: '""',
-    position: 'absolute',
-    left: '50%',
-    bottom: '-10px',
-    transform: 'translateX(-50%)',
-    width: '80px',
-    height: '4px',
-    backgroundColor: theme.palette.primary.main,
-    borderRadius: '2px',
-  },
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: theme.spacing(2),
-  "& .MuiSvgIcon-root": {
-    fontSize: 'clamp(2.5rem, 4.5vw, 3.5rem)',
-    color: theme.palette.primary.main,
-  }
-}));
-
-const Subheading = styled(Typography)(({ theme }) => ({
-  fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-  fontWeight: 700,
-  color: darkText,
-  marginBottom: theme.spacing(3),
-  marginTop: theme.spacing(4),
-}));
-
-const BodyText = styled(Typography)(({ theme }) => ({
-  fontSize: "1rem",
-  lineHeight: 1.7,
-  color: lightText,
-  marginBottom: theme.spacing(2),
-}));
-
-const ContactInfoItem = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
   display: "flex",
   alignItems: "center",
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(2),
+  gap: theme.spacing(1.5),
   "& .MuiSvgIcon-root": {
-    color: theme.palette.primary.main,
     fontSize: "2rem",
+    color: theme.palette.primary.main,
+  },
+}));
+
+const CardMetric = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3.5),
+  borderRadius: "18px",
+  backgroundColor: "#fbfbfb",
+  border: `1px solid ${alpha(theme.palette.divider, 0.06)}`,
+  textAlign: "center",
+  height: "100%",
+  transition: "all 0.2s",
+  "&:hover": {
+    backgroundColor: "#ffffff",
+    borderColor: theme.palette.primary.main,
+    transform: "translateY(-4px)",
+    boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.05)}`,
+  },
+}));
+
+const ContactCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  borderRadius: "16px",
+  border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+  backgroundColor: "#ffffff",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  textAlign: "center",
+  height: "100%",
+  transition: "all 0.2s",
+  "&:hover": {
+    borderColor: theme.palette.primary.main,
+    transform: "translateY(-3px)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.03)",
+  },
+}));
+
+const StyledAccordion = styled(Accordion)(({ theme }) => ({
+  boxShadow: "none",
+  border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+  borderRadius: "14px !important",
+  marginBottom: theme.spacing(2),
+  overflow: "hidden",
+  "&::before": {
+    display: "none",
+  },
+  "&.Mui-expanded": {
+    borderColor: theme.palette.primary.main,
+    boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.03)}`,
   },
 }));
 
 const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
-  backgroundColor: lightGray,
-  borderRadius: "8px",
-  marginBottom: theme.spacing(1),
-  "&:hover": {
-    backgroundColor: mediumGray,
-  },
-  "& .MuiAccordionSummary-content": {
-    margin: `${theme.spacing(1.5)} 0 !important`, // Adjust internal padding
+  backgroundColor: "#fbfbfb",
+  padding: theme.spacing(1, 2.5),
+  "&.Mui-expanded": {
+    backgroundColor: "#ffffff",
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
   },
 }));
-
-const StyledAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
-  padding: theme.spacing(3),
-  border: `1px solid ${mediumGray}`,
-  borderTop: "none",
-  borderRadius: "0 0 8px 8px",
-  marginTop: "-8px", // Overlap with summary border-radius
-}));
-
 
 function AboutPage() {
   const theme = useTheme();
+
   return (
-    // Assuming PageContainer from root layout wraps this component
-    <Container maxWidth="lg" sx={{ py: 8 }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
+      {/* Premium Hero Section */}
+      <HeroWrapper>
+        <Container maxWidth="md">
+          <Chip 
+            label="Empowering Digital Commerce" 
+            variant="outlined" 
+            sx={{ 
+              borderRadius: "30px", 
+              fontWeight: 700, 
+              color: theme.palette.primary.main, 
+              borderColor: alpha(theme.palette.primary.main, 0.3),
+              backgroundColor: alpha(theme.palette.primary.main, 0.03),
+              mb: 3,
+              px: 1
+            }} 
+          />
+          <Typography variant="h1" sx={{ fontWeight: 900, color: darkText, fontSize: { xs: "2.5rem", md: "3.6rem" }, mb: 2, letterSpacing: "-0.02em" }}>
+            About sokoJunction
+          </Typography>
+          <Typography variant="h5" sx={{ color: lightText, fontWeight: 500, lineHeight: 1.6, maxW: "700px", mx: "auto", fontSize: { xs: "1.1rem", md: "1.25rem" } }}>
+            We build simple, powerful, and scalable tools that empower local entrepreneurs and businesses to establish their digital storefronts and thrive in the global marketplace.
+          </Typography>
+        </Container>
+      </HeroWrapper>
 
-      {/* About Section */}
-      <SectionWrapper>
-        <SectionTitle><InfoIcon /> About sokoJunction</SectionTitle>
-        <BodyText sx={{ fontSize: '1.1rem', textAlign: 'center', maxWidth: '800px', mx: 'auto', mb: 4 }}>
-          Welcome to **sokoJunction**, your premier destination for building and growing successful online businesses. We believe in empowering entrepreneurs and small-to-medium enterprises (SMEs) with cutting-edge eCommerce solutions that are powerful, intuitive, and designed for scalability.
-        </BodyText>
-        <Grid container spacing={4} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={6}>
-            <Subheading>Our Story</Subheading>
-            <BodyText>
-              Founded in 2023, sokoJunction emerged from a passion for simplifying the complexities of online retail. We saw a gap in the market for a platform that truly understood the needs of growing businesses offering robust features without the prohibitive costs or steep learning curves. Our journey began with a commitment to democratize eCommerce, making it accessible and profitable for everyone.
-            </BodyText>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Subheading>What We Offer</Subheading>
-            <BodyText>
-              sokoJunction provides an all-in-one suite of tools including customizable storefronts, secure payment gateways, comprehensive inventory management, advanced analytics, and integrated marketing features. Our platform is built on a foundation of innovation, security, and exceptional user experience, ensuring that you have everything you need to thrive in the digital marketplace.
-            </BodyText>
-          </Grid>
-        </Grid>
-      </SectionWrapper>
+      <Container maxWidth="lg" sx={{ mt: 8 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          
+          {/* Brand Identity / Story Section */}
+          <SectionWrapper>
+            <SectionTitle><InfoIcon /> Our Story & Offer</SectionTitle>
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4 }}>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: darkText, mb: 1.5 }}>
+                  The Journey
+                </Typography>
+                <Typography variant="body1" sx={{ color: lightText, lineHeight: 1.7, mb: 2 }}>
+                  Founded in 2023, sokoJunction emerged from a passion for simplifying the complexities of online retail. We saw a gap in the market for a platform that truly understood the needs of growing businesses — offering robust, premium features without prohibitive costs or steep technical learning curves.
+                </Typography>
+                <Typography variant="body1" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  Our journey began with a simple commitment: democratize eCommerce. We aim to make setting up an online business accessible, profitable, and smooth for everyone.
+                </Typography>
+              </Box>
 
-      {/* Our Mission Section */}
-      <SectionWrapper>
-        <SectionTitle><RocketLaunchIcon /> Our Mission</SectionTitle>
-        <BodyText sx={{ fontSize: '1.1rem', textAlign: 'center', maxWidth: '800px', mx: 'auto', mb: 4 }}>
-          Our mission at sokoJunction is to empower businesses of all sizes to achieve their fullest potential in the digital realm. We are dedicated to providing an innovative, reliable, and user-friendly eCommerce platform that not only simplifies online selling but also accelerates growth and fosters sustainable success.
-        </BodyText>
-        <Grid container spacing={4} sx={{ mt: 4 }}>
-          <Grid item xs={12} md={4} textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main, mb: 2 }}>Innovation</Typography>
-            <BodyText>Constantly evolving our technology to provide the best tools and features.</BodyText>
-          </Grid>
-          <Grid item xs={12} md={4} textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main, mb: 2 }}>Accessibility</Typography>
-            <BodyText>Making powerful eCommerce solutions affordable and easy to use for everyone.</BodyText>
-          </Grid>
-          <Grid item xs={12} md={4} textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.primary.main, mb: 2 }}>Growth</Typography>
-            <BodyText>Committed to helping our users scale their businesses and reach new heights.</BodyText>
-          </Grid>
-        </Grid>
-      </SectionWrapper>
+              <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", md: "block" } }} />
 
-      {/* Contact Us Section */}
-      <SectionWrapper>
-        <SectionTitle>Contact Us</SectionTitle>
-        <BodyText sx={{ textAlign: 'center', maxWidth: '700px', mx: 'auto', mb: 4 }}>
-          We&apos;re here to help! Whether you have a question, need support, or just want to chat, feel free to reach out to our team.
-        </BodyText>
-        <Grid container spacing={4} justifyContent="center" sx={{ mt: 4 }}>
-          <Grid item xs={12} md={4}>
-            <ContactInfoItem>
-              <EmailIcon />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Email Support</Typography>
-                <Typography variant="body1" color={lightText}>sokojunction@gmail.com</Typography>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: darkText, mb: 1.5 }}>
+                  What We Offer
+                </Typography>
+                <Typography variant="body1" sx={{ color: lightText, lineHeight: 1.7, mb: 2 }}>
+                  sokoJunction provides a comprehensive suite of digital merchant tools. Our platform includes customizable storefronts, secure payment integrations (such as instant M-Pesa STK push and Card billing), detailed inventory controls, advanced analytics, and integrated delivery systems.
+                </Typography>
+                <Typography variant="body1" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  Built on a modern stack emphasizing security, efficiency, and exceptional UX, we handle the complexity so you can focus on building your brand.
+                </Typography>
               </Box>
-            </ContactInfoItem>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <ContactInfoItem>
-              <PhoneIcon />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Phone</Typography>
-                <Typography variant="body1" color={lightText}>+254 (703) 508-881</Typography>
-              </Box>
-            </ContactInfoItem>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <ContactInfoItem>
-              <LocationOnIcon />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Address</Typography>
-                <Typography variant="body1" color={lightText}>Nairobi</Typography>
-              </Box>
-            </ContactInfoItem>
-          </Grid>
-        </Grid>
-        <Box sx={{ textAlign: 'center', mt: 5 }}>
-            <Button
+            </Box>
+          </SectionWrapper>
+
+          {/* Mission & Core Values */}
+          <SectionWrapper>
+            <SectionTitle><RocketLaunchIcon /> Our Core Mission</SectionTitle>
+            <Typography variant="body1" sx={{ color: lightText, lineHeight: 1.7, mb: 4, maxW: "750px" }}>
+              Our mission is to empower businesses of all sizes to achieve their absolute potential in the digital realm. We strive to provide an innovative, reliable, and user-friendly platform that catalyzes growth and simplifies the daily operations of local merchants.
+            </Typography>
+
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 3 }}>
+              <CardMetric>
+                <RocketLaunchIcon sx={{ fontSize: "2.5rem", color: theme.palette.primary.main, mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 800, color: darkText, mb: 1 }}>
+                  Innovation
+                </Typography>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.6 }}>
+                  Constantly evolving our technology and endpoints to keep your storefront fast, secure, and modern.
+                </Typography>
+              </CardMetric>
+
+              <CardMetric>
+                <HandshakeIcon sx={{ fontSize: "2.5rem", color: theme.palette.primary.main, mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 800, color: darkText, mb: 1 }}>
+                  Accessibility
+                </Typography>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.6 }}>
+                  Making premium eCommerce tools affordable and easy to use without requiring coding or complex setups.
+                </Typography>
+              </CardMetric>
+
+              <CardMetric>
+                <LocalActivityIcon sx={{ fontSize: "2.5rem", color: theme.palette.primary.main, mb: 2 }} />
+                <Typography variant="h6" sx={{ fontWeight: 800, color: darkText, mb: 1 }}>
+                  Merchant Growth
+                </Typography>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.6 }}>
+                  Dedicated support, local payment channels (Kes), and tools designed to help you expand your customer reach.
+                </Typography>
+              </CardMetric>
+            </Box>
+          </SectionWrapper>
+
+          {/* Guidelines Section */}
+          <SectionWrapper>
+            <SectionTitle><PeopleIcon /> Community Guidelines</SectionTitle>
+            <Typography variant="body1" sx={{ color: lightText, mb: 4 }}>
+              SokoJunction thrives on trust, transparency, and respect. Our community guidelines ensure a safe, reliable, and successful environment for both buyers and sellers.
+            </Typography>
+
+            <StyledAccordion>
+              <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: darkText }}>Respectful Conduct</Typography>
+              </StyledAccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: "#ffffff" }}>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  Treat all members of the sokoJunction community with dignity. Harassment, discrimination, hate speech, or abuse will not be tolerated. Engage in constructive discussions and maintain professional ethics.
+                </Typography>
+              </AccordionDetails>
+            </StyledAccordion>
+
+            <StyledAccordion>
+              <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: darkText }}>Authenticity & Transparency</Typography>
+              </StyledAccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: "#ffffff" }}>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  Ensure all details provided in your product listings, company profile, and store catalog are accurate and up to date. Avoid misleading ads or deceptive selling methods. Transparency builds buyer loyalty.
+                </Typography>
+              </AccordionDetails>
+            </StyledAccordion>
+
+            <StyledAccordion>
+              <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: darkText }}>Safe & Secure Transactions</Typography>
+              </StyledAccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: "#ffffff" }}>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  Merchants must utilize safe billing endpoints and fulfill orders as agreed. Buyers are encouraged to complete M-Pesa STK prompts securely. Report any suspicious behavior or payment issues immediately to customer service.
+                </Typography>
+              </AccordionDetails>
+            </StyledAccordion>
+          </SectionWrapper>
+
+          {/* Terms & Policies */}
+          <SectionWrapper>
+            <SectionTitle><PolicyIcon /> Terms & Policies</SectionTitle>
+            <Typography variant="body1" sx={{ color: lightText, mb: 4 }}>
+              Please review our primary platform terms. By creating a store or placing an order on sokoJunction, you agree to these policies.
+            </Typography>
+
+            <StyledAccordion>
+              <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: darkText }}>User Accounts & Shop Ownership</Typography>
+              </StyledAccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: "#ffffff" }}>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  Merchants are responsible for maintaining the confidentiality of their credentials and all operations carried out in their storefronts. You are responsible for ensuring that your products comply with local trade laws.
+                </Typography>
+              </AccordionDetails>
+            </StyledAccordion>
+
+            <StyledAccordion>
+              <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: darkText }}>Limitation of Liability</Typography>
+              </StyledAccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: "#ffffff" }}>
+                <Typography variant="body2" sx={{ color: lightText, lineHeight: 1.7 }}>
+                  sokoJunction functions as a facilitator of digital commerce. We are not directly liable for disputes arising between individual buyers and sellers, though we provide verification badges (KYC) to protect community trust.
+                </Typography>
+              </AccordionDetails>
+            </StyledAccordion>
+          </SectionWrapper>
+
+          {/* Contact Section */}
+          <SectionWrapper>
+            <SectionTitle>Get In Touch</SectionTitle>
+            <Typography variant="body1" sx={{ color: lightText, mb: 4, textAlign: "center" }}>
+              Have questions, feedback, or need help setting up your store? Contact our customer support team.
+            </Typography>
+
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 3, mb: 4 }}>
+              <ContactCard>
+                <EmailIcon color="primary" sx={{ fontSize: "2.5rem", mb: 2 }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: darkText, mb: 0.5 }}>
+                  Email Support
+                </Typography>
+                <Typography variant="body2" sx={{ color: lightText }}>
+                  sokojunction@gmail.com
+                </Typography>
+              </ContactCard>
+
+              <ContactCard>
+                <PhoneIcon color="primary" sx={{ fontSize: "2.5rem", mb: 2 }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: darkText, mb: 0.5 }}>
+                  Phone Support
+                </Typography>
+                <Typography variant="body2" sx={{ color: lightText }}>
+                  +254 (703) 508-881
+                </Typography>
+              </ContactCard>
+
+              <ContactCard>
+                <LocationOnIcon color="primary" sx={{ fontSize: "2.5rem", mb: 2 }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: darkText, mb: 0.5 }}>
+                  Our Location
+                </Typography>
+                <Typography variant="body2" sx={{ color: lightText }}>
+                  Nairobi, Kenya
+                </Typography>
+              </ContactCard>
+            </Box>
+
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <Button
                 variant="contained"
-                sx={{
-                    backgroundColor: theme.palette.primary.main,
-                    '&:hover': { backgroundColor: theme.palette.primary.dark },
-                    padding: '12px 30px',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                }}
+                size="large"
                 href="mailto:sokojunction@gmail.com"
-            >
+                sx={{
+                  borderRadius: "12px",
+                  fontWeight: 800,
+                  textTransform: "none",
+                  px: 5,
+                  py: 1.5,
+                  boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.25)}`,
+                }}
+              >
                 Send Us an Email
-            </Button>
+              </Button>
+            </Box>
+          </SectionWrapper>
+
         </Box>
-      </SectionWrapper>
-
-      {/* Community Guidelines Section */}
-      <SectionWrapper>
-        <SectionTitle><PeopleIcon /> Community Guidelines</SectionTitle>
-        <BodyText sx={{ textAlign: 'center', maxWidth: '700px', mx: 'auto', mb: 4 }}>
-          Our community thrives on respect and integrity. These guidelines are designed to ensure a safe and positive environment for all sokoJunction users.
-        </BodyText>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Respectful Conduct</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              Treat all members of the sokoJunction community with respect. Harassment, discrimination, hate speech, or any form of abuse will not be tolerated. Engage in constructive dialogue and maintain professionalism in all interactions.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Authenticity & Transparency</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              Ensure all information you provide, including product listings and business details, is accurate and truthful. Avoid misleading practices, false advertising, or misrepresentation. Transparency builds trust.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel3a-content" id="panel3a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Legal Compliance</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              All activities on sokoJunction must comply with applicable local, national, and international laws and regulations. This includes laws related to consumer protection, intellectual property, data privacy, and taxation.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px' }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel4a-content" id="panel4a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Safe & Secure Practices</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              Do not engage in any activity that could compromise the security or integrity of the sokoJunction platform or its users&apos; data. Report any suspicious activity or vulnerabilities immediately.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-      </SectionWrapper>
-
-      {/* Terms & Conditions Section */}
-      <SectionWrapper>
-        <SectionTitle><PolicyIcon /> Terms & Conditions</SectionTitle>
-        <BodyText sx={{ textAlign: 'center', maxWidth: '700px', mx: 'auto', mb: 4 }}>
-          By using sokoJunction, you agree to abide by these terms. Please read them carefully.
-        </BodyText>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="terms-panel1a-content" id="terms-panel1a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Acceptance of Terms</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              By accessing or using the sokoJunction platform, you agree to be bound by these Terms and Conditions and our Privacy Policy. If you do not agree to all the terms and conditions of this agreement, then you may not access the website or use any services.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="terms-panel2a-content" id="terms-panel2a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>User Accounts</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              To access certain features of sokoJunction, you may be required to create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px', mb: 2 }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="terms-panel3a-content" id="terms-panel3a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Intellectual Property</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              All content on sokoJunction, including text, graphics, logos, images, and software, is the property of sokoJunction or its content suppliers and protected by international copyright laws. You may not reproduce, distribute, or create derivative works from any content without explicit permission.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-
-        <Accordion sx={{ boxShadow: 'none', border: `1px solid ${mediumGray}`, borderRadius: '8px' }}>
-          <StyledAccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="terms-panel4a-content" id="terms-panel4a-header">
-            <Typography variant="h6" sx={{ fontWeight: 600, color: darkText }}>Limitation of Liability</Typography>
-          </StyledAccordionSummary>
-          <StyledAccordionDetails>
-            <BodyText>
-              sokoJunction will not be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses, resulting from the use or the inability to use the service.
-            </BodyText>
-          </StyledAccordionDetails>
-        </Accordion>
-      </SectionWrapper>
-    </Container>
+      </Container>
+    </Box>
   );
 }
 
