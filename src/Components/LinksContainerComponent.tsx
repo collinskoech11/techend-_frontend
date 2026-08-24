@@ -119,8 +119,14 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
 
   const getLogoUrl = (path?: string) => {
     if (!path) return "/logo_min.jpeg";
-    const base = `https://res.cloudinary.com/dqokryv6u/${path}`;
-    return base.replace("/upload/", "/upload/f_auto,q_auto,w_240,h_240,c_fill/");
+    let url = path;
+    if (!path.startsWith("http://") && !path.startsWith("https://")) {
+      url = `https://res.cloudinary.com/dqokryv6u/${path}`;
+    }
+    if (url.includes("cloudinary.com")) {
+      return url.replace("/upload/", "/upload/f_auto,q_auto,w_240,h_240,c_fill/");
+    }
+    return url;
   };
 
   const navbarLogoUrl = (!isDefaultBrandPage && companyData?.logo_image)
