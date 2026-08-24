@@ -117,6 +117,16 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
     }
   }, [router.pathname, router.query.shop, router.asPath, companyData]);
 
+  const getLogoUrl = (path?: string) => {
+    if (!path) return "/logo_min.jpeg";
+    const base = `https://res.cloudinary.com/dqokryv6u/${path}`;
+    return base.replace("/upload/", "/upload/f_auto,q_auto,w_240,h_240,c_fill/");
+  };
+
+  const navbarLogoUrl = (!isDefaultBrandPage && companyData?.logo_image)
+    ? getLogoUrl(companyData.logo_image)
+    : "/logo_min.jpeg";
+
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -245,15 +255,16 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
                 },
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Box
+                  component="img"
+                  src={navbarLogoUrl}
+                  alt={displayedBrand}
                   sx={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    backgroundColor: theme.palette.primary.main,
-                    boxShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.6)}`,
-                    transition: "all 0.3s ease",
+                    height: 38,
+                    width: "auto",
+                    maxHeight: 38,
+                    maxWidth: 100,
+                    objectFit: "contain",
                   }}
                 />
                 <Typography
@@ -271,7 +282,6 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
                 >
                   {displayedBrand}
                 </Typography>
-              </Box>
             </Box>
 
             {/* --- CENTER: DESKTOP NAVIGATION LINKS --- */}
@@ -588,16 +598,30 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
         <Box>
           {/* Drawer Header */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
-            <Typography
-              sx={{
-                fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                color: "#18181b",
-              }}
-            >
-              {displayedBrand}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box
+                component="img"
+                src={navbarLogoUrl}
+                alt={displayedBrand}
+                sx={{
+                  height: 30,
+                  width: "auto",
+                  maxHeight: 30,
+                  maxWidth: 80,
+                  objectFit: "contain",
+                }}
+              />
+              <Typography
+                sx={{
+                  fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "#18181b",
+                }}
+              >
+                {displayedBrand}
+              </Typography>
+            </Box>
             <IconButton
               size="small"
               onClick={() => setIsMobileDrawerOpen(false)}
