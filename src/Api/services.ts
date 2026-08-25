@@ -189,6 +189,16 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    rateProduct: builder.mutation<any, { product_id: number; rating: number; token: string }>({
+      query: ({ product_id, rating, token }) => ({
+        url: `products/rate/${product_id}/`,
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: { rating },
+      }),
+    }),
     getPickupLocations: builder.query<PickupLocation[], { company_slug: string, token: string }>({ // New endpoint
       query: ({ company_slug, token }) => ({
         url: `companies/${company_slug}/pickup-locations/`,
@@ -349,6 +359,7 @@ export const {
   useGetCartGuestQuery,
   usePlaceOrderGuestMutation,
   useGetActiveSubscriptionQuery, // New hook
+  useRateProductMutation,
 }: any = AuthApi;
 
 export const getProducts = async (args: { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }) => {

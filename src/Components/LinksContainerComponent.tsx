@@ -10,6 +10,7 @@ import {
   MenuItem,
   Divider,
   Box,
+  Skeleton,
   Typography,
   useTheme,
   ListItemIcon,
@@ -56,6 +57,7 @@ const DEFAULT_BRAND_URLS = [
 const LinksContainerComponent = forwardRef((_props, ref) => {
   const router = useRouter();
   const theme = useTheme();
+  const [mounted, setMounted] = useState(false);
   const cookieShop = Cookies.get("shopname");
 
   // Determine active shop from URL query, asPath, or cookies
@@ -81,14 +83,31 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const [shopname, setShopName] = useState(currentShopSlug);
 
   useEffect(() => {
+    setMounted(true);
     const cUser = Cookies.get("username");
     setUser(cUser);
     setUsername(cUser || null);
   }, []);
 
-  const { data: companyData } = useGetCompanyBySlugQuery(displayShopName, {
+  const { data: companyData, isLoading: isCompanyLoading } = useGetCompanyBySlugQuery(displayShopName, {
     skip: isDefaultBrandPage || !displayShopName || displayShopName.toLowerCase() === "sokojunction",
   });
+
+  const [cachedLogo, setCachedLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const detailsRaw = Cookies.get("shopDetails");
+      if (detailsRaw) {
+        const details = JSON.parse(detailsRaw);
+        if (details && details.logo_image && (details.sluggified_name === displayShopName || details.name === displayShopName)) {
+          setCachedLogo(details.logo_image);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse cached shopDetails", e);
+    }
+  }, [displayShopName]);
 
   const [displayedBrand, setDisplayedBrand] = useState("SokoJunction");
 
@@ -129,8 +148,9 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
     return url;
   };
 
-  const navbarLogoUrl = (!isDefaultBrandPage && companyData?.logo_image)
-    ? getLogoUrl(companyData.logo_image)
+  const activeLogoImage = companyData?.logo_image || cachedLogo;
+  const navbarLogoUrl = (!isDefaultBrandPage && activeLogoImage)
+    ? getLogoUrl(activeLogoImage)
     : "/logo_min.jpeg";
 
   const { sessionId } = useCart();
@@ -261,6 +281,9 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
                 },
               }}
             >
+              {mounted && isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
+                <Skeleton variant="rectangular" width={60} height={38} sx={{ borderRadius: "8px" }} />
+              ) : (
                 <Box
                   component="img"
                   src={navbarLogoUrl}
@@ -273,6 +296,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
                     objectFit: "contain",
                   }}
                 />
+              )}
                 <Typography
                   variant="h5"
                   component="div"
@@ -605,18 +629,22 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
           {/* Drawer Header */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Box
-                component="img"
-                src={navbarLogoUrl}
-                alt={displayedBrand}
-                sx={{
-                  height: 30,
-                  width: "auto",
-                  maxHeight: 30,
-                  maxWidth: 80,
-                  objectFit: "contain",
-                }}
-              />
+              {mounted && isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
+                <Skeleton variant="rectangular" width={50} height={30} sx={{ borderRadius: "6px" }} />
+              ) : (
+                <Box
+                  component="img"
+                  src={navbarLogoUrl}
+                  alt={displayedBrand}
+                  sx={{
+                    height: 30,
+                    width: "auto",
+                    maxHeight: 30,
+                    maxWidth: 80,
+                    objectFit: "contain",
+                  }}
+                />
+              )}
               <Typography
                 sx={{
                   fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
