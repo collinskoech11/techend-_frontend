@@ -86,7 +86,13 @@ function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
     try {
       loginSchema.parse(loginData);
 
-      const response = await login({ body: loginData });
+      const sessionId = typeof window !== "undefined" ? localStorage.getItem("session_id") : null;
+      const payload = {
+        ...loginData,
+        ...(sessionId ? { session_id: sessionId } : {}),
+      };
+
+      const response = await login({ body: payload });
       if (response.data) {
         const { access, refresh, user } = response.data;
         Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });
@@ -113,7 +119,13 @@ function AuthDialog({ onTrigger, forceOpen = false,  onClose }) {
     try {
       registerSchema.parse(registerData);
 
-      const response = await register({ body: registerData });
+      const sessionId = typeof window !== "undefined" ? localStorage.getItem("session_id") : null;
+      const payload = {
+        ...registerData,
+        ...(sessionId ? { session_id: sessionId } : {}),
+      };
+
+      const response = await register({ body: payload });
       if (response.data) {
         const { access, refresh, user } = response.data;
         Cookies.set("access", access, { expires: 7, secure: false, sameSite: "Strict" });

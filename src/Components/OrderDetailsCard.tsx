@@ -5,7 +5,6 @@ import {
   Grid,
   Card,
   CardContent,
-  Divider,
   Button,
   alpha,
   useTheme,
@@ -157,6 +156,11 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails
             <Typography variant="body2" sx={{ color: "#71717a", fontWeight: 500, mb: 0.5 }}>
               Placed on {formatDate(item.cart?.created_at)}
             </Typography>
+            {item.company_name && (
+              <Typography variant="caption" display="block" sx={{ color: theme.palette.primary.main, fontWeight: 700, mb: 0.5, mt: -0.2 }}>
+                Store: {item.company_name}
+              </Typography>
+            )}
             <Typography variant="body2" sx={{ color: "#27272a", fontWeight: 700 }}>
               {totalProducts} {totalProducts === 1 ? "item" : "items"} &bull; Kes {Number(item.total_amount).toLocaleString()}
             </Typography>

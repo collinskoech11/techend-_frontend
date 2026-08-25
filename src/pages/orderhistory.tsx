@@ -31,7 +31,7 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { ProductImage } from "@/StyledComponents/Products";
-import { PickupLocation, DeliveryLocation } from "@/Types";
+import { PickupLocation } from "@/Types";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -366,7 +366,7 @@ function OrderHistory() {
                       Order #{selectedOrder.id} Details
                     </Typography>
                     <Typography variant="body2" sx={{ color: "#71717a", fontWeight: 500 }}>
-                      Comprehensive summary & rating console
+                      Store: <b>{selectedOrder.company_name || "SokoJunction"}</b>
                     </Typography>
                   </Box>
                   <IconButton onClick={() => setSelectedOrder(null)} sx={{ color: "#71717a", backgroundColor: "#f4f4f5", "&:hover": { backgroundColor: "#e4e4e7" } }}>
