@@ -57,6 +57,7 @@ const DEFAULT_BRAND_URLS = [
 const LinksContainerComponent = forwardRef((_props, ref) => {
   const router = useRouter();
   const theme = useTheme();
+  const [mounted, setMounted] = useState(false);
   const cookieShop = Cookies.get("shopname");
 
   // Determine active shop from URL query, asPath, or cookies
@@ -82,6 +83,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const [shopname, setShopName] = useState(currentShopSlug);
 
   useEffect(() => {
+    setMounted(true);
     const cUser = Cookies.get("username");
     setUser(cUser);
     setUsername(cUser || null);
@@ -279,7 +281,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
                 },
               }}
             >
-              {isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
+              {mounted && isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
                 <Skeleton variant="rectangular" width={60} height={38} sx={{ borderRadius: "8px" }} />
               ) : (
                 <Box
@@ -627,7 +629,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
           {/* Drawer Header */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
+              {mounted && isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
                 <Skeleton variant="rectangular" width={50} height={30} sx={{ borderRadius: "6px" }} />
               ) : (
                 <Box

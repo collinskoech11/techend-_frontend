@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -7,55 +7,41 @@ import {
   CardContent,
   Divider,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
+  alpha,
+  useTheme,
+  Chip,
 } from "@mui/material";
-import { ProductImage } from "@/StyledComponents/Products";
 import { format } from "date-fns";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { PickupLocation, DeliveryLocation } from "@/Types";
-import Link from "next/link";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 
 interface OrderDetailsCardProps {
   item: {
     id: number;
-    address: string;
-    city: string;
-    state?: string;
-    postal_code?: string;
-    country: string;
     total_amount: string;
-    payment_method?: string;
     payment_status: string;
-    delivery_fee: string;
-    pickup_location?: PickupLocation | null;
-    delivery_location?: DeliveryLocation | null;
     cart?: {
       created_at?: string;
       status?: any;
-      items: {
-        product: {
-          title: string;
-          price: number;
-          main_image: string;
-        };
-        quantity: number;
-      }[];
+      items: any[];
     };
   };
-  onViewMap: (location: PickupLocation) => void;
+  onViewDetails: (item: any) => void;
+  isActive: boolean;
 }
 
-const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewMap }) => {
+const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails, isActive }) => {
+  const theme = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const cartItems = item.cart?.items || [];
-  const totalProducts = cartItems.reduce(
-    (acc: any, curr: any) => acc + curr.quantity,
-    0
-  );
+  const totalProducts = cartItems.reduce((acc: number, curr: any) => acc + (curr.quantity || 0), 0);
 
   const formatDate = (dateString: string | undefined) => {
+    if (!mounted) return "";
     try {
       return dateString ? format(new Date(dateString), "dd MMM yyyy, HH:mm") : "N/A";
     } catch {
@@ -63,127 +49,134 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewMap }) 
     }
   };
 
+  const getPaymentChipStyle = (status: string) => {
+    if (status.toLowerCase() === "paid") {
+      return {
+        backgroundColor: "rgba(16, 185, 129, 0.08)",
+        color: "#059669",
+        border: "1px solid rgba(16, 185, 129, 0.2)",
+      };
+    }
+    return {
+      backgroundColor: "rgba(245, 158, 11, 0.08)",
+      color: "#d97706",
+      border: "1px solid rgba(245, 158, 11, 0.2)",
+    };
+  };
+
+  const getShippingChipStyle = (statusVal?: number) => {
+    if (statusVal === 2) {
+      return {
+        label: "Delivered",
+        style: {
+          backgroundColor: "rgba(16, 185, 129, 0.08)",
+          color: "#059669",
+          border: "1px solid rgba(16, 185, 129, 0.2)",
+        }
+      };
+    }
+    if (statusVal === 1) {
+      return {
+        label: "Shipping",
+        style: {
+          backgroundColor: "rgba(59, 130, 246, 0.08)",
+          color: "#2563eb",
+          border: "1px solid rgba(59, 130, 246, 0.2)",
+        }
+      };
+    }
+    return {
+      label: "Processing",
+      style: {
+        backgroundColor: "rgba(245, 158, 11, 0.08)",
+        color: "#d97706",
+        border: "1px solid rgba(245, 158, 11, 0.2)",
+      }
+    };
+  };
+
+  const shipStatus = getShippingChipStyle(item.cart?.status);
+  const paymentStyle = getPaymentChipStyle(item.payment_status);
+
   return (
     <Card
+      onClick={() => onViewDetails(item)}
       sx={{
         mb: 2,
-        borderRadius: 3,
-        boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
-        p: 2,
+        borderRadius: "20px",
+        boxShadow: isActive
+          ? `0 12px 32px ${alpha(theme.palette.primary.main, 0.08)}`
+          : "0 6px 20px rgba(0, 0, 0, 0.02)",
+        border: `1.5px solid ${isActive ? theme.palette.primary.main : alpha(theme.palette.divider, 0.08)}`,
+        cursor: "pointer",
+        overflow: "hidden",
+        backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.01) : "#ffffff",
+        transition: "all 0.25s ease",
+        "&:hover": {
+          boxShadow: `0 12px 28px ${alpha(theme.palette.primary.main, 0.06)}`,
+          borderColor: isActive ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.2),
+        },
       }}
     >
-      <CardContent>
-        <Grid container spacing={1} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Order #{item.id}
+      <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={8}>
+            <Box sx={{ display: "flex", gap: 1, mb: 1, flexWrap: "wrap" }}>
+              <Chip
+                label={`Order #${item.id}`}
+                size="small"
+                sx={{
+                  fontWeight: 800,
+                  borderRadius: "6px",
+                  fontSize: "0.72rem",
+                  backgroundColor: "#f4f4f5",
+                  color: "#18181b",
+                }}
+              />
+              <Chip
+                label={item.payment_status}
+                size="small"
+                sx={{
+                  fontWeight: 700,
+                  borderRadius: "6px",
+                  fontSize: "0.72rem",
+                  ...paymentStyle,
+                }}
+              />
+              <Chip
+                label={shipStatus.label}
+                size="small"
+                sx={{
+                  fontWeight: 700,
+                  borderRadius: "6px",
+                  fontSize: "0.72rem",
+                  ...shipStatus.style,
+                }}
+              />
+            </Box>
+            <Typography variant="body2" sx={{ color: "#71717a", fontWeight: 500, mb: 0.5 }}>
+              Placed on {formatDate(item.cart?.created_at)}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Placed on: {formatDate(item.cart?.created_at)}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Total Products: {totalProducts}
+            <Typography variant="body2" sx={{ color: "#27272a", fontWeight: 700 }}>
+              {totalProducts} {totalProducts === 1 ? "item" : "items"} &bull; Kes {Number(item.total_amount).toLocaleString()}
             </Typography>
           </Grid>
-          <Grid item xs={12} md={6} sx={{ textAlign: { xs: "left", md: "right" } }}>
-            <Typography>
-              <strong>Total:</strong> Kes {item.total_amount}
-            </Typography>
-            <Typography>
-              <strong>Status:</strong>{" "}
-              <span
-                style={{
-                  color:
-                    item.payment_status === "Paid" ? "green" : "#BE1E2D",
-                  fontWeight: "bold",
-                }}
-              >
-                {item.payment_status}
-              </span>
-            </Typography>
-            <Link href={`/orderhistory/${item.id}`} passHref>
-              <Button variant="outlined" size="small" sx={{ mt: 1 }}>
-                View Details
-              </Button>
-            </Link>
+          <Grid item xs={12} sm={4} sx={{ display: "flex", justifyContent: { xs: "flex-start", sm: "flex-end" } }}>
+            <Button
+              variant={isActive ? "contained" : "text"}
+              size="small"
+              endIcon={<KeyboardArrowRightIcon />}
+              sx={{
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 700,
+                px: 2,
+              }}
+            >
+              Details
+            </Button>
           </Grid>
         </Grid>
-        <Divider sx={{ my: 2 }} />
-
-        {/* Shipping/Pickup Location Details */}
-        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
-          {item.pickup_location ? "Pickup Location:" : "Shipping Address:"}
-        </Typography>
-        {item.pickup_location ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Box>
-              <Typography variant="body1" fontWeight="bold">{item.pickup_location.name}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                {item.pickup_location.address}, {item.pickup_location.city}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Delivery Fee: Kes {item.pickup_location.delivery_fee}
-              </Typography>
-            </Box>
-            {item.pickup_location.gmaps_link && (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<LocationOnIcon />}
-                onClick={() => onViewMap(item.pickup_location as PickupLocation)}
-              >
-                View on Map
-              </Button>
-            )}
-          </Box>
-        ) : item.delivery_location ? (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body1" fontWeight="bold">{item.delivery_location.location_name} - {item.delivery_location.route}</Typography>
-            <Typography variant="body2" color="textSecondary">
-              Delivery Fee: Kes {item.delivery_location.delivery_fee}
-            </Typography>
-          </Box>
-        ) : (
-          <Typography sx={{ mb: 2 }}>
-            {item.address}, {item.city},{" "}
-            {item.state}, {item.postal_code},{" "}
-            {item.country}
-          </Typography>
-        )}
-
-        {/* Products Table */}
-        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
-          Products:
-        </Typography>
-        <Table size="small">
-          <TableBody>
-            {cartItems.map((cartItem, index) => (
-              <TableRow key={index}>
-                <TableCell>{cartItem.product.title}</TableCell>
-                <TableCell>
-                  <Box sx={{ width: "50px", height: "50px", display: "flex", alignItems: "center", overflow: "hidden" }}>
-                    <ProductImage loading="lazy" src={`https://res.cloudinary.com/dqokryv6u/${cartItem.product.main_image}`} alt={cartItem.product.title} width={50} height={50}/>
-                  </Box>
-                </TableCell>
-                <TableCell>Qty: {cartItem.quantity}</TableCell>
-                <TableCell>Kes {cartItem.product.price}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Payment Summary */}
-        <Typography sx={{ mb: 1 }}>
-          <strong>Payment Method:</strong> {item.payment_method}
-        </Typography>
-        <Typography>
-          <strong>Payment Status:</strong>{" "}
-          <span style={{ color: item.payment_status === "Paid" ? "green" : "#BE1E2D", fontWeight: "bold" }}>
-            {item.payment_status}
-          </span>
-        </Typography>
       </CardContent>
     </Card>
   );
