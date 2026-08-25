@@ -25,8 +25,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: isAuthCartLoading,
     refetch: refetchAuthCart,
     error: authCartError,
-    // isUninitialized: isAuthCartUninitialized,
-    // isFetching: isAuthCartFetching,
+    isUninitialized: isAuthCartUninitialized,
   } = useGetCartQuery(
     { token, company_name },
     { skip: !token || !company_name }
@@ -37,17 +36,28 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: isGuestCartLoading,
     refetch: refetchGuestCart,
     error: guestCartError,
-    // isUninitialized: isGuestCartUninitialized,
-    // isFetching: isGuestCartFetching,
+    isUninitialized: isGuestCartUninitialized,
   } = useGetCartGuestQuery({ session_id: sessionId!, company_name: company_name || "techend" }, { skip:  !sessionId || !!token  });
 
   const triggerCartRefetch = useCallback(() => {
     if (token) {
-      refetchAuthCart?.();
+      if (!isAuthCartUninitialized) {
+        try {
+          refetchAuthCart?.();
+        } catch (e) {
+          console.warn("Cart refetch skipped: query not initialized", e);
+        }
+      }
     } else {
-      refetchGuestCart?.();
+      if (!isGuestCartUninitialized) {
+        try {
+          refetchGuestCart?.();
+        } catch (e) {
+          console.warn("Guest cart refetch skipped: query not initialized", e);
+        }
+      }
     }
-  }, [token, refetchAuthCart, refetchGuestCart]);
+  }, [token, isAuthCartUninitialized, refetchAuthCart, isGuestCartUninitialized, refetchGuestCart]);
   const data = token ? authCartData : guestCartData;
   const isLoading = token ? isAuthCartLoading : isGuestCartLoading;
   const error = token ? authCartError : guestCartError;

@@ -87,6 +87,12 @@ function Cart() {
 
   const activeShop = Cookies.get("shopname") || "techend";
 
+  // Mount tracking to prevent SSR hydration mismatch
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Individual loading states
   const [updatingProductIds, setUpdatingProductIds] = React.useState<Record<number, boolean>>({});
   const [deletingProductIds, setDeletingProductIds] = React.useState<Record<number, boolean>>({});
@@ -208,6 +214,23 @@ function Cart() {
       : Number(item.product?.price || 0);
     subTotal += price * (item.quantity || 1);
   });
+
+  if (!mounted) {
+    return (
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
+        <Container maxWidth="lg" sx={{ py: 6 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 380px" }, gap: 4 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <Skeleton key={idx} variant="rectangular" height={130} sx={{ borderRadius: "20px" }} />
+              ))}
+            </Box>
+            <Skeleton variant="rectangular" height={320} sx={{ borderRadius: "24px" }} />
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
