@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import dynamic from "next/dynamic";
+import { useGetPlatformStatsQuery } from "@/Api/services";
 
 const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
 
@@ -131,9 +132,53 @@ interface HeroProps {
   handleAuthTrigger: () => void;
 }
 
+const AnimatedCounter: React.FC<{ endValue: number; formatFn?: (val: number) => string }> = ({ endValue, formatFn }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const duration = 1500; // 1.5 seconds animation
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const easeOutQuad = (t: number) => t * (2 - t);
+      const currentVal = Math.floor(start + easeOutQuad(progress) * (endValue - start));
+      
+      setCount(currentVal);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(endValue);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [endValue]);
+
+  return <>{formatFn ? formatFn(count) : count.toLocaleString()}</>;
+};
+
 const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
   const theme = useTheme();
   const [isMounted, setIsMounted] = useState(false);
+  const { data: stats } = useGetPlatformStatsQuery();
+
+  const formatVolume = (val: number) => {
+    if (val >= 1.0e9) {
+      return `Kes ${(val / 1.0e9).toFixed(1).replace(/\.0$/, "")}B+`;
+    }
+    if (val >= 1.0e6) {
+      return `Kes ${(val / 1.0e6).toFixed(1).replace(/\.0$/, "")}M+`;
+    }
+    if (val >= 1.0e3) {
+      return `Kes ${(val / 1.0e3).toFixed(1).replace(/\.0$/, "")}K+`;
+    }
+    return `Kes ${val.toLocaleString()}+`;
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -223,7 +268,7 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
           >
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
-                5,000+
+                <AnimatedCounter endValue={stats?.total_merchants ?? 0} formatFn={(val) => `${val.toLocaleString()}+`} />
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 Active Merchants
@@ -231,18 +276,18 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
             </Box>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.secondary.main }}>
-                99.9%
+                <AnimatedCounter endValue={stats?.total_orders ?? 0} formatFn={(val) => `${val.toLocaleString()}+`} />
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Platform Uptime
+                Orders Completed
               </Typography>
             </Box>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
-                 Kes 50M+
+                <AnimatedCounter endValue={stats?.total_volume ?? 0} formatFn={formatVolume} />
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Monthly Volume
+                Transaction Volume
               </Typography>
             </Box>
           </Box>

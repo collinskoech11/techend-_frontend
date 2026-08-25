@@ -217,6 +217,9 @@ export const AuthApi = createApi({
         },
       }),
     }),
+    getPlatformStats: builder.query<{ total_merchants: number; total_volume: number; uptime: string }, void>({
+      query: () => "companies/platform-stats/",
+    }),
     getCompany: builder.query({
       query: (token) => ({
         url: `companies/my/status/`,
@@ -360,6 +363,7 @@ export const {
   usePlaceOrderGuestMutation,
   useGetActiveSubscriptionQuery, // New hook
   useRateProductMutation,
+  useGetPlatformStatsQuery,
 }: any = AuthApi;
 
 export const getProducts = async (args: { company?: string; category?: string; page?: number; page_size?: number; search?: string; on_sale?: boolean; }) => {
