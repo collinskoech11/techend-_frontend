@@ -43,7 +43,7 @@ const ProductRatingWidget: React.FC<{ productId: number; initialRating: number |
   const [rateProduct, { isLoading }] = useRateProductMutation();
   const token = Cookies.get("access");
 
-  const handleRatingChange = async (event: any, newValue: number | null) => {
+  const handleRatingChange = async (_: any, newValue: number | null) => {
     if (!newValue || !token) return;
     setRating(newValue);
     try {

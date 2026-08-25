@@ -18,17 +18,19 @@ interface OrderDetailsCardProps {
     id: number;
     total_amount: string;
     payment_status: string;
+    company_name?: string;
     cart?: {
       created_at?: string;
       status?: any;
       items: any[];
     };
   };
-  onViewDetails: (item: any) => void;
-  isActive: boolean;
+  onViewDetails?: (item: any) => void;
+  isActive?: boolean;
+  onViewMap?: (location: any) => void;
 }
 
-const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails, isActive }) => {
+const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails, isActive = false, onViewMap }) => {
   const theme = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -99,7 +101,7 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails
 
   return (
     <Card
-      onClick={() => onViewDetails(item)}
+      onClick={() => onViewDetails?.(item)}
       sx={{
         mb: 2,
         borderRadius: "20px",
@@ -165,21 +167,27 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails
               {totalProducts} {totalProducts === 1 ? "item" : "items"} &bull; Kes {Number(item.total_amount).toLocaleString()}
             </Typography>
           </Grid>
-          <Grid item xs={12} sm={4} sx={{ display: "flex", justifyContent: { xs: "flex-start", sm: "flex-end" } }}>
-            <Button
-              variant={isActive ? "contained" : "text"}
-              size="small"
-              endIcon={<KeyboardArrowRightIcon />}
-              sx={{
-                borderRadius: "10px",
-                textTransform: "none",
-                fontWeight: 700,
-                px: 2,
-              }}
-            >
-              Details
-            </Button>
-          </Grid>
+          {onViewDetails && (
+            <Grid item xs={12} sm={4} sx={{ display: "flex", justifyContent: { xs: "flex-start", sm: "flex-end" } }}>
+              <Button
+                variant={isActive ? "contained" : "text"}
+                size="small"
+                endIcon={<KeyboardArrowRightIcon />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewDetails(item);
+                }}
+                sx={{
+                  borderRadius: "10px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  px: 2,
+                }}
+              >
+                Details
+              </Button>
+            </Grid>
+          )}
         </Grid>
       </CardContent>
     </Card>
