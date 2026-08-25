@@ -19,6 +19,7 @@ import {
   Stack,
   alpha,
   styled,
+  CircularProgress,
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import AddIcon from "@mui/icons-material/Add";
@@ -80,11 +81,30 @@ function Cart() {
   const router = useRouter();
   const theme = useTheme();
 
-  const [updateItemQty, { isLoading: isLoadingUpdate }] = useAddProductQtyToCartMutation();
-  const [deleteItemQty, { isLoading: isLoadingDelete }] = useRemoveProductFromCartMutation();
+  const [updateItemQty] = useAddProductQtyToCartMutation();
+  const [deleteItemQty] = useRemoveProductFromCartMutation();
   const [addToCartGuest] = useAddToCartGuestMutation();
 
   const activeShop = Cookies.get("shopname") || "techend";
+
+  // Mount tracking to prevent SSR hydration mismatch
+  const [mounted, setMounted] = React.useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Individual loading states
+  const [updatingProductIds, setUpdatingProductIds] = React.useState<Record<number, boolean>>({});
+  const [deletingProductIds, setDeletingProductIds] = React.useState<Record<number, boolean>>({});
+
+  // Optimistic UI Cart state
+  const [optimisticCartItems, setOptimisticCartItems] = React.useState<any[]>([]);
+
+  useEffect(() => {
+    if (cart_data?.items) {
+      setOptimisticCartItems(cart_data.items);
+    }
+  }, [cart_data?.items]);
 
   const getImageUrl = (item: any) => {
     const raw = item?.product?.main_image || item?.product?.image;
@@ -97,30 +117,39 @@ function Cart() {
     const token = Cookies.get("access");
     const productId = item.product.id || item.product;
 
+    setUpdatingProductIds(prev => ({ ...prev, [productId]: true }));
+
     try {
+      let response: any;
       if (token) {
-        const response = await updateItemQty({
+        response = await updateItemQty({
           product: productId,
           product_action_symbol: direction,
           token,
           shopname: activeShop,
         });
-        if ("error" in response) {
-          toast.error((response.error as any)?.data?.error || "Failed to update quantity");
-        } else {
-          cart_refetch();
-        }
       } else if (sessionId) {
-        await addToCartGuest({
+        response = await addToCartGuest({
           productId: productId.toString(),
           quantity: direction === "incr" ? 1 : -1,
           sessionId,
           companyName: activeShop,
-        }).unwrap();
+        });
+      }
+
+      if (response && "error" in response) {
+        toast.error((response.error as any)?.data?.error || "Failed to update quantity");
+      } else {
         cart_refetch();
       }
     } catch {
       toast.error("Could not update item quantity");
+    } finally {
+      setUpdatingProductIds(prev => {
+        const copy = { ...prev };
+        delete copy[productId];
+        return copy;
+      });
     }
   };
 
@@ -128,31 +157,47 @@ function Cart() {
     const token = Cookies.get("access");
     const productId = item.product.id || item.product;
 
+    // Optimistically remove from state immediately
+    const originalItems = [...optimisticCartItems];
+    setOptimisticCartItems(prev => prev.filter(i => (i.product.id || i.product) !== productId));
+
+    setDeletingProductIds(prev => ({ ...prev, [productId]: true }));
+
     try {
+      let response: any;
       if (token) {
-        const response = await deleteItemQty({
+        response = await deleteItemQty({
           product: productId,
           token,
           shopname: activeShop,
         });
-        if ("error" in response) {
-          toast.error((response.error as any)?.data?.error || "Failed to remove item");
-        } else {
-          toast.success("Item removed from cart");
-          cart_refetch();
-        }
       } else if (sessionId) {
-        await addToCartGuest({
+        response = await addToCartGuest({
           productId: productId.toString(),
           quantity: -item.quantity,
           sessionId,
           companyName: activeShop,
-        }).unwrap();
+        });
+      }
+
+      if (response && "error" in response) {
+        // Rollback on failure
+        setOptimisticCartItems(originalItems);
+        toast.error((response.error as any)?.data?.error || "Failed to remove item");
+      } else {
         toast.success("Item removed from cart");
         cart_refetch();
       }
-    } catch {
+    } catch (err) {
+      // Rollback on failure
+      setOptimisticCartItems(originalItems);
       toast.error("Could not remove item");
+    } finally {
+      setDeletingProductIds(prev => {
+        const copy = { ...prev };
+        delete copy[productId];
+        return copy;
+      });
     }
   };
 
@@ -160,7 +205,7 @@ function Cart() {
     cart_refetch();
   }, [cart_refetch]);
 
-  const CartItems = cart_data?.items || [];
+  const CartItems = optimisticCartItems;
   let subTotal = 0;
 
   CartItems.forEach((item: any) => {
@@ -169,6 +214,23 @@ function Cart() {
       : Number(item.product?.price || 0);
     subTotal += price * (item.quantity || 1);
   });
+
+  if (!mounted) {
+    return (
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
+        <Container maxWidth="lg" sx={{ py: 6 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 380px" }, gap: 4 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <Skeleton key={idx} variant="rectangular" height={130} sx={{ borderRadius: "20px" }} />
+              ))}
+            </Box>
+            <Skeleton variant="rectangular" height={320} sx={{ borderRadius: "24px" }} />
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#fafafa", pb: 12 }}>
@@ -272,6 +334,9 @@ function Cart() {
                 const unitPrice = isSale
                   ? Number(item.product?.discounted_price || 0)
                   : Number(item.product?.price || 0);
+                const isItemUpdating = updatingProductIds[item.product.id || item.product];
+                const isItemDeleting = deletingProductIds[item.product.id || item.product];
+                const isItemLoading = isItemUpdating || isItemDeleting;
                 const itemTotal = unitPrice * item.quantity;
 
                 return (
@@ -325,7 +390,6 @@ function Cart() {
                         )}
                       </Box>
 
-                      {/* Quantity Stepper */}
                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <Box
                           sx={{
@@ -335,39 +399,48 @@ function Cart() {
                             border: "1px solid rgba(0,0,0,0.1)",
                             backgroundColor: "#fafafa",
                             p: "2px",
+                            filter: isItemLoading ? "blur(1.5px)" : "none",
+                            opacity: isItemLoading ? 0.6 : 1,
+                            pointerEvents: isItemLoading ? "none" : "auto",
                           }}
                         >
                           <IconButton
                             size="small"
                             onClick={() => updateItemCart(item, "decr")}
-                            disabled={isLoadingUpdate || item.quantity <= 1}
+                            disabled={isItemLoading || item.quantity <= 1}
                             sx={{ width: 28, height: 28, color: "#18181b" }}
                           >
                             <RemoveIcon sx={{ fontSize: "0.95rem" }} />
                           </IconButton>
-                          <Typography sx={{ minWidth: 30, textAlign: "center", fontWeight: 700, fontSize: "0.88rem" }}>
-                            {item.quantity}
-                          </Typography>
+                          <Box sx={{ minWidth: 30, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            {isItemUpdating ? (
+                              <CircularProgress size={16} thickness={5} />
+                            ) : (
+                              <Typography sx={{ fontWeight: 700, fontSize: "0.88rem" }}>
+                                {item.quantity}
+                              </Typography>
+                            )}
+                          </Box>
                           <IconButton
                             size="small"
                             onClick={() => updateItemCart(item, "incr")}
-                            disabled={isLoadingUpdate}
+                            disabled={isItemLoading}
                             sx={{ width: 28, height: 28, color: "#18181b" }}
                           >
                             <AddIcon sx={{ fontSize: "0.95rem" }} />
                           </IconButton>
                         </Box>
-
+ 
                         <Typography sx={{ fontWeight: 800, fontSize: "1.1rem", color: "#18181b" }}>
                           Kes {itemTotal.toLocaleString()}
                         </Typography>
                       </Box>
                     </Box>
-
+ 
                     {/* Action */}
                     <IconButton
                       onClick={() => deleteItemCart(item)}
-                      disabled={isLoadingDelete}
+                      disabled={isItemLoading}
                       sx={{
                         color: "#ef4444",
                         backgroundColor: "rgba(239, 68, 68, 0.08)",
@@ -375,6 +448,9 @@ function Cart() {
                           backgroundColor: "#ef4444",
                           color: "#ffffff",
                         },
+                        filter: isItemLoading ? "blur(1.5px)" : "none",
+                        opacity: isItemLoading ? 0.6 : 1,
+                        pointerEvents: isItemLoading ? "none" : "auto",
                       }}
                     >
                       <DeleteOutlineIcon sx={{ fontSize: "1.2rem" }} />
@@ -438,7 +514,7 @@ function Cart() {
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: "#71717a" }}>
                     <ShieldOutlinedIcon sx={{ fontSize: "1.1rem", color: theme.palette.primary.main }} />
                     <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                      Encrypted SSL Checkout & M-Pesa Integration
+                      Encrypted order details & M-Pesa Integration
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, color: "#71717a" }}>
