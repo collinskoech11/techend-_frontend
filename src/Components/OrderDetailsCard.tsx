@@ -18,6 +18,7 @@ interface OrderDetailsCardProps {
     id: number;
     total_amount: string;
     payment_status: string;
+    company_name?: string;
     cart?: {
       created_at?: string;
       status?: any;
