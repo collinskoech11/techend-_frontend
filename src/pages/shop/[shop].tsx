@@ -281,33 +281,65 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
 
   // Unique categories derived from company API endpoint + fallback from products
   const availableCategories = useMemo(() => {
-    if (apiCategories && Array.isArray(apiCategories) && apiCategories.length > 0) {
-      return [
-        { label: "All Items", value: "" },
-        ...apiCategories.map((c) => ({ label: c.name, value: c.name })),
-      ];
-    }
-
-    const set = new Set<string>();
+    // Collect all category names that are actually present on the company's fetched products
+    const companyProductCategoryNames = new Set<string>();
+    
+    // Populate this set from the products list we have loaded
     (productsData?.results || []).forEach((p: any) => {
       if (p.categories && Array.isArray(p.categories)) {
         p.categories.forEach((catObj: any) => {
-          if (catObj?.name) set.add(catObj.name.trim());
-        });
-      }
-    });
-    products.forEach((p: any) => {
-      if (p.categories && Array.isArray(p.categories)) {
-        p.categories.forEach((catObj: any) => {
-          if (catObj?.name) set.add(catObj.name.trim());
+          if (catObj?.name) {
+            companyProductCategoryNames.add(catObj.name.trim().toLowerCase());
+          }
         });
       }
     });
 
-    const categoryList = Array.from(set);
+    products.forEach((p: any) => {
+      if (p.categories && Array.isArray(p.categories)) {
+        p.categories.forEach((catObj: any) => {
+          if (catObj?.name) {
+            companyProductCategoryNames.add(catObj.name.trim().toLowerCase());
+          }
+        });
+      }
+    });
+
+    let list: Array<{ label: string; value: string }> = [];
+    if (apiCategories && Array.isArray(apiCategories) && apiCategories.length > 0) {
+      const filteredApi = apiCategories.filter((c) => 
+        c && c.name && companyProductCategoryNames.has(c.name.trim().toLowerCase())
+      );
+      list = filteredApi.map((c) => ({ label: c.name, value: c.name }));
+    }
+
+    // Fallback to parsing from products if API result doesn't match or is empty/loading
+    if (list.length === 0) {
+      const parsedList = Array.from(companyProductCategoryNames);
+      const nameMap = new Map<string, string>();
+      const collectOriginalNames = (pList: any[]) => {
+        pList.forEach((p: any) => {
+          if (p.categories && Array.isArray(p.categories)) {
+            p.categories.forEach((catObj: any) => {
+              if (catObj?.name) {
+                nameMap.set(catObj.name.trim().toLowerCase(), catObj.name.trim());
+              }
+            });
+          }
+        });
+      };
+      collectOriginalNames(productsData?.results || []);
+      collectOriginalNames(products);
+
+      list = parsedList.map((lowerName) => {
+        const originalName = nameMap.get(lowerName) || lowerName;
+        return { label: originalName, value: originalName };
+      });
+    }
+
     return [
       { label: "All Items", value: "" },
-      ...categoryList.map((c) => ({ label: c, value: c })),
+      ...list,
     ];
   }, [apiCategories, products, productsData]);
 
@@ -640,79 +672,94 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
         </Box>
 
         {/* --- STICKY CATEGORIES BAR --- */}
-        <Box
-          sx={{
-            position: "sticky",
-            top: { xs: 62, md: 70 },
-            zIndex: 90,
-            backgroundColor: "rgba(255, 255, 255, 0.94)",
-            backdropFilter: "blur(18px) saturate(180%)",
-            WebkitBackdropFilter: "blur(18px) saturate(180%)",
-            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-            py: 1.5,
-            mb: 3,
-            mx: { xs: -2.5, sm: -4, md: -6 },
-            px: { xs: 2.5, sm: 4, md: 6 },
-            transition: "all 0.25s ease",
-          }}
-        >
-          {/* Dynamic Category Chips Scroll Area */}
+        {availableCategories.length > 1 && (
           <Box
             sx={{
-              maxWidth: "1400px",
-              mx: "auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 1.2,
-              overflowX: "auto",
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": { display: "none" },
-              py: 0.2,
+              position: "sticky",
+              top: { xs: 62, md: 70 },
+              zIndex: 90,
+              backgroundColor: "rgba(255, 255, 255, 0.94)",
+              backdropFilter: "blur(18px) saturate(180%)",
+              WebkitBackdropFilter: "blur(18px) saturate(180%)",
+              borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+              py: 1.5,
+              mb: 3,
+              mx: { xs: -2.5, sm: -4, md: -6 },
+              px: { xs: 2.5, sm: 4, md: 6 },
+              transition: "all 0.25s ease",
             }}
           >
-            {availableCategories.map((cat) => {
-              const isSelected = category === cat.value || (cat.value === "" && !category);
-              return (
-                <Button
-                  key={cat.value || "all"}
-                  onClick={() => handleCategorySelect(cat.value)}
-                  size="small"
-                  sx={{
-                    width: "auto",
-                    minWidth: "fit-content",
-                    flexShrink: 0,
-                    whiteSpace: "nowrap",
-                    px: { xs: 2, sm: 2.5 },
-                    py: 0.8,
-                    borderRadius: "30px",
-                    fontSize: "0.84rem",
-                    fontWeight: isSelected ? 700 : 500,
-                    textTransform: "none",
-                    letterSpacing: "0.02em",
-                    backgroundColor: isSelected
-                      ? theme.palette.primary.main
-                      : "rgba(0, 0, 0, 0.04)",
-                    color: isSelected ? "#ffffff" : "#27272a",
-                    border: `1px solid ${isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)"}`,
-                    boxShadow: isSelected
-                      ? `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`
-                      : "none",
-                    transition: "all 0.25s ease",
-                    "&:hover": {
+            {/* Dynamic Category Chips Scroll Area */}
+            <Box
+              sx={{
+                maxWidth: "1400px",
+                mx: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: 1.2,
+                overflowX: "auto",
+                py: 1,
+                scrollbarWidth: "thin",
+                "&::-webkit-scrollbar": {
+                  height: "6px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "rgba(0,0,0,0.03)",
+                  borderRadius: "10px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "rgba(0,0,0,0.12)",
+                  borderRadius: "10px",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.24)",
+                  },
+                },
+              }}
+            >
+              {availableCategories.map((cat) => {
+                const isSelected = category === cat.value || (cat.value === "" && !category);
+                return (
+                  <Button
+                    key={cat.value || "all"}
+                    onClick={() => handleCategorySelect(cat.value)}
+                    size="small"
+                    sx={{
+                      width: "auto",
+                      minWidth: "fit-content",
+                      flexShrink: 0,
+                      whiteSpace: "nowrap",
+                      px: { xs: 2, sm: 2.5 },
+                      py: 0.8,
+                      borderRadius: "30px",
+                      fontSize: "0.84rem",
+                      fontWeight: isSelected ? 700 : 500,
+                      textTransform: "none",
+                      letterSpacing: "0.02em",
                       backgroundColor: isSelected
                         ? theme.palette.primary.main
-                        : alpha(theme.palette.primary.main, 0.08),
-                      color: isSelected ? "#ffffff" : theme.palette.primary.main,
-                      borderColor: theme.palette.primary.main,
-                    },
-                  }}
-                >
-                  {cat.label}
-                </Button>
-              );
-            })}
+                        : "rgba(0, 0, 0, 0.04)",
+                      color: isSelected ? "#ffffff" : "#27272a",
+                      border: `1px solid ${isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)"}`,
+                      boxShadow: isSelected
+                        ? `0 4px 14px ${alpha(theme.palette.primary.main, 0.35)}`
+                        : "none",
+                      transition: "all 0.25s ease",
+                      "&:hover": {
+                        backgroundColor: isSelected
+                          ? theme.palette.primary.main
+                          : alpha(theme.palette.primary.main, 0.08),
+                        color: isSelected ? "#ffffff" : theme.palette.primary.main,
+                        borderColor: theme.palette.primary.main,
+                      },
+                    }}
+                  >
+                    {cat.label}
+                  </Button>
+                );
+              })}
+            </Box>
           </Box>
-        </Box>
+        )}
 
         {/* --- SEARCH & FILTER CONTROLS BAR --- */}
         <Box

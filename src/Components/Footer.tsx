@@ -117,17 +117,29 @@ export default function Footer() {
 
   useEffect(() => {
     setMounted(true);
-    setCookieShop(Cookies.get("shopname") || null);
   }, []);
+
+  useEffect(() => {
+    setCookieShop(Cookies.get("shopname") || null);
+  }, [router.asPath, router.query.shop]);
 
   const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
 
+  const urlShop =
+    typeof router.query.shop === "string"
+      ? router.query.shop
+      : router.asPath.startsWith("/shop/")
+      ? router.asPath.split("/shop/")[1]?.split("?")[0]
+      : null;
+
+  const activeShopSlug = urlShop || cookieShop || "SokoJunction";
   const displayShopName = isDefaultBrandPage
     ? "SokoJunction"
-    : cookieShop || "SokoJunction";
+    : activeShopSlug;
+
   const { data: companyData, isLoading: companyLoading } =
     useGetCompanyBySlugQuery(displayShopName, {
-      skip: isDefaultBrandPage || !cookieShop,
+      skip: isDefaultBrandPage || displayShopName.toLowerCase() === "sokojunction",
     });
 
   const [newsletterEmail, setNewsletterEmail] = useState("");
