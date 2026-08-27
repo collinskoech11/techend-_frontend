@@ -30,7 +30,7 @@ interface OrderDetailsCardProps {
   onViewMap?: (location: any) => void;
 }
 
-const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails, isActive = false, onViewMap }) => {
+const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ item, onViewDetails, isActive = false }) => {
   const theme = useTheme();
   const [mounted, setMounted] = useState(false);
 
