@@ -14,6 +14,7 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import dynamic from "next/dynamic";
 import { useGetPlatformStatsQuery } from "@/Api/services";
+import Cookies from "js-cookie";
 
 const Typewriter = dynamic(() => import("typewriter-effect"), { ssr: false });
 
@@ -165,6 +166,7 @@ const AnimatedCounter: React.FC<{ endValue: number; formatFn?: (val: number) => 
 const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
   const theme = useTheme();
   const [isMounted, setIsMounted] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const { data: stats } = useGetPlatformStatsQuery();
 
   const formatVolume = (val: number) => {
@@ -182,6 +184,17 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
 
   useEffect(() => {
     setIsMounted(true);
+    const userCookie = Cookies.get("user");
+    if (userCookie) {
+      try {
+        const parsedUser = JSON.parse(userCookie);
+        if (parsedUser && parsedUser.companies && parsedUser.companies.length > 0) {
+          setIsOwner(true);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
   }, []);
 
   return (
@@ -247,10 +260,16 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
           >
             <GlowButton 
               endIcon={<ArrowForwardIcon />} 
-              onClick={handleNavigate}
+              onClick={() => {
+                if (isOwner) {
+                  window.location.href = "https://merchant.sokojunction.com";
+                } else {
+                  handleNavigate();
+                }
+              }}
               size="large"
             >
-              Start Selling Now
+              {isOwner ? "Manage Your Store" : "Start Selling Now"}
             </GlowButton>
           </Box>
           
