@@ -1,7 +1,7 @@
 
 import { createTheme } from '@mui/material/styles';
 
-export const createAppTheme = (primaryColor: string) => {
+export const createAppTheme = (primaryColor: string, secondaryColor: string = "#EF5C2A") => {
   const accent = primaryColor;
   const lightGray = "#f0f2f5";
   const pageBackground = "#f8f8f8";
@@ -43,6 +43,9 @@ export const createAppTheme = (primaryColor: string) => {
     palette: {
       primary: {
         main: accent,
+      },
+      secondary: {
+        main: secondaryColor,
       },
       grey: {
           '50': pageBackground,

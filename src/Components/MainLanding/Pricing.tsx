@@ -70,9 +70,7 @@ const PricingCard = styled(Box)(({ theme }) => ({
     border: `2px solid ${theme.palette.primary.main}`,
     boxShadow: `0 25px 50px -12px ${alpha(theme.palette.primary.main, 0.4)}`,
     transform: "scale(1.05)",
-    background: theme.palette.mode === 'dark'
-      ? alpha(theme.palette.primary.dark, 0.1)
-      : alpha(theme.palette.primary.light, 0.15),
+    background: alpha(theme.palette.primary.main, 0.1),
 
     "&:hover": {
       transform: "translateY(-5px) scale(1.06)",
