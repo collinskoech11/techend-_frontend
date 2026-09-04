@@ -85,6 +85,47 @@ const straightUp = keyframes`
   100% { transform: translate3d(0, -105vh, 0); opacity: 0; }
 `;
 
+// Speed-reactive streak stretch keyframes (3x longer at fast points, elegant in center)
+const tailStretchRight = keyframes`
+  0% { transform: translateY(-50%) scaleX(4.5); opacity: 0.95; }
+  20% { transform: translateY(-50%) scaleX(3.8); opacity: 0.9; }
+  35% { transform: translateY(-50%) scaleX(1.4); opacity: 0.8; }
+  50% { transform: translateY(-50%) scaleX(0.9); opacity: 0.7; }
+  65% { transform: translateY(-50%) scaleX(1.3); opacity: 0.78; }
+  80% { transform: translateY(-50%) scaleX(3.5); opacity: 0.92; }
+  100% { transform: translateY(-50%) scaleX(5.0); opacity: 1; }
+`;
+
+const tailStretchLeft = keyframes`
+  0% { transform: translateY(-50%) scaleX(4.5); opacity: 0.95; }
+  20% { transform: translateY(-50%) scaleX(3.8); opacity: 0.9; }
+  35% { transform: translateY(-50%) scaleX(1.4); opacity: 0.8; }
+  50% { transform: translateY(-50%) scaleX(0.9); opacity: 0.7; }
+  65% { transform: translateY(-50%) scaleX(1.3); opacity: 0.78; }
+  80% { transform: translateY(-50%) scaleX(3.5); opacity: 0.92; }
+  100% { transform: translateY(-50%) scaleX(5.0); opacity: 1; }
+`;
+
+const tailStretchDown = keyframes`
+  0% { transform: translateX(-50%) scaleY(4.5); opacity: 0.95; }
+  20% { transform: translateX(-50%) scaleY(3.8); opacity: 0.9; }
+  35% { transform: translateX(-50%) scaleY(1.4); opacity: 0.8; }
+  50% { transform: translateX(-50%) scaleY(0.9); opacity: 0.7; }
+  65% { transform: translateX(-50%) scaleY(1.3); opacity: 0.78; }
+  80% { transform: translateX(-50%) scaleY(3.5); opacity: 0.92; }
+  100% { transform: translateX(-50%) scaleY(5.0); opacity: 1; }
+`;
+
+const tailStretchUp = keyframes`
+  0% { transform: translateX(-50%) scaleY(4.5); opacity: 0.95; }
+  20% { transform: translateX(-50%) scaleY(3.8); opacity: 0.9; }
+  35% { transform: translateX(-50%) scaleY(1.4); opacity: 0.8; }
+  50% { transform: translateX(-50%) scaleY(0.9); opacity: 0.7; }
+  65% { transform: translateX(-50%) scaleY(1.3); opacity: 0.78; }
+  80% { transform: translateX(-50%) scaleY(3.5); opacity: 0.92; }
+  100% { transform: translateX(-50%) scaleY(5.0); opacity: 1; }
+`;
+
 interface GlowDotProps {
   glowcolor: string;
   delay?: string;
@@ -112,37 +153,57 @@ const GlowDot = styled(Box, {
     tailStyles = {
       right: "50%",
       top: "50%",
-      transform: "translateY(-50%)",
-      width: "70px",
-      height: "2px",
-      background: `linear-gradient(90deg, transparent, ${alpha(glowcolor, 0.4)} 60%, #ffffff)`,
+      transformOrigin: "right center",
+      width: "90px",
+      height: "3.5px",
+      background: `linear-gradient(90deg, transparent, ${alpha(glowcolor, 0.2)} 15%, ${glowcolor} 55%, #ffffff 100%)`,
+      animation: `${tailStretchRight} ${duration} linear forwards`,
+      [theme.breakpoints.down("sm")]: {
+        width: "50px",
+        height: "2.5px",
+      },
     };
   } else if (direction === "left") {
     tailStyles = {
       left: "50%",
       top: "50%",
-      transform: "translateY(-50%)",
-      width: "70px",
-      height: "2px",
-      background: `linear-gradient(90deg, #ffffff, ${alpha(glowcolor, 0.4)} 40%, transparent)`,
+      transformOrigin: "left center",
+      width: "90px",
+      height: "3.5px",
+      background: `linear-gradient(90deg, #ffffff 0%, ${glowcolor} 45%, ${alpha(glowcolor, 0.2)} 85%, transparent 100%)`,
+      animation: `${tailStretchLeft} ${duration} linear forwards`,
+      [theme.breakpoints.down("sm")]: {
+        width: "50px",
+        height: "2.5px",
+      },
     };
   } else if (direction === "down") {
     tailStyles = {
       bottom: "50%",
       left: "50%",
-      transform: "translateX(-50%)",
-      width: "2px",
-      height: "70px",
-      background: `linear-gradient(180deg, transparent, ${alpha(glowcolor, 0.4)} 60%, #ffffff)`,
+      transformOrigin: "center bottom",
+      width: "3.5px",
+      height: "90px",
+      background: `linear-gradient(180deg, transparent, ${alpha(glowcolor, 0.2)} 15%, ${glowcolor} 55%, #ffffff 100%)`,
+      animation: `${tailStretchDown} ${duration} linear forwards`,
+      [theme.breakpoints.down("sm")]: {
+        width: "2.5px",
+        height: "50px",
+      },
     };
   } else if (direction === "up") {
     tailStyles = {
       top: "50%",
       left: "50%",
-      transform: "translateX(-50%)",
-      width: "2px",
-      height: "70px",
-      background: `linear-gradient(180deg, #ffffff, ${alpha(glowcolor, 0.4)} 40%, transparent)`,
+      transformOrigin: "center top",
+      width: "3.5px",
+      height: "90px",
+      background: `linear-gradient(180deg, #ffffff 0%, ${glowcolor} 45%, ${alpha(glowcolor, 0.2)} 85%, transparent 100%)`,
+      animation: `${tailStretchUp} ${duration} linear forwards`,
+      [theme.breakpoints.down("sm")]: {
+        width: "2.5px",
+        height: "50px",
+      },
     };
   }
 
@@ -156,11 +217,11 @@ const GlowDot = styled(Box, {
     backgroundColor: "#ffffff",
     boxShadow: `
       0 0 6px 2px #ffffff,
-      0 0 14px 4px ${glowcolor},
-      0 0 30px 8px ${alpha(glowcolor, 0.6)}
+      0 0 16px 5px ${glowcolor},
+      0 0 36px 10px ${alpha(glowcolor, 0.8)}
     `,
     zIndex: 1,
-    animation: `${pathanimation} ${duration} linear infinite`,
+    animation: `${pathanimation} ${duration} linear forwards`,
     animationDelay: delay,
     pointerEvents: "none",
     willChange: "transform, opacity",
@@ -169,13 +230,21 @@ const GlowDot = styled(Box, {
       content: '""',
       position: "absolute",
       borderRadius: "999px",
-      filter: `drop-shadow(0 0 6px ${glowcolor})`,
+      filter: `drop-shadow(0 0 8px ${glowcolor}) drop-shadow(0 0 16px ${glowcolor})`,
       pointerEvents: "none",
       ...tailStyles,
     },
 
     [theme.breakpoints.down("sm")]: {
-      display: "none",
+      display: "block",
+      width: `${Math.max(size - 2, 4)}px`,
+      height: `${Math.max(size - 2, 4)}px`,
+      opacity: 0.85,
+      boxShadow: `
+        0 0 5px 2px #ffffff,
+        0 0 12px 3px ${glowcolor},
+        0 0 22px 5px ${alpha(glowcolor, 0.6)}
+      `,
     },
   };
 });
@@ -237,22 +306,25 @@ const HeroWrapper = styled(Box)(({ theme }) => ({
 const ContentCard = styled(Box)(({ theme }) => ({
   position: "relative",
   zIndex: 2,
-  background: alpha(theme.palette.background.paper, 0.4),
-  backdropFilter: "blur(20px)",
+  background: alpha(theme.palette.background.paper, 0.2),
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
   borderRadius: "32px",
   padding: theme.spacing(6, 4),
-  border: `1px solid ${alpha(theme.palette.common.white, 0.3)}`,
-  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.05)}`,
+  border: `1px solid ${alpha(theme.palette.common.white, 0.15)}`,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.03)}`,
   animation: `${fadeUp} 1s ease-out`,
   maxWidth: "900px",
   margin: "0 auto",
   
   [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(4, 2),
-    background: "transparent", // Remove card effect on mobile for more space
-    border: "none",
-    backdropFilter: "none",
-    boxShadow: "none",
+    padding: theme.spacing(4, 2.5),
+    background: alpha(theme.palette.background.paper, 0.3),
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    borderRadius: "24px",
+    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+    boxShadow: `0 8px 24px -4px ${alpha(theme.palette.common.black, 0.03)}`,
   }
 }));
 
@@ -318,10 +390,22 @@ const AnimatedCounter: React.FC<{ endValue: number; formatFn?: (val: number) => 
   return <>{formatFn ? formatFn(count) : count.toLocaleString()}</>;
 };
 
+interface ShootingStarItem {
+  id: number;
+  direction: "right" | "left" | "down" | "up";
+  top?: string;
+  left?: string;
+  animation: any;
+  duration: string;
+  color: string;
+  size: number;
+}
+
 const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
   const theme = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [activeStars, setActiveStars] = useState<ShootingStarItem[]>([]);
   const { data: stats } = useGetPlatformStatsQuery();
 
   const formatVolume = (val: number) => {
@@ -352,21 +436,122 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
     }
   }, []);
 
+  // Randomized non-repetitive shooting star spawner
+  useEffect(() => {
+    if (!isMounted) return;
+
+    let starIdCounter = 0;
+    let isCancelled = false;
+    let spawnTimer: NodeJS.Timeout;
+
+    const HORIZONTAL_TRACKS = [12, 20, 28, 36, 44, 52, 60, 68, 76, 84, 92];
+    const VERTICAL_TRACKS = [15, 25, 35, 45, 55, 65, 75, 85, 92];
+    const COLORS = [
+      theme.palette.primary.main || "#35408F",   // Brand Blue / Purple
+      theme.palette.secondary.main || "#EF5C2A", // Brand Orange
+    ];
+    const DIRECTIONS: Array<"right" | "left" | "down" | "up"> = ["right", "left", "down", "up"];
+
+    let lastDirection: string = "";
+    let lastTrack: number = -1;
+    let lastColorIndex: number = -1;
+
+    const spawnStar = () => {
+      if (isCancelled) return;
+
+      // Random direction (different from last)
+      const availableDirs = DIRECTIONS.filter((d) => d !== lastDirection);
+      const direction = availableDirs[Math.floor(Math.random() * availableDirs.length)] || "right";
+      lastDirection = direction;
+
+      const isHorizontal = direction === "right" || direction === "left";
+      const trackPool = isHorizontal ? HORIZONTAL_TRACKS : VERTICAL_TRACKS;
+
+      // Random track (different from last)
+      const availableTracks = trackPool.filter((t) => t !== lastTrack);
+      const chosenTrack = availableTracks[Math.floor(Math.random() * availableTracks.length)] || trackPool[0];
+      lastTrack = chosenTrack;
+
+      let topStr: string | undefined;
+      let leftStr: string | undefined;
+      let anim: any;
+
+      if (direction === "right") {
+        topStr = `${chosenTrack}%`;
+        leftStr = "0%";
+        anim = straightRight;
+      } else if (direction === "left") {
+        topStr = `${chosenTrack}%`;
+        leftStr = "100%";
+        anim = straightLeft;
+      } else if (direction === "down") {
+        topStr = "0%";
+        leftStr = `${chosenTrack}%`;
+        anim = straightDown;
+      } else {
+        topStr = "100%";
+        leftStr = `${chosenTrack}%`;
+        anim = straightUp;
+      }
+
+      // Slightly varied fast speed: 1.7s to 2.2s
+      const randomDuration = (1.7 + Math.random() * 0.5).toFixed(2);
+      // Alternate between the 2 logo brand colors (blue/purple and orange)
+      const nextColorIndex = lastColorIndex === 0 ? 1 : 0;
+      lastColorIndex = nextColorIndex;
+      const chosenColor = COLORS[nextColorIndex];
+      const randomSize = Math.random() > 0.45 ? 6 : 5;
+
+      const newStar: ShootingStarItem = {
+        id: ++starIdCounter,
+        direction,
+        top: topStr,
+        left: leftStr,
+        animation: anim,
+        duration: `${randomDuration}s`,
+        color: chosenColor,
+        size: randomSize,
+      };
+
+      setActiveStars((prev) => {
+        // Keep at most 4 active stars simultaneously
+        return [...prev.slice(-3), newStar];
+      });
+
+      // Schedule next random spawn between 650ms and 1300ms
+      const nextDelay = 650 + Math.floor(Math.random() * 650);
+      spawnTimer = setTimeout(spawnStar, nextDelay);
+    };
+
+    // Initial staggered spawns on mount
+    spawnStar();
+    const initTimer = setTimeout(spawnStar, 400);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(spawnTimer);
+      clearTimeout(initTimer);
+    };
+  }, [isMounted, theme.palette.primary.main, theme.palette.secondary.main]);
+
   return (
     <HeroWrapper>
-      {/* Fast straight-path shooting stars (5 total) */}
-      {/* Horizontal: Left to Right */}
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="20%" left="0%" pathanimation={straightRight} direction="right" duration="1.9s" delay="0s" size={6} />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="72%" left="0%" pathanimation={straightRight} direction="right" duration="2.1s" delay="1.4s" size={5} />
-
-      {/* Horizontal: Right to Left */}
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="42%" left="100%" pathanimation={straightLeft} direction="left" duration="1.8s" delay="0.7s" size={6} />
-
-      {/* Vertical: Top to Bottom */}
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="0%" left="20%" pathanimation={straightDown} direction="down" duration="2.0s" delay="2.1s" size={5} />
-
-      {/* Vertical: Bottom to Top */}
-      <GlowDot glowcolor="#38bdf8" top="100%" left="80%" pathanimation={straightUp} direction="up" duration="2.0s" delay="2.8s" size={6} />
+      {/* Dynamically randomized shooting stars */}
+      {activeStars.map((star) => (
+        <GlowDot
+          key={star.id}
+          glowcolor={star.color}
+          top={star.top}
+          left={star.left}
+          pathanimation={star.animation}
+          direction={star.direction}
+          duration={star.duration}
+          size={star.size}
+          onAnimationEnd={() => {
+            setActiveStars((prev) => prev.filter((s) => s.id !== star.id));
+          }}
+        />
+      ))}
 
       <Container maxWidth="lg">
         <ContentCard>
