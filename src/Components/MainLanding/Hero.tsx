@@ -37,75 +37,148 @@ const blobMove2 = keyframes`
   100% { transform: translate(0px, 0px) scale(1); }
 `;
 
-const walkPath1 = keyframes`
-  0% { transform: translate(0, 0); opacity: 0; }
-  5% { opacity: 1; }
-  20% { transform: translate(120px, 0); }
-  40% { transform: translate(120px, 80px); }
-  60% { transform: translate(280px, 80px); }
-  80% { transform: translate(280px, -40px); }
-  95% { opacity: 1; }
-  100% { transform: translate(400px, -40px); opacity: 0; }
+const straightRight = keyframes`
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  20% { transform: translate3d(36vw, 0, 0); }
+  35% { transform: translate3d(46vw, 0, 0); }
+  50% { transform: translate3d(52.5vw, 0, 0); }
+  65% { transform: translate3d(59vw, 0, 0); }
+  80% { transform: translate3d(69vw, 0, 0); }
+  98% { opacity: 1; }
+  100% { transform: translate3d(105vw, 0, 0); opacity: 0; }
 `;
 
-const walkPath2 = keyframes`
-  0% { transform: translate(0, 0); opacity: 0; }
-  5% { opacity: 1; }
-  25% { transform: translate(0, -160px); }
-  50% { transform: translate(-120px, -160px); }
-  75% { transform: translate(-120px, -280px); }
-  95% { opacity: 1; }
-  100% { transform: translate(40px, -280px); opacity: 0; }
+const straightLeft = keyframes`
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  20% { transform: translate3d(-36vw, 0, 0); }
+  35% { transform: translate3d(-46vw, 0, 0); }
+  50% { transform: translate3d(-52.5vw, 0, 0); }
+  65% { transform: translate3d(-59vw, 0, 0); }
+  80% { transform: translate3d(-69vw, 0, 0); }
+  98% { opacity: 1; }
+  100% { transform: translate3d(-105vw, 0, 0); opacity: 0; }
 `;
 
-const walkPath3 = keyframes`
-  0% { transform: translate(0, 0); opacity: 0; }
-  5% { opacity: 1; }
-  20% { transform: translate(-160px, 0); }
-  40% { transform: translate(-160px, 120px); }
-  60% { transform: translate(0px, 120px); }
-  80% { transform: translate(0px, 240px); }
-  95% { opacity: 1; }
-  100% { transform: translate(120px, 240px); opacity: 0; }
+const straightDown = keyframes`
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  20% { transform: translate3d(0, 36vh, 0); }
+  35% { transform: translate3d(0, 46vh, 0); }
+  50% { transform: translate3d(0, 52.5vh, 0); }
+  65% { transform: translate3d(0, 59vh, 0); }
+  80% { transform: translate3d(0, 69vh, 0); }
+  98% { opacity: 1; }
+  100% { transform: translate3d(0, 105vh, 0); opacity: 0; }
 `;
 
-const walkPath4 = keyframes`
-  0% { transform: translate(0, 0); opacity: 0; }
-  5% { opacity: 1; }
-  25% { transform: translate(160px, 0); }
-  50% { transform: translate(160px, -120px); }
-  75% { transform: translate(280px, -120px); }
-  95% { opacity: 1; }
-  100% { transform: translate(280px, 0); opacity: 0; }
+const straightUp = keyframes`
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  2% { opacity: 1; }
+  20% { transform: translate3d(0, -36vh, 0); }
+  35% { transform: translate3d(0, -46vh, 0); }
+  50% { transform: translate3d(0, -52.5vh, 0); }
+  65% { transform: translate3d(0, -59vh, 0); }
+  80% { transform: translate3d(0, -69vh, 0); }
+  98% { opacity: 1; }
+  100% { transform: translate3d(0, -105vh, 0); opacity: 0; }
 `;
 
 interface GlowDotProps {
   glowcolor: string;
   delay?: string;
-  top: string;
-  left: string;
+  duration?: string;
+  top?: string;
+  left?: string;
   pathanimation: any;
+  direction?: "right" | "left" | "down" | "up";
+  size?: number;
 }
 
 const GlowDot = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "glowcolor" && prop !== "delay" && prop !== "top" && prop !== "left" && prop !== "pathanimation",
-})<GlowDotProps>(({ theme, glowcolor, delay = "0s", top, left, pathanimation }) => ({
-  position: "absolute",
-  top: top,
-  left: left,
-  width: "6px",
-  height: "6px",
-  borderRadius: "50%",
-  backgroundColor: glowcolor,
-  boxShadow: `0 0 8px 3px ${glowcolor}, 0 0 16px 6px ${glowcolor}`,
-  zIndex: 1,
-  animation: `${pathanimation} 14s linear infinite`,
-  animationDelay: delay,
-  pointerEvents: "none",
-  [theme.breakpoints.down("sm")]: {
-    display: "none",
-  },
-}));
+  shouldForwardProp: (prop) =>
+    prop !== "glowcolor" &&
+    prop !== "delay" &&
+    prop !== "duration" &&
+    prop !== "top" &&
+    prop !== "left" &&
+    prop !== "pathanimation" &&
+    prop !== "direction" &&
+    prop !== "size",
+})<GlowDotProps>(({ theme, glowcolor, delay = "0s", duration = "1.5s", top, left, pathanimation, direction = "right", size = 6 }) => {
+  let tailStyles: any = {};
+  if (direction === "right") {
+    tailStyles = {
+      right: "50%",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: "70px",
+      height: "2px",
+      background: `linear-gradient(90deg, transparent, ${alpha(glowcolor, 0.4)} 60%, #ffffff)`,
+    };
+  } else if (direction === "left") {
+    tailStyles = {
+      left: "50%",
+      top: "50%",
+      transform: "translateY(-50%)",
+      width: "70px",
+      height: "2px",
+      background: `linear-gradient(90deg, #ffffff, ${alpha(glowcolor, 0.4)} 40%, transparent)`,
+    };
+  } else if (direction === "down") {
+    tailStyles = {
+      bottom: "50%",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "2px",
+      height: "70px",
+      background: `linear-gradient(180deg, transparent, ${alpha(glowcolor, 0.4)} 60%, #ffffff)`,
+    };
+  } else if (direction === "up") {
+    tailStyles = {
+      top: "50%",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "2px",
+      height: "70px",
+      background: `linear-gradient(180deg, #ffffff, ${alpha(glowcolor, 0.4)} 40%, transparent)`,
+    };
+  }
+
+  return {
+    position: "absolute",
+    top: top,
+    left: left,
+    width: `${size}px`,
+    height: `${size}px`,
+    borderRadius: "50%",
+    backgroundColor: "#ffffff",
+    boxShadow: `
+      0 0 6px 2px #ffffff,
+      0 0 14px 4px ${glowcolor},
+      0 0 30px 8px ${alpha(glowcolor, 0.6)}
+    `,
+    zIndex: 1,
+    animation: `${pathanimation} ${duration} linear infinite`,
+    animationDelay: delay,
+    pointerEvents: "none",
+    willChange: "transform, opacity",
+
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      borderRadius: "999px",
+      filter: `drop-shadow(0 0 6px ${glowcolor})`,
+      pointerEvents: "none",
+      ...tailStyles,
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    },
+  };
+});
 
 // --- Styled Components ---
 
@@ -281,19 +354,19 @@ const Hero: React.FC<HeroProps> = ({ handleNavigate }) => {
 
   return (
     <HeroWrapper>
-      {/* Glowing animated dots moving along the grid lines in random paths */}
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="30%" left="10%" pathanimation={walkPath1} delay="0s" />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="70%" left="40%" pathanimation={walkPath2} delay="2s" />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="40%" left="80%" pathanimation={walkPath3} delay="4s" />
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="20%" left="60%" pathanimation={walkPath4} delay="6s" />
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="15%" left="15%" pathanimation={walkPath1} delay="1s" />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="50%" left="20%" pathanimation={walkPath2} delay="3s" />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="30%" left="70%" pathanimation={walkPath3} delay="5s" />
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="80%" left="50%" pathanimation={walkPath4} delay="7s" />
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="60%" left="10%" pathanimation={walkPath1} delay="2.5s" />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="25%" left="85%" pathanimation={walkPath2} delay="4.5s" />
-      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="75%" left="75%" pathanimation={walkPath3} delay="6.5s" />
-      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="45%" left="45%" pathanimation={walkPath4} delay="0.5s" />
+      {/* Fast straight-path shooting stars (5 total) */}
+      {/* Horizontal: Left to Right */}
+      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="20%" left="0%" pathanimation={straightRight} direction="right" duration="1.9s" delay="0s" size={6} />
+      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="72%" left="0%" pathanimation={straightRight} direction="right" duration="2.1s" delay="1.4s" size={5} />
+
+      {/* Horizontal: Right to Left */}
+      <GlowDot glowcolor={theme.palette.secondary.main || "#ef5c2a"} top="42%" left="100%" pathanimation={straightLeft} direction="left" duration="1.8s" delay="0.7s" size={6} />
+
+      {/* Vertical: Top to Bottom */}
+      <GlowDot glowcolor={theme.palette.primary.main || "#00b0ff"} top="0%" left="20%" pathanimation={straightDown} direction="down" duration="2.0s" delay="2.1s" size={5} />
+
+      {/* Vertical: Bottom to Top */}
+      <GlowDot glowcolor="#38bdf8" top="100%" left="80%" pathanimation={straightUp} direction="up" duration="2.0s" delay="2.8s" size={6} />
 
       <Container maxWidth="lg">
         <ContentCard>
