@@ -16,7 +16,7 @@ const floatAnimation = keyframes`
 export const HeroSection = styled(Box)(({ theme }) => ({
   background: `linear-gradient(-45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark}, ${theme.palette.secondary.main}, ${theme.palette.secondary.dark})`,
   backgroundSize: '400% 400%',
-  animation: `${animatedGradient} 15s ease infinite`,
+  animation: `${animatedGradient} 6s ease infinite`,
   color: "#fff",
   textAlign: "center",
   borderRadius: "20px", // More rounded for a modern feel
@@ -67,7 +67,7 @@ export const HeroGraphic = styled(Box)({
   // For demonstration, these are placeholder circles
   background: 'rgba(255,255,255,0.08)',
   borderRadius: '50%',
-  animation: `${floatAnimation} 4s ease-in-out infinite`,
+  animation: `${floatAnimation} 2s ease-in-out infinite`,
   zIndex: 1, // Below content but above background patterns
 });
 
