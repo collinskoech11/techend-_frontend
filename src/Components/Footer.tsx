@@ -16,6 +16,7 @@ import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import { useRouter } from "next/router";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
+import { useIsCustomDomain } from "@/utils/domain";
 
 // Social Icons
 import FacebookIcon from "@mui/icons-material/Facebook";
@@ -111,6 +112,7 @@ const DEFAULT_BRAND_URLS = [
 export default function Footer() {
   const theme = useTheme();
   const router = useRouter();
+  const isCustomDomain = useIsCustomDomain();
 
   const [mounted, setMounted] = useState(false);
   const [cookieShop, setCookieShop] = useState<string | null>(null);
@@ -327,7 +329,7 @@ export default function Footer() {
             <Stack spacing={0.5}>
               {[
                 { name: "Home", path: "/" },
-                { name: "Explore Shops", path: "/shops" },
+                ...(!isCustomDomain ? [{ name: "Explore Shops", path: "/shops" }] : []),
                 { name: "About Platform", path: "/about" },
                 { name: "Mobile App", path: "/mobile-app" },
                 { name: "Merchant Setup", path: "/company-onboarding" },
