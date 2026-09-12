@@ -42,6 +42,26 @@ const nextConfig = {
       },
     ],
   },
+
+  async redirects() {
+    const landingUrl =
+      process.env.NEXT_PUBLIC_LANDING_URL ||
+      (process.env.NODE_ENV === 'production'
+        ? 'https://sokojunction.com'
+        : 'http://localhost:3000');
+    return [
+      {
+        source: '/about',
+        destination: `${landingUrl}/about`,
+        permanent: false,
+      },
+      {
+        source: '/mobile-app',
+        destination: `${landingUrl}/mobile-app`,
+        permanent: false,
+      },
+    ];
+  },
 }
 
 export default bundleAnalyzer(nextConfig)
