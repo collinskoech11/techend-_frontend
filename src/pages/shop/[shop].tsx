@@ -11,6 +11,7 @@ import React, {
 import { alpha, useTheme } from "@mui/material/styles";
 import Skeleton from "@mui/material/Skeleton";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { getProducts, getCompanyBySlug, useGetCompanyCategoriesQuery } from "@/Api/services";
 import { GetServerSidePropsContext } from "next";
@@ -359,8 +360,49 @@ const Shop = forwardRef(({ companyData, productsData, shopname }: any, ref: any)
   const rawPhone = (companyData?.contact_phone || "").replace(/\D/g, "");
   const formattedPhone = rawPhone.startsWith("0") ? `254${rawPhone.slice(1)}` : rawPhone;
 
+  const shopTitle = companyData?.name
+    ? `${companyData.name} — Storefront`
+    : `${shopname} — Storefront`;
+
+  const shopDescription =
+    companyData?.description ||
+    `Explore products and shop online from ${companyData?.name || shopname} on SokoJunction with instant Kenya-wide delivery.`;
+
+  const shopLogoUrl = getCloudinaryLogo(companyData?.logo_image);
+  const shopBannerUrl = companyData?.banner_image
+    ? (companyData.banner_image.startsWith("http")
+        ? companyData.banner_image
+        : `https://res.cloudinary.com/dqokryv6u/${companyData.banner_image}`)
+    : shopLogoUrl;
+
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
+      <Head>
+        <title>{shopTitle}</title>
+        <meta name="description" content={shopDescription} />
+
+        {/* Dynamic Store Favicon */}
+        <link rel="icon" href={shopLogoUrl} />
+        <link rel="shortcut icon" href={shopLogoUrl} />
+        <link rel="apple-touch-icon" href={shopLogoUrl} />
+
+        {/* OpenGraph / WhatsApp / Telegram Preview */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={companyData?.name || "SokoJunction"} />
+        <meta property="og:title" content={shopTitle} />
+        <meta property="og:description" content={shopDescription} />
+        <meta property="og:image" content={shopBannerUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:url" content={`https://sokojunction.com/shop/${shopname}`} />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={shopTitle} />
+        <meta name="twitter:description" content={shopDescription} />
+        <meta name="twitter:image" content={shopBannerUrl} />
+      </Head>
+
       {/* --- CUP COUTURE INSPIRED STOREFRONT HERO --- */}
       <Box
         sx={{
