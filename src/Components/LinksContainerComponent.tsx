@@ -40,6 +40,7 @@ import Cookies from "js-cookie";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import { CartMenu } from "./CartMin";
+import { useIsCustomDomain } from "@/utils/domain";
 
 const AuthDialog = dynamic(() => import("./AuthDialog"), { ssr: false });
 
@@ -226,6 +227,8 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
     };
   }, [router.events, router.query, router.asPath]);
 
+  const isCustomDomain = useIsCustomDomain();
+
   const isNavActive = (path: string) => {
     if (path === "/" && router.pathname === "/") return true;
     if (path !== "/" && router.asPath.startsWith(path)) return true;
@@ -235,7 +238,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const navLinks = [
     { label: "Home", path: "/" },
     { label: "Storefront", path: `/shop/${shopname}` },
-    { label: "Explore Shops", path: "/shops" },
+    ...(!isCustomDomain ? [{ label: "Explore Shops", path: "/shops" }] : []),
     { label: "About", path: "/about" },
   ];
 
@@ -782,24 +785,26 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
               </ListItemButton>
             </ListItem>
 
-            <ListItem disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton
-                onClick={() => {
-                  router.push("/shops");
-                  setIsMobileDrawerOpen(false);
-                }}
-                sx={{
-                  borderRadius: "12px",
-                  backgroundColor: router.pathname === "/shops" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
-                  color: router.pathname === "/shops" ? theme.palette.primary.main : "#18181b",
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
-                  <StoreOutlinedIcon />
-                </ListItemIcon>
-                <ListItemText primary="Explore All Shops" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
-              </ListItemButton>
-            </ListItem>
+            {!isCustomDomain && (
+              <ListItem disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  onClick={() => {
+                    router.push("/shops");
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  sx={{
+                    borderRadius: "12px",
+                    backgroundColor: router.pathname === "/shops" ? alpha(theme.palette.primary.main, 0.08) : "transparent",
+                    color: router.pathname === "/shops" ? theme.palette.primary.main : "#18181b",
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                    <StoreOutlinedIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Explore All Shops" primaryTypographyProps={{ fontSize: "0.9rem", fontWeight: 600 }} />
+                </ListItemButton>
+              </ListItem>
+            )}
 
             <ListItem disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton

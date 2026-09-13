@@ -36,6 +36,7 @@ import {
   useAddToCartGuestMutation,
 } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
+import { useIsCustomDomain } from "@/utils/domain";
 
 // ForwardRef Grid wrapper honoring MUI v5 size prop
 const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
@@ -80,6 +81,7 @@ function Cart() {
   const { data: cart_data, isLoading: cart_loading, refetch: cart_refetch, sessionId } = useCart();
   const router = useRouter();
   const theme = useTheme();
+  const isCustomDomain = useIsCustomDomain();
 
   const [updateItemQty] = useAddProductQtyToCartMutation();
   const [deleteItemQty] = useRemoveProductFromCartMutation();
@@ -309,7 +311,7 @@ function Cart() {
             </Typography>
             <Button
               variant="contained"
-              onClick={() => router.push("/shops")}
+              onClick={() => router.push(isCustomDomain ? (activeShop ? `/shop/${activeShop}` : "/") : "/shops")}
               sx={{
                 borderRadius: "30px",
                 px: 4,
@@ -322,7 +324,7 @@ function Cart() {
                 boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.35)}`,
               }}
             >
-              Explore Storefronts
+              {isCustomDomain ? "Continue Shopping" : "Explore Storefronts"}
             </Button>
           </Box>
         ) : (
