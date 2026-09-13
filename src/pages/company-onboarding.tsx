@@ -314,17 +314,24 @@ export default function CompanyOnboarding() {
               {/* Overall Progress Header */}
               {activeStep < 7 && (
                 <Box sx={{ mb: 4 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                    <Chip
-                      label={`Step ${activeStep + 1} of ${steps.length}: ${steps[activeStep]}`}
-                      size="small"
-                      sx={{
-                        bgcolor: alpha(theme.palette.primary.main, 0.08),
-                        color: theme.palette.primary.main,
-                        fontWeight: 700,
-                        fontSize: "12px",
-                      }}
-                    />
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, flexWrap: "wrap", gap: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Chip
+                        label={`Step ${activeStep + 1} of ${steps.length}: ${steps[activeStep]}`}
+                        size="small"
+                        sx={{
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          color: theme.palette.primary.main,
+                          fontWeight: 700,
+                          fontSize: "12px",
+                        }}
+                      />
+                      {activeStep > 0 && user && (
+                        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                          Account: <strong>{typeof user === "string" ? user : user?.username || Cookies.get("username")}</strong>
+                        </Typography>
+                      )}
+                    </Box>
                     <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary" }}>
                       {progressPercent}% Completed
                     </Typography>
@@ -618,71 +625,26 @@ export default function CompanyOnboarding() {
                 </Box>
               )}
 
-              {/* Step 1: Basic Info */}
-              {activeStep === 1 && (
-                <BasicInfo
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  steps={steps}
-                  activeStep={activeStep}
-                  companyData={companyData}
-                  setCompanyData={setCompanyData}
-                  token={authToken}
-                  companyExists={companyExists}
-                  refetchCompany={refetch_company_details}
-                  triggerRerender={triggerRerender}
-                />
-              )}
+              <Box key={refresh}>
+                {/* Step 1: Basic Info */}
+                {activeStep === 1 && (
+                  <BasicInfo
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    steps={steps}
+                    activeStep={activeStep}
+                    companyData={companyData}
+                    setCompanyData={setCompanyData}
+                    token={authToken}
+                    companyExists={companyExists}
+                    refetchCompany={refetch_company_details}
+                    triggerRerender={triggerRerender}
+                  />
+                )}
 
-              {/* Step 2: Personal KYC */}
-              {activeStep === 2 && (
-                <KYC
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  steps={steps}
-                  activeStep={activeStep}
-                  companyData={companyData}
-                  setCompanyData={setCompanyData}
-                  token={authToken}
-                  refetchCompany={refetch_company_details}
-                  triggerRerender={triggerRerender}
-                />
-              )}
-
-              {/* Step 3: Business KYC */}
-              {activeStep === 3 && (
-                <BusinessKYC
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  steps={steps}
-                  activeStep={activeStep}
-                  companyData={companyData}
-                  setCompanyData={setCompanyData}
-                  token={authToken}
-                  refetchCompany={refetch_company_details}
-                  triggerRerender={triggerRerender}
-                />
-              )}
-
-              {/* Step 4: Proof of Address */}
-              {activeStep === 4 && (
-                <ProofAddress
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  steps={steps}
-                  activeStep={activeStep}
-                  companyData={companyData}
-                  setCompanyData={setCompanyData}
-                  token={authToken}
-                  refetchCompany={refetch_company_details}
-                  triggerRerender={triggerRerender}
-                />
-              )}
-
-              {/* Step 5: Branding */}
-              {activeStep === 5 && (
-                <Suspense fallback={<CircularProgress />}>
-                  <Branding
+                {/* Step 2: Personal KYC */}
+                {activeStep === 2 && (
+                  <KYC
                     nextStep={nextStep}
                     prevStep={prevStep}
                     steps={steps}
@@ -693,26 +655,73 @@ export default function CompanyOnboarding() {
                     refetchCompany={refetch_company_details}
                     triggerRerender={triggerRerender}
                   />
-                </Suspense>
-              )}
+                )}
 
-              {/* Step 6: Terms & Conditions */}
-              {activeStep === 6 && (
-                <TCs
-                  nextStep={nextStep}
-                  prevStep={prevStep}
-                  steps={steps}
-                  activeStep={activeStep}
-                  companyData={companyData}
-                  setCompanyData={setCompanyData}
-                  token={authToken}
-                  refetchCompany={refetch_company_details}
-                  triggerRerender={triggerRerender}
-                />
-              )}
+                {/* Step 3: Business KYC */}
+                {activeStep === 3 && (
+                  <BusinessKYC
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    steps={steps}
+                    activeStep={activeStep}
+                    companyData={companyData}
+                    setCompanyData={setCompanyData}
+                    token={authToken}
+                    refetchCompany={refetch_company_details}
+                    triggerRerender={triggerRerender}
+                  />
+                )}
 
-              {/* Step 7: Completion & Verification Status */}
-              {activeStep === 7 && <VerificationStatus />}
+                {/* Step 4: Proof of Address */}
+                {activeStep === 4 && (
+                  <ProofAddress
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    steps={steps}
+                    activeStep={activeStep}
+                    companyData={companyData}
+                    setCompanyData={setCompanyData}
+                    token={authToken}
+                    refetchCompany={refetch_company_details}
+                    triggerRerender={triggerRerender}
+                  />
+                )}
+
+                {/* Step 5: Branding */}
+                {activeStep === 5 && (
+                  <Suspense fallback={<CircularProgress />}>
+                    <Branding
+                      nextStep={nextStep}
+                      prevStep={prevStep}
+                      steps={steps}
+                      activeStep={activeStep}
+                      companyData={companyData}
+                      setCompanyData={setCompanyData}
+                      token={authToken}
+                      refetchCompany={refetch_company_details}
+                      triggerRerender={triggerRerender}
+                    />
+                  </Suspense>
+                )}
+
+                {/* Step 6: Terms & Conditions */}
+                {activeStep === 6 && (
+                  <TCs
+                    nextStep={nextStep}
+                    prevStep={prevStep}
+                    steps={steps}
+                    activeStep={activeStep}
+                    companyData={companyData}
+                    setCompanyData={setCompanyData}
+                    token={authToken}
+                    refetchCompany={refetch_company_details}
+                    triggerRerender={triggerRerender}
+                  />
+                )}
+
+                {/* Step 7: Completion & Verification Status */}
+                {activeStep === 7 && <VerificationStatus />}
+              </Box>
             </>
           )}
         </Paper>

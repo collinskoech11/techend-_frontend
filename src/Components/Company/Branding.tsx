@@ -1,24 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import { YourChildProps } from "@/Types";
 import { useUpdateCompanyMutation } from "@/Api/services";
 import {
   Box,
   Button,
-  Grid,
   Typography,
   CircularProgress,
   useTheme,
   Card,
-  CardContent,
   Chip,
   alpha,
   TextField,
   InputAdornment,
 } from "@mui/material";
-import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
+import Grid from "@/Components/Grid";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";

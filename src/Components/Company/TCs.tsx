@@ -10,11 +10,9 @@ import {
   Checkbox,
   FormControlLabel,
   Card,
-  CardContent,
-  Grid,
   alpha,
 } from "@mui/material";
-import GavelOutlinedIcon from "@mui/icons-material/GavelOutlined";
+import Grid from "@/Components/Grid";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";

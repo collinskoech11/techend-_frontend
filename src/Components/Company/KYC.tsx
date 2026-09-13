@@ -8,11 +8,11 @@ import {
   CircularProgress,
   useTheme,
   Typography,
-  Grid,
   InputAdornment,
   Alert,
   alpha,
 } from "@mui/material";
+import Grid from "@/Components/Grid";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";

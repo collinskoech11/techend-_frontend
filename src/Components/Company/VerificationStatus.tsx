@@ -1,15 +1,14 @@
 import React from "react";
 import {
   Card,
-  CardContent,
   Typography,
   Box,
   Button,
   Chip,
-  Grid,
   alpha,
   useTheme,
 } from "@mui/material";
+import Grid from "@/Components/Grid";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import StorefrontIcon from "@mui/icons-material/Storefront";

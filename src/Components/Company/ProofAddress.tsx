@@ -8,10 +8,10 @@ import {
   CircularProgress,
   useTheme,
   Typography,
-  Grid,
   InputAdornment,
   alpha,
 } from "@mui/material";
+import Grid from "@/Components/Grid";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import MarkunreadMailboxOutlinedIcon from "@mui/icons-material/MarkunreadMailboxOutlined";
