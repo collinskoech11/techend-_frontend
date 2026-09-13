@@ -46,6 +46,18 @@ export interface Paginated<T> {
   results: T[];
 }
 
+export interface ProductImageItem {
+  id: number;
+  image_url: string;
+  alt_text?: string;
+}
+
+export interface ProductVideoItem {
+  id: number;
+  video_url: string;
+  title?: string;
+}
+
 export interface Product {
   rating: number;
   reviews_count: number;
@@ -57,12 +69,18 @@ export interface Product {
   price: number;
   image: string;
   main_image: string;
+  extra_images?: ProductImageItem[];
+  images?: string[];
+  extra_videos?: ProductVideoItem[];
+  video_url?: string;
   category: string;
   company: string;
+  company_slug?: string;
   sluggified_name: string;
   on_sale: boolean;
   discounted_price: number;
   stock: number;
+  quantity?: number;
   // Add other product properties here
 }
 
