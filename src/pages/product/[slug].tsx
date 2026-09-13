@@ -44,6 +44,8 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 
 // Services & Contexts
 import {
@@ -104,6 +106,7 @@ function ProductDetailView() {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState(0);
+  const [mediaMode, setMediaMode] = useState<"images" | "video">("images");
 
   const [addToCartAuth, { isLoading: isAddingToCartAuth }] = useAddToCartMutation();
   const [addToCartGuest, { isLoading: isAddingToCartGuest }] = useAddToCartGuestMutation();
@@ -275,9 +278,26 @@ function ProductDetailView() {
     );
   }
 
-  const rawImages: string[] = (product?.images && product.images.length > 0)
-    ? product.images
-    : (product?.main_image ? [product.main_image] : (product?.image ? [product.image] : []));
+  const rawImages: string[] = (() => {
+    const list: string[] = [];
+    if (product?.main_image) list.push(product.main_image);
+    else if (product?.image) list.push(product.image);
+
+    if (Array.isArray(product?.extra_images)) {
+      product.extra_images.forEach((img: any) => {
+        const u = img.image_url || img.image || img;
+        if (u && !list.includes(u)) list.push(u);
+      });
+    }
+
+    if (Array.isArray(product?.images)) {
+      product.images.forEach((u: string) => {
+        if (u && !list.includes(u)) list.push(u);
+      });
+    }
+
+    return list;
+  })();
 
   const fallbackImage =
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600' fill='%23f4f4f5'><rect width='100%' height='100%' fill='%23f4f4f5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='22' font-weight='600' fill='%23a1a1aa'>No Image Available</text></svg>";
@@ -287,6 +307,18 @@ function ProductDetailView() {
     if (imgStr.startsWith("http://") || imgStr.startsWith("https://") || imgStr.startsWith("data:")) return imgStr;
     return `https://res.cloudinary.com/dqokryv6u/${imgStr}`;
   };
+
+  const formatVideoUrl = (v: any) => {
+    if (!v) return null;
+    if (typeof v === "object" && v.url) return v.url;
+    const str = String(v).trim();
+    if (!str || str === "None" || str === "null" || str === "undefined") return null;
+    if (str.startsWith("http://") || str.startsWith("https://")) return str;
+    const clean = str.replace(/^\/+/, "");
+    return `https://res.cloudinary.com/dqokryv6u/video/upload/${clean}`;
+  };
+
+  const productVideoUrl = formatVideoUrl(product?.video_url || product?.video);
 
   const imagesToDisplay = rawImages.length > 0 ? rawImages.map(formatImageUrl) : [fallbackImage];
 
@@ -399,7 +431,33 @@ function ProductDetailView() {
                   )}
                 </Box>
 
-                {/* Main Image Slider */}
+                {/* Media Mode Selector (if video exists) */}
+                {productVideoUrl && (
+                  <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mb: 1.5 }}>
+                    <Chip
+                      clickable
+                      onClick={() => setMediaMode("images")}
+                      icon={<ShoppingBagOutlinedIcon fontSize="small" />}
+                      label={`Photos (${imagesToDisplay.length})`}
+                      size="small"
+                      variant={mediaMode === "images" ? "filled" : "outlined"}
+                      color={mediaMode === "images" ? "primary" : "default"}
+                      sx={{ fontWeight: 700, borderRadius: "8px" }}
+                    />
+                    <Chip
+                      clickable
+                      onClick={() => setMediaMode("video")}
+                      icon={<VideocamOutlinedIcon fontSize="small" />}
+                      label="Video Showcase"
+                      size="small"
+                      variant={mediaMode === "video" ? "filled" : "outlined"}
+                      color={mediaMode === "video" ? "primary" : "default"}
+                      sx={{ fontWeight: 700, borderRadius: "8px" }}
+                    />
+                  </Box>
+                )}
+
+                {/* Main Media Showcase (Images Slider or Video Player) */}
                 {isLoading ? (
                   <Skeleton
                     variant="rectangular"
@@ -409,6 +467,31 @@ function ProductDetailView() {
                       borderRadius: "18px",
                     }}
                   />
+                ) : mediaMode === "video" && productVideoUrl ? (
+                  <Box
+                    sx={{
+                      borderRadius: "18px",
+                      overflow: "hidden",
+                      backgroundColor: "#000",
+                      position: "relative",
+                      width: "100%",
+                      height: { xs: 340, sm: 460, md: 520 },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <video
+                      src={productVideoUrl}
+                      controls
+                      autoPlay
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </Box>
                 ) : (
                   <Box
                     sx={{
@@ -466,45 +549,84 @@ function ProductDetailView() {
                 )}
 
                 {/* Thumbnails Row */}
-                {imagesToDisplay.length > 1 && (
-                  <Box sx={{ mt: 2, px: 0.5 }}>
-                    <Swiper
-                      onSwiper={setThumbsSwiper}
-                      spaceBetween={10}
-                      slidesPerView={Math.min(imagesToDisplay.length, 5)}
-                      freeMode={true}
-                      watchSlidesProgress
-                      modules={[FreeMode, Navigation, Thumbs]}
-                    >
-                      {imagesToDisplay.map((imgUrl, index) => (
-                        <SwiperSlide key={index} style={{ cursor: "pointer" }}>
-                          <Box
-                            sx={{
-                              position: "relative",
-                              width: "100%",
-                              height: 72,
-                              borderRadius: "12px",
-                              overflow: "hidden",
-                              border: "2px solid rgba(0,0,0,0.08)",
-                              backgroundColor: "#f4f4f5",
-                              transition: "all 0.2s ease",
-                              "&:hover": {
-                                borderColor: theme.palette.primary.main,
-                                transform: "translateY(-1px)",
-                              },
-                            }}
-                          >
-                            <Image
-                              src={imgUrl}
-                              alt={`Thumbnail ${index + 1}`}
-                              fill
-                              sizes="80px"
-                              style={{ objectFit: "contain", padding: "4px" }}
-                            />
-                          </Box>
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
+                {(imagesToDisplay.length > 1 || productVideoUrl) && (
+                  <Box sx={{ mt: 2, px: 0.5, display: "flex", gap: 1.5, alignItems: "center" }}>
+                    {imagesToDisplay.length > 1 && (
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Swiper
+                          onSwiper={setThumbsSwiper}
+                          spaceBetween={10}
+                          slidesPerView={Math.min(imagesToDisplay.length, 5)}
+                          freeMode={true}
+                          watchSlidesProgress
+                          modules={[FreeMode, Navigation, Thumbs]}
+                        >
+                          {imagesToDisplay.map((imgUrl, index) => (
+                            <SwiperSlide
+                              key={index}
+                              style={{ cursor: "pointer" }}
+                              onClick={() => setMediaMode("images")}
+                            >
+                              <Box
+                                sx={{
+                                  position: "relative",
+                                  width: "100%",
+                                  height: 72,
+                                  borderRadius: "12px",
+                                  overflow: "hidden",
+                                  border: mediaMode === "images" ? "2px solid rgba(0,0,0,0.08)" : "2px solid rgba(0,0,0,0.04)",
+                                  backgroundColor: "#f4f4f5",
+                                  transition: "all 0.2s ease",
+                                  "&:hover": {
+                                    borderColor: theme.palette.primary.main,
+                                    transform: "translateY(-1px)",
+                                  },
+                                }}
+                              >
+                                <Image
+                                  src={imgUrl}
+                                  alt={`Thumbnail ${index + 1}`}
+                                  fill
+                                  sizes="80px"
+                                  style={{ objectFit: "contain", padding: "4px" }}
+                                />
+                              </Box>
+                            </SwiperSlide>
+                          ))}
+                        </Swiper>
+                      </Box>
+                    )}
+
+                    {productVideoUrl && (
+                      <Box
+                        onClick={() => setMediaMode("video")}
+                        sx={{
+                          width: 72,
+                          height: 72,
+                          minWidth: 72,
+                          borderRadius: "12px",
+                          overflow: "hidden",
+                          border: mediaMode === "video" ? `2px solid ${theme.palette.primary.main}` : "2px solid rgba(0,0,0,0.12)",
+                          backgroundColor: "#18181b",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          color: "#fff",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: theme.palette.primary.main,
+                            transform: "translateY(-1px)",
+                          },
+                        }}
+                      >
+                        <PlayCircleOutlineIcon sx={{ fontSize: "1.5rem", color: "#fff" }} />
+                        <Typography sx={{ fontSize: "0.68rem", fontWeight: 700, color: "#fff", mt: 0.3 }}>
+                          Video
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
                 )}
               </Box>
@@ -589,6 +711,27 @@ function ProductDetailView() {
                       <Typography sx={{ fontSize: "0.82rem", color: "#71717a" }}>
                         ({product?.reviews_count || 12} reviews)
                       </Typography>
+                      {productVideoUrl && (
+                        <Chip
+                          icon={<VideocamOutlinedIcon sx={{ color: `${theme.palette.primary.main} !important`, fontSize: "1rem" }} />}
+                          label="Watch Video"
+                          clickable
+                          onClick={() => {
+                            setMediaMode("video");
+                            window.scrollTo({ top: 120, behavior: "smooth" });
+                          }}
+                          size="small"
+                          sx={{
+                            cursor: "pointer",
+                            fontWeight: 700,
+                            fontSize: "0.75rem",
+                            borderRadius: "8px",
+                            color: theme.palette.primary.main,
+                            backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                            "&:hover": { backgroundColor: alpha(theme.palette.primary.main, 0.16) },
+                          }}
+                        />
+                      )}
                     </Box>
 
                     {/* Live Stock Badge */}
