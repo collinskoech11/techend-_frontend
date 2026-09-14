@@ -40,7 +40,7 @@ import Cookies from "js-cookie";
 import { useGetCompanyBySlugQuery } from "@/Api/services";
 import { useCart } from "@/contexts/CartContext";
 import { CartMenu } from "./CartMin";
-import { useIsCustomDomain } from "@/utils/domain";
+import { useIsCustomDomain, getCustomDomainShop } from "@/utils/domain";
 
 const AuthDialog = dynamic(() => import("./AuthDialog"), { ssr: false });
 
@@ -59,9 +59,10 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const router = useRouter();
   const theme = useTheme();
   const [mounted, setMounted] = useState(false);
+  const isCustomDomain = useIsCustomDomain();
   const cookieShop = Cookies.get("shopname");
 
-  // Determine active shop from URL query, asPath, or cookies
+  // Determine active shop from URL query, custom domain, asPath, or cookies
   const urlShop =
     typeof router.query.shop === "string"
       ? router.query.shop
@@ -69,8 +70,9 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
       ? router.asPath.split("/shop/")[1]?.split("?")[0]
       : null;
 
-  const currentShopSlug = urlShop || cookieShop || "Sokojunction";
-  const isDefaultBrandPage = DEFAULT_BRAND_URLS.includes(router.pathname);
+  const customDomainShop = typeof window !== "undefined" ? getCustomDomainShop(window.location.hostname) : null;
+  const currentShopSlug = urlShop || customDomainShop || cookieShop || "Sokojunction";
+  const isDefaultBrandPage = !isCustomDomain && DEFAULT_BRAND_URLS.includes(router.pathname);
   const rawShopName = isDefaultBrandPage ? "SokoJunction" : currentShopSlug;
   const displayShopName = /^\d+$/.test(rawShopName) ? "SokoJunction" : rawShopName;
 
@@ -138,7 +140,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   }, [router.pathname, router.query.shop, router.asPath, companyData]);
 
   const getLogoUrl = (path?: string) => {
-    if (!path) return "/logo_min.jpeg";
+    if (!path) return "/logo_square.png";
     let url = path;
     if (!path.startsWith("http://") && !path.startsWith("https://")) {
       url = `https://res.cloudinary.com/dqokryv6u/${path}`;
@@ -152,7 +154,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
   const activeLogoImage = companyData?.logo_image || cachedLogo;
   const navbarLogoUrl = (!isDefaultBrandPage && activeLogoImage)
     ? getLogoUrl(activeLogoImage)
-    : "/logo_min.jpeg";
+    : "/logo_square.png";
 
   const { sessionId } = useCart();
   const cartRef = useRef<any>(null);
@@ -227,7 +229,15 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
     };
   }, [router.events, router.query, router.asPath]);
 
-  const isCustomDomain = useIsCustomDomain();
+  const handleBrandClick = () => {
+    if (isCustomDomain) {
+      router.push("/");
+    } else if (!isDefaultBrandPage && displayShopName && displayShopName.toLowerCase() !== "sokojunction") {
+      router.push(`/shop/${displayShopName}`);
+    } else {
+      router.push("/");
+    }
+  };
 
   const isNavActive = (path: string) => {
     if (path === "/" && router.pathname === "/") return true;
@@ -271,7 +281,7 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
           >
             {/* --- LEFT: BRAND LOGO --- */}
             <Box
-              onClick={() => router.push("/")}
+              onClick={handleBrandClick}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -631,7 +641,13 @@ const LinksContainerComponent = forwardRef((_props, ref) => {
         <Box>
           {/* Drawer Header */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              onClick={() => {
+                setIsMobileDrawerOpen(false);
+                handleBrandClick();
+              }}
+              sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer", userSelect: "none" }}
+            >
               {mounted && isCompanyLoading && !isDefaultBrandPage && !cachedLogo ? (
                 <Skeleton variant="rectangular" width={50} height={30} sx={{ borderRadius: "6px" }} />
               ) : (

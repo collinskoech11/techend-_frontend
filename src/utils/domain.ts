@@ -64,3 +64,22 @@ export const useIsCustomDomain = (): boolean => {
 
   return isCustom;
 };
+
+/**
+ * Returns the corresponding shop slug for a custom merchant domain, or null.
+ */
+export const getCustomDomainShop = (hostname?: string): string | null => {
+  if (typeof window === "undefined" && !hostname) return null;
+  const host = (
+    hostname ||
+    (typeof window !== "undefined" ? window.location.hostname : "")
+  )
+    .toLowerCase()
+    .trim();
+
+  if (!host) return null;
+  if (host.includes("cupcoutureshop.com")) return "the-cup-couture";
+  if (host.includes("boromoto.com")) return "boromoto";
+  return null;
+};
+

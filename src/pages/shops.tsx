@@ -69,13 +69,32 @@ const CompanyCardItem: React.FC<{ company: Company }> = ({ company }) => {
   const theme = useTheme();
   const router = useRouter();
   const CLOUDINARY_BASE_URL = "https://res.cloudinary.com/dqokryv6u/";
-  const FALLBACK_IMAGE_URL = "/assets/techendbanner.png";
+  const FALLBACK_BANNER = "https://res.cloudinary.com/dqokryv6u/image/upload/v1771967817/100bg_aptttu.jpg";
 
-  const initialLogoUrl = company.logo_image
-    ? `${CLOUDINARY_BASE_URL}${company.logo_image}`
-    : FALLBACK_IMAGE_URL;
+  const formatMediaUrl = (path?: string, isBanner = false) => {
+    if (!path) return isBanner ? FALLBACK_BANNER : "/logo_square.png";
+    let url = path;
+    if (!path.startsWith("http://") && !path.startsWith("https://")) {
+      url = `${CLOUDINARY_BASE_URL}${path}`;
+    }
+    if (url.includes("cloudinary.com")) {
+      return isBanner
+        ? url.replace("/upload/", "/upload/f_auto,q_auto,w_800,h_360,c_fill/")
+        : url.replace("/upload/", "/upload/f_auto,q_auto,w_180,h_180,c_fill/");
+    }
+    return url;
+  };
 
-  const [imgSrc, setImgSrc] = useState(initialLogoUrl);
+  const bannerUrl = (company as any).banner_image
+    ? formatMediaUrl((company as any).banner_image, true)
+    : FALLBACK_BANNER;
+
+  const logoUrl = company.logo_image
+    ? formatMediaUrl(company.logo_image, false)
+    : "/logo_square.png";
+
+  const [bannerSrc, setBannerSrc] = useState(bannerUrl);
+  const [logoSrc, setLogoSrc] = useState(logoUrl);
 
   const handleVisitShop = () => {
     const slug = company.sluggified_name || company.name?.toLowerCase().replace(/\s+/g, "-");
@@ -86,13 +105,21 @@ const CompanyCardItem: React.FC<{ company: Company }> = ({ company }) => {
     <ShopCard onClick={handleVisitShop}>
       <CardBanner>
         <Image
-          className="shop-logo"
-          src={imgSrc}
-          alt={`${company.name} logo`}
-          onError={() => setImgSrc(FALLBACK_IMAGE_URL)}
+          className="shop-banner"
+          src={bannerSrc}
+          alt={`${company.name} storefront banner`}
+          onError={() => setBannerSrc(FALLBACK_BANNER)}
           fill
           sizes="(max-width: 768px) 100vw, 320px"
           style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)",
+            zIndex: 1,
+          }}
         />
 
         {company.kyc_approved && (
@@ -108,7 +135,7 @@ const CompanyCardItem: React.FC<{ company: Company }> = ({ company }) => {
               px: 1.2,
               py: 0.4,
               borderRadius: "20px",
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: "rgba(255, 255, 255, 0.92)",
               backdropFilter: "blur(8px)",
               color: "#10b981",
               boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
@@ -122,7 +149,44 @@ const CompanyCardItem: React.FC<{ company: Company }> = ({ company }) => {
         )}
       </CardBanner>
 
-      <Box sx={{ p: 3, flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      {/* Overlapping Brand Logo Badge */}
+      <Box sx={{ position: "relative", px: 3, pt: 0 }}>
+        <Box
+          sx={{
+            width: 68,
+            height: 68,
+            borderRadius: "50%",
+            backgroundColor: "#ffffff",
+            border: "3px solid #ffffff",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.14)",
+            position: "relative",
+            mt: "-34px",
+            mb: 1,
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            zIndex: 3,
+            transition: "transform 0.3s ease",
+            "&:hover": {
+              transform: "scale(1.06)",
+            },
+          }}
+        >
+          <Image
+            className="shop-logo"
+            src={logoSrc}
+            alt={`${company.name} logo`}
+            onError={() => setLogoSrc("/logo_square.png")}
+            fill
+            sizes="68px"
+            style={{ objectFit: "cover" }}
+          />
+        </Box>
+      </Box>
+
+      <Box sx={{ px: 3, pb: 3, flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <Box>
           <Typography
             variant="h5"
