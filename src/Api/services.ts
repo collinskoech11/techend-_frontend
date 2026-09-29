@@ -1,13 +1,46 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import dotenv from "dotenv";
 import Cookies from "js-cookie";
 import { Paginated, Product, Company, CheckoutResponse, CheckoutFormData, PickupLocation, DeliveryLocation, Cart, GuestOrderResponse, GuestPlaceOrderArgs, LipaNaMpesaResponse, UserSubscription, InitiateMpesaStkPushSubscriptionResponse } from "@/Types";
+import { getResolvedBackendUrl, probeAndResolveBackendUrl } from "@/utils/backendConfig";
+
 
 dotenv.config();
-const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URI || "https://app.sokojunction.com/";
+
+export const getBaseUrl = () => getResolvedBackendUrl();
+
+// Pre-warm dynamic backend detection in development
+if (typeof window !== "undefined") {
+  probeAndResolveBackendUrl().catch(() => {});
+}
+
+const dynamicBaseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const currentBaseUrl = getBaseUrl();
+  const rawBaseQuery = fetchBaseQuery({ baseUrl: currentBaseUrl });
+  let result = await rawBaseQuery(args, api, extraOptions);
+
+  // Auto-probe candidate ports if connection refused on local dev
+  if (result.error && (result.error.status === "FETCH_ERROR" || result.error.status === 0)) {
+    if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+      const discoveredUrl = await probeAndResolveBackendUrl();
+      if (discoveredUrl && discoveredUrl !== currentBaseUrl) {
+        const retryBaseQuery = fetchBaseQuery({ baseUrl: discoveredUrl });
+        result = await retryBaseQuery(args, api, extraOptions);
+      }
+    }
+  }
+
+  return result;
+};
+
 export const AuthApi = createApi({
   reducerPath: "AuthApi",
-  baseQuery: fetchBaseQuery({ baseUrl }),
+  baseQuery: dynamicBaseQuery,
+
   endpoints: (builder) => ({
     getUser: builder.query({
       query: (token) => ({
@@ -387,7 +420,7 @@ export const getProducts = async (args: { company?: string; category?: string; p
     params.append('on_sale', 'true');
   }
   const queryString = params.toString();
-  const response = await fetch(`${baseUrl}products/all/${queryString ? `?${queryString}` : ''}`);
+  const response = await fetch(`${getBaseUrl()}products/all/${queryString ? `?${queryString}` : ''}`);
   if (!response.ok) {
     throw new Error('Failed to fetch products');
   }
@@ -395,7 +428,7 @@ export const getProducts = async (args: { company?: string; category?: string; p
 };
 
 export const getCompanyBySlug = async (slug: string) => {
-  const response = await fetch(`${baseUrl}companies/slug/${slug}/`);
+  const response = await fetch(`${getBaseUrl()}companies/slug/${slug}/`);
   if (!response.ok) {
     throw new Error('Failed to fetch company by slug');
   }
@@ -411,7 +444,7 @@ export const getCompanies = async (args: { page?: number; page_size?: number } =
     params.append('page_size', args.page_size.toString());
   }
   const queryString = params.toString();
-  const response = await fetch(`${baseUrl}companies/all/${queryString ? `?${queryString}` : ''}`);
+  const response = await fetch(`${getBaseUrl()}companies/all/${queryString ? `?${queryString}` : ''}`);
   if (!response.ok) {
     throw new Error('Failed to fetch companies');
   }
