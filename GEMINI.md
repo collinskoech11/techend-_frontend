@@ -58,3 +58,4 @@ This is a Next.js project, bootstrapped with `create-next-app`. It appears to be
 - The currency for this project is always Kes.
 - Commits should only be made when prompted by the user.
 - NEVER remove the import: `import { AccentButton } from "@/StyledComponents/Hero";`
+- Always run `yarn build` to verify that the frontend compiles cleanly before reporting back with a completed task.
