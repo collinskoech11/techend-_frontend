@@ -1,7 +1,40 @@
-import fs from "fs";
-import path from "path";
-
 let cachedBackendUrl: string | null = null;
+
+/**
+ * Safely check discovery files when running on Node.js server
+ * without triggering Webpack client bundle errors for 'fs' or 'path'.
+ */
+const readDiscoveryFileOnServer = (): string | null => {
+  if (typeof window !== "undefined") return null;
+  try {
+    // Use eval require to prevent Webpack static analysis from attempting to bundle 'fs'
+    const req = eval("require");
+    const fs = req("fs");
+    const path = req("path");
+    const candidatePaths = [
+      path.resolve(process.cwd(), "../.backend_url"),
+      path.resolve(process.cwd(), ".backend_url"),
+      path.resolve(process.cwd(), "../.backend_port"),
+      path.resolve(process.cwd(), ".backend_port"),
+    ];
+
+    for (const p of candidatePaths) {
+      if (fs.existsSync(p)) {
+        const content = fs.readFileSync(p, "utf-8").trim();
+        if (content) {
+          if (content.startsWith("http")) {
+            return content.endsWith("/") ? content : `${content}/`;
+          } else if (!isNaN(Number(content))) {
+            return `http://127.0.0.1:${content}/`;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore runtime or bundling errors
+  }
+  return null;
+};
 
 /**
  * Synchronously get the best-known backend URL.
@@ -38,7 +71,7 @@ export const getResolvedBackendUrl = (): string => {
     return "https://app.sokojunction.com/";
   }
 
-  // 2. Server-side (Node.js runtime)
+  // 2. Server-side (Node.js runtime in Next.js)
   // If explicitly provided via env (e.g. from start.sh) and not default 8000
   if (process.env.NEXT_PUBLIC_BACKEND_URI && !process.env.NEXT_PUBLIC_BACKEND_URI.includes(":8000")) {
     const uri = process.env.NEXT_PUBLIC_BACKEND_URI.endsWith("/")
@@ -49,32 +82,10 @@ export const getResolvedBackendUrl = (): string => {
   }
 
   // Check discovery files written by the backend or start.sh
-  try {
-    const candidatePaths = [
-      path.resolve(process.cwd(), "../.backend_url"),
-      path.resolve(process.cwd(), ".backend_url"),
-      path.resolve(process.cwd(), "../.backend_port"),
-      path.resolve(process.cwd(), ".backend_port"),
-    ];
-
-    for (const p of candidatePaths) {
-      if (fs.existsSync(p)) {
-        const content = fs.readFileSync(p, "utf-8").trim();
-        if (content) {
-          if (content.startsWith("http")) {
-            const url = content.endsWith("/") ? content : `${content}/`;
-            cachedBackendUrl = url;
-            return url;
-          } else if (!isNaN(Number(content))) {
-            const url = `http://127.0.0.1:${content}/`;
-            cachedBackendUrl = url;
-            return url;
-          }
-        }
-      }
-    }
-  } catch (e) {
-    // Ignore file system errors
+  const fileUrl = readDiscoveryFileOnServer();
+  if (fileUrl) {
+    cachedBackendUrl = fileUrl;
+    return fileUrl;
   }
 
   const defaultUrl = process.env.NEXT_PUBLIC_BACKEND_URI || (
