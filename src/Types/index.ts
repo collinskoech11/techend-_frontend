@@ -173,6 +173,7 @@ export type CheckoutFormData = {
   payment_method: string;
   pickup_location?: number | null;
   delivery_location?: number | null;
+  send_email_updates?: boolean;
 };
 
 export interface GuestOrderResponse {
