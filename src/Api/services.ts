@@ -191,6 +191,7 @@ export const AuthApi = createApi({
           payment_method: data.body.payment_method,
           pickup_location: data.body.pickup_location,
           delivery_location: data.body.delivery_location,
+          send_email_updates: data.body.send_email_updates,
         }
       }),
     }),
@@ -232,22 +233,22 @@ export const AuthApi = createApi({
         body: { rating },
       }),
     }),
-    getPickupLocations: builder.query<PickupLocation[], { company_slug: string, token: string }>({ // New endpoint
+    getPickupLocations: builder.query<PickupLocation[], { company_slug: string; token?: string }>({
       query: ({ company_slug, token }) => ({
         url: `companies/${company_slug}/pickup-locations/`,
         method: "GET",
-        headers: {
+        headers: token ? {
           Authorization: `Bearer ${token}`,
-        },
+        } : undefined,
       }),
     }),
-    getDeliveryLocations: builder.query<DeliveryLocation[], { company_slug: string, token: string }>({ // New endpoint
+    getDeliveryLocations: builder.query<DeliveryLocation[], { company_slug: string; token?: string }>({
       query: ({ company_slug, token }) => ({
         url: `companies/${company_slug}/delivery-locations/`,
         method: "GET",
-        headers: {
+        headers: token ? {
           Authorization: `Bearer ${token}`,
-        },
+        } : undefined,
       }),
     }),
     getPlatformStats: builder.query<{ total_merchants: number; total_volume: number; uptime: string }, void>({

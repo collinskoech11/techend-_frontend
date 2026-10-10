@@ -9,6 +9,8 @@ import {
   usePlaceOrderGuestMutation,
   useLipaNaMpesaMutation,
   useGetOrderByIdQuery,
+  useGetPickupLocationsQuery,
+  useGetDeliveryLocationsQuery,
 } from "@/Api/services";
 import { GuestOrderResponse } from "@/Types";
 import Cookies from "js-cookie";
@@ -43,6 +45,9 @@ import {
   styled,
   Chip,
   Divider,
+  Autocomplete,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -53,6 +58,8 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import MapIcon from '@mui/icons-material/Map';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 
 // ForwardRef Grid wrapper honoring MUI v5 size prop
 const Grid = React.forwardRef<HTMLDivElement, any>(function Grid(props, ref) {
@@ -230,7 +237,7 @@ const OrderSuccessScreen = ({
   guestPassword, 
   cartData, 
   formData, 
-  shopname,
+  shopname, 
   paymentStatus
 }: { 
   orderId: string; 
@@ -243,12 +250,23 @@ const OrderSuccessScreen = ({
 }) => {
   const router = useRouter();
 
-  const orderTotal = useMemo(() => {
+  const itemsSubtotal = useMemo(() => {
     if (!cartData) return 0;
+    let subtotal = 0;
+    if (cartData.items && Array.isArray(cartData.items)) {
+      cartData.items.forEach((item: any) => {
+        const price = item.product.on_sale ? parseFloat(item.product.discounted_price) : parseFloat(item.product.price);
+        subtotal += price * parseInt(item.quantity);
+      });
+      return subtotal;
+    }
     if (typeof cartData.total === "number") return cartData.total;
     const parsed = parseFloat(cartData.total);
     return isNaN(parsed) ? 0 : parsed;
   }, [cartData]);
+
+  const deliveryFee = formData?.deliveryFee || 0;
+  const orderTotal = itemsSubtotal + deliveryFee;
 
   const isPaid = useMemo(() => {
     return paymentStatus === "Paid" || formData?.payment_method !== "mpesa";
@@ -266,6 +284,11 @@ const OrderSuccessScreen = ({
       minute: "2-digit"
     });
     
+    const fulfillmentMethodText = formData?.fulfillmentType === "pickup" ? "STORE PICKUP" : "DOORSTEP DELIVERY";
+    const fulfillmentDetailText = formData?.fulfillmentType === "pickup"
+      ? `Pickup Store    : ${formData?.pickupLocationName || "Shop Location"}`
+      : `Delivery Area   : ${formData?.deliveryLocationName || "Standard Delivery"}`;
+
     const receiptText = `
 ==================================================
                  SOKOJUNCTION RECEIPT             
@@ -279,9 +302,10 @@ Payment Status  : ${isPaid ? "PAID" : "PENDING"}
 CUSTOMER DETAILS:
 Name            : ${formData?.firstName} ${formData?.lastName}
 Phone           : ${formData?.phoneNumber}
-Address         : ${formData?.address}, ${formData?.city}
-${formData?.pinnedLocation ? `Coordinates     : ${formData.pinnedLocation}` : ""}
---------------------------------------------------
+Fulfillment     : ${fulfillmentMethodText}
+${fulfillmentDetailText}
+Address         : ${formData?.address || "N/A"}, ${formData?.city || ""}
+${formData?.pinnedLocation ? `Coordinates     : ${formData.pinnedLocation}\n` : ""}--------------------------------------------------
 ITEMS PURCHASED:
 ${cartData?.items?.map((item: any) => {
   const price = item.product.on_sale ? parseFloat(item.product.discounted_price) : parseFloat(item.product.price);
@@ -291,6 +315,8 @@ ${cartData?.items?.map((item: any) => {
   return `${nameLine.padEnd(30)} ${qtyLine} ${priceLine}`;
 }).join("\n")}
 --------------------------------------------------
+Items Subtotal  : Kes ${itemsSubtotal.toLocaleString()}
+Delivery Fee    : ${deliveryFee > 0 ? `Kes ${deliveryFee.toLocaleString()}` : "FREE"}
 Order Total     : Kes ${orderTotal.toLocaleString()}
 Amount Paid     : Kes ${amountPaid.toLocaleString()}
 Remaining Bal.  : Kes ${balance.toLocaleString()}
@@ -330,7 +356,7 @@ Remaining Bal.  : Kes ${balance.toLocaleString()}
         <Typography variant="h3" align="center" sx={{ fontWeight: 900, color: "#18181b", fontSize: { xs: "1.8rem", md: "2.4rem" }, mb: 1 }}>
           Order Placed Successfully!
         </Typography>
-        <Typography variant="body1" align="center" sx={{ color: "#71717a", maxW: 500, mx: "auto", mb: 4 }}>
+        <Typography variant="body1" align="center" sx={{ color: "#71717a", maxWidth: 500, mx: "auto", mb: 4 }}>
           Thank you for your purchase. Your order has been received and is being processed.
         </Typography>
 
@@ -356,11 +382,19 @@ Remaining Bal.  : Kes ${balance.toLocaleString()}
           </Paper>
         )}
 
-        {/* Order Details Accordion/Summary */}
+        {/* Order Details Summary */}
         <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: "16px", borderColor: "rgba(0,0,0,0.06)", backgroundColor: "#fafafa" }}>
           <Stack spacing={2.5} divider={<Divider />}>
             {/* Financial Details */}
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2, textAlign: "center", py: 1 }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr 1fr" }, gap: 2, textAlign: "center", py: 1 }}>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Subtotal</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700 }}>Kes {itemsSubtotal.toLocaleString()}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Delivery Fee</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700 }}>{deliveryFee > 0 ? `Kes ${deliveryFee.toLocaleString()}` : "FREE"}</Typography>
+              </Box>
               <Box>
                 <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order Total</Typography>
                 <Typography variant="body1" sx={{ fontWeight: 800 }}>Kes {orderTotal.toLocaleString()}</Typography>
@@ -368,10 +402,6 @@ Remaining Bal.  : Kes ${balance.toLocaleString()}
               <Box>
                 <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Amount Paid</Typography>
                 <Typography variant="body1" sx={{ fontWeight: 800, color: "#10b981" }}>Kes {amountPaid.toLocaleString()}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Remaining Balance</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 800, color: balance > 0 ? "#ef4444" : "text.primary" }}>Kes {balance.toLocaleString()}</Typography>
               </Box>
             </Box>
 
@@ -381,17 +411,30 @@ Remaining Bal.  : Kes ${balance.toLocaleString()}
               <Typography variant="body1" sx={{ fontWeight: 800 }}>#{orderId}</Typography>
             </Box>
 
-            {/* Delivery address */}
+            {/* Fulfillment / Delivery destination */}
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 0.5, textTransform: "uppercase", fontSize: "0.75rem" }}>
-                Delivery Address
+                Fulfillment Details
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                {formData?.firstName} {formData?.lastName}
+                {formData?.fulfillmentType === "pickup" ? "Store Pickup" : "Doorstep Delivery"}
               </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {formData?.address}, {formData?.city}
-              </Typography>
+              {formData?.fulfillmentType === "pickup" ? (
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  Store: {formData?.pickupLocationName || "Physical Shop Store"}
+                </Typography>
+              ) : (
+                <>
+                  {formData?.deliveryLocationName && (
+                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                      Delivery Zone: {formData.deliveryLocationName}
+                    </Typography>
+                  )}
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {formData?.address}, {formData?.city}
+                  </Typography>
+                </>
+              )}
               {formData?.pinnedLocation && (
                 <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
                   Coordinates: {formData.pinnedLocation}
@@ -455,15 +498,44 @@ Remaining Bal.  : Kes ${balance.toLocaleString()}
   );
 };
 
-// --- Authenticated Checkout --- //
+// --- Authenticated Checkout Schema --- //
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
+  fulfillmentType: z.enum(["delivery", "pickup"]).default("delivery"),
+  delivery_location: z.number().nullable().optional(),
+  pickup_location: z.number().nullable().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   payment_method: z.string().min(2, "Payment method is required"),
   pinnedLocation: z.string().optional(),
+  send_email_updates: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  if (data.fulfillmentType === "delivery") {
+    if (!data.address || data.address.trim().length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Delivery address must be at least 3 characters",
+        path: ["address"],
+      });
+    }
+    if (!data.city || data.city.trim().length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "City is required",
+        path: ["city"],
+      });
+    }
+  } else if (data.fulfillmentType === "pickup") {
+    if (!data.pickup_location) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please select a pickup store location",
+        path: ["pickup_location"],
+      });
+    }
+  }
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -475,7 +547,7 @@ const AuthenticatedCheckout = () => {
   const theme = useTheme();
   
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ['Your Details', 'Delivery Address', 'Payment Method', 'Review & Pay'];
+  const steps = ['Your Details', 'Fulfillment & Address', 'Payment Method', 'Review & Pay'];
 
   // M-Pesa states
   const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
@@ -502,9 +574,26 @@ const AuthenticatedCheckout = () => {
 
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
+  const { data: pickupLocations, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery(
+    { company_slug: shopname, token: Cookies.get("access") },
+    { skip: !shopname }
+  );
+
+  const { data: deliveryLocations, isLoading: deliveryLocationsLoading } = useGetDeliveryLocationsQuery(
+    { company_slug: shopname, token: Cookies.get("access") },
+    { skip: !shopname }
+  );
+
   const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control, setError, clearErrors } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { payment_method: "mpesa", pinnedLocation: "" },
+    defaultValues: {
+      payment_method: "mpesa",
+      pinnedLocation: "",
+      fulfillmentType: "delivery",
+      delivery_location: null,
+      pickup_location: null,
+      send_email_updates: false,
+    },
   });
 
   const router = useRouter();
@@ -567,44 +656,88 @@ const AuthenticatedCheckout = () => {
     };
   }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder]);
 
-  const totalAmount = useMemo(() => {
+  const selectedFulfillmentType = watch("fulfillmentType") || "delivery";
+  const selectedDeliveryLocId = watch("delivery_location");
+  const selectedPickupLocId = watch("pickup_location");
+
+  const selectedDeliveryLocation = useMemo(() => {
+    return deliveryLocations?.find((d) => d.id === selectedDeliveryLocId) || null;
+  }, [deliveryLocations, selectedDeliveryLocId]);
+
+  const selectedPickupLocation = useMemo(() => {
+    return pickupLocations?.find((p) => p.id === selectedPickupLocId) || null;
+  }, [pickupLocations, selectedPickupLocId]);
+
+  const activeDeliveryFee = useMemo(() => {
+    if (selectedFulfillmentType === "pickup") {
+      return selectedPickupLocation?.delivery_fee ? parseFloat(selectedPickupLocation.delivery_fee.toString()) : 0;
+    }
+    if (selectedDeliveryLocation?.delivery_fee) {
+      return parseFloat(selectedDeliveryLocation.delivery_fee.toString());
+    }
+    return 0;
+  }, [selectedFulfillmentType, selectedPickupLocation, selectedDeliveryLocation]);
+
+  const itemsSubtotal = useMemo(() => {
     if (!cart_data) return 0;
-    let itemsSubtotal = 0;
-    cart_data.items.forEach((item: any) => {
-      itemsSubtotal += item.product.on_sale
-        ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
-        : parseFloat(item.product.price) * parseInt(item.quantity);
+    let subtotal = 0;
+    cart_data.items?.forEach((item: any) => {
+      const price = item.product.on_sale
+        ? parseFloat(item.product.discounted_price)
+        : parseFloat(item.product.price);
+      subtotal += price * parseInt(item.quantity);
     });
-    return itemsSubtotal;
+    return subtotal;
   }, [cart_data]);
+
+  const totalAmount = useMemo(() => {
+    return itemsSubtotal + activeDeliveryFee;
+  }, [itemsSubtotal, activeDeliveryFee]);
 
   const onSubmit = async (formData: CheckoutFormData) => {
     try {
       const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber);
-      const combinedAddress = formData.address + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
+      const selectedPickupStore = pickupLocations?.find((p) => p.id === formData.pickup_location);
+      const selectedDeliveryLoc = deliveryLocations?.find((d) => d.id === formData.delivery_location);
+
+      const combinedAddress = formData.fulfillmentType === "pickup"
+        ? (selectedPickupStore?.address || "Store Pickup")
+        : (formData.address || "") + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
+
+      const orderPayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formattedPhoneNumber,
+        address: combinedAddress,
+        city: formData.fulfillmentType === "pickup" ? (selectedPickupStore?.city || "Store Pickup") : (formData.city || "Nairobi"),
+        state: "Kenya",
+        country: "Kenya",
+        postal_code: "00100",
+        payment_method: formData.payment_method,
+        pickup_location: formData.fulfillmentType === "pickup" ? (formData.pickup_location || null) : null,
+        delivery_location: formData.fulfillmentType === "delivery" ? (formData.delivery_location || null) : null,
+        send_email_updates: !!formData.send_email_updates,
+      };
+
+      const enrichedFormData = {
+        ...formData,
+        deliveryFee: activeDeliveryFee,
+        pickupLocationName: selectedPickupStore?.name,
+        deliveryLocationName: selectedDeliveryLoc?.location_name,
+      };
 
       const response = await checkoutFx({
-        body: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phoneNumber: formattedPhoneNumber,
-          address: combinedAddress,
-          city: formData.city,
-          state: "Kenya",
-          country: "Kenya",
-          postal_code: "00100",
-          payment_method: formData.payment_method,
-        },
-        token: Cookies.get("access"),
+        body: orderPayload,
+        token: Cookies.get("access") || "",
         company_name: shopname,
       }).unwrap();
 
       if (formData.payment_method === "mpesa") {
-        setLastSubmittedFormData(formData);
+        setLastSubmittedFormData(enrichedFormData);
         setLastCartData(cart_data);
         setIsProcessingMpesa(true);
         setMpesaOrderId(response.order_id);
-        await lipaNaMpesaFx({ order_id: response.order_id, token: Cookies.get("access") }).unwrap();
+        await lipaNaMpesaFx({ order_id: response.order_id, token: Cookies.get("access") || "" }).unwrap();
         setIsProcessingMpesa(false);
         setIsMpesaPaymentInitiated(true);
         setShowMpesaModal(true);
@@ -613,7 +746,7 @@ const AuthenticatedCheckout = () => {
         toast.success("Order Placed Successfully!");
         setSuccessOrder({
           orderId: response.order_id,
-          formData,
+          formData: enrichedFormData,
           cartData: cart_data,
         });
       }
@@ -700,42 +833,253 @@ const AuthenticatedCheckout = () => {
           <Stack spacing={3}>
             <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
               <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
-                Delivery Address
+                Fulfillment & Address
               </Typography>
               <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
-                Enter the physical address where you'd like your items delivered, and drop a pin on the map.
+                Choose your preferred fulfillment method and specify the delivery or pickup details.
               </Typography>
             </Box>
-            
-            <TextField
-              fullWidth
-              label="Street / Apartment / Delivery Address"
-              variant="outlined"
-              {...register("address")}
-              error={!!errors.address}
-              helperText={errors.address?.message}
-              InputProps={{ sx: { borderRadius: "12px" } }}
-              placeholder="e.g. Apartment 4B, Kilimani Road"
-            />
-            
-            <TextField
-              fullWidth
-              label="City"
-              variant="outlined"
-              {...register("city")}
-              error={!!errors.city}
-              helperText={errors.city?.message}
-              InputProps={{ sx: { borderRadius: "12px" } }}
-              placeholder="e.g. Nairobi"
-            />
 
-            <Controller
-              name="pinnedLocation"
-              control={control}
-              render={({ field }) => (
-                <MapPinWidget value={field.value || ""} onChange={field.onChange} />
-              )}
-            />
+            {/* Fulfillment Type Toggle (Delivery vs Store Pickup) */}
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+              {/* Doorstep Delivery Card */}
+              <Box
+                onClick={() => {
+                  setValue("fulfillmentType", "delivery");
+                  setValue("pickup_location", null);
+                  clearErrors(["pickup_location"]);
+                }}
+                sx={{
+                  border: "2px solid",
+                  borderColor: selectedFulfillmentType === "delivery" ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                  borderRadius: "16px",
+                  p: 2.5,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  backgroundColor: selectedFulfillmentType === "delivery" ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": { borderColor: theme.palette.primary.main },
+                }}
+              >
+                <Radio checked={selectedFulfillmentType === "delivery"} sx={{ p: 0.5 }} />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <LocalShippingIcon sx={{ fontSize: "1.3rem", color: selectedFulfillmentType === "delivery" ? theme.palette.primary.main : "text.secondary" }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#18181b" }}>Doorstep Delivery</Typography>
+                  </Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
+                    Delivered directly to your home or office address
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Store Pickup Card */}
+              <Box
+                onClick={() => {
+                  setValue("fulfillmentType", "pickup");
+                  setValue("delivery_location", null);
+                  clearErrors(["address", "city"]);
+                  if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
+                    const firstStore = pickupLocations[0];
+                    setValue("pickup_location", firstStore.id);
+                    setValue("address", firstStore.address || "Store Pickup");
+                    setValue("city", firstStore.city || "Store Pickup");
+                  }
+                }}
+                sx={{
+                  border: "2px solid",
+                  borderColor: selectedFulfillmentType === "pickup" ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                  borderRadius: "16px",
+                  p: 2.5,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  backgroundColor: selectedFulfillmentType === "pickup" ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": { borderColor: theme.palette.primary.main },
+                }}
+              >
+                <Radio checked={selectedFulfillmentType === "pickup"} sx={{ p: 0.5 }} />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <StorefrontIcon sx={{ fontSize: "1.3rem", color: selectedFulfillmentType === "pickup" ? theme.palette.primary.main : "text.secondary" }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#18181b" }}>Store Pickup</Typography>
+                  </Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
+                    {pickupLocations && pickupLocations.length > 0 ? "Collect directly from a shop store" : "Collect in person from the store"}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* When Doorstep Delivery is selected */}
+            {selectedFulfillmentType === "delivery" && (
+              <Stack spacing={2.5}>
+                {deliveryLocationsLoading ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress size={18} />
+                    <Typography variant="caption">Loading delivery routes...</Typography>
+                  </Box>
+                ) : deliveryLocations && deliveryLocations.length > 0 ? (
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: "text.secondary" }}>
+                      Select Delivery Area / Route (Calculates exact delivery fee)
+                    </Typography>
+                    <Autocomplete
+                      options={deliveryLocations}
+                      getOptionLabel={(option) => `${option.location_name}${option.route ? ` (${option.route})` : ''} — Kes ${parseFloat(option.delivery_fee?.toString() || '0').toLocaleString()}`}
+                      value={deliveryLocations.find((d) => d.id === watch("delivery_location")) || null}
+                      onChange={(_, newValue) => {
+                        setValue("delivery_location", newValue ? newValue.id : null);
+                        if (newValue && !watch("city")) {
+                          setValue("city", newValue.location_name);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Search your delivery zone / estate (e.g. Kilimani, Westlands, Nairobi CBD...)"
+                          variant="outlined"
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: { borderRadius: "12px" },
+                          }}
+                          helperText={
+                            selectedDeliveryLocation
+                              ? `Selected: ${selectedDeliveryLocation.location_name} (Delivery Fee: Kes ${parseFloat(selectedDeliveryLocation.delivery_fee?.toString() || '0').toLocaleString()})`
+                              : "Choose your area to calculate delivery fee"
+                          }
+                        />
+                      )}
+                    />
+                  </Box>
+                ) : null}
+
+                <TextField
+                  fullWidth
+                  label="Street / Apartment / Delivery Address"
+                  variant="outlined"
+                  {...register("address")}
+                  error={!!errors.address}
+                  helperText={errors.address?.message || "e.g. Apartment 4B, Kilimani Road, Gate 3"}
+                  InputProps={{ sx: { borderRadius: "12px" } }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="City"
+                  variant="outlined"
+                  {...register("city")}
+                  error={!!errors.city}
+                  helperText={errors.city?.message}
+                  InputProps={{ sx: { borderRadius: "12px" } }}
+                  placeholder="e.g. Nairobi"
+                />
+
+                <Controller
+                  name="pinnedLocation"
+                  control={control}
+                  render={({ field }) => (
+                    <MapPinWidget value={field.value || ""} onChange={field.onChange} />
+                  )}
+                />
+              </Stack>
+            )}
+
+            {/* When Store Pickup is selected */}
+            {selectedFulfillmentType === "pickup" && (
+              <Stack spacing={2}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Select Pickup Store Location
+                </Typography>
+
+                {pickupLocationsLoading ? (
+                  <CircularProgress size={24} />
+                ) : pickupLocations && pickupLocations.length > 0 ? (
+                  <RadioGroup
+                    value={watch("pickup_location") || ""}
+                    onChange={(e) => {
+                      const storeId = parseInt(e.target.value);
+                      setValue("pickup_location", storeId);
+                      const store = pickupLocations.find((p) => p.id === storeId);
+                      if (store) {
+                        setValue("address", store.address || "Store Pickup");
+                        setValue("city", store.city || "Store Pickup");
+                      }
+                    }}
+                  >
+                    <Stack spacing={1.5}>
+                      {pickupLocations.map((store) => {
+                        const isSelected = watch("pickup_location") === store.id;
+                        const fee = store.delivery_fee ? parseFloat(store.delivery_fee.toString()) : 0;
+                        return (
+                          <Box
+                            key={store.id}
+                            onClick={() => {
+                              setValue("pickup_location", store.id);
+                              setValue("address", store.address || "Store Pickup");
+                              setValue("city", store.city || "Store Pickup");
+                            }}
+                            sx={{
+                              border: "2px solid",
+                              borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                              borderRadius: "14px",
+                              p: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                              backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <Radio checked={isSelected} value={store.id} sx={{ p: 0.5 }} />
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                                  {store.name}
+                                </Typography>
+                                <Chip
+                                  label={fee > 0 ? `Kes ${fee.toLocaleString()}` : "FREE"}
+                                  size="small"
+                                  color={fee > 0 ? "default" : "success"}
+                                  variant="outlined"
+                                  sx={{ fontWeight: 700 }}
+                                />
+                              </Box>
+                              {store.address && (
+                                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
+                                  {store.address}{store.city ? `, ${store.city}` : ""}
+                                </Typography>
+                              )}
+                              {store.phone_number && (
+                                <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mt: 0.25 }}>
+                                  Contact: {store.phone_number}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                  </RadioGroup>
+                ) : (
+                  <Paper sx={{ p: 2.5, borderRadius: "12px", backgroundColor: "#fff8e1", border: "1px solid #ffe082" }}>
+                    <Typography variant="body2" sx={{ color: "#b78103", fontWeight: 600 }}>
+                      No dedicated store pickup locations configured for this shop. You can pick up directly at the shop's main premises or select Doorstep Delivery above.
+                    </Typography>
+                  </Paper>
+                )}
+
+                {errors.pickup_location && (
+                  <Typography variant="caption" color="error">
+                    {errors.pickup_location.message}
+                  </Typography>
+                )}
+              </Stack>
+            )}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
               <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
@@ -744,26 +1088,35 @@ const AuthenticatedCheckout = () => {
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={() => {
-                  const addressVal = watch("address");
-                  const cityVal = watch("city");
-                  let hasError = false;
-                  
-                  if (!addressVal || addressVal.trim().length < 5) {
-                    setError("address", { type: "manual", message: "Delivery address must be at least 5 characters" });
-                    hasError = true;
-                  } else {
-                    clearErrors("address");
-                  }
-                  
-                  if (!cityVal || cityVal.trim().length < 2) {
-                    setError("city", { type: "manual", message: "City is required" });
-                    hasError = true;
-                  } else {
-                    clearErrors("city");
-                  }
+                onClick={async () => {
+                  if (selectedFulfillmentType === "delivery") {
+                    const addressVal = watch("address");
+                    const cityVal = watch("city");
+                    let hasError = false;
+                    
+                    if (!addressVal || addressVal.trim().length < 3) {
+                      setError("address", { type: "manual", message: "Delivery address must be at least 3 characters" });
+                      hasError = true;
+                    } else {
+                      clearErrors("address");
+                    }
+                    
+                    if (!cityVal || cityVal.trim().length < 2) {
+                      setError("city", { type: "manual", message: "City is required" });
+                      hasError = true;
+                    } else {
+                      clearErrors("city");
+                    }
 
-                  if (!hasError) handleNext();
+                    if (!hasError) handleNext();
+                  } else {
+                    if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
+                      setError("pickup_location", { type: "manual", message: "Please select a pickup store" });
+                      return;
+                    }
+                    clearErrors(["pickup_location", "address", "city"]);
+                    handleNext();
+                  }
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
@@ -787,7 +1140,7 @@ const AuthenticatedCheckout = () => {
             <FormControl component="fieldset" fullWidth>
               <RadioGroup
                 row
-                name="payment_method"
+                name="auth_payment_method"
                 value={watch("payment_method")}
                 onChange={(e) => setValue("payment_method", e.target.value)}
               >
@@ -830,6 +1183,17 @@ const AuthenticatedCheckout = () => {
                 </Box>
               </RadioGroup>
             </FormControl>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!watch("send_email_updates")}
+                  onChange={(e) => setValue("send_email_updates", e.target.checked)}
+                  color="primary"
+                />
+              }
+              label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Send me email updates about my order and delivery</Typography>}
+            />
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
               <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
@@ -875,19 +1239,43 @@ const AuthenticatedCheckout = () => {
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
-                    Delivery Location
+                    Fulfillment & Destination
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {watch("address")}, {watch("city")}
+                    {selectedFulfillmentType === "pickup" ? "Store Pickup" : "Doorstep Delivery"}
                   </Typography>
-                  {watch("pinnedLocation") && (
-                    <Chip 
-                      icon={<LocationOnIcon sx={{ fontSize: "1rem !important" }} />}
-                      label={`Pinned Location: ${watch("pinnedLocation")}`}
-                      variant="outlined"
-                      size="small"
-                      sx={{ mt: 1, borderRadius: "6px", fontWeight: 600 }}
-                    />
+                  {selectedFulfillmentType === "pickup" ? (
+                    <Box sx={{ mt: 0.5 }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        Store: {selectedPickupLocation?.name || "Physical Shop Store"}
+                      </Typography>
+                      {selectedPickupLocation?.address && (
+                        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                          Address: {selectedPickupLocation.address}
+                        </Typography>
+                      )}
+                      <Chip label="Store Pickup" size="small" color="success" variant="outlined" sx={{ mt: 0.5, fontWeight: 700 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ mt: 0.5 }}>
+                      {selectedDeliveryLocation && (
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                          Delivery Area: {selectedDeliveryLocation.location_name} {selectedDeliveryLocation.route ? `(${selectedDeliveryLocation.route})` : ''}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        Address: {watch("address")}, {watch("city")}
+                      </Typography>
+                      {watch("pinnedLocation") && (
+                        <Chip 
+                          icon={<LocationOnIcon sx={{ fontSize: "1rem !important" }} />}
+                          label={`Pinned: ${watch("pinnedLocation")}`}
+                          variant="outlined"
+                          size="small"
+                          sx={{ mt: 1, borderRadius: "6px", fontWeight: 600 }}
+                        />
+                      )}
+                    </Box>
                   )}
                 </Box>
 
@@ -982,13 +1370,20 @@ const AuthenticatedCheckout = () => {
           <Stack spacing={2} sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Typography color="text.secondary">Items Subtotal</Typography>
-              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {cart_data?.total || 0}</Typography>
+              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {itemsSubtotal.toLocaleString()}</Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Delivery / Shipping</Typography>
+              <Typography sx={{ fontWeight: 700, color: activeDeliveryFee > 0 ? "#18181b" : "#10b981" }}>
+                {activeDeliveryFee > 0 ? `Kes ${activeDeliveryFee.toLocaleString()}` : "FREE"}
+              </Typography>
             </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
               <Typography variant="h6" sx={{ fontWeight: 800, color: "#18181b" }}>Total</Typography>
               <Typography variant="h4" sx={{ fontWeight: 900, color: theme.palette.primary.main }}>
-                Kes {totalAmount}
+                Kes {totalAmount.toLocaleString()}
               </Typography>
             </Box>
           </Stack>
@@ -1012,7 +1407,7 @@ const AuthenticatedCheckout = () => {
           <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Please check your phone for an M-Pesa STK Push notification.
           </Typography>
-          <Typography variant="body2" color="textSecondary" sx={{ maxW: "80%", mx: "auto", mb: 3 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ maxWidth: "80%", mx: "auto", mb: 3 }}>
             Complete the payment prompt by entering your M-Pesa PIN on your phone to finalize your order.
           </Typography>
           <Button
@@ -1034,16 +1429,45 @@ const AuthenticatedCheckout = () => {
   );
 };
 
-// --- Guest Checkout --- //
+// --- Guest Checkout Schema --- //
 const guestCheckoutSchema = z.object({
   email: z.string().email("Invalid email address"),
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   phoneNumber: z.string().min(7, "Phone number is required"),
+  fulfillmentType: z.enum(["delivery", "pickup"]).default("delivery"),
+  delivery_location: z.number().nullable().optional(),
+  pickup_location: z.number().nullable().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   payment_method: z.string().min(2, "Payment method is required"),
   pinnedLocation: z.string().optional(),
+  send_email_updates: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  if (data.fulfillmentType === "delivery") {
+    if (!data.address || data.address.trim().length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Delivery address must be at least 3 characters",
+        path: ["address"],
+      });
+    }
+    if (!data.city || data.city.trim().length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "City is required",
+        path: ["city"],
+      });
+    }
+  } else if (data.fulfillmentType === "pickup") {
+    if (!data.pickup_location) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please select a pickup store location",
+        path: ["pickup_location"],
+      });
+    }
+  }
 });
 
 type GuestCheckoutFormData = z.infer<typeof guestCheckoutSchema>;
@@ -1055,10 +1479,10 @@ const GuestCheckout = () => {
   const [placeOrderGuest, { isLoading }] = usePlaceOrderGuestMutation();
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
   const [orderResponse, setOrderResponse] = useState<GuestOrderResponse | null>(null);
-  const [shopname] = useState(Cookies.get("shopname") || "techend");
+  const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const [activeStep, setActiveStep] = useState(0);
-  const steps = ['Your Details', 'Delivery Address', 'Payment Method', 'Review & Pay'];
+  const steps = ['Your Details', 'Fulfillment & Address', 'Payment Method', 'Review & Pay'];
 
   // M-Pesa states
   const [isMpesaPaymentInitiated, setIsMpesaPaymentInitiated] = useState(false);
@@ -1072,14 +1496,38 @@ const GuestCheckout = () => {
   const [lastSubmittedFormData, setLastSubmittedFormData] = useState<any>(null);
   const [lastCartData, setLastCartData] = useState<any>(null);
 
+  useEffect(() => {
+    const cookieShop = Cookies.get("shopname");
+    if (cookieShop) {
+      setShopName(cookieShop);
+    }
+  }, []);
+
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
 
   const { data: companyData, isLoading: companyDataLoading } = useGetCompanyBySlugQuery(shopname);
 
+  const { data: pickupLocations, isLoading: pickupLocationsLoading } = useGetPickupLocationsQuery(
+    { company_slug: shopname },
+    { skip: !shopname }
+  );
+
+  const { data: deliveryLocations, isLoading: deliveryLocationsLoading } = useGetDeliveryLocationsQuery(
+    { company_slug: shopname },
+    { skip: !shopname }
+  );
+
   const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control, setError, clearErrors } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
-    defaultValues: { payment_method: "mpesa", pinnedLocation: "" },
+    defaultValues: {
+      payment_method: "mpesa",
+      pinnedLocation: "",
+      fulfillmentType: "delivery",
+      delivery_location: null,
+      pickup_location: null,
+      send_email_updates: false,
+    },
   });
 
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
@@ -1134,16 +1582,43 @@ const GuestCheckout = () => {
     };
   }, [isMpesaPaymentInitiated, mpesaOrderId, refetchMpesaOrder]);
 
-  const totalAmount = useMemo(() => {
+  const selectedFulfillmentType = watch("fulfillmentType") || "delivery";
+  const selectedDeliveryLocId = watch("delivery_location");
+  const selectedPickupLocId = watch("pickup_location");
+
+  const selectedDeliveryLocation = useMemo(() => {
+    return deliveryLocations?.find((d) => d.id === selectedDeliveryLocId) || null;
+  }, [deliveryLocations, selectedDeliveryLocId]);
+
+  const selectedPickupLocation = useMemo(() => {
+    return pickupLocations?.find((p) => p.id === selectedPickupLocId) || null;
+  }, [pickupLocations, selectedPickupLocId]);
+
+  const activeDeliveryFee = useMemo(() => {
+    if (selectedFulfillmentType === "pickup") {
+      return selectedPickupLocation?.delivery_fee ? parseFloat(selectedPickupLocation.delivery_fee.toString()) : 0;
+    }
+    if (selectedDeliveryLocation?.delivery_fee) {
+      return parseFloat(selectedDeliveryLocation.delivery_fee.toString());
+    }
+    return 0;
+  }, [selectedFulfillmentType, selectedPickupLocation, selectedDeliveryLocation]);
+
+  const itemsSubtotal = useMemo(() => {
     if (!cart_data) return 0;
-    let itemsSubtotal = 0;
-    cart_data.items.forEach((item: any) => {
-      itemsSubtotal += item.product.on_sale
-        ? parseFloat(item.product.discounted_price) * parseInt(item.quantity)
-        : parseFloat(item.product.price) * parseInt(item.quantity);
+    let subtotal = 0;
+    cart_data.items?.forEach((item: any) => {
+      const price = item.product.on_sale
+        ? parseFloat(item.product.discounted_price)
+        : parseFloat(item.product.price);
+      subtotal += price * parseInt(item.quantity);
     });
-    return itemsSubtotal;
+    return subtotal;
   }, [cart_data]);
+
+  const totalAmount = useMemo(() => {
+    return itemsSubtotal + activeDeliveryFee;
+  }, [itemsSubtotal, activeDeliveryFee]);
 
   const onSubmit = async (formData: GuestCheckoutFormData) => {
     if (!sessionId) {
@@ -1153,9 +1628,21 @@ const GuestCheckout = () => {
 
     try {
       const formattedPhoneNumber = formatPhoneNumber(formData.phoneNumber);
-      const combinedAddress = formData.address + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
-      
-      setLastSubmittedFormData(formData);
+      const selectedPickupStore = pickupLocations?.find((p) => p.id === formData.pickup_location);
+      const selectedDeliveryLoc = deliveryLocations?.find((d) => d.id === formData.delivery_location);
+
+      const combinedAddress = formData.fulfillmentType === "pickup"
+        ? (selectedPickupStore?.address || "Store Pickup")
+        : (formData.address || "") + (formData.pinnedLocation ? ` [Map: ${formData.pinnedLocation}]` : "");
+
+      const enrichedFormData = {
+        ...formData,
+        deliveryFee: activeDeliveryFee,
+        pickupLocationName: selectedPickupStore?.name,
+        deliveryLocationName: selectedDeliveryLoc?.location_name,
+      };
+
+      setLastSubmittedFormData(enrichedFormData);
       setLastCartData(cart_data);
 
       const response = await placeOrderGuest({
@@ -1164,11 +1651,14 @@ const GuestCheckout = () => {
         lastName: formData.lastName,
         phoneNumber: formattedPhoneNumber,
         address: combinedAddress,
-        city: formData.city,
+        city: formData.fulfillmentType === "pickup" ? (selectedPickupStore?.city || "Store Pickup") : (formData.city || "Nairobi"),
         state: "Kenya",
         country: "Kenya",
         postal_code: "00100",
         payment_method: formData.payment_method,
+        pickup_location: formData.fulfillmentType === "pickup" ? (formData.pickup_location || null) : null,
+        delivery_location: formData.fulfillmentType === "delivery" ? (formData.delivery_location || null) : null,
+        send_email_updates: !!formData.send_email_updates,
         sessionId,
         company_name: shopname,
       }).unwrap();
@@ -1193,7 +1683,7 @@ const GuestCheckout = () => {
         toast.error("An account with this email already exists. Please log in.");
         router.push("/login");
       } else {
-        toast.error(error.data?.error || "An unexpected error occurred.");
+        toast.error(error.data?.non_field_errors?.[0] || error.data?.error || "An unexpected error occurred.");
       }
     }
   };
@@ -1276,6 +1766,7 @@ const GuestCheckout = () => {
                   const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
                   if (isValid) handleNext();
                 }}
+                sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
                 Next Step
               </Button>
@@ -1287,42 +1778,253 @@ const GuestCheckout = () => {
           <Stack spacing={3}>
             <Box sx={{ borderBottom: "2px solid #f4f4f5", pb: 2 }}>
               <Typography variant="h5" sx={{ fontWeight: 800, color: "#18181b" }}>
-                Delivery Address
+                Fulfillment & Address
               </Typography>
               <Typography variant="body2" sx={{ color: "#71717a", mt: 0.5 }}>
-                Enter the physical address where you'd like your items delivered, and drop a pin on the map.
+                Choose your preferred fulfillment method and specify the delivery or pickup details.
               </Typography>
             </Box>
 
-            <TextField
-              fullWidth
-              label="Street / Apartment / Delivery Address"
-              variant="outlined"
-              {...register("address")}
-              error={!!errors.address}
-              helperText={errors.address?.message}
-              InputProps={{ sx: { borderRadius: "12px" } }}
-              placeholder="e.g. Apartment 4B, Kilimani Road"
-            />
+            {/* Fulfillment Type Toggle (Delivery vs Store Pickup) */}
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+              {/* Doorstep Delivery Card */}
+              <Box
+                onClick={() => {
+                  setValue("fulfillmentType", "delivery");
+                  setValue("pickup_location", null);
+                  clearErrors(["pickup_location"]);
+                }}
+                sx={{
+                  border: "2px solid",
+                  borderColor: selectedFulfillmentType === "delivery" ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                  borderRadius: "16px",
+                  p: 2.5,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  backgroundColor: selectedFulfillmentType === "delivery" ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": { borderColor: theme.palette.primary.main },
+                }}
+              >
+                <Radio checked={selectedFulfillmentType === "delivery"} sx={{ p: 0.5 }} />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <LocalShippingIcon sx={{ fontSize: "1.3rem", color: selectedFulfillmentType === "delivery" ? theme.palette.primary.main : "text.secondary" }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#18181b" }}>Doorstep Delivery</Typography>
+                  </Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
+                    Delivered directly to your home or office address
+                  </Typography>
+                </Box>
+              </Box>
 
-            <TextField
-              fullWidth
-              label="City"
-              variant="outlined"
-              {...register("city")}
-              error={!!errors.city}
-              helperText={errors.city?.message}
-              InputProps={{ sx: { borderRadius: "12px" } }}
-              placeholder="e.g. Nairobi"
-            />
+              {/* Store Pickup Card */}
+              <Box
+                onClick={() => {
+                  setValue("fulfillmentType", "pickup");
+                  setValue("delivery_location", null);
+                  clearErrors(["address", "city"]);
+                  if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
+                    const firstStore = pickupLocations[0];
+                    setValue("pickup_location", firstStore.id);
+                    setValue("address", firstStore.address || "Store Pickup");
+                    setValue("city", firstStore.city || "Store Pickup");
+                  }
+                }}
+                sx={{
+                  border: "2px solid",
+                  borderColor: selectedFulfillmentType === "pickup" ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                  borderRadius: "16px",
+                  p: 2.5,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  backgroundColor: selectedFulfillmentType === "pickup" ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": { borderColor: theme.palette.primary.main },
+                }}
+              >
+                <Radio checked={selectedFulfillmentType === "pickup"} sx={{ p: 0.5 }} />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <StorefrontIcon sx={{ fontSize: "1.3rem", color: selectedFulfillmentType === "pickup" ? theme.palette.primary.main : "text.secondary" }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#18181b" }}>Store Pickup</Typography>
+                  </Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
+                    {pickupLocations && pickupLocations.length > 0 ? "Collect directly from a shop store" : "Collect in person from the store"}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
 
-            <Controller
-              name="pinnedLocation"
-              control={control}
-              render={({ field }) => (
-                <MapPinWidget value={field.value || ""} onChange={field.onChange} />
-              )}
-            />
+            {/* When Doorstep Delivery is selected */}
+            {selectedFulfillmentType === "delivery" && (
+              <Stack spacing={2.5}>
+                {deliveryLocationsLoading ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress size={18} />
+                    <Typography variant="caption">Loading delivery routes...</Typography>
+                  </Box>
+                ) : deliveryLocations && deliveryLocations.length > 0 ? (
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: "text.secondary" }}>
+                      Select Delivery Area / Route (Calculates exact delivery fee)
+                    </Typography>
+                    <Autocomplete
+                      options={deliveryLocations}
+                      getOptionLabel={(option) => `${option.location_name}${option.route ? ` (${option.route})` : ''} — Kes ${parseFloat(option.delivery_fee?.toString() || '0').toLocaleString()}`}
+                      value={deliveryLocations.find((d) => d.id === watch("delivery_location")) || null}
+                      onChange={(_, newValue) => {
+                        setValue("delivery_location", newValue ? newValue.id : null);
+                        if (newValue && !watch("city")) {
+                          setValue("city", newValue.location_name);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Search your delivery zone / estate (e.g. Kilimani, Westlands, Nairobi CBD...)"
+                          variant="outlined"
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: { borderRadius: "12px" },
+                          }}
+                          helperText={
+                            selectedDeliveryLocation
+                              ? `Selected: ${selectedDeliveryLocation.location_name} (Delivery Fee: Kes ${parseFloat(selectedDeliveryLocation.delivery_fee?.toString() || '0').toLocaleString()})`
+                              : "Choose your area to calculate delivery fee"
+                          }
+                        />
+                      )}
+                    />
+                  </Box>
+                ) : null}
+
+                <TextField
+                  fullWidth
+                  label="Street / Apartment / Delivery Address"
+                  variant="outlined"
+                  {...register("address")}
+                  error={!!errors.address}
+                  helperText={errors.address?.message || "e.g. Apartment 4B, Kilimani Road, Gate 3"}
+                  InputProps={{ sx: { borderRadius: "12px" } }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="City"
+                  variant="outlined"
+                  {...register("city")}
+                  error={!!errors.city}
+                  helperText={errors.city?.message}
+                  InputProps={{ sx: { borderRadius: "12px" } }}
+                  placeholder="e.g. Nairobi"
+                />
+
+                <Controller
+                  name="pinnedLocation"
+                  control={control}
+                  render={({ field }) => (
+                    <MapPinWidget value={field.value || ""} onChange={field.onChange} />
+                  )}
+                />
+              </Stack>
+            )}
+
+            {/* When Store Pickup is selected */}
+            {selectedFulfillmentType === "pickup" && (
+              <Stack spacing={2}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Select Pickup Store Location
+                </Typography>
+
+                {pickupLocationsLoading ? (
+                  <CircularProgress size={24} />
+                ) : pickupLocations && pickupLocations.length > 0 ? (
+                  <RadioGroup
+                    value={watch("pickup_location") || ""}
+                    onChange={(e) => {
+                      const storeId = parseInt(e.target.value);
+                      setValue("pickup_location", storeId);
+                      const store = pickupLocations.find((p) => p.id === storeId);
+                      if (store) {
+                        setValue("address", store.address || "Store Pickup");
+                        setValue("city", store.city || "Store Pickup");
+                      }
+                    }}
+                  >
+                    <Stack spacing={1.5}>
+                      {pickupLocations.map((store) => {
+                        const isSelected = watch("pickup_location") === store.id;
+                        const fee = store.delivery_fee ? parseFloat(store.delivery_fee.toString()) : 0;
+                        return (
+                          <Box
+                            key={store.id}
+                            onClick={() => {
+                              setValue("pickup_location", store.id);
+                              setValue("address", store.address || "Store Pickup");
+                              setValue("city", store.city || "Store Pickup");
+                            }}
+                            sx={{
+                              border: "2px solid",
+                              borderColor: isSelected ? theme.palette.primary.main : "rgba(0,0,0,0.08)",
+                              borderRadius: "14px",
+                              p: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 2,
+                              backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.04) : "#ffffff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <Radio checked={isSelected} value={store.id} sx={{ p: 0.5 }} />
+                            <Box sx={{ flexGrow: 1 }}>
+                              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                                  {store.name}
+                                </Typography>
+                                <Chip
+                                  label={fee > 0 ? `Kes ${fee.toLocaleString()}` : "FREE"}
+                                  size="small"
+                                  color={fee > 0 ? "default" : "success"}
+                                  variant="outlined"
+                                  sx={{ fontWeight: 700 }}
+                                />
+                              </Box>
+                              {store.address && (
+                                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
+                                  {store.address}{store.city ? `, ${store.city}` : ""}
+                                </Typography>
+                              )}
+                              {store.phone_number && (
+                                <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mt: 0.25 }}>
+                                  Contact: {store.phone_number}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                  </RadioGroup>
+                ) : (
+                  <Paper sx={{ p: 2.5, borderRadius: "12px", backgroundColor: "#fff8e1", border: "1px solid #ffe082" }}>
+                    <Typography variant="body2" sx={{ color: "#b78103", fontWeight: 600 }}>
+                      No dedicated store pickup locations configured for this shop. You can pick up directly at the shop's main premises or select Doorstep Delivery above.
+                    </Typography>
+                  </Paper>
+                )}
+
+                {errors.pickup_location && (
+                  <Typography variant="caption" color="error">
+                    {errors.pickup_location.message}
+                  </Typography>
+                )}
+              </Stack>
+            )}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
               <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
@@ -1331,26 +2033,35 @@ const GuestCheckout = () => {
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={() => {
-                  const addressVal = watch("address");
-                  const cityVal = watch("city");
-                  let hasError = false;
-                  
-                  if (!addressVal || addressVal.trim().length < 5) {
-                    setError("address", { type: "manual", message: "Delivery address must be at least 5 characters" });
-                    hasError = true;
-                  } else {
-                    clearErrors("address");
-                  }
-                  
-                  if (!cityVal || cityVal.trim().length < 2) {
-                    setError("city", { type: "manual", message: "City is required" });
-                    hasError = true;
-                  } else {
-                    clearErrors("city");
-                  }
+                onClick={async () => {
+                  if (selectedFulfillmentType === "delivery") {
+                    const addressVal = watch("address");
+                    const cityVal = watch("city");
+                    let hasError = false;
+                    
+                    if (!addressVal || addressVal.trim().length < 3) {
+                      setError("address", { type: "manual", message: "Delivery address must be at least 3 characters" });
+                      hasError = true;
+                    } else {
+                      clearErrors("address");
+                    }
+                    
+                    if (!cityVal || cityVal.trim().length < 2) {
+                      setError("city", { type: "manual", message: "City is required" });
+                      hasError = true;
+                    } else {
+                      clearErrors("city");
+                    }
 
-                  if (!hasError) handleNext();
+                    if (!hasError) handleNext();
+                  } else {
+                    if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
+                      setError("pickup_location", { type: "manual", message: "Please select a pickup store" });
+                      return;
+                    }
+                    clearErrors(["pickup_location", "address", "city"]);
+                    handleNext();
+                  }
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
@@ -1418,6 +2129,17 @@ const GuestCheckout = () => {
               </RadioGroup>
             </FormControl>
 
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!!watch("send_email_updates")}
+                  onChange={(e) => setValue("send_email_updates", e.target.checked)}
+                  color="primary"
+                />
+              }
+              label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Send me email updates about my order and delivery</Typography>}
+            />
+
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
               <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
                 Back
@@ -1465,19 +2187,43 @@ const GuestCheckout = () => {
 
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#71717a", mb: 1, textTransform: "uppercase", fontSize: "0.75rem" }}>
-                    Delivery Location
+                    Fulfillment & Destination
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {watch("address")}, {watch("city")}
+                    {selectedFulfillmentType === "pickup" ? "Store Pickup" : "Doorstep Delivery"}
                   </Typography>
-                  {watch("pinnedLocation") && (
-                    <Chip 
-                      icon={<LocationOnIcon sx={{ fontSize: "1rem !important" }} />}
-                      label={`Pinned Location: ${watch("pinnedLocation")}`}
-                      variant="outlined"
-                      size="small"
-                      sx={{ mt: 1, borderRadius: "6px", fontWeight: 600 }}
-                    />
+                  {selectedFulfillmentType === "pickup" ? (
+                    <Box sx={{ mt: 0.5 }}>
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        Store: {selectedPickupLocation?.name || "Physical Shop Store"}
+                      </Typography>
+                      {selectedPickupLocation?.address && (
+                        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                          Address: {selectedPickupLocation.address}
+                        </Typography>
+                      )}
+                      <Chip label="Store Pickup" size="small" color="success" variant="outlined" sx={{ mt: 0.5, fontWeight: 700 }} />
+                    </Box>
+                  ) : (
+                    <Box sx={{ mt: 0.5 }}>
+                      {selectedDeliveryLocation && (
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                          Delivery Area: {selectedDeliveryLocation.location_name} {selectedDeliveryLocation.route ? `(${selectedDeliveryLocation.route})` : ''}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                        Address: {watch("address")}, {watch("city")}
+                      </Typography>
+                      {watch("pinnedLocation") && (
+                        <Chip 
+                          icon={<LocationOnIcon sx={{ fontSize: "1rem !important" }} />}
+                          label={`Pinned: ${watch("pinnedLocation")}`}
+                          variant="outlined"
+                          size="small"
+                          sx={{ mt: 1, borderRadius: "6px", fontWeight: 600 }}
+                        />
+                      )}
+                    </Box>
                   )}
                 </Box>
 
@@ -1572,14 +2318,20 @@ const GuestCheckout = () => {
           <Stack spacing={2} sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Typography color="text.secondary">Items Subtotal</Typography>
-              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {cart_data?.total || 0}</Typography>
+              <Typography sx={{ fontWeight: 700, color: "#18181b" }}>Kes {itemsSubtotal.toLocaleString()}</Typography>
             </Box>
 
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography color="text.secondary">Delivery / Shipping</Typography>
+              <Typography sx={{ fontWeight: 700, color: activeDeliveryFee > 0 ? "#18181b" : "#10b981" }}>
+                {activeDeliveryFee > 0 ? `Kes ${activeDeliveryFee.toLocaleString()}` : "FREE"}
+              </Typography>
+            </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
               <Typography variant="h6" sx={{ fontWeight: 800, color: "#18181b" }}>Total</Typography>
               <Typography variant="h4" sx={{ fontWeight: 900, color: theme.palette.primary.main }}>
-                Kes {totalAmount}
+                Kes {totalAmount.toLocaleString()}
               </Typography>
             </Box>
           </Stack>
@@ -1603,7 +2355,7 @@ const GuestCheckout = () => {
           <Typography variant="h6" sx={{ fontWeight: 700 }} gutterBottom>
             Please check your phone for an M-Pesa STK Push notification.
           </Typography>
-          <Typography variant="body2" color="textSecondary" sx={{ maxW: "80%", mx: "auto", mb: 3 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ maxWidth: "80%", mx: "auto", mb: 3 }}>
             Complete the payment prompt by entering your M-Pesa PIN on your phone to finalize your order.
           </Typography>
           <Button
