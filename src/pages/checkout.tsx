@@ -17,7 +17,6 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart } from "@/contexts/CartContext";
 import {
   Breadcrumbs,
@@ -91,8 +90,10 @@ const SummarySideCard = styled(Paper)(({ theme }) => ({
   top: 90,
 }));
 
-const formatPhoneNumber = (phoneNumber: string): string => {
+const formatPhoneNumber = (phoneNumber?: string | null): string => {
+  if (!phoneNumber) return "";
   const digitsOnly = phoneNumber.replace(/\D/g, '');
+  if (!digitsOnly) return "";
   if (digitsOnly.startsWith("254")) {
     return digitsOnly;
   }
@@ -100,6 +101,24 @@ const formatPhoneNumber = (phoneNumber: string): string => {
     return "254" + digitsOnly.substring(1);
   }
   return "254" + digitsOnly;
+};
+
+const extractErrorMessage = (error: any): string => {
+  if (!error) return "An unexpected error occurred.";
+  if (typeof error === "string") return error;
+  if (error.data) {
+    if (typeof error.data === "string") return error.data;
+    if (error.data.error) return typeof error.data.error === "string" ? error.data.error : JSON.stringify(error.data.error);
+    if (error.data.detail) return typeof error.data.detail === "string" ? error.data.detail : JSON.stringify(error.data.detail);
+    if (Array.isArray(error.data.non_field_errors) && error.data.non_field_errors.length > 0) return String(error.data.non_field_errors[0]);
+    const firstKey = Object.keys(error.data)[0];
+    if (firstKey) {
+      const val = error.data[firstKey];
+      if (Array.isArray(val) && val.length > 0) return `${firstKey}: ${val[0]}`;
+      if (typeof val === "string") return `${firstKey}: ${val}`;
+    }
+  }
+  return error.message || "An unexpected error occurred.";
 };
 
 // --- Map Pinning Widget --- //
@@ -498,12 +517,55 @@ Remaining Bal.  : Kes ${balance.toLocaleString()}
   );
 };
 
+// --- Safe Zod Resolver --- //
+const safeZodResolver = <T extends z.ZodType<any, any>>(schema: T) => async (values: any) => {
+  try {
+    const result = await schema.safeParseAsync(values);
+    if (result.success) {
+      return { values: result.data, errors: {} };
+    }
+    const errors: Record<string, any> = {};
+    for (const issue of (result.error.issues || [])) {
+      const path = issue.path.join(".");
+      if (!errors[path]) {
+        errors[path] = {
+          type: issue.code,
+          message: issue.message,
+        };
+      }
+    }
+    return { values: {}, errors };
+  } catch (err: any) {
+    console.error("Resolver safeParseAsync error:", err);
+    return { values: {}, errors: { _global: { type: "custom", message: err?.message || "Validation failed" } } };
+  }
+};
+
+const step0AuthSchema = z.object({
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  phoneNumber: z.string().refine((val) => !val || val.trim().length === 0 || val.replace(/\D/g, '').length >= 7, {
+    message: "Phone number must be at least 7 digits",
+  }),
+});
+
+const step0GuestSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  phoneNumber: z.string().refine((val) => !val || val.trim().length === 0 || val.replace(/\D/g, '').length >= 7, {
+    message: "Phone number must be at least 7 digits",
+  }),
+});
+
 // --- Authenticated Checkout Schema --- //
 const checkoutSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
-  phoneNumber: z.string().min(7, "Phone number is required"),
-  fulfillmentType: z.enum(["delivery", "pickup"]).default("delivery"),
+  phoneNumber: z.string().refine((val) => !val || val.trim().length === 0 || val.replace(/\D/g, '').length >= 7, {
+    message: "Phone number must be at least 7 digits",
+  }),
+  fulfillmentType: z.enum(["delivery", "pickup"]),
   delivery_location: z.number().nullable().optional(),
   pickup_location: z.number().nullable().optional(),
   address: z.string().optional(),
@@ -513,14 +575,14 @@ const checkoutSchema = z.object({
   send_email_updates: z.boolean().optional(),
 }).superRefine((data, ctx) => {
   if (data.fulfillmentType === "delivery") {
-    if (!data.address || data.address.trim().length < 3) {
+    if (!data.address || typeof data.address !== "string" || data.address.trim().length < 3) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Delivery address must be at least 3 characters",
         path: ["address"],
       });
     }
-    if (!data.city || data.city.trim().length < 2) {
+    if (!data.city || typeof data.city !== "string" || data.city.trim().length < 2) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "City is required",
@@ -541,12 +603,14 @@ const checkoutSchema = z.object({
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 const AuthenticatedCheckout = () => {
+  const router = useRouter();
   const [checkoutFx, { isLoading }] = useCheckoutCartMutation();
   const [lipaNaMpesaFx] = useLipaNaMpesaMutation();
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
   const theme = useTheme();
   
   const [activeStep, setActiveStep] = useState(0);
+  const [isStepLoading, setIsStepLoading] = useState(false);
   const steps = ['Your Details', 'Fulfillment & Address', 'Payment Method', 'Review & Pay'];
 
   // M-Pesa states
@@ -563,11 +627,17 @@ const AuthenticatedCheckout = () => {
   const [lastCartData, setLastCartData] = useState<any>(null);
 
   useEffect(() => {
+    const queryShop = typeof router.query.shop === "string" ? router.query.shop : (typeof router.query.shopname === "string" ? router.query.shopname : null);
+    if (queryShop) {
+      setShopName(queryShop);
+      Cookies.set("shopname", queryShop, { expires: 7, sameSite: "Lax" });
+      return;
+    }
     const cookieShop = Cookies.get("shopname");
     if (cookieShop) {
       setShopName(cookieShop);
     }
-  }, []);
+  }, [router.query]);
 
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
@@ -584,9 +654,12 @@ const AuthenticatedCheckout = () => {
     { skip: !shopname }
   );
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control, setError, clearErrors } = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
+  const { register, handleSubmit, formState: { errors }, setValue, watch, control, setError, clearErrors } = useForm<CheckoutFormData>({
+    resolver: safeZodResolver(checkoutSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
       payment_method: "mpesa",
       pinnedLocation: "",
       fulfillmentType: "delivery",
@@ -596,7 +669,6 @@ const AuthenticatedCheckout = () => {
     },
   });
 
-  const router = useRouter();
   const { data: cart_data } = useGetCartQuery({ token: Cookies.get("access"), company_name: shopname });
 
   const { data: mpesaOrderDetails, refetch: refetchMpesaOrder } = useGetOrderByIdQuery(
@@ -752,7 +824,8 @@ const AuthenticatedCheckout = () => {
       }
     } catch (error: any) {
       setIsProcessingMpesa(false);
-      toast.error(error.data?.non_field_errors?.[0] || error.data?.error || "An error occurred");
+      const msg = extractErrorMessage(error);
+      toast.error(msg);
     }
   };
 
@@ -804,11 +877,11 @@ const AuthenticatedCheckout = () => {
             </Box>
             <TextField
               fullWidth
-              label="Phone Number"
+              label="Phone Number (Optional - required for M-Pesa)"
               variant="outlined"
               {...register("phoneNumber")}
               error={!!errors.phoneNumber}
-              helperText={errors.phoneNumber?.message}
+              helperText={errors.phoneNumber?.message || "Optional for card/PayPal, required for M-Pesa push"}
               InputProps={{ sx: { borderRadius: "12px" } }}
               placeholder="e.g. 0712345678"
             />
@@ -817,13 +890,39 @@ const AuthenticatedCheckout = () => {
               <Button 
                 variant="contained" 
                 size="large"
+                disabled={isStepLoading}
+                startIcon={isStepLoading ? <CircularProgress size={18} color="inherit" /> : null}
                 onClick={async () => {
-                  const isValid = await trigger(["firstName", "lastName", "phoneNumber"]);
-                  if (isValid) handleNext();
+                  setIsStepLoading(true);
+                  try {
+                    const parseResult = step0AuthSchema.safeParse({
+                      firstName: watch("firstName"),
+                      lastName: watch("lastName"),
+                      phoneNumber: watch("phoneNumber"),
+                    });
+                    await new Promise((resolve) => setTimeout(resolve, 350));
+                    if (!parseResult.success) {
+                      let firstMsg = "";
+                      for (const issue of parseResult.error.issues) {
+                        const fieldName = issue.path[0] as keyof CheckoutFormData;
+                        if (!firstMsg) firstMsg = issue.message;
+                        setError(fieldName, { type: issue.code, message: issue.message });
+                      }
+                      toast.error(firstMsg || "Please enter your first and last name.");
+                      return;
+                    }
+                    clearErrors(["firstName", "lastName", "phoneNumber"]);
+                    handleNext();
+                  } catch (e) {
+                    console.error("Step navigation error:", e);
+                    toast.error("Validation error. Please verify your details.");
+                  } finally {
+                    setIsStepLoading(false);
+                  }
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
-                Next Step
+                {isStepLoading ? "Checking..." : "Next Step"}
               </Button>
             </Box>
           </Stack>
@@ -1089,38 +1188,52 @@ const AuthenticatedCheckout = () => {
                 variant="contained" 
                 size="large"
                 onClick={async () => {
-                  if (selectedFulfillmentType === "delivery") {
-                    const addressVal = watch("address");
-                    const cityVal = watch("city");
-                    let hasError = false;
-                    
-                    if (!addressVal || addressVal.trim().length < 3) {
-                      setError("address", { type: "manual", message: "Delivery address must be at least 3 characters" });
-                      hasError = true;
-                    } else {
-                      clearErrors("address");
-                    }
-                    
-                    if (!cityVal || cityVal.trim().length < 2) {
-                      setError("city", { type: "manual", message: "City is required" });
-                      hasError = true;
-                    } else {
-                      clearErrors("city");
-                    }
+                  setIsStepLoading(true);
+                  try {
+                    if (selectedFulfillmentType === "delivery") {
+                      const addressVal = watch("address");
+                      const cityVal = watch("city");
+                      let hasError = false;
+                      
+                      if (!addressVal || typeof addressVal !== "string" || addressVal.trim().length < 3) {
+                        setError("address", { type: "manual", message: "Delivery address must be at least 3 characters" });
+                        hasError = true;
+                      } else {
+                        clearErrors("address");
+                      }
+                      
+                      if (!cityVal || typeof cityVal !== "string" || cityVal.trim().length < 2) {
+                        setError("city", { type: "manual", message: "City is required" });
+                        hasError = true;
+                      } else {
+                        clearErrors("city");
+                      }
 
-                    if (!hasError) handleNext();
-                  } else {
-                    if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
-                      setError("pickup_location", { type: "manual", message: "Please select a pickup store" });
-                      return;
+                      await new Promise((resolve) => setTimeout(resolve, 350));
+                      if (!hasError) {
+                        handleNext();
+                      } else {
+                        toast.error("Please enter your delivery street and city.");
+                      }
+                    } else {
+                      if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
+                        setError("pickup_location", { type: "manual", message: "Please select a pickup store" });
+                        toast.error("Please select a store pickup location.");
+                        return;
+                      }
+                      clearErrors(["pickup_location", "address", "city"]);
+                      await new Promise((resolve) => setTimeout(resolve, 350));
+                      handleNext();
                     }
-                    clearErrors(["pickup_location", "address", "city"]);
-                    handleNext();
+                  } finally {
+                    setIsStepLoading(false);
                   }
                 }}
+                disabled={isStepLoading}
+                startIcon={isStepLoading ? <CircularProgress size={18} color="inherit" /> : null}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
-                Next Step
+                {isStepLoading ? "Checking..." : "Next Step"}
               </Button>
             </Box>
           </Stack>
@@ -1184,6 +1297,23 @@ const AuthenticatedCheckout = () => {
               </RadioGroup>
             </FormControl>
 
+            {watch("payment_method") === "mpesa" && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5 }}>
+                  M-Pesa Phone Number (for STK Push prompt)
+                </Typography>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="e.g. 0712345678 or 254712345678"
+                  {...register("phoneNumber")}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber?.message || "We will trigger the Safaricom PIN prompt on this phone"}
+                  InputProps={{ sx: { borderRadius: "12px" } }}
+                />
+              </Box>
+            )}
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -1196,16 +1326,34 @@ const AuthenticatedCheckout = () => {
             />
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+              <Button variant="outlined" onClick={handleBack} disabled={isStepLoading} sx={{ borderRadius: "12px", textTransform: "none" }}>
                 Back
               </Button>
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={handleNext}
+                disabled={isStepLoading}
+                startIcon={isStepLoading ? <CircularProgress size={18} color="inherit" /> : null}
+                onClick={async () => {
+                  if (watch("payment_method") === "mpesa") {
+                    const phone = watch("phoneNumber");
+                    if (!phone || phone.replace(/\D/g, '').length < 7) {
+                      setError("phoneNumber", { type: "manual", message: "Phone number is required for M-Pesa STK push" });
+                      toast.error("Please enter a valid phone number for M-Pesa payment.");
+                      return;
+                    }
+                  }
+                  setIsStepLoading(true);
+                  try {
+                    await new Promise((resolve) => setTimeout(resolve, 350));
+                    handleNext();
+                  } finally {
+                    setIsStepLoading(false);
+                  }
+                }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
-                Review & Confirm
+                {isStepLoading ? "Proceeding..." : "Review & Confirm"}
               </Button>
             </Box>
           </Stack>
@@ -1434,8 +1582,10 @@ const guestCheckoutSchema = z.object({
   email: z.string().email("Invalid email address"),
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
-  phoneNumber: z.string().min(7, "Phone number is required"),
-  fulfillmentType: z.enum(["delivery", "pickup"]).default("delivery"),
+  phoneNumber: z.string().refine((val) => !val || val.trim().length === 0 || val.replace(/\D/g, '').length >= 7, {
+    message: "Phone number must be at least 7 digits",
+  }),
+  fulfillmentType: z.enum(["delivery", "pickup"]),
   delivery_location: z.number().nullable().optional(),
   pickup_location: z.number().nullable().optional(),
   address: z.string().optional(),
@@ -1445,14 +1595,14 @@ const guestCheckoutSchema = z.object({
   send_email_updates: z.boolean().optional(),
 }).superRefine((data, ctx) => {
   if (data.fulfillmentType === "delivery") {
-    if (!data.address || data.address.trim().length < 3) {
+    if (!data.address || typeof data.address !== "string" || data.address.trim().length < 3) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Delivery address must be at least 3 characters",
         path: ["address"],
       });
     }
-    if (!data.city || data.city.trim().length < 2) {
+    if (!data.city || typeof data.city !== "string" || data.city.trim().length < 2) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "City is required",
@@ -1482,6 +1632,7 @@ const GuestCheckout = () => {
   const [shopname, setShopName] = useState(Cookies.get("shopname") || "techend");
 
   const [activeStep, setActiveStep] = useState(0);
+  const [isStepLoading, setIsStepLoading] = useState(false);
   const steps = ['Your Details', 'Fulfillment & Address', 'Payment Method', 'Review & Pay'];
 
   // M-Pesa states
@@ -1497,11 +1648,17 @@ const GuestCheckout = () => {
   const [lastCartData, setLastCartData] = useState<any>(null);
 
   useEffect(() => {
+    const queryShop = typeof router.query.shop === "string" ? router.query.shop : (typeof router.query.shopname === "string" ? router.query.shopname : null);
+    if (queryShop) {
+      setShopName(queryShop);
+      Cookies.set("shopname", queryShop, { expires: 7, sameSite: "Lax" });
+      return;
+    }
     const cookieShop = Cookies.get("shopname");
     if (cookieShop) {
       setShopName(cookieShop);
     }
-  }, []);
+  }, [router.query]);
 
   const handleNext = React.useCallback(() => setActiveStep((prev) => prev + 1), []);
   const handleBack = React.useCallback(() => setActiveStep((prev) => prev - 1), []);
@@ -1518,9 +1675,13 @@ const GuestCheckout = () => {
     { skip: !shopname }
   );
 
-  const { register, handleSubmit, formState: { errors }, setValue, trigger, watch, control, setError, clearErrors } = useForm<GuestCheckoutFormData>({
-    resolver: zodResolver(guestCheckoutSchema),
+  const { register, handleSubmit, formState: { errors }, setValue, watch, control, setError, clearErrors } = useForm<GuestCheckoutFormData>({
+    resolver: safeZodResolver(guestCheckoutSchema),
     defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
       payment_method: "mpesa",
       pinnedLocation: "",
       fulfillmentType: "delivery",
@@ -1683,7 +1844,8 @@ const GuestCheckout = () => {
         toast.error("An account with this email already exists. Please log in.");
         router.push("/login");
       } else {
-        toast.error(error.data?.non_field_errors?.[0] || error.data?.error || "An unexpected error occurred.");
+        const msg = extractErrorMessage(error);
+        toast.error(msg);
       }
     }
   };
@@ -1749,11 +1911,11 @@ const GuestCheckout = () => {
             </Box>
             <TextField
               fullWidth
-              label="Phone Number"
+              label="Phone Number (Optional - required for M-Pesa)"
               variant="outlined"
               {...register("phoneNumber")}
               error={!!errors.phoneNumber}
-              helperText={errors.phoneNumber?.message}
+              helperText={errors.phoneNumber?.message || "Optional for card/PayPal, required for M-Pesa prompt"}
               InputProps={{ sx: { borderRadius: "12px" } }}
               placeholder="e.g. 0712345678"
             />
@@ -1762,13 +1924,40 @@ const GuestCheckout = () => {
               <Button 
                 variant="contained" 
                 size="large"
+                disabled={isStepLoading}
+                startIcon={isStepLoading ? <CircularProgress size={18} color="inherit" /> : null}
                 onClick={async () => {
-                  const isValid = await trigger(["email", "firstName", "lastName", "phoneNumber"]);
-                  if (isValid) handleNext();
+                  setIsStepLoading(true);
+                  try {
+                    const parseResult = step0GuestSchema.safeParse({
+                      email: watch("email"),
+                      firstName: watch("firstName"),
+                      lastName: watch("lastName"),
+                      phoneNumber: watch("phoneNumber"),
+                    });
+                    await new Promise((resolve) => setTimeout(resolve, 350));
+                    if (!parseResult.success) {
+                      let firstMsg = "";
+                      for (const issue of parseResult.error.issues) {
+                        const fieldName = issue.path[0] as keyof GuestCheckoutFormData;
+                        if (!firstMsg) firstMsg = issue.message;
+                        setError(fieldName, { type: issue.code, message: issue.message });
+                      }
+                      toast.error(firstMsg || "Please enter a valid email address and your full names.");
+                      return;
+                    }
+                    clearErrors(["email", "firstName", "lastName", "phoneNumber"]);
+                    handleNext();
+                  } catch (e) {
+                    console.error("Step navigation error:", e);
+                    toast.error("Validation error. Please verify your details.");
+                  } finally {
+                    setIsStepLoading(false);
+                  }
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
-                Next Step
+                {isStepLoading ? "Checking..." : "Next Step"}
               </Button>
             </Box>
           </Stack>
@@ -2027,45 +2216,59 @@ const GuestCheckout = () => {
             )}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+              <Button variant="outlined" onClick={handleBack} disabled={isStepLoading} sx={{ borderRadius: "12px", textTransform: "none" }}>
                 Back
               </Button>
               <Button 
                 variant="contained" 
                 size="large"
+                disabled={isStepLoading}
+                startIcon={isStepLoading ? <CircularProgress size={18} color="inherit" /> : null}
                 onClick={async () => {
-                  if (selectedFulfillmentType === "delivery") {
-                    const addressVal = watch("address");
-                    const cityVal = watch("city");
-                    let hasError = false;
-                    
-                    if (!addressVal || addressVal.trim().length < 3) {
-                      setError("address", { type: "manual", message: "Delivery address must be at least 3 characters" });
-                      hasError = true;
-                    } else {
-                      clearErrors("address");
-                    }
-                    
-                    if (!cityVal || cityVal.trim().length < 2) {
-                      setError("city", { type: "manual", message: "City is required" });
-                      hasError = true;
-                    } else {
-                      clearErrors("city");
-                    }
+                  setIsStepLoading(true);
+                  try {
+                    if (selectedFulfillmentType === "delivery") {
+                      const addressVal = watch("address");
+                      const cityVal = watch("city");
+                      let hasError = false;
+                      
+                      if (!addressVal || typeof addressVal !== "string" || addressVal.trim().length < 3) {
+                        setError("address", { type: "manual", message: "Delivery address must be at least 3 characters" });
+                        hasError = true;
+                      } else {
+                        clearErrors("address");
+                      }
+                      
+                      if (!cityVal || typeof cityVal !== "string" || cityVal.trim().length < 2) {
+                        setError("city", { type: "manual", message: "City is required" });
+                        hasError = true;
+                      } else {
+                        clearErrors("city");
+                      }
 
-                    if (!hasError) handleNext();
-                  } else {
-                    if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
-                      setError("pickup_location", { type: "manual", message: "Please select a pickup store" });
-                      return;
+                      await new Promise((resolve) => setTimeout(resolve, 350));
+                      if (!hasError) {
+                        handleNext();
+                      } else {
+                        toast.error("Please enter your delivery street and city.");
+                      }
+                    } else {
+                      if (pickupLocations && pickupLocations.length > 0 && !watch("pickup_location")) {
+                        setError("pickup_location", { type: "manual", message: "Please select a pickup store" });
+                        toast.error("Please select a store pickup location.");
+                        return;
+                      }
+                      clearErrors(["pickup_location", "address", "city"]);
+                      await new Promise((resolve) => setTimeout(resolve, 350));
+                      handleNext();
                     }
-                    clearErrors(["pickup_location", "address", "city"]);
-                    handleNext();
+                  } finally {
+                    setIsStepLoading(false);
                   }
                 }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
-                Next Step
+                {isStepLoading ? "Checking..." : "Next Step"}
               </Button>
             </Box>
           </Stack>
@@ -2129,6 +2332,23 @@ const GuestCheckout = () => {
               </RadioGroup>
             </FormControl>
 
+            {watch("payment_method") === "mpesa" && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5 }}>
+                  M-Pesa Phone Number (for STK Push prompt)
+                </Typography>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="e.g. 0712345678 or 254712345678"
+                  {...register("phoneNumber")}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber?.message || "We will trigger the Safaricom PIN prompt on this phone"}
+                  InputProps={{ sx: { borderRadius: "12px" } }}
+                />
+              </Box>
+            )}
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -2141,16 +2361,34 @@ const GuestCheckout = () => {
             />
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-              <Button variant="outlined" onClick={handleBack} sx={{ borderRadius: "12px", textTransform: "none" }}>
+              <Button variant="outlined" onClick={handleBack} disabled={isStepLoading} sx={{ borderRadius: "12px", textTransform: "none" }}>
                 Back
               </Button>
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={handleNext}
+                disabled={isStepLoading}
+                startIcon={isStepLoading ? <CircularProgress size={18} color="inherit" /> : null}
+                onClick={async () => {
+                  if (watch("payment_method") === "mpesa") {
+                    const phone = watch("phoneNumber");
+                    if (!phone || phone.replace(/\D/g, '').length < 7) {
+                      setError("phoneNumber", { type: "manual", message: "Phone number is required for M-Pesa STK push" });
+                      toast.error("Please enter a valid phone number for M-Pesa payment.");
+                      return;
+                    }
+                  }
+                  setIsStepLoading(true);
+                  try {
+                    await new Promise((resolve) => setTimeout(resolve, 350));
+                    handleNext();
+                  } finally {
+                    setIsStepLoading(false);
+                  }
+                }}
                 sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 4 }}
               >
-                Review & Confirm
+                {isStepLoading ? "Proceeding..." : "Review & Confirm"}
               </Button>
             </Box>
           </Stack>
@@ -2378,16 +2616,23 @@ const GuestCheckout = () => {
 };
 
 function Checkout() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const theme = useTheme();
   const [shopname, setShopName] = useState("techend");
 
   useEffect(() => {
+    const queryShop = typeof router.query.shop === "string" ? router.query.shop : (typeof router.query.shopname === "string" ? router.query.shopname : null);
+    if (queryShop) {
+      setShopName(queryShop);
+      Cookies.set("shopname", queryShop, { expires: 7, sameSite: "Lax" });
+      return;
+    }
     const cookieShop = Cookies.get("shopname");
     if (cookieShop) {
       setShopName(cookieShop);
     }
-  }, []);
+  }, [router.query]);
 
   useEffect(() => {
     const token = Cookies.get("access");

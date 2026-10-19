@@ -17,18 +17,6 @@ import { useRouter } from "next/router";
 import AuthDialog from "@/Components/AuthDialog";
 import { useEffect, useState } from "react";
 
-// Define validation schema for the form
-interface AddPickupLocationFormData {
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  country: string;
-  delivery_fee: number;
-  gmaps_link?: string;
-}
-
 const addPickupLocationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   address: z.string().min(1, "Address is required"),
@@ -36,9 +24,11 @@ const addPickupLocationSchema = z.object({
   state: z.string().min(1, "State is required"),
   postal_code: z.string().min(1, "Postal Code is required"),
   country: z.string().min(1, "Country is required"),
-  delivery_fee: z.coerce.number().min(0, "Delivery Fee must be a positive number"),
+  delivery_fee: z.number().min(0, "Delivery Fee must be a positive number"),
   gmaps_link: z.string().url("Must be a valid URL").optional(),
 });
+
+type AddPickupLocationFormData = z.infer<typeof addPickupLocationSchema>;
 
 const AddPickupLocation = () => {
   const [createPickupLocation] = useCreatePickupLocationMutation();
@@ -155,7 +145,7 @@ const AddPickupLocation = () => {
                     label="Delivery Fee (Kes)"
                     type="number"
                     inputMode="decimal"
-                    {...register("delivery_fee")}
+                    {...register("delivery_fee", { valueAsNumber: true })}
                     error={!!errors.delivery_fee}
                     helperText={errors.delivery_fee?.message}
                   />
